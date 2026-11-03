@@ -9,3 +9,6 @@
 .thermal-reading p{margin:0}
 .thermal-site-hold{font-weight:600;color:#92400e}
 .thermal-caveat{color:#71717a}
+
+.thermal-site-hold{margin-top:var(--space-2,8px);padding-left:var(--space-3,12px);border-left:2px solid #d97706;font-weight:400;display:grid;gap:var(--space-2,8px)}
+.thermal-site-hold strong{font-weight:600}

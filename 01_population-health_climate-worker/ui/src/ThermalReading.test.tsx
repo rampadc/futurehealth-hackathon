@@ -17,7 +17,9 @@ test('current green band still shows separate Sandline heavy-work hold', () => {
  const html = renderToStaticMarkup(<ThermalReading reading={{ twl: 145, at: '2025-08-04T08:00:00+04:00' }} clock="2025-08-04T08:05:00+04:00" sensorStatus="serviceable" />);
  expect(html).toContain('green lamp: Low environmental risk, on');
  expect(html).toContain('5 min old');
- expect(html).toContain('Sandline site rule: heavy work remains on hold');
+ expect(html).toContain('Green starts at 140');
+ expect(html).toContain('hold at 150');
+ expect(html).toContain('Heavy-work threshold reached');
 });
 
 test('failed, missing, and future readings explain why no lamp is live', () => {
@@ -30,7 +32,7 @@ test('failed, missing, and future readings explain why no lamp is live', () => {
  expect(missing).toContain('No local TWL reading recorded');
  const future = renderToStaticMarkup(<ThermalReading reading={{ twl: 145, at: '2025-08-04T08:05:01+04:00' }} clock="2025-08-04T08:05:00+04:00" sensorStatus="serviceable" />);
  expect(future).toContain('1 sec ahead');
- expect(future).not.toContain('Sandline site rule: heavy work remains on hold');
+ expect(future).not.toContain('Heavy-work threshold reached');
 });
 
 test('compact mode leaves the common clearance caveat to its enclosing table', () => {
