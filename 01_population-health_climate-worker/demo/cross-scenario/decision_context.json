@@ -1,0 +1,306 @@
+{
+  "01_pre_shift_planning": {
+    "existingProcess": "Sandline reviews the heat forecast, work-front readings, permits and delivery book before the shift. The forecast helps plan work but cannot clear a task.",
+    "pain": "Exposed trench work may clash with the 11:30 aggregate delivery. The civil and logistics plans have not yet been checked together.",
+    "trustQuestion": "Rashid and Huda need to brief the civil crew on the planned sequence, then check fresh local readings before exposed work starts.",
+    "moneyQuestion": "Amal should record any actual change to work or the delivery slot. Delay, standby or supplier charges need contract review only if they arise.",
+    "coordinationNeed": "Rashid reviews the trench sequence with Huda and Noura before the shift. Huda confirms the crew briefing; permits and local readings still control the work.",
+    "stakeholders": [
+      "Rashid Al Wadi, superintendent",
+      "Huda Al Nadir, civil foreman",
+      "Noura Al Nadir, logistics coordinator",
+      "Dune civil crew"
+    ],
+    "commercial": {
+      "status": "Planning risk only. No heat stop, charge or cost claim is recorded.",
+      "owner": "Amal Al Nadir, Sandline project manager",
+      "items": [
+        "Record a programme or booking change if one occurs",
+        "Check actual supplier or subcontractor charges against the relevant agreement"
+      ]
+    },
+    "evidenceNeeded": [
+      "Original work programme and 11:30 delivery booking",
+      "Forecast source and review time",
+      "Fresh local reading, permit and any approved change"
+    ],
+    "aiContribution": "Show the forecast, trench task and delivery booking together for Rashid’s review; prepare a crew briefing draft for Huda."
+  },
+  "02_heat_alert_response": {
+    "existingProcess": "The civil work-front monitor drives a local beacon. Under the site heat programme, Huda stops exposed heavy work, radios her crew and records the stop; Maya and Rashid oversee the hold.",
+    "pain": "The beacon alone does not show whether the crew received the instruction, stopped work or reached recovery. Dune also needs a clear record of the time lost.",
+    "trustQuestion": "Maya issues the site hold under Rashid’s authority. Huda must acknowledge it, stop the trench task, account for the affected workers and direct them to water and cooling.",
+    "moneyQuestion": "Dune’s fictional Heat Rest Schedule covers required recovery during ordinary rostered time. Dune must verify individual payment; Amal separately reviews lost output and any later delay cost.",
+    "coordinationNeed": "Maya records the local trigger and instruction. Huda confirms the actual stop and recovery count without waiting for a cost decision, and refers individual pay questions to Mina Rahman at Dune.",
+    "stakeholders": [
+      "Huda Al Nadir, civil foreman",
+      "Dune civil crew",
+      "Maya Al Qamar, HSE officer",
+      "Rashid Al Wadi, superintendent",
+      "Mina Rahman, Dune contract manager",
+      "Amal Al Nadir, Sandline project manager"
+    ],
+    "commercial": {
+      "status": "Dune’s fictional ordinary-shift recovery term applies to the covered civil crew. Actual payroll and any payment between organisations are unverified.",
+      "owner": "Amal Al Nadir, Sandline project manager",
+      "items": [
+        "Huda explains the approved rest scope; Mina handles individual coverage and pay questions",
+        "Record Dune’s actual lost output or standby for later review",
+        "Review any programme cost under the parties’ agreements; no client allowance is agreed"
+      ]
+    },
+    "evidenceNeeded": [
+      "Civil work-front reading, quality, zone and time",
+      "Beacon and radio instruction times",
+      "Huda’s acknowledgment and actual stop time",
+      "Affected workers’ recovery count and location",
+      "Original task and programme",
+      "Fictional Heat Rest Schedule and covered roster",
+      "Dune payroll confirmation if later available"
+    ],
+    "aiContribution": "Link the alert to the instruction, acknowledgment, stop and recovery records; show Amal the unresolved cost item."
+  },
+  "03_constrained_reassignment": {
+    "existingProcess": "During the civil trench hold, Huda and Rashid may review other tasks against qualifications and the occupancy board. Two welfare attendants already occupy the six-seat workshop.",
+    "pain": "Moving the whole civil crew would exceed workshop capacity and include people without the right assignment. Recovery places must stay available for workers who need them.",
+    "trustQuestion": "Huda must confirm recovery and suitability before assigning Rana, Yusuf, Dana and Bilal to lightweight workshop preparation. She keeps the other affected workers accounted for.",
+    "moneyQuestion": "Dune’s ordinary-shift recovery term still applies where covered. Amal needs actual workshop work and remaining standby times before reviewing any programme cost.",
+    "coordinationNeed": "Huda checks four available seats and the workers’ qualifications, then approves only the separate workshop task. Rashid keeps the trench hold in place.",
+    "stakeholders": [
+      "Huda Al Nadir, civil foreman",
+      "Rana Al Nadir, Yusuf Al Wadi, Dana Al Qamar and Bilal Al Safa, civil workers",
+      "Remaining Dune civil crew",
+      "Rashid Al Wadi, superintendent",
+      "Lina Al Qamar and Omar Al Safa, workshop welfare attendants",
+      "Amal Al Nadir, Sandline project manager"
+    ],
+    "commercial": {
+      "status": "Covered recovery time remains within Dune’s fictional ordinary-shift term. Any cost allocation between parties remains open.",
+      "owner": "Amal Al Nadir, Sandline project manager",
+      "items": [
+        "Record the four workers’ actual workshop work",
+        "Record remaining recovery and standby time",
+        "Dune confirms individual payroll through its employer process",
+        "Review any subcontract or client adjustment against the agreements"
+      ]
+    },
+    "evidenceNeeded": [
+      "Linked civil heat hold and stop record",
+      "Recovery and task suitability confirmation",
+      "Six-seat workshop capacity and current occupants",
+      "Qualifications and assignment times for Rana, Yusuf, Dana and Bilal",
+      "Locations of remaining affected workers",
+      "Heat Rest Schedule scope and later Dune payroll confirmation if available"
+    ],
+    "aiContribution": "Explain why the whole-crew move fails capacity and qualification checks; offer the four-person task for Huda’s approval."
+  },
+  "04_delivery_coordination": {
+    "existingProcess": "Noura maintains the delivery book and contacts the Oasis Aggregate Supply dispatcher. A new slot needs an approved request, a sent message and supplier acceptance.",
+    "pain": "The civil hold changes yard capacity and puts the 11:30 aggregate booking at risk. Moving the booking may also create standby or transport costs.",
+    "trustQuestion": "Noura must send the revised request and record the dispatcher’s reply. The 15:30 slot is confirmed only after supplier acceptance; the trench hold remains in place.",
+    "moneyQuestion": "Amal reviews any actual supplier charge, civil delay or client milestone effect against the contracts. Agreement on a new time does not settle those costs.",
+    "coordinationNeed": "Noura approves and sends the slot request, records the supplier’s acceptance and checks safe receiving conditions when the delivery arrives. Amal receives the open cost question.",
+    "stakeholders": [
+      "Noura Al Nadir, logistics coordinator",
+      "Oasis Aggregate Supply dispatcher",
+      "Sirocco Site Logistics crew",
+      "Rashid Al Wadi, superintendent",
+      "Amal Al Nadir, Sandline project manager",
+      "Dune Civil Works"
+    ],
+    "commercial": {
+      "status": "The connected replay can confirm a 15:30 supplier slot after acceptance. Charges, actual delivery and cost allocation remain unconfirmed.",
+      "owner": "Amal Al Nadir, Sandline project manager",
+      "items": [
+        "Keep Dune’s protected recovery term separate from supplier costs",
+        "Check supplier rescheduling or standby charges if invoiced",
+        "Record effects on the civil and yard sequence",
+        "Review any client milestone treatment under the client agreement"
+      ]
+    },
+    "evidenceNeeded": [
+      "Original 11:30 booking",
+      "Civil hold and actual stop time",
+      "Noura’s approved request and send time",
+      "Supplier acceptance and revised booking",
+      "Actual delivery and any later charge or programme effect",
+      "Dune recovery scope and employer payroll confirmation if relevant"
+    ],
+    "aiContribution": "Prepare Noura’s slot request and distinguish draft, sent and supplier-accepted states; send cost records to Amal for review."
+  },
+  "05_restricted_worker_assignment": {
+    "existingProcess": "Huda checks the mobilisation roster and acclimatisation restrictions before civil assignments. Noor and Adil are on supervised light work.",
+    "pain": "Assigning the two new starters to heavy trench work would conflict with their current restriction and pressure them to accept unsuitable work.",
+    "trustQuestion": "Huda keeps Noor and Adil on supervised light tasks and explains the assignment limit without sharing personal health details with the crew.",
+    "moneyQuestion": "Rashid plans around the reduced heavy-work capacity. A roster restriction alone does not establish a wage adjustment or a claim.",
+    "coordinationNeed": "Huda rejects the heavy-work request, confirms the existing light tasks and tells Rashid if the programme needs another crew plan.",
+    "stakeholders": [
+      "Noor Al Nadir and Adil Al Wadi, new civil workers",
+      "Huda Al Nadir, civil foreman",
+      "Rashid Al Wadi, superintendent",
+      "Dune Civil Works"
+    ],
+    "commercial": {
+      "status": "No cost allocation is decided; the assignment restriction still applies.",
+      "owner": "Amal Al Nadir, Sandline project manager",
+      "items": [
+        "Record any actual capacity shortfall for normal programme review"
+      ]
+    },
+    "evidenceNeeded": [
+      "Current acclimatisation roster and assignment restriction",
+      "Approved supervised light tasks",
+      "Rejected heavy-task request and operational reason"
+    ],
+    "aiContribution": "Show Huda the assignment restriction and available light work without exposing personal health records."
+  },
+  "06_sensor_failure": {
+    "existingProcess": "The civil beacon uses the civil work-front monitor. Maya can arrange a manual local assessment if it fails; the electrical monitor covers a different zone.",
+    "pain": "The failed civil display leaves local conditions unverified. The electrical reading cannot show whether the trench is safe.",
+    "trustQuestion": "Maya tells Huda that the civil reading is unavailable and gives the crew the protective instruction while a local assessment is arranged.",
+    "moneyQuestion": "Amal records any actual hold or verification delay that affects the programme. A device failure alone establishes no payable delay.",
+    "coordinationNeed": "Maya logs the monitor failure, Huda follows the protective instruction and Rashid seeks a fresh verified civil-front assessment before restart review.",
+    "stakeholders": [
+      "Maya Al Qamar, HSE officer",
+      "Huda Al Nadir, civil foreman",
+      "Dune civil crew",
+      "Rashid Al Wadi, superintendent",
+      "Amal Al Nadir, Sandline project manager"
+    ],
+    "commercial": {
+      "status": "No cost entitlement follows from the failed monitor or a precautionary hold.",
+      "owner": "Amal Al Nadir, Sandline project manager",
+      "items": [
+        "Record actual verification time and programme effect",
+        "Review any later cost under the relevant agreement"
+      ]
+    },
+    "evidenceNeeded": [
+      "Civil monitor failure and last valid reading time",
+      "Electrical monitor’s separate zone",
+      "Manual civil-front assessment request and result",
+      "Crew instruction and actual stop confirmation"
+    ],
+    "aiContribution": "Flag the missing civil reading, reject the electrical reading as a substitute and list the checks Maya and Rashid need."
+  },
+  "07_unacknowledged_alert": {
+    "existingProcess": "The local beacon and radio carry the civil hold instruction. The manual register expects Huda’s acknowledgment; Rashid handles escalation after the fictional two-minute window.",
+    "pain": "The missing reply leaves the crew’s actual work status unknown. Radio congestion or a missed entry could explain it, so the stop cannot be marked complete.",
+    "trustQuestion": "Rashid contacts Huda or checks the work front to establish what the crew heard and did, while keeping the hold open.",
+    "moneyQuestion": "Amal needs verified acknowledgment and stop times before assessing any actual delay. Escalation itself creates no payable claim.",
+    "coordinationNeed": "Rashid verifies receipt and task cessation directly. Maya keeps the instruction open until the foreman’s response and crew status are recorded.",
+    "stakeholders": [
+      "Huda Al Nadir, civil foreman",
+      "Rashid Al Wadi, superintendent",
+      "Maya Al Qamar, HSE officer",
+      "Dune civil crew",
+      "Amal Al Nadir, Sandline project manager"
+    ],
+    "commercial": {
+      "status": "Work status and timing must be verified before any cost review.",
+      "owner": "Amal Al Nadir, Sandline project manager",
+      "items": [
+        "Reconcile beacon, radio, acknowledgment and actual stop times"
+      ]
+    },
+    "evidenceNeeded": [
+      "Beacon and alert times",
+      "Radio and register contact attempts",
+      "Rashid’s escalation time",
+      "Huda’s acknowledgment and observed stop if later confirmed"
+    ],
+    "aiContribution": "Flag the missing acknowledgment and ask Rashid to verify the crew’s status without assuming the stop is complete."
+  },
+  "08_symptom_escalation": {
+    "existingProcess": "A worker may report symptoms to Huda or trained first aider Salim regardless of the local heat band. Salim keeps clinical details in the first-aid record.",
+    "pain": "Bilal may delay reporting symptoms because he fears disrupting the crew. A non-hold environmental reading cannot rule out individual harm.",
+    "trustQuestion": "Huda removes Bilal from the task and contacts Salim promptly. The shared crew record contains only the operational restriction and response status.",
+    "moneyQuestion": "Dune handles any individual pay or absence question through its employer process. The site record does not determine wages or leave.",
+    "coordinationNeed": "Huda releases Bilal from work and contacts Salim. Salim assesses or refers him privately and gives Huda only the task restriction she needs.",
+    "stakeholders": [
+      "Bilal Al Safa, civil worker",
+      "Huda Al Nadir, civil foreman",
+      "Salim Al Wadi, first aider",
+      "Dune Civil Works",
+      "Rashid Al Wadi, superintendent"
+    ],
+    "commercial": {
+      "status": "The shared record contains no individual wage or cost decision.",
+      "owner": "Mina Rahman, Dune contract manager, for employer pay questions; Amal Al Nadir for programme effects",
+      "items": [
+        "Keep individual employment and clinical details out of the shared crew log"
+      ]
+    },
+    "evidenceNeeded": [
+      "Symptom report time",
+      "Removal from task and contact with Salim",
+      "First-aid response status without clinical detail in the shared record"
+    ],
+    "aiContribution": "Prompt Huda to contact Salim and keep the symptom response separate from the environmental threshold."
+  },
+  "09_restart_review": {
+    "existingProcess": "Rashid and permit coordinator Tariq review the permit, local monitor and crew conditions before any restart. An improved beacon band is one input.",
+    "pain": "The reading may improve and then become stale while the crew is waiting. Earlier approval cannot carry into changed or unverified conditions.",
+    "trustQuestion": "Rashid authorises restart only after Tariq confirms the permit and both check a current local reading, crew readiness and welfare conditions. A stale reading blocks a later attempt.",
+    "moneyQuestion": "Amal reconciles actual hold and restart times if the programme changes. A delayed restart does not by itself establish a payable claim.",
+    "coordinationNeed": "Rashid reviews the current civil-front reading with Tariq and Huda at the proposed restart time. A later stale or failed reading requires a new check.",
+    "stakeholders": [
+      "Rashid Al Wadi, superintendent",
+      "Tariq Al Safa, permit coordinator",
+      "Huda Al Nadir, civil foreman",
+      "Maya Al Qamar, HSE officer",
+      "Dune civil crew",
+      "Amal Al Nadir, Sandline project manager"
+    ],
+    "commercial": {
+      "status": "No cost allocation or payable delay is established by restart timing alone.",
+      "owner": "Amal Al Nadir, Sandline project manager",
+      "items": [
+        "Reconcile actual hold and restart times if programme review is needed"
+      ]
+    },
+    "evidenceNeeded": [
+      "Current civil-front reading and monitor health",
+      "Tariq’s permit check and Rashid’s decision",
+      "Crew, water and recovery readiness",
+      "Restart time and any later stale-reading time"
+    ],
+    "aiContribution": "List the current restart checks and missing evidence for Tariq and Rashid; leave authorisation with Rashid."
+  },
+  "10_handover_and_evidence": {
+    "existingProcess": "Rashid hands the heat register, permit status and delivery book to the next supervisor. The same civil heat event carries through the stop, reassignment and supplier coordination.",
+    "pain": "A short handover could omit the held trench, seven workers still in recovery, the four-person workshop task, or the difference between a revised booking and an actual delivery.",
+    "trustQuestion": "Rashid gives the next supervisor the verified instruction, stop, recovery and task states, plus the checks still needed before trench work restarts.",
+    "moneyQuestion": "Dune’s fictional ordinary-shift recovery term applies where covered, but actual payroll is unverified. Amal reviews lost output, supplier charges and any client treatment against the contracts.",
+    "coordinationNeed": "Rashid hands over the current safety state and source times. Noura verifies delivery status; Amal receives the separate unresolved cost question.",
+    "stakeholders": [
+      "Rashid Al Wadi, outgoing superintendent",
+      "Incoming supervisor",
+      "Huda Al Nadir, civil foreman",
+      "Dune civil crew",
+      "Noura Al Nadir, logistics coordinator",
+      "Amal Al Nadir, Sandline project manager"
+    ],
+    "commercial": {
+      "status": "Dune’s fictional rest term applies in scope; actual payroll remains unverified. The replay confirms a 15:30 booking, while delivery and cross-party costs remain open.",
+      "owner": "Amal Al Nadir, Sandline project manager",
+      "items": [
+        "Mina Rahman handles Dune coverage and individual payroll questions",
+        "Review Dune’s recorded lost output or standby",
+        "Record the four workers’ actual alternative work",
+        "Check any supplier rescheduling or standby charge",
+        "Review client milestone treatment only under the client agreement"
+      ]
+    },
+    "evidenceNeeded": [
+      "Linked civil heat alert and hold record",
+      "Civil reading, beacon and radio times",
+      "Huda’s acknowledgment, 08:03 stop and 08:04 recovery record",
+      "08:11 workshop assignment and remaining crew locations",
+      "Original booking, revised supplier acceptance and actual delivery status",
+      "Fresh local reading and permit checks still required before restart",
+      "Fictional Heat Rest Schedule scope; actual payroll confirmation still needed"
+    ],
+    "aiContribution": "Assemble a source-linked timeline for the next supervisor and a separate list of unresolved costs for Amal."
+  }
+}

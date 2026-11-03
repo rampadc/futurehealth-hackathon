@@ -1,0 +1,20 @@
+.recommendation-basis{margin-top:14px;border:1px solid #e4e4e7;border-radius:6px;background:#fff;color:#3f3f46}
+.recommendation-basis>summary{display:flex;justify-content:space-between;gap:12px;align-items:center;cursor:pointer;padding:11px 13px;font-size:12px;font-weight:700;list-style:none}
+.recommendation-basis>summary::-webkit-details-marker{display:none}
+.recommendation-basis-hint{color:#71717a;font-size:11px;font-weight:400}
+.recommendation-basis-body{padding:0 13px 13px;border-top:1px solid #ededf0}
+.recommendation-basis-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:12px}
+.recommendation-basis-flow>div{padding:10px;border:1px solid #ededf0;border-radius:4px;background:#fafafa}
+.recommendation-basis-flow small{display:block;color:#71717a;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.recommendation-basis-flow p{margin:6px 0 0;font-size:12px;line-height:1.45}
+.recommendation-basis-flow ul{list-style:none;margin:6px 0 0;padding:0;font-size:11px;line-height:1.55}
+.recommendation-basis-flow li+li{margin-top:3px}
+.recommendation-basis-flow li strong{font-weight:600}
+.recommendation-basis-cost{margin:10px 0 0;font-size:11px;line-height:1.5}
+.recommendation-basis-boundary{margin:11px 0;color:#71717a;font-size:11px;line-height:1.5}
+.recommendation-basis-sources{display:flex;flex-wrap:wrap;gap:7px}
+.recommendation-basis-sources details{flex:0 1 auto;min-width:0}
+.recommendation-basis-sources summary{cursor:pointer;padding:6px 8px;border:1px solid #e4e4e7;border-radius:4px;font-size:11px;color:#52525b}
+.recommendation-basis-sources details[open]{flex-basis:100%}
+.recommendation-basis-sources pre,.recommendation-basis-sources blockquote{max-height:220px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;margin:8px 0;padding:10px;border:1px solid #ededf0;border-radius:4px;background:#fafafa;color:#52525b;font-size:11px;line-height:1.45}
+@media(max-width:760px){.recommendation-basis-flow{grid-template-columns:1fr}.recommendation-basis-hint{display:none}}

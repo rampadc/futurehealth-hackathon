@@ -1,6 +1,6 @@
 # 06. Treat missing local information as unknown
 
-The civil-area instrument fails. The electrical-area instrument still reports a current reading, creating a tempting but invalid shortcut.
+Sandline's existing civil-area monitor and beacon lose a reliable local input. The electrical-area instrument still reports a current reading, creating a tempting but invalid shortcut under programme pressure. P03 and C01 use the manual verification and protective route while P02 arranges local assessment; P01 can review any actual delay later. The crew needs an honest statement that the civil conditions are unknown.
 
 **Demonstrated value:** Make uncertainty explicit and avoid interpreting nearby or historical data as current local conditions.
 

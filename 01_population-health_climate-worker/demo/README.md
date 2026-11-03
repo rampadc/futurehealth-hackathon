@@ -1,6 +1,6 @@
 # Project Sandline — synthetic Heat-Safe demonstration
 
-Start with one fictional utilities-construction site in Mussafah, Abu Dhabi, on **4 August 2025 (Asia/Dubai, UTC+04:00)**. The site already has a heat programme. These cases explore how an assistant could help people apply it, coordinate changes and preserve evidence.
+Start with one fictional utilities-construction site in Mussafah, Abu Dhabi, on **4 August 2025 (Asia/Dubai, UTC+04:00)**. The site already has a heat programme, local monitor and beacon, radio procedure and manual register. These cases explore how an assistant could help people apply the existing instruction, coordinate changes and preserve evidence across employers. The open questions are who can confirm a stop, what the crew can trust about rest and pay, and who owns its cost.
 
 All people, companies, measurements and operational actions are synthetic. The package is a dossier and replayable fixtures, not an application, live integration or operational safety approval.
 
@@ -9,6 +9,8 @@ All people, companies, measurements and operational actions are synthetic. The p
 1. [Site context](cross-scenario/SITE_CONTEXT.md): organisations, personnel, resources, work and authority.
 2. [Heat programme and SOP](cross-scenario/HEAT_PROGRAM_AND_SOP.md): response steps and the distinction between published requirements and invented demo policies.
 3. [Policy register](cross-scenario/policies.json) and [source register](cross-scenario/sources.json): evidence behind each rule.
+4. [Decision context](cross-scenario/decision_context.json): the existing process, trust and money questions, named commercial owner and evidence needed for each scenario.
+5. [Fictional Heat Rest Schedule](cross-scenario/HEAT_REST_SCHEDULE.md): the scoped Dune employer commitment and the unresolved cross-party costs.
 
 The shared JSON files define 36 regular personnel, their crews, tasks, zones, assets and delivery. Scenario folders reuse those IDs; they do not introduce a different company each time.
 
@@ -27,7 +29,7 @@ The shared JSON files define 36 regular personnel, their crews, tasks, zones, as
 | [09. Require current evidence at restart](09_restart_review/README.md) | Prevent an earlier review from becoming a reusable permission that overrides changed conditions. |
 | [10. Explain what happened and what remains open](10_handover_and_evidence/README.md) | Produce an inspectable handover that preserves unresolved work instead of writing a misleading success summary. |
 
-For a presentation, use **02 → 03 → 04 → 10**: heat hold, constrained reassignment, supplier coordination and handover. Use **06** as the independent failure demonstration. The other cases are focused tests or alternate demonstrations.
+For a presentation, use **02 → 03 → 04 → 10** as one disputed day: the existing civil beacon alerts; C01 follows P02's authorised hold before commercial resolution; Dune's fictional Heat Rest Schedule supports a scoped crew reassurance, while reimbursement remains open; four people take feasible alternative work; the supplier confirms a later booking without agreeing charges; P02 hands a verified timeline and unresolved cost question to P01. Use **06** as the independent failure demonstration. The other cases are focused tests or alternate demonstrations.
 
 ## How the data fits together
 
@@ -49,3 +51,5 @@ python3 validation/mutation_checks.py
 The standard-library validator checks shared references and replays all ten standalone scenarios and the connected chain. [Results](validation/results.json) record the latest run. The [independent Astra review](validation/ASTRA_REVIEW.md) and [resolution record](validation/RESOLUTIONS.md) document review status and corrections. Read the status in those files; a replay pass alone is not field validation.
 
 The demonstration keeps acknowledgement, task cessation, message transmission, supplier acceptance and action completion separate. A future afternoon delivery booking is not a clearance to unload. Symptoms follow the first-aid route regardless of the environmental reading; no clinical diagnosis or treatment model is included.
+
+The discovery deck proposes a money path **#9 unowned cost → #6 cost to stop → #7 who may stop** and a trust path **#10 hidden harm → #2 weak signals → #8 tech versus task → #7 who may stop**. Sandline's existing beacon addresses part of weak signalling, but a signal cannot prove an instruction was acted on or make the cost of stopping disappear. The fictional Heat Rest Schedule covers ordinary-shift recovery for Dune's civil crew; the event log does not prove payroll execution, subcontract reimbursement or a payable client claim. If coverage is unverified, protection still proceeds and the pay question goes to Dune. These are testable workflow and commercial hypotheses, not observed outcomes.

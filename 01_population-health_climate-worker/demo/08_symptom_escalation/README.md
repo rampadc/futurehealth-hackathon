@@ -1,6 +1,6 @@
 # 08. Respond to a person, not just a sensor
 
-A worker reports dizziness while the current local TWL does not trigger the fictional environmental hold. This is a separate incident branch, not part of the main connected demonstration.
+A worker reports dizziness while the current local TWL does not trigger the fictional environmental hold. This is a separate incident branch, not part of the main connected demonstration. The existing first-aid route takes priority over the beacon band, and minimal shared detail protects the worker from a performance label. Any wage or absence question belongs to Dune's employer process, not the crew event log.
 
 **Demonstrated value:** Avoid reassuring a symptomatic worker merely because no environmental threshold was crossed.
 

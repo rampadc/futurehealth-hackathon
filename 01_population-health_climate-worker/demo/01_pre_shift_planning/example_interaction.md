@@ -7,3 +7,7 @@
 **Operator:** Send the plan to P02 for scheduling review.
 
 **Assistant:** Plan queued for superintendent review; fresh civil-zone TWL and permit checks remain required.
+
+**Operator:** Does that already move the supplier slot or create a heat-delay allowance?
+
+**Assistant:** No. P05 has not asked the supplier and no heat stop has occurred. P01 can review any actual programme cost later against the original booking and contract terms.

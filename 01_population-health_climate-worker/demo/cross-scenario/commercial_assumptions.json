@@ -1,0 +1,10 @@
+{
+  "window_minutes": 30,
+  "illustrative_burdened_rate_aed_per_worker_hour": 30,
+  "aed_per_usd": 3.6725,
+  "fictional_reschedule_quote_aed": 200,
+  "conditional_truck_standby_aed_per_hour": 250,
+  "original_delivery_slot": "2025-08-04T11:30:00+04:00",
+  "proposed_delivery_slot": "2025-08-04T15:30:00+04:00",
+  "basis": "Fictional training assumptions only. Burdened rate is not a wage quote; supplier charges are unverified scenarios, not incurred costs. Workshop capacity is potential productive time, not a cash saving."
+}

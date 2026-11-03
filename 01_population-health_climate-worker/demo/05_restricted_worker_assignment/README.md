@@ -1,6 +1,6 @@
 # 05. Respect mobilisation restrictions
 
-C13 and C14 are newly mobilised civil workers. Their baseline assignment is supervised light work. An attempted assignment to exposed heavy work conflicts with their restrictions.
+C13 and C14 are newly mobilised civil workers. C01's existing roster places them on supervised light work. An attempted assignment to exposed heavy work conflicts with their restrictions and could put social pressure on new starters to accept. P01 may need to plan around a real capacity gap, but no worker pay or subcontract adjustment follows automatically from this roster entry.
 
 **Demonstrated value:** Catch an assignment mistake before work starts, without disclosing a diagnosis or a full HR record.
 

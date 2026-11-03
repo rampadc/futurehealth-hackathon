@@ -1,6 +1,6 @@
 # 04. Coordinate across organisational boundaries
 
-The held civil work affects the plan for the aggregate delivery. The principal contractor can request a new slot, but the supplier must accept it; the assistant cannot commit the supplier.
+The same held civil work affects the plan for the aggregate delivery. The principal contractor can request a new slot, but the supplier must accept it; the assistant cannot commit the supplier. A timing agreement also leaves possible supplier charges and Dune/Sandline allocation for P01 to review.
 
 **Demonstrated value:** Keep draft, approval, transmission and external confirmation distinct across contractor and supplier teams.
 
@@ -9,11 +9,11 @@ The held civil work affects the plan for the aggregate delivery. The principal c
 1. Show the original delivery booking and the reason a timing change is proposed.
 2. Review the draft request and the logistics coordinator’s approval.
 3. Show the simulated outbound request as sent, still awaiting acceptance.
-4. Advance to the supplier reply; only then display the new slot as confirmed.
+4. Advance to the supplier reply; only then display the new slot as confirmed. Keep charges and milestone treatment unconfirmed.
 
 ## Expected result
 
-The supplier has confirmed a revised booking. Delivery has not physically occurred, and the booking does not clear future work conditions.
+The supplier has confirmed a revised booking. Delivery has not physically occurred, charges are not agreed, and the booking does not clear future work conditions.
 
 The machine-readable assertions, deliberate rejections and forbidden actions are in [expected_outcomes.json](expected_outcomes.json). Policy references: `p_heat_program`; see the shared [SOP](../cross-scenario/HEAT_PROGRAM_AND_SOP.md) and [policy register](../cross-scenario/policies.json).
 

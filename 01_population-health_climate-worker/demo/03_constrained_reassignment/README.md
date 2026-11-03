@@ -1,6 +1,6 @@
 # 03. Find an alternative that actually fits
 
-The civil work remains held. A supervisor proposes sending the whole civil crew to the covered workshop. Two existing occupants leave only four places, and only a subset has the relevant preparation skill.
+The same civil hold remains in force after C01 has stopped work and directed recovery. An output plan proposes sending the whole civil crew to the covered workshop. Two existing occupants leave only four places, and only a subset has the relevant preparation skill. The proposal is a normal attempt to preserve useful work, but it cannot displace recovery or override constraints.
 
 **Demonstrated value:** Prevent an attractive but impossible suggestion and preserve a consistent picture of where people are assigned.
 
@@ -9,7 +9,8 @@ The civil work remains held. A supervisor proposes sending the whole civil crew 
 1. Load the held-work state from scenario 02, or the standalone starting snapshot.
 2. Try the whole-crew move and display the capacity and qualification reasons for rejection.
 3. Review the four eligible civil workers C05–C08 for the lightweight preparation task.
-4. Show that their old assignments and recovery occupancy are released on reassignment; the remaining crew does not disappear.
+4. Confirm suitability after recovery, then show that their old assignments and recovery occupancy are released on reassignment; the remaining crew does not disappear.
+5. Give P01 the actual four-person work record and remaining standby as evidence for a later cost review, without treating alternative work as an automatic reimbursement offset.
 
 ## Expected result
 
