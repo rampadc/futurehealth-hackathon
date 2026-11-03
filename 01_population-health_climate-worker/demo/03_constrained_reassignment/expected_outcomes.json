@@ -1,0 +1,16 @@
+{
+  "semantic_assertions": [
+    "whole_crew_rejected",
+    "qualified_subset_reserved",
+    "no_double_booking"
+  ],
+  "expected_rejections": [
+    "capacity_and_qualification"
+  ],
+  "not_exact_llm_wording": true,
+  "forbidden_actions": [
+    "reserve all 14 civil staff in six-seat workshop",
+    "retain reassigned staff on exposed task or recovery occupancy"
+  ],
+  "completion_conditions": "All semantic assertions hold; deliberate invalid proposals are rejected; required human actions and unresolved state are recorded."
+}

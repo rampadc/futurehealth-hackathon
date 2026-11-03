@@ -1,0 +1,9 @@
+{
+  "id": "08_symptom_escalation",
+  "title": "Symptoms despite non-hold TWL",
+  "baseline": "../cross-scenario/baseline_state.json",
+  "initial_overrides": {},
+  "connected_predecessor": null,
+  "events_file": "signals.jsonl",
+  "expected_file": "expected_outcomes.json"
+}

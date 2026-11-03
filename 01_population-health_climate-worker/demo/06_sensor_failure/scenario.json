@@ -1,0 +1,9 @@
+{
+  "id": "06_sensor_failure",
+  "title": "Failed civil sensor cannot borrow electrical reading",
+  "baseline": "../cross-scenario/baseline_state.json",
+  "initial_overrides": {},
+  "connected_predecessor": null,
+  "events_file": "signals.jsonl",
+  "expected_file": "expected_outcomes.json"
+}

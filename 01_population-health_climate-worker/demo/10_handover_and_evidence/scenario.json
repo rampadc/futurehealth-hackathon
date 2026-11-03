@@ -1,0 +1,76 @@
+{
+  "id": "10_handover_and_evidence",
+  "title": "Handover with case lineage and unresolved items",
+  "baseline": "../cross-scenario/baseline_state.json",
+  "initial_overrides": {
+    "case_id": "sandline_case_01",
+    "task_status": {
+      "civil_heavy": "held",
+      "workshop_prep": "active"
+    },
+    "assignments": {
+      "electrical_prep": [
+        "E01",
+        "E02",
+        "E03",
+        "E04",
+        "E05",
+        "E06",
+        "E07",
+        "E08",
+        "E09",
+        "E10"
+      ],
+      "workshop_prep": [
+        "C05",
+        "C06",
+        "C07",
+        "C08"
+      ],
+      "civil_heavy": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C09",
+        "C10",
+        "C11",
+        "C12"
+      ]
+    },
+    "occupancy": {
+      "workshop": [
+        "P07",
+        "P08",
+        "C05",
+        "C06",
+        "C07",
+        "C08"
+      ],
+      "shelter_a": [
+        "C02",
+        "C03",
+        "C04",
+        "C09",
+        "C10",
+        "C11",
+        "C12"
+      ]
+    },
+    "delivery": {
+      "id": "delivery_aggregate_01",
+      "slot": "2025-08-04T15:30:00+04:00",
+      "status": "confirmed"
+    },
+    "evidence": [
+      {
+        "kind": "hold",
+        "id": "heat_case_01",
+        "at": "2025-08-04T08:01:00+04:00"
+      }
+    ]
+  },
+  "connected_predecessor": "04_delivery_coordination",
+  "events_file": "signals.jsonl",
+  "expected_file": "expected_outcomes.json"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "05_restricted_worker_assignment",
+  "title": "Restricted worker assignment conflict",
+  "baseline": "../cross-scenario/baseline_state.json",
+  "initial_overrides": {},
+  "connected_predecessor": null,
+  "events_file": "signals.jsonl",
+  "expected_file": "expected_outcomes.json"
+}

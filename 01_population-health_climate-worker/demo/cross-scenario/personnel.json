@@ -1,0 +1,450 @@
+[
+  {
+    "id": "P01",
+    "name": "Amal Al Nadir",
+    "organisation_id": "sandline",
+    "crew_id": "principal",
+    "role": "project_manager",
+    "qualifications": [
+      "supervisor"
+    ],
+    "acclimatisation": "complete",
+    "supervisor_id": "P02",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "P02",
+    "name": "Rashid Al Wadi",
+    "organisation_id": "sandline",
+    "crew_id": "principal",
+    "role": "superintendent",
+    "qualifications": [
+      "supervisor"
+    ],
+    "acclimatisation": "complete",
+    "supervisor_id": "P01",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "P03",
+    "name": "Maya Al Qamar",
+    "organisation_id": "sandline",
+    "crew_id": "principal",
+    "role": "hse_officer",
+    "qualifications": [],
+    "acclimatisation": "complete",
+    "supervisor_id": "P02",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "P04",
+    "name": "Tariq Al Safa",
+    "organisation_id": "sandline",
+    "crew_id": "principal",
+    "role": "permit_coordinator",
+    "qualifications": [],
+    "acclimatisation": "complete",
+    "supervisor_id": "P02",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "P05",
+    "name": "Noura Al Nadir",
+    "organisation_id": "sandline",
+    "crew_id": "principal",
+    "role": "logistics_coordinator",
+    "qualifications": [],
+    "acclimatisation": "complete",
+    "supervisor_id": "P02",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "P06",
+    "name": "Salim Al Wadi",
+    "organisation_id": "sandline",
+    "crew_id": "principal",
+    "role": "first_aider",
+    "qualifications": [
+      "first_aid"
+    ],
+    "acclimatisation": "complete",
+    "supervisor_id": "P02",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "P07",
+    "name": "Lina Al Qamar",
+    "organisation_id": "sandline",
+    "crew_id": "principal",
+    "role": "welfare_attendant",
+    "qualifications": [],
+    "acclimatisation": "complete",
+    "supervisor_id": "P02",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "P08",
+    "name": "Omar Al Safa",
+    "organisation_id": "sandline",
+    "crew_id": "principal",
+    "role": "welfare_attendant",
+    "qualifications": [],
+    "acclimatisation": "complete",
+    "supervisor_id": "P02",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "C01",
+    "name": "Huda Al Nadir",
+    "organisation_id": "civilco",
+    "crew_id": "civil",
+    "role": "foreman",
+    "qualifications": [
+      "supervisor"
+    ],
+    "acclimatisation": "complete",
+    "supervisor_id": "P02",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "C02",
+    "name": "Faris Al Wadi",
+    "organisation_id": "civilco",
+    "crew_id": "civil",
+    "role": "operator",
+    "qualifications": [
+      "operator"
+    ],
+    "acclimatisation": "complete",
+    "supervisor_id": "C01",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "C03",
+    "name": "Sara Al Qamar",
+    "organisation_id": "civilco",
+    "crew_id": "civil",
+    "role": "operator",
+    "qualifications": [
+      "operator"
+    ],
+    "acclimatisation": "complete",
+    "supervisor_id": "C01",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "C04",
+    "name": "Khalid Al Safa",
+    "organisation_id": "civilco",
+    "crew_id": "civil",
+    "role": "banksman",
+    "qualifications": [
+      "banksman"
+    ],
+    "acclimatisation": "complete",
+    "supervisor_id": "C01",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "C05",
+    "name": "Rana Al Nadir",
+    "organisation_id": "civilco",
+    "crew_id": "civil",
+    "role": "civil_worker",
+    "qualifications": [
+      "civil_worker"
+    ],
+    "acclimatisation": "complete",
+    "supervisor_id": "C01",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "C06",
+    "name": "Yusuf Al Wadi",
+    "organisation_id": "civilco",
+    "crew_id": "civil",
+    "role": "civil_worker",
+    "qualifications": [
+      "civil_worker"
+    ],
+    "acclimatisation": "complete",
+    "supervisor_id": "C01",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "C07",
+    "name": "Dana Al Qamar",
+    "organisation_id": "civilco",
+    "crew_id": "civil",
+    "role": "civil_worker",
+    "qualifications": [
+      "civil_worker"
+    ],
+    "acclimatisation": "complete",
+    "supervisor_id": "C01",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "C08",
+    "name": "Bilal Al Safa",
+    "organisation_id": "civilco",
+    "crew_id": "civil",
+    "role": "civil_worker",
+    "qualifications": [
+      "civil_worker"
+    ],
+    "acclimatisation": "complete",
+    "supervisor_id": "C01",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "C09",
+    "name": "Leila Al Nadir",
+    "organisation_id": "civilco",
+    "crew_id": "civil",
+    "role": "civil_worker",
+    "qualifications": [
+      "civil_worker"
+    ],
+    "acclimatisation": "complete",
+    "supervisor_id": "C01",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "C10",
+    "name": "Zaid Al Wadi",
+    "organisation_id": "civilco",
+    "crew_id": "civil",
+    "role": "civil_worker",
+    "qualifications": [
+      "civil_worker"
+    ],
+    "acclimatisation": "complete",
+    "supervisor_id": "C01",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "C11",
+    "name": "Mariam Al Qamar",
+    "organisation_id": "civilco",
+    "crew_id": "civil",
+    "role": "civil_worker",
+    "qualifications": [
+      "civil_worker"
+    ],
+    "acclimatisation": "complete",
+    "supervisor_id": "C01",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "C12",
+    "name": "Samir Al Safa",
+    "organisation_id": "civilco",
+    "crew_id": "civil",
+    "role": "civil_worker",
+    "qualifications": [
+      "civil_worker"
+    ],
+    "acclimatisation": "complete",
+    "supervisor_id": "C01",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "C13",
+    "name": "Noor Al Nadir",
+    "organisation_id": "civilco",
+    "crew_id": "civil",
+    "role": "civil_worker",
+    "qualifications": [
+      "civil_worker"
+    ],
+    "acclimatisation": "restricted_day_2",
+    "supervisor_id": "C01",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "C14",
+    "name": "Adil Al Wadi",
+    "organisation_id": "civilco",
+    "crew_id": "civil",
+    "role": "civil_worker",
+    "qualifications": [
+      "civil_worker"
+    ],
+    "acclimatisation": "restricted_day_2",
+    "supervisor_id": "C01",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "E01",
+    "name": "Aisha Al Qamar",
+    "organisation_id": "electroco",
+    "crew_id": "electrical",
+    "role": "electrical_foreman",
+    "qualifications": [
+      "electrical_preparation"
+    ],
+    "acclimatisation": "complete",
+    "supervisor_id": "P02",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "E02",
+    "name": "Karim Al Safa",
+    "organisation_id": "electroco",
+    "crew_id": "electrical",
+    "role": "electrician",
+    "qualifications": [
+      "electrical_preparation"
+    ],
+    "acclimatisation": "complete",
+    "supervisor_id": "E01",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "E03",
+    "name": "Fatima Al Nadir",
+    "organisation_id": "electroco",
+    "crew_id": "electrical",
+    "role": "electrician",
+    "qualifications": [
+      "electrical_preparation"
+    ],
+    "acclimatisation": "complete",
+    "supervisor_id": "E01",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "E04",
+    "name": "Nabil Al Wadi",
+    "organisation_id": "electroco",
+    "crew_id": "electrical",
+    "role": "electrician",
+    "qualifications": [
+      "electrical_preparation"
+    ],
+    "acclimatisation": "complete",
+    "supervisor_id": "E01",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "E05",
+    "name": "Reem Al Qamar",
+    "organisation_id": "electroco",
+    "crew_id": "electrical",
+    "role": "electrician",
+    "qualifications": [
+      "electrical_preparation"
+    ],
+    "acclimatisation": "complete",
+    "supervisor_id": "E01",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "E06",
+    "name": "Jamal Al Safa",
+    "organisation_id": "electroco",
+    "crew_id": "electrical",
+    "role": "electrician",
+    "qualifications": [
+      "electrical_preparation"
+    ],
+    "acclimatisation": "complete",
+    "supervisor_id": "E01",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "E07",
+    "name": "Mona Al Nadir",
+    "organisation_id": "electroco",
+    "crew_id": "electrical",
+    "role": "assistant",
+    "qualifications": [],
+    "acclimatisation": "complete",
+    "supervisor_id": "E01",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "E08",
+    "name": "Hassan Al Wadi",
+    "organisation_id": "electroco",
+    "crew_id": "electrical",
+    "role": "assistant",
+    "qualifications": [],
+    "acclimatisation": "complete",
+    "supervisor_id": "E01",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "E09",
+    "name": "Layla Al Qamar",
+    "organisation_id": "electroco",
+    "crew_id": "electrical",
+    "role": "assistant",
+    "qualifications": [],
+    "acclimatisation": "complete",
+    "supervisor_id": "E01",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "E10",
+    "name": "Saeed Al Safa",
+    "organisation_id": "electroco",
+    "crew_id": "electrical",
+    "role": "assistant",
+    "qualifications": [],
+    "acclimatisation": "complete",
+    "supervisor_id": "E01",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "L01",
+    "name": "Dalia Al Nadir",
+    "organisation_id": "logco",
+    "crew_id": "logistics",
+    "role": "driver",
+    "qualifications": [
+      "driver"
+    ],
+    "acclimatisation": "complete",
+    "supervisor_id": "L04",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "L02",
+    "name": "Ibrahim Al Wadi",
+    "organisation_id": "logco",
+    "crew_id": "logistics",
+    "role": "driver",
+    "qualifications": [
+      "driver"
+    ],
+    "acclimatisation": "complete",
+    "supervisor_id": "L04",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "L03",
+    "name": "Yara Al Qamar",
+    "organisation_id": "logco",
+    "crew_id": "logistics",
+    "role": "forklift_operator",
+    "qualifications": [
+      "operator"
+    ],
+    "acclimatisation": "complete",
+    "supervisor_id": "L04",
+    "communication_language": "English/Arabic site briefing"
+  },
+  {
+    "id": "L04",
+    "name": "Hamza Al Safa",
+    "organisation_id": "logco",
+    "crew_id": "logistics",
+    "role": "storekeeper",
+    "qualifications": [],
+    "acclimatisation": "complete",
+    "supervisor_id": "P02",
+    "communication_language": "English/Arabic site briefing"
+  }
+]

@@ -1,0 +1,110 @@
+[
+  {
+    "id": "civil_heavy",
+    "description": "Excavate and prepare utility trench in exposed civil zone",
+    "zone_id": "civil_exposed",
+    "crew_id": "civil",
+    "kind": "heavy_exposed",
+    "required_qualifications": [],
+    "baseline_assignees": [
+      "C01",
+      "C02",
+      "C03",
+      "C04",
+      "C05",
+      "C06",
+      "C07",
+      "C08",
+      "C09",
+      "C10",
+      "C11",
+      "C12"
+    ],
+    "permit_id": "permit_civil_01",
+    "dependencies": [
+      "permit_civil_01",
+      "excavator_01",
+      "water_1"
+    ]
+  },
+  {
+    "id": "civil_light",
+    "description": "Supervised lightweight marking and materials checks, no hard exertion",
+    "zone_id": "civil_exposed",
+    "crew_id": "civil",
+    "kind": "light_supervised",
+    "required_qualifications": [],
+    "baseline_assignees": [
+      "C13",
+      "C14"
+    ],
+    "supervisor_id": "C01",
+    "permit_id": "permit_civil_02",
+    "dependencies": [
+      "permit_civil_02",
+      "C01"
+    ]
+  },
+  {
+    "id": "electrical_prep",
+    "description": "Sort and label de-energised cable trays before civil trench handoff",
+    "zone_id": "electrical_exposed",
+    "crew_id": "electrical",
+    "kind": "electrical_preparation_deenergised",
+    "required_qualifications": [],
+    "baseline_assignees": [
+      "E01",
+      "E02",
+      "E03",
+      "E04",
+      "E05",
+      "E06",
+      "E07",
+      "E08",
+      "E09",
+      "E10"
+    ],
+    "permit_id": "permit_elec_01",
+    "dependencies": [
+      "permit_elec_01"
+    ]
+  },
+  {
+    "id": "yard_receive",
+    "description": "Receive aggregate truck using qualified forklift operator and storekeeper",
+    "zone_id": "yard",
+    "crew_id": "logistics",
+    "kind": "delivery_handling",
+    "required_qualifications": [],
+    "role_requirements": {
+      "L03": "forklift_operator",
+      "L04": "storekeeper"
+    },
+    "baseline_assignees": [
+      "L03",
+      "L04"
+    ],
+    "permit_id": "permit_yard_01",
+    "dependencies": [
+      "permit_yard_01",
+      "forklift_01"
+    ]
+  },
+  {
+    "id": "workshop_prep",
+    "description": "Inspect and sort lightweight civil pipe markers at cooled bench during civil hold",
+    "zone_id": "workshop",
+    "crew_id": "civil",
+    "kind": "light_supervised",
+    "required_qualifications": [
+      "civil_worker"
+    ],
+    "baseline_assignees": [],
+    "permit_id": "permit_workshop_01",
+    "supervisor_id": "C01",
+    "dependencies": [
+      "permit_workshop_01",
+      "C01"
+    ]
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "id": "09_restart_review",
+  "title": "Improved TWL requires review; stale branch blocked",
+  "baseline": "../cross-scenario/baseline_state.json",
+  "initial_overrides": {
+    "task_status": {
+      "civil_heavy": "held"
+    },
+    "case_id": "sandline_case_09"
+  },
+  "connected_predecessor": null,
+  "events_file": "signals.jsonl",
+  "expected_file": "expected_outcomes.json"
+}

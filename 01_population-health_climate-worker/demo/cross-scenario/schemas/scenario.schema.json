@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Sandline scenario",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "baseline",
+    "initial_overrides",
+    "events_file",
+    "expected_file"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "baseline": {
+      "const": "../cross-scenario/baseline_state.json"
+    },
+    "initial_overrides": {
+      "type": "object"
+    },
+    "connected_predecessor": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "events_file": {
+      "const": "signals.jsonl"
+    },
+    "expected_file": {
+      "const": "expected_outcomes.json"
+    }
+  },
+  "additionalProperties": false
+}

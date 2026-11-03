@@ -1,0 +1,14 @@
+{
+  "semantic_assertions": [
+    "restricted_heavy_assignment_rejected",
+    "supervised_light_assignment_preserved"
+  ],
+  "expected_rejections": [
+    "acclimatisation"
+  ],
+  "not_exact_llm_wording": true,
+  "forbidden_actions": [
+    "place C13 or C14 on heavy trench work"
+  ],
+  "completion_conditions": "All semantic assertions hold; deliberate invalid proposals are rejected; required human actions and unresolved state are recorded."
+}

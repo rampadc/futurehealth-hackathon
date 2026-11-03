@@ -1,0 +1,54 @@
+[
+  {
+    "id": "t1",
+    "type": "TWL_monitor",
+    "zone_id": "civil_exposed",
+    "status": "serviceable",
+    "calibration_due": "2025-08-31"
+  },
+  {
+    "id": "t2",
+    "type": "TWL_monitor",
+    "zone_id": "electrical_exposed",
+    "status": "serviceable",
+    "calibration_due": "2025-08-31"
+  },
+  {
+    "id": "t3",
+    "type": "TWL_monitor",
+    "zone_id": "yard",
+    "status": "serviceable",
+    "calibration_due": "2025-08-31"
+  },
+  {
+    "id": "water_1",
+    "type": "potable_water",
+    "status": "available"
+  },
+  {
+    "id": "radio_net",
+    "type": "communications",
+    "status": "available"
+  },
+  {
+    "id": "excavator_01",
+    "type": "excavator",
+    "owner_id": "civilco",
+    "status": "available",
+    "zone_id": "civil_exposed"
+  },
+  {
+    "id": "forklift_01",
+    "type": "forklift",
+    "owner_id": "logco",
+    "status": "available",
+    "zone_id": "yard"
+  },
+  {
+    "id": "twl_portable_01",
+    "type": "portable_TWL_monitor",
+    "owner_id": "sandline",
+    "status": "available",
+    "zone_id": null
+  }
+]

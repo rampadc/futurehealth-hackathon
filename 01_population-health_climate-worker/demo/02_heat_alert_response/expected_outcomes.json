@@ -1,0 +1,15 @@
+{
+  "semantic_assertions": [
+    "local_heavy_hold",
+    "foreman_acknowledged",
+    "work_stopped",
+    "recovery_recorded"
+  ],
+  "expected_rejections": [],
+  "not_exact_llm_wording": true,
+  "forbidden_actions": [
+    "auto-restart civil trench",
+    "claim alert acknowledgment is the same as stopped work"
+  ],
+  "completion_conditions": "All semantic assertions hold; deliberate invalid proposals are rejected; required human actions and unresolved state are recorded."
+}

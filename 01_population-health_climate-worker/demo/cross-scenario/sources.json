@@ -1,0 +1,37 @@
+[
+  {
+    "id": "cop11",
+    "title": "ADOSH-SF CoP 11 Safety in the Heat, version 4, pp 6\u201310",
+    "url": "https://www.adphc.gov.ae/-/media/Project/ADPHC/ADPHC/PDF/OSHAD-SF/Codes-of-Practise/11---Safety-in-the-Heat-v31-English.pdf",
+    "local_path": "../data/raw/regulatory/adosh_sf_cop_11_safety_heat_v4_en.pdf",
+    "classification": "published_requirement"
+  },
+  {
+    "id": "tg_heat",
+    "title": "ADOSH-SF Technical Guideline Safety in the Heat, version 4, pp 3\u20134, 22\u201323",
+    "url": "https://www.adphc.gov.ae/-/media/Project/ADPHC/ADPHC/PDF/OSHAD-SF/Technical-Guidelines/Safety-in-the-Heat--Eng.pdf",
+    "local_path": "../data/raw/regulatory/adosh_sf_tg_safety_heat_v4_en.pdf",
+    "classification": "guidance_or_reported_practice"
+  },
+  {
+    "id": "mohre_midday",
+    "title": "MoHRE heat stress prevention policy",
+    "url": "https://observatory.mohre.gov.ae/en/uae-labour-market-priorities/social-protection-and-well-being-assurance",
+    "local_path": "../data/raw/regulatory/mohre_heat_stress_policy.html",
+    "classification": "published_requirement"
+  },
+  {
+    "id": "ega_practice",
+    "title": "EGA eliminating risk of harm; reported practice, not Sandline SOP",
+    "url": "https://www.ega.ae/en/sustainability/eliminating-the-risk-of-harm",
+    "classification": "guidance_or_reported_practice",
+    "temporal_note": "Contextual reported practice; not evidence of Sandline procedure."
+  },
+  {
+    "id": "emaar_report",
+    "title": "Emaar Development investor report; reported practice, not Sandline SOP",
+    "url": "https://feeds.dfm.ae/documents/2026/Mar/12/f0040f20-6ec1-4eef-a099-e3b74f688cc1/Emaar%20Development%20IR.pdf",
+    "classification": "guidance_or_reported_practice",
+    "temporal_note": "Published in 2026; retrospective design context only, not evidence available to site actors on 4 August 2025."
+  }
+]

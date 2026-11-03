@@ -1,0 +1,15 @@
+# Initial Astra audit resolutions
+
+1. **Restart gates:** `validate.py` now checks the actual restart instant for the summer midday interval, fresh local TWL above the fictional 150 W/m² hold threshold, and a serviceable sensor. It also requires a prior human review of the held task. A later stale reading returns the active civil task to held state. The `mutation_checks.py` probes shift scenario 09 into midday, fail the sensor between review and restart, and delay restart past freshness; all are rejected.
+2. **Constrained civil reassignment:** Scenario 03 now proposes all 14 civil workers for four free workshop seats, rejects that proposal, then selects qualified C05–C08 for lightweight civil pipe-marker preparation. Replay releases those four from the held trench roster and shelter occupancy before workshop reservation. Active-task assignment uniqueness, cooled-location occupancy uniqueness, capacity and exposed-task/occupancy conflict are checked. The other civil workers stay in their recovery state in the connected 02→03→04→10 chain. Electrical crew remains on its own de-energised preparation.
+3. **Signal contracts:** `signal.schema.json` now enumerates event types and type-specific required payload fields; the standard-library validator enforces equivalent field, ID, timestamp, person, zone and measurement contract checks without adding a JSON Schema dependency. It rejects duplicate event IDs and a wrong-zone TWL probe.
+4. **Derived state:** The local synthetic TWL event establishes heavy-work hold state under the fictional policy; a subsequent human hold notification records case, alert and actor. Symptom report and first-aid response are distinct; incident evidence appears only after the trained first-aid event. Regression probes remove the low TWL trigger or first-aid response and are rejected.
+
+Verification: `python3 validation/validate.py` passes 10 standalone scenarios and the connected chain. `python3 validation/mutation_checks.py` rejects seven unsafe mutations. The package remains synthetic and does not implement a live safety application.
+
+## Rereview follow-up
+
+- Scenario 03 assignment proposals and approval use civil foreman C01. The event envelope actor is mandatory for human actions and checked against task authority; when a payload also carries an actor ID, it must match. Electrical foreman E01 and a missing actor are rejected by mutation probes.
+- Required payload fields now receive explicit string, list, number, or boolean checks; the JSON Schema mirrors these types. A symptom observation object is rejected.
+- Event processing requires the next event to occur after the previous signal was received. A delayed TWL received at 10:00 cannot support an 08:01 hold action. Eleven mutation probes now cover the original audit and follow-up failures.
+- Each scenario example now shows a concrete operator request, assistant control/action, human confirmation and resulting state. The examples are illustrative; replay assertions remain in `expected_outcomes.json`.

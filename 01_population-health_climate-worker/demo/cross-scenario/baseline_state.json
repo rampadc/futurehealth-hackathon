@@ -1,0 +1,87 @@
+{
+  "clock": "2025-08-04T07:58:00+04:00",
+  "case_id": null,
+  "task_status": {
+    "civil_heavy": "active",
+    "civil_light": "active",
+    "electrical_prep": "active",
+    "yard_receive": "active",
+    "workshop_prep": "idle"
+  },
+  "assignments": {
+    "civil_heavy": [
+      "C01",
+      "C02",
+      "C03",
+      "C04",
+      "C05",
+      "C06",
+      "C07",
+      "C08",
+      "C09",
+      "C10",
+      "C11",
+      "C12"
+    ],
+    "civil_light": [
+      "C13",
+      "C14"
+    ],
+    "electrical_prep": [
+      "E01",
+      "E02",
+      "E03",
+      "E04",
+      "E05",
+      "E06",
+      "E07",
+      "E08",
+      "E09",
+      "E10"
+    ],
+    "yard_receive": [
+      "L03",
+      "L04"
+    ],
+    "workshop_prep": []
+  },
+  "occupancy": {
+    "workshop": [
+      "P07",
+      "P08"
+    ],
+    "shelter_a": [],
+    "shelter_b": [],
+    "welfare": []
+  },
+  "readings": {
+    "civil_exposed": {
+      "twl": 175,
+      "at": "2025-08-04T07:58:00+04:00",
+      "sensor_id": "t1"
+    },
+    "electrical_exposed": {
+      "twl": 190,
+      "at": "2025-08-04T07:58:00+04:00",
+      "sensor_id": "t2"
+    },
+    "yard": {
+      "twl": 185,
+      "at": "2025-08-04T07:58:00+04:00",
+      "sensor_id": "t3"
+    }
+  },
+  "sensor_status": {
+    "t1": "serviceable",
+    "t2": "serviceable",
+    "t3": "serviceable"
+  },
+  "alerts": {},
+  "delivery": {
+    "id": "delivery_aggregate_01",
+    "slot": "2025-08-04T11:30:00+04:00",
+    "status": "confirmed"
+  },
+  "evidence": [],
+  "open_items": []
+}

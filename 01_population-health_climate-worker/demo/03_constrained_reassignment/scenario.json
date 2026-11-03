@@ -1,0 +1,36 @@
+{
+  "id": "03_constrained_reassignment",
+  "title": "Reject whole-crew workshop move, assign qualified subset",
+  "baseline": "../cross-scenario/baseline_state.json",
+  "initial_overrides": {
+    "case_id": "sandline_case_01",
+    "task_status": {
+      "civil_heavy": "held"
+    },
+    "alerts": {
+      "heat_case_01": {
+        "task_id": "civil_heavy",
+        "status": "stopped",
+        "acknowledged": true
+      }
+    },
+    "occupancy": {
+      "shelter_a": [
+        "C02",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C12"
+      ]
+    }
+  },
+  "connected_predecessor": "02_heat_alert_response",
+  "events_file": "signals.jsonl",
+  "expected_file": "expected_outcomes.json"
+}

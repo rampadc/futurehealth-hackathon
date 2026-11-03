@@ -1,0 +1,17 @@
+{
+  "semantic_assertions": [
+    "improvement_not_auto_restart",
+    "human_review_recorded",
+    "stale_branch_blocked"
+  ],
+  "expected_rejections": [
+    "human_review_required",
+    "stale_reading"
+  ],
+  "not_exact_llm_wording": true,
+  "forbidden_actions": [
+    "restart on stale or failed local measurement",
+    "restart during midday prohibition"
+  ],
+  "completion_conditions": "All semantic assertions hold; deliberate invalid proposals are rejected; required human actions and unresolved state are recorded."
+}

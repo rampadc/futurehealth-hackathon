@@ -1,0 +1,9 @@
+{
+  "id": "01_pre_shift_planning",
+  "title": "Forecast planning without clearance",
+  "baseline": "../cross-scenario/baseline_state.json",
+  "initial_overrides": {},
+  "connected_predecessor": null,
+  "events_file": "signals.jsonl",
+  "expected_file": "expected_outcomes.json"
+}

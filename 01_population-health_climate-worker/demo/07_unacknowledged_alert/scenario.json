@@ -1,0 +1,9 @@
+{
+  "id": "07_unacknowledged_alert",
+  "title": "Unacknowledged hold escalation",
+  "baseline": "../cross-scenario/baseline_state.json",
+  "initial_overrides": {},
+  "connected_predecessor": null,
+  "events_file": "signals.jsonl",
+  "expected_file": "expected_outcomes.json"
+}
