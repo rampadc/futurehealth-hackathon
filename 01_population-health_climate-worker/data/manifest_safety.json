@@ -1,0 +1,233 @@
+{
+  "generated_utc": "2026-11-03T03:33:53.531306+00:00",
+  "sources": [
+    {
+      "source_url": "https://www.adphc.gov.ae/-/media/Project/ADPHC/ADPHC/PDF/OSHAD-SF/Codes-of-Practise/11---Safety-in-the-Heat-v31-English.pdf",
+      "relative_path": "raw/regulatory/adosh_sf_cop_11_safety_heat_v4_en.pdf",
+      "title": "Safety in the Heat",
+      "version": "4.0",
+      "attempted_utc": "2026-11-03T03:33:19.485609+00:00",
+      "notes": "Fresh download from interrupted prior run; reused after validation",
+      "status": "downloaded",
+      "retrieved_utc": "2026-11-03T03:29:02.226340+00:00",
+      "sha256": "e441dc99ba65ecaf07265a16ccf683707365b1fcebf8055a782d4796f3af0909",
+      "bytes": 341108,
+      "final_url": "https://www.adphc.gov.ae/-/media/Project/ADPHC/ADPHC/PDF/OSHAD-SF/Codes-of-Practise/11---Safety-in-the-Heat-v31-English.pdf"
+    },
+    {
+      "source_url": "https://www.adphc.gov.ae/-/media/Project/ADPHC/ADPHC/PDF/OSHAD-SF/Codes-of-Practise/11---Safety-in-the-Heat-v31-Arabic.pdf",
+      "relative_path": "raw/regulatory/adosh_sf_cop_11_safety_heat_v4_ar.pdf",
+      "title": "Safety in the Heat (Arabic)",
+      "version": "4.0",
+      "attempted_utc": "2026-11-03T03:33:19.486039+00:00",
+      "notes": "Fresh download from interrupted prior run; reused after validation",
+      "status": "downloaded",
+      "retrieved_utc": "2026-11-03T03:29:08.711227+00:00",
+      "sha256": "cf68c0c81ce179cc0ed3de3ee45c9259a0025985842af1288061e8758619790e",
+      "bytes": 342563,
+      "final_url": "https://www.adphc.gov.ae/-/media/Project/ADPHC/ADPHC/PDF/OSHAD-SF/Codes-of-Practise/11---Safety-in-the-Heat-v31-Arabic.pdf"
+    },
+    {
+      "source_url": "https://www.adphc.gov.ae/-/media/Project/ADPHC/ADPHC/PDF/OSHAD-SF/Technical-Guidelines/Safety-in-the-Heat--Eng.pdf",
+      "relative_path": "raw/regulatory/adosh_sf_tg_safety_heat_v4_en.pdf",
+      "title": "Safety in the Heat Technical Guideline",
+      "version": "4.0",
+      "attempted_utc": "2026-11-03T03:33:19.486196+00:00",
+      "notes": "Fresh download from interrupted prior run; reused after validation",
+      "status": "downloaded",
+      "retrieved_utc": "2026-11-03T03:29:17.261552+00:00",
+      "sha256": "3f78cdac1314006fe8970f8eabb7a5edb95ac63106fb3eb3cfd25d0ac9ebd9cd",
+      "bytes": 1232151,
+      "final_url": "https://www.adphc.gov.ae/-/media/Project/ADPHC/ADPHC/PDF/OSHAD-SF/Technical-Guidelines/Safety-in-the-Heat--Eng.pdf"
+    },
+    {
+      "source_url": "https://www.adphc.gov.ae/-/media/Project/ADPHC/ADPHC/PDF/OSHAD-SF/Codes-of-Practise/2026/COP-531--OSH-Construction-Management-Plan-v41-English.pdf",
+      "relative_path": "raw/regulatory/adosh_sf_cop_53_1_construction_v4_1_en.pdf",
+      "title": "OSH Construction Management Plan",
+      "version": "4.1",
+      "attempted_utc": "2026-11-03T03:33:19.552666+00:00",
+      "notes": "Fresh download from interrupted prior run; reused after validation",
+      "status": "downloaded",
+      "retrieved_utc": "2026-11-03T03:29:22.318982+00:00",
+      "sha256": "9b04d1beb20a99026a8e8982bbcf2163e58693f1381c5274f7ee2b42699b2281",
+      "bytes": 482681,
+      "final_url": "https://www.adphc.gov.ae/-/media/Project/ADPHC/ADPHC/PDF/OSHAD-SF/Codes-of-Practise/2026/COP-531--OSH-Construction-Management-Plan-v41-English.pdf"
+    },
+    {
+      "source_url": "https://www.adphc.gov.ae/en/Legislation/Code-of-Practices",
+      "relative_path": "raw/regulatory/adphc_codes_of_practice_index.html",
+      "title": "ADPHC Codes of Practice index",
+      "version": "current",
+      "attempted_utc": "2026-11-03T03:33:19.553124+00:00",
+      "notes": "Fresh download from interrupted prior run; reused after validation",
+      "status": "downloaded",
+      "retrieved_utc": "2026-11-03T03:29:25.102101+00:00",
+      "sha256": "37ae48107b220d164c22d18ecb9bb555ebb8f5c5e850bdc44473d8ea735b6533",
+      "bytes": 93797,
+      "final_url": "https://www.adphc.gov.ae/en/Legislation/Code-of-Practices"
+    },
+    {
+      "source_url": "https://www.mohre.gov.ae/assets/download/11018ec0/Occupational-Health-and-Safety-Guide-EN.pdf.aspx",
+      "relative_path": "raw/regulatory/mohre_occupational_safety_guide_en.pdf",
+      "title": "MoHRE Occupational Health and Safety Guide",
+      "version": "current",
+      "attempted_utc": "2026-11-03T03:33:19.556328+00:00",
+      "status": "unavailable",
+      "notes": "OSError: curl: (28) Connection timed out after 8005 milliseconds"
+    },
+    {
+      "source_url": "https://www.mohre.gov.ae/handlers/download.ashx?YXNzZXQ9NjY1NA%3D%3D=",
+      "relative_path": "raw/regulatory/mohre_midday_resolution_44_2022_en.pdf",
+      "title": "MoHRE Ministerial Resolution 44 of 2022",
+      "version": "2022",
+      "attempted_utc": "2026-11-03T03:33:19.559240+00:00",
+      "status": "unavailable",
+      "notes": "OSError: curl: (28) Connection timed out after 8004 milliseconds"
+    },
+    {
+      "source_url": "https://mohre.gov.ae/assets/download/6786916a/administrative-decision-no-19-of-2023-relating-to-occupational-safety-and-health-and-labour.aspx",
+      "relative_path": "raw/regulatory/mohre_administrative_decision_19_2023_en.pdf",
+      "title": "MoHRE Administrative Decision 19 of 2023",
+      "version": "2023",
+      "attempted_utc": "2026-11-03T03:33:19.582543+00:00",
+      "status": "unavailable",
+      "notes": "OSError: curl: (28) Connection timed out after 8001 milliseconds"
+    },
+    {
+      "source_url": "https://www.uaelegislation.gov.ae/en/legislations/1972/download",
+      "relative_path": "raw/regulatory/uae_pdpl_fdl_45_2021_en.pdf",
+      "title": "UAE Personal Data Protection Law",
+      "version": "2021",
+      "attempted_utc": "2026-11-03T03:33:27.576746+00:00",
+      "status": "unavailable",
+      "notes": "OSError: curl: (56) The requested URL returned error: 403"
+    },
+    {
+      "source_url": "https://uaelegislation.gov.ae/en/legislations/1209/download",
+      "relative_path": "raw/regulatory/uae_health_ict_federal_law_2_2019_en.pdf",
+      "title": "UAE Health ICT Law",
+      "version": "2019",
+      "attempted_utc": "2026-11-03T03:33:27.579703+00:00",
+      "status": "unavailable",
+      "notes": "OSError: curl: (56) The requested URL returned error: 403"
+    },
+    {
+      "source_url": "https://uaelegislation.gov.ae/en/legislations/1444/download",
+      "relative_path": "raw/regulatory/uae_health_ict_regulation_32_2020_en.pdf",
+      "title": "UAE Health ICT Executive Regulation",
+      "version": "2020",
+      "attempted_utc": "2026-11-03T03:33:27.598088+00:00",
+      "status": "unavailable",
+      "notes": "OSError: curl: (56) The requested URL returned error: 403"
+    },
+    {
+      "source_url": "https://www.doh.gov.ae/-/media/Feature/Resources/Standards/ADHICS-v2-standard.ashx",
+      "relative_path": "raw/regulatory/adhics_v2_standard.pdf",
+      "title": "Abu Dhabi Healthcare Information and Cyber Security Standard",
+      "version": "2",
+      "attempted_utc": "2026-11-03T03:33:28.569979+00:00",
+      "status": "downloaded",
+      "retrieved_utc": "2026-11-03T03:33:53.529235+00:00",
+      "sha256": "1593e14f05cb9741200ead46787d1887cdba2f7443f193598d65c985b72f0661",
+      "bytes": 3834582,
+      "final_url": "https://www.doh.gov.ae/-/media/Feature/Resources/Standards/ADHICS-v2-standard.ashx"
+    },
+    {
+      "source_url": "https://www.doh.gov.ae/-/media/Feature/Aamen/ADHICS-FAQ.ashx",
+      "relative_path": "raw/regulatory/adhics_faq.pdf",
+      "title": "ADHICS FAQ",
+      "version": "current",
+      "attempted_utc": "2026-11-03T03:33:28.823532+00:00",
+      "notes": "Fresh download from interrupted prior run; reused after validation",
+      "status": "downloaded",
+      "retrieved_utc": "2026-11-03T03:32:37.933310+00:00",
+      "sha256": "a5d5be0e09d033ed92b2ca0773802ec0ca6f9abf2236e8fda48ee588d888cc47",
+      "bytes": 300044,
+      "final_url": "https://www.doh.gov.ae/-/media/Feature/Aamen/ADHICS-FAQ.ashx"
+    },
+    {
+      "source_url": "https://www.cdc.gov/niosh/docs/2016-106/pdfs/2016-106.pdf",
+      "relative_path": "raw/guidance/niosh_2016_106_heat.pdf",
+      "title": "NIOSH Occupational Exposure to Heat and Hot Environments",
+      "version": "2016-106",
+      "attempted_utc": "2026-11-03T03:33:28.832419+00:00",
+      "status": "downloaded",
+      "retrieved_utc": "2026-11-03T03:33:29.139909+00:00",
+      "sha256": "db50cd0d8c9ac921e6eacad550ba9ed34629891ace4035ccbeffc44fd8ba5ea3",
+      "bytes": 3716182,
+      "final_url": "https://www.cdc.gov/niosh/docs/2016-106/pdfs/2016-106.pdf"
+    },
+    {
+      "source_url": "https://www.ilo.org/sites/default/files/wcmsp5/groups/public/%40dgreports/%40dcomm/%40publ/documents/publication/wcms_711919.pdf",
+      "relative_path": "raw/guidance/ilo_working_on_a_warmer_planet_2019.pdf",
+      "title": "Working on a warmer planet",
+      "version": "2019",
+      "attempted_utc": "2026-11-03T03:33:28.856793+00:00",
+      "notes": "Fresh download from interrupted prior run; reused after validation",
+      "status": "downloaded",
+      "retrieved_utc": "2026-11-03T03:31:29.032794+00:00",
+      "sha256": "23fdd36a207b6136f55781ad64cbdf689222d4fdb76f90d8000b1b18ca0e61d5",
+      "bytes": 3747012,
+      "final_url": "https://www.ilo.org/sites/default/files/wcmsp5/groups/public/%40dgreports/%40dcomm/%40publ/documents/publication/wcms_711919.pdf"
+    },
+    {
+      "source_url": "https://cdn.who.int/media/docs/default-source/climate-change/heat-waves-and-health---guidance-on-warning-system-development.pdf?download=true&sfvrsn=e4813084_2",
+      "relative_path": "raw/guidance/who_wmo_heatwaves_warning_systems_2015.pdf",
+      "title": "Heatwaves and health: warning-system development",
+      "version": "2015/2016",
+      "attempted_utc": "2026-11-03T03:33:28.958205+00:00",
+      "notes": "Fresh download from interrupted prior run; reused after validation",
+      "status": "downloaded",
+      "retrieved_utc": "2026-11-03T03:31:30.426750+00:00",
+      "sha256": "9df0e831085b02eaef186252929ee132e1010ceff07b178a5240a19e98d0785c",
+      "bytes": 2945118,
+      "final_url": "https://cdn.who.int/media/docs/default-source/climate-change/heat-waves-and-health---guidance-on-warning-system-development.pdf?download=true&sfvrsn=e4813084_2"
+    },
+    {
+      "source_url": "https://iris.who.int/bitstream/handle/10665/382351/9789240099814-eng.pdf?sequence=1",
+      "relative_path": "raw/guidance/who_wmo_workplace_heat_stress_2025.pdf",
+      "title": "Climate change and workplace heat stress",
+      "version": "2025",
+      "attempted_utc": "2026-11-03T03:33:29.008957+00:00",
+      "status": "unavailable",
+      "notes": "AssertionError: missing PDF signature"
+    },
+    {
+      "source_url": "https://www.who.int/news-room/fact-sheets/detail/climate-change-heat-and-health",
+      "relative_path": "raw/guidance/who_heat_and_health_factsheet.html",
+      "title": "WHO Heat and health fact sheet",
+      "version": "2026",
+      "attempted_utc": "2026-11-03T03:33:29.141719+00:00",
+      "notes": "Fresh download from interrupted prior run; reused after validation",
+      "status": "downloaded",
+      "retrieved_utc": "2026-11-03T03:31:29.458631+00:00",
+      "sha256": "1f5e375ae4efa3df3fb904425ca1b8ff809ba2322353cf112f16ad143d28d390",
+      "bytes": 120193,
+      "final_url": "https://www.who.int/news-room/fact-sheets/detail/climate-change-heat-and-health"
+    },
+    {
+      "source_url": "https://observatory.mohre.gov.ae/en/uae-labour-market-priorities/social-protection-and-well-being-assurance",
+      "relative_path": "raw/regulatory/mohre_heat_stress_policy.html",
+      "title": "MoHRE Heat Stress Prevention Policy",
+      "version": "2025/2026",
+      "attempted_utc": "2026-11-03T03:33:29.143632+00:00",
+      "status": "downloaded",
+      "retrieved_utc": "2026-11-03T03:33:34.437076+00:00",
+      "sha256": "c860739f9020fc9b0412002c72a97c86f5db37a218991645ec8901a5df101b3a",
+      "bytes": 545902,
+      "final_url": "https://observatory.mohre.gov.ae/en/uae-labour-market-priorities/social-protection-and-well-being-assurance"
+    },
+    {
+      "source_url": "https://wmo.int/resources/publication-series/climate-change-and-workplace-heat-stress/climate-change-and-workplace-heat-stress",
+      "relative_path": "raw/guidance/wmo_workplace_heat_stress_2025.html",
+      "title": "WMO Climate change and workplace heat stress publication",
+      "version": "2025",
+      "attempted_utc": "2026-11-03T03:33:34.437488+00:00",
+      "status": "downloaded",
+      "retrieved_utc": "2026-11-03T03:33:35.597782+00:00",
+      "sha256": "1dea792083d0a5ea23f4036a07e518a533ec2cb7cb013b366e69370b2e2c5e0e",
+      "bytes": 105568,
+      "final_url": "https://wmo.int/resources/publication-series/climate-change-and-workplace-heat-stress/climate-change-and-workplace-heat-stress"
+    }
+  ]
+}

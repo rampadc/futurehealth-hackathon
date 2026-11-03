@@ -1,0 +1,86 @@
+{
+  "dataset": "O*NET 30.1 Database",
+  "version": "30.1",
+  "release": "December 2025",
+  "status": "validated",
+  "retrievedUTC": "2026-11-03T03:28:42.474851+00:00",
+  "sourceURL": "https://www.onetcenter.org/dl_files/database/db_30_1_text.zip",
+  "sourceArchive": {
+    "path": "raw/onet/db_30_1_text.zip",
+    "bytes": 13435626,
+    "sha256": "bfdf922f17a5c22d7f6c9498ee2cc49a6752976072085f9b9b1af0f2232a6568"
+  },
+  "documentationURLs": [
+    "https://www.onetcenter.org/db_releases.html",
+    "https://www.onetcenter.org/dictionary/30.1/excel/work_context.html",
+    "https://www.onetcenter.org/dictionary/30.1/excel/work_context_categories.html"
+  ],
+  "archiveStatus": "existing",
+  "licenseStatus": "existing",
+  "license": {
+    "url": "https://www.onetcenter.org/license_db.html",
+    "name": "CC BY 4.0",
+    "file": {
+      "path": "raw/onet/LICENSE.html",
+      "bytes": 40673,
+      "sha256": "c5713b54238da9640d7cad86b08ce00aa6e32b78596a40543af35878a10810b3"
+    },
+    "attribution": "O*NET 30.1 Database by the U.S. Department of Labor, Employment and Training Administration (USDOL/ETA). Used under CC BY 4.0. Extract modified by selecting occupations and Work Context elements; USDOL/ETA has not approved, endorsed, or tested these modifications."
+  },
+  "files": [
+    {
+      "path": "raw/onet/Read Me.txt",
+      "bytes": 516,
+      "sha256": "45cd3154c7f5e1e9ca3a0be6eb565c80acddc9bd7b63feeb76dfdd2e845a6c5f",
+      "rows": null
+    },
+    {
+      "path": "raw/onet/Occupation Data.txt",
+      "bytes": 265794,
+      "sha256": "63e6029d3d30ff5c7cf39b5304a733b77a409e01c65ae7095fe92f6d18d74a66",
+      "rows": 1016
+    },
+    {
+      "path": "raw/onet/Work Context.txt",
+      "bytes": 36782933,
+      "sha256": "d52948bc8457192a56fbf40f96168dcbfcbb3a7bdd1c22b097ab02e833dea190",
+      "rows": 297676
+    },
+    {
+      "path": "raw/onet/Work Context Categories.txt",
+      "bytes": 23269,
+      "sha256": "c10536131f81056d81acf44db1c6f3efb19c09a44420a805f36020db7d1489db",
+      "rows": 281
+    }
+  ],
+  "processed": {
+    "path": "processed/onet_30_1_work_context_heat_proxy.csv",
+    "bytes": 15321,
+    "sha256": "77e77e61b0d85758a54d77d8eb725ccaec06467bafa7c29748d5000f345ed862",
+    "rows": 90
+  },
+  "coverage": {
+    "geography": "United States occupations; proxy for UAE only, not UAE measurements",
+    "occupations": {
+      "47-2061.00": "Construction Laborers",
+      "47-2171.00": "Reinforcing Iron and Rebar Workers",
+      "47-2181.00": "Roofers",
+      "53-3032.00": "Heavy and Tractor-Trailer Truck Drivers",
+      "53-3033.00": "Light Truck Drivers"
+    },
+    "elements": {
+      "4.C.2.a.1.c": "Outdoors, Exposed to All Weather Conditions",
+      "4.C.2.a.1.d": "Outdoors, Under Cover",
+      "4.C.2.b.1.b": "Exposed to Very Hot or Cold Temperatures"
+    },
+    "scales": [
+      "CX",
+      "CXP"
+    ],
+    "scaleMeaning": {
+      "CX": "mean frequency rating",
+      "CXP": "percent of respondents endorsing each frequency category"
+    },
+    "limitations": "The hot/cold item combines very hot and very cold exposure; outdoor conditions are not equivalent to heat exposure. O*NET ratings are US occupational survey data, not UAE exposure or worker health observations."
+  }
+}

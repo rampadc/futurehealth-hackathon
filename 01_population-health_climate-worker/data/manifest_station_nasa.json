@@ -1,0 +1,1595 @@
+{
+  "generatedUTC": "2026-11-03T03:29:17+00:00",
+  "entries": [
+    {
+      "sourceURL": "https://www.ncei.noaa.gov/pub/data/noaa/isd-history.csv",
+      "retrievedUTC": "2026-11-03T03:28:49+00:00",
+      "status": "ok",
+      "relativePath": "raw/noaa_gsod/isd-history.csv",
+      "sha256": "1994747ab4af1b97e63adb434b4d0d022f2daee76f0c144ea9ab46be2d906604",
+      "bytes": 2914601,
+      "rows": 29661,
+      "units": {
+        "LAT": "degrees north",
+        "LON": "degrees east",
+        "ELEV(M)": "m"
+      },
+      "coverage": {
+        "begin": "station-dependent",
+        "end": "station-dependent"
+      },
+      "location": {
+        "abu_dhabi_international": {
+          "USAF": "412170",
+          "WBAN": "99999",
+          "STATION NAME": "ABU DHABI INTL / ZAYED INTL",
+          "CTRY": "AE",
+          "STATE": "",
+          "ICAO": "OMAA",
+          "LAT": "+24.433",
+          "LON": "+054.651",
+          "ELEV(M)": "+0026.8",
+          "BEGIN": "19830102",
+          "END": "20250824"
+        },
+        "al_bateen": {
+          "USAF": "412160",
+          "WBAN": "99999",
+          "STATION NAME": "AL BATEEN EXECUTIVE",
+          "CTRY": "AE",
+          "STATE": "",
+          "ICAO": "OMAD",
+          "LAT": "+24.428",
+          "LON": "+054.458",
+          "ELEV(M)": "+0004.9",
+          "BEGIN": "19830101",
+          "END": "20250824"
+        },
+        "al_ain": {
+          "USAF": "412180",
+          "WBAN": "99999",
+          "STATION NAME": "AL AIN INTL",
+          "CTRY": "AE",
+          "STATE": "",
+          "ICAO": "OMAL",
+          "LAT": "+24.262",
+          "LON": "+055.609",
+          "ELEV(M)": "+0264.9",
+          "BEGIN": "19940308",
+          "END": "20250824"
+        }
+      },
+      "notes": "Official ISD station history; three selected station records in location."
+    },
+    {
+      "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2020/41217099999.csv",
+      "retrievedUTC": "2026-11-03T03:28:51+00:00",
+      "status": "ok",
+      "relativePath": "raw/noaa_gsod/abu_dhabi_international_2020.csv",
+      "sha256": "602293f91fafc6a669d94f718e3520890bc7ab326ea5d4ecb7117224585dfcc7",
+      "bytes": 87792,
+      "rows": 363,
+      "units": {
+        "TEMP/DEWP/MAX/MIN": "deg F",
+        "WDSP/MXSPD/GUST": "knots",
+        "SLP/STP": "hPa",
+        "VISIB": "miles",
+        "PRCP": "inches"
+      },
+      "coverage": {
+        "first": "2020-01-01",
+        "last": "2020-12-31",
+        "requestedYear": 2020
+      },
+      "location": {
+        "stationID": "41217099999",
+        "name": "ABU DHABI INTERNATIONAL, AE",
+        "latitude": 24.432972,
+        "longitude": 54.651138,
+        "metadata": {
+          "USAF": "412170",
+          "WBAN": "99999",
+          "STATION NAME": "ABU DHABI INTL / ZAYED INTL",
+          "CTRY": "AE",
+          "STATE": "",
+          "ICAO": "OMAA",
+          "LAT": "+24.433",
+          "LON": "+054.651",
+          "ELEV(M)": "+0026.8",
+          "BEGIN": "19830102",
+          "END": "20250824"
+        }
+      },
+      "notes": {
+        "missingByField": {
+          "TEMP": 0,
+          "DEWP": 0,
+          "SLP": 3,
+          "STP": 0,
+          "VISIB": 0,
+          "WDSP": 0,
+          "MXSPD": 0,
+          "GUST": 344,
+          "MAX": 0,
+          "MIN": 0,
+          "PRCP": 10,
+          "SNDP": 363
+        },
+        "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+        "missingCalendarDaysWithinCoverage": 3
+      }
+    },
+    {
+      "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2021/41217099999.csv",
+      "retrievedUTC": "2026-11-03T03:28:52+00:00",
+      "status": "ok",
+      "relativePath": "raw/noaa_gsod/abu_dhabi_international_2021.csv",
+      "sha256": "7ab3b1d75a8802c6a1053aad850a807f6e3d9a3ec5719aa9c02b85efd48552f4",
+      "bytes": 87551,
+      "rows": 362,
+      "units": {
+        "TEMP/DEWP/MAX/MIN": "deg F",
+        "WDSP/MXSPD/GUST": "knots",
+        "SLP/STP": "hPa",
+        "VISIB": "miles",
+        "PRCP": "inches"
+      },
+      "coverage": {
+        "first": "2021-01-01",
+        "last": "2021-12-31",
+        "requestedYear": 2021
+      },
+      "location": {
+        "stationID": "41217099999",
+        "name": "ABU DHABI INTERNATIONAL, AE",
+        "latitude": 24.432972,
+        "longitude": 54.651138,
+        "metadata": {
+          "USAF": "412170",
+          "WBAN": "99999",
+          "STATION NAME": "ABU DHABI INTL / ZAYED INTL",
+          "CTRY": "AE",
+          "STATE": "",
+          "ICAO": "OMAA",
+          "LAT": "+24.433",
+          "LON": "+054.651",
+          "ELEV(M)": "+0026.8",
+          "BEGIN": "19830102",
+          "END": "20250824"
+        }
+      },
+      "notes": {
+        "missingByField": {
+          "TEMP": 0,
+          "DEWP": 0,
+          "SLP": 133,
+          "STP": 0,
+          "VISIB": 0,
+          "WDSP": 0,
+          "MXSPD": 0,
+          "GUST": 354,
+          "MAX": 0,
+          "MIN": 0,
+          "PRCP": 1,
+          "SNDP": 362
+        },
+        "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+        "missingCalendarDaysWithinCoverage": 3
+      }
+    },
+    {
+      "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2022/41217099999.csv",
+      "retrievedUTC": "2026-11-03T03:28:54+00:00",
+      "status": "ok",
+      "relativePath": "raw/noaa_gsod/abu_dhabi_international_2022.csv",
+      "sha256": "17a05028cc23377fe8919546636b6b25ee47c1907959a57be5d089eee1dacbee",
+      "bytes": 88274,
+      "rows": 365,
+      "units": {
+        "TEMP/DEWP/MAX/MIN": "deg F",
+        "WDSP/MXSPD/GUST": "knots",
+        "SLP/STP": "hPa",
+        "VISIB": "miles",
+        "PRCP": "inches"
+      },
+      "coverage": {
+        "first": "2022-01-01",
+        "last": "2022-12-31",
+        "requestedYear": 2022
+      },
+      "location": {
+        "stationID": "41217099999",
+        "name": "ABU DHABI INTERNATIONAL, AE",
+        "latitude": 24.432972,
+        "longitude": 54.651138,
+        "metadata": {
+          "USAF": "412170",
+          "WBAN": "99999",
+          "STATION NAME": "ABU DHABI INTL / ZAYED INTL",
+          "CTRY": "AE",
+          "STATE": "",
+          "ICAO": "OMAA",
+          "LAT": "+24.433",
+          "LON": "+054.651",
+          "ELEV(M)": "+0026.8",
+          "BEGIN": "19830102",
+          "END": "20250824"
+        }
+      },
+      "notes": {
+        "missingByField": {
+          "TEMP": 0,
+          "DEWP": 0,
+          "SLP": 179,
+          "STP": 0,
+          "VISIB": 0,
+          "WDSP": 0,
+          "MXSPD": 0,
+          "GUST": 351,
+          "MAX": 0,
+          "MIN": 0,
+          "PRCP": 6,
+          "SNDP": 365
+        },
+        "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+        "missingCalendarDaysWithinCoverage": 0
+      }
+    },
+    {
+      "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2023/41217099999.csv",
+      "retrievedUTC": "2026-11-03T03:28:55+00:00",
+      "status": "ok",
+      "relativePath": "raw/noaa_gsod/abu_dhabi_international_2023.csv",
+      "sha256": "37cb10707a9d0920a3f2e9960e55a5b98576b476d52612f953e2650be55308d5",
+      "bytes": 88274,
+      "rows": 365,
+      "units": {
+        "TEMP/DEWP/MAX/MIN": "deg F",
+        "WDSP/MXSPD/GUST": "knots",
+        "SLP/STP": "hPa",
+        "VISIB": "miles",
+        "PRCP": "inches"
+      },
+      "coverage": {
+        "first": "2023-01-01",
+        "last": "2023-12-31",
+        "requestedYear": 2023
+      },
+      "location": {
+        "stationID": "41217099999",
+        "name": "ABU DHABI INTERNATIONAL, AE",
+        "latitude": 24.432972,
+        "longitude": 54.651138,
+        "metadata": {
+          "USAF": "412170",
+          "WBAN": "99999",
+          "STATION NAME": "ABU DHABI INTL / ZAYED INTL",
+          "CTRY": "AE",
+          "STATE": "",
+          "ICAO": "OMAA",
+          "LAT": "+24.433",
+          "LON": "+054.651",
+          "ELEV(M)": "+0026.8",
+          "BEGIN": "19830102",
+          "END": "20250824"
+        }
+      },
+      "notes": {
+        "missingByField": {
+          "TEMP": 0,
+          "DEWP": 0,
+          "SLP": 0,
+          "STP": 0,
+          "VISIB": 0,
+          "WDSP": 0,
+          "MXSPD": 0,
+          "GUST": 352,
+          "MAX": 0,
+          "MIN": 0,
+          "PRCP": 5,
+          "SNDP": 365
+        },
+        "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+        "missingCalendarDaysWithinCoverage": 0
+      }
+    },
+    {
+      "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2024/41217099999.csv",
+      "retrievedUTC": "2026-11-03T03:28:56+00:00",
+      "status": "ok",
+      "relativePath": "raw/noaa_gsod/abu_dhabi_international_2024.csv",
+      "sha256": "2fcb50b42a1c24c9bbb2015bfb99e9883f3529d02f69269115f43a925ad0c0d9",
+      "bytes": 85864,
+      "rows": 355,
+      "units": {
+        "TEMP/DEWP/MAX/MIN": "deg F",
+        "WDSP/MXSPD/GUST": "knots",
+        "SLP/STP": "hPa",
+        "VISIB": "miles",
+        "PRCP": "inches"
+      },
+      "coverage": {
+        "first": "2024-01-01",
+        "last": "2024-12-31",
+        "requestedYear": 2024
+      },
+      "location": {
+        "stationID": "41217099999",
+        "name": "ABU DHABI INTERNATIONAL, AE",
+        "latitude": 24.432972,
+        "longitude": 54.651138,
+        "metadata": {
+          "USAF": "412170",
+          "WBAN": "99999",
+          "STATION NAME": "ABU DHABI INTL / ZAYED INTL",
+          "CTRY": "AE",
+          "STATE": "",
+          "ICAO": "OMAA",
+          "LAT": "+24.433",
+          "LON": "+054.651",
+          "ELEV(M)": "+0026.8",
+          "BEGIN": "19830102",
+          "END": "20250824"
+        }
+      },
+      "notes": {
+        "missingByField": {
+          "TEMP": 0,
+          "DEWP": 0,
+          "SLP": 2,
+          "STP": 0,
+          "VISIB": 0,
+          "WDSP": 0,
+          "MXSPD": 0,
+          "GUST": 337,
+          "MAX": 0,
+          "MIN": 0,
+          "PRCP": 6,
+          "SNDP": 355
+        },
+        "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+        "missingCalendarDaysWithinCoverage": 11
+      }
+    },
+    {
+      "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2025/41217099999.csv",
+      "retrievedUTC": "2026-11-03T03:28:58+00:00",
+      "status": "ok",
+      "relativePath": "raw/noaa_gsod/abu_dhabi_international_2025.csv",
+      "sha256": "e6653e95154ad712bac79cc60cbab1a05a38c8ebb6964443e1de81735d77a415",
+      "bytes": 61122,
+      "rows": 233,
+      "units": {
+        "TEMP/DEWP/MAX/MIN": "deg F",
+        "WDSP/MXSPD/GUST": "knots",
+        "SLP/STP": "hPa",
+        "VISIB": "miles",
+        "PRCP": "inches"
+      },
+      "coverage": {
+        "first": "2025-01-01",
+        "last": "2025-08-24",
+        "requestedYear": 2025
+      },
+      "location": {
+        "stationID": "41217099999",
+        "name": "ABU DHABI INTERNATIONAL ZAYED INTERNATIONAL, AE",
+        "latitude": 24.432972,
+        "longitude": 54.651138,
+        "metadata": {
+          "USAF": "412170",
+          "WBAN": "99999",
+          "STATION NAME": "ABU DHABI INTL / ZAYED INTL",
+          "CTRY": "AE",
+          "STATE": "",
+          "ICAO": "OMAA",
+          "LAT": "+24.433",
+          "LON": "+054.651",
+          "ELEV(M)": "+0026.8",
+          "BEGIN": "19830102",
+          "END": "20250824"
+        }
+      },
+      "notes": {
+        "missingByField": {
+          "TEMP": 0,
+          "DEWP": 0,
+          "SLP": 0,
+          "STP": 0,
+          "VISIB": 0,
+          "WDSP": 0,
+          "MXSPD": 0,
+          "GUST": 212,
+          "MAX": 0,
+          "MIN": 0,
+          "PRCP": 1,
+          "SNDP": 233
+        },
+        "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+        "missingCalendarDaysWithinCoverage": 3
+      }
+    },
+    {
+      "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2020/41216099999.csv",
+      "retrievedUTC": "2026-11-03T03:28:59+00:00",
+      "status": "ok",
+      "relativePath": "raw/noaa_gsod/al_bateen_2020.csv",
+      "sha256": "eeda96844b5ec04c8b6bb80d927d34a642c08cec3cee882b51fa1cbc4b3de8f7",
+      "bytes": 81704,
+      "rows": 365,
+      "units": {
+        "TEMP/DEWP/MAX/MIN": "deg F",
+        "WDSP/MXSPD/GUST": "knots",
+        "SLP/STP": "hPa",
+        "VISIB": "miles",
+        "PRCP": "inches"
+      },
+      "coverage": {
+        "first": "2020-01-01",
+        "last": "2020-12-31",
+        "requestedYear": 2020
+      },
+      "location": {
+        "stationID": "41216099999",
+        "name": "BATEEN, AE",
+        "latitude": 24.428333,
+        "longitude": 54.458084,
+        "metadata": {
+          "USAF": "412160",
+          "WBAN": "99999",
+          "STATION NAME": "AL BATEEN EXECUTIVE",
+          "CTRY": "AE",
+          "STATE": "",
+          "ICAO": "OMAD",
+          "LAT": "+24.428",
+          "LON": "+054.458",
+          "ELEV(M)": "+0004.9",
+          "BEGIN": "19830101",
+          "END": "20250824"
+        }
+      },
+      "notes": {
+        "missingByField": {
+          "TEMP": 0,
+          "DEWP": 0,
+          "SLP": 3,
+          "STP": 0,
+          "VISIB": 0,
+          "WDSP": 0,
+          "MXSPD": 0,
+          "GUST": 347,
+          "MAX": 0,
+          "MIN": 0,
+          "PRCP": 9,
+          "SNDP": 365
+        },
+        "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+        "missingCalendarDaysWithinCoverage": 1
+      }
+    },
+    {
+      "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2021/41216099999.csv",
+      "retrievedUTC": "2026-11-03T03:29:00+00:00",
+      "status": "ok",
+      "relativePath": "raw/noaa_gsod/al_bateen_2021.csv",
+      "sha256": "3c0a6f17901caa6ba0edd2ec4f21d3e2317a4e52f3387d649acb049dc2f77724",
+      "bytes": 81035,
+      "rows": 362,
+      "units": {
+        "TEMP/DEWP/MAX/MIN": "deg F",
+        "WDSP/MXSPD/GUST": "knots",
+        "SLP/STP": "hPa",
+        "VISIB": "miles",
+        "PRCP": "inches"
+      },
+      "coverage": {
+        "first": "2021-01-01",
+        "last": "2021-12-31",
+        "requestedYear": 2021
+      },
+      "location": {
+        "stationID": "41216099999",
+        "name": "BATEEN, AE",
+        "latitude": 24.428333,
+        "longitude": 54.458084,
+        "metadata": {
+          "USAF": "412160",
+          "WBAN": "99999",
+          "STATION NAME": "AL BATEEN EXECUTIVE",
+          "CTRY": "AE",
+          "STATE": "",
+          "ICAO": "OMAD",
+          "LAT": "+24.428",
+          "LON": "+054.458",
+          "ELEV(M)": "+0004.9",
+          "BEGIN": "19830101",
+          "END": "20250824"
+        }
+      },
+      "notes": {
+        "missingByField": {
+          "TEMP": 0,
+          "DEWP": 0,
+          "SLP": 133,
+          "STP": 0,
+          "VISIB": 0,
+          "WDSP": 0,
+          "MXSPD": 0,
+          "GUST": 357,
+          "MAX": 0,
+          "MIN": 0,
+          "PRCP": 2,
+          "SNDP": 362
+        },
+        "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+        "missingCalendarDaysWithinCoverage": 3
+      }
+    },
+    {
+      "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2022/41216099999.csv",
+      "retrievedUTC": "2026-11-03T03:29:02+00:00",
+      "status": "ok",
+      "relativePath": "raw/noaa_gsod/al_bateen_2022.csv",
+      "sha256": "ed6925cf3778d19d8ae7b0feb8497dc268d01018a908abeca6569b18c3e9a348",
+      "bytes": 81704,
+      "rows": 365,
+      "units": {
+        "TEMP/DEWP/MAX/MIN": "deg F",
+        "WDSP/MXSPD/GUST": "knots",
+        "SLP/STP": "hPa",
+        "VISIB": "miles",
+        "PRCP": "inches"
+      },
+      "coverage": {
+        "first": "2022-01-01",
+        "last": "2022-12-31",
+        "requestedYear": 2022
+      },
+      "location": {
+        "stationID": "41216099999",
+        "name": "BATEEN, AE",
+        "latitude": 24.428333,
+        "longitude": 54.458084,
+        "metadata": {
+          "USAF": "412160",
+          "WBAN": "99999",
+          "STATION NAME": "AL BATEEN EXECUTIVE",
+          "CTRY": "AE",
+          "STATE": "",
+          "ICAO": "OMAD",
+          "LAT": "+24.428",
+          "LON": "+054.458",
+          "ELEV(M)": "+0004.9",
+          "BEGIN": "19830101",
+          "END": "20250824"
+        }
+      },
+      "notes": {
+        "missingByField": {
+          "TEMP": 0,
+          "DEWP": 0,
+          "SLP": 178,
+          "STP": 0,
+          "VISIB": 0,
+          "WDSP": 0,
+          "MXSPD": 0,
+          "GUST": 354,
+          "MAX": 0,
+          "MIN": 0,
+          "PRCP": 10,
+          "SNDP": 365
+        },
+        "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+        "missingCalendarDaysWithinCoverage": 0
+      }
+    },
+    {
+      "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2023/41216099999.csv",
+      "retrievedUTC": "2026-11-03T03:29:03+00:00",
+      "status": "ok",
+      "relativePath": "raw/noaa_gsod/al_bateen_2023.csv",
+      "sha256": "14344863493e350fa645c8e9f13a1c9e62dabe070e6622c85274e81cc95eae66",
+      "bytes": 81704,
+      "rows": 365,
+      "units": {
+        "TEMP/DEWP/MAX/MIN": "deg F",
+        "WDSP/MXSPD/GUST": "knots",
+        "SLP/STP": "hPa",
+        "VISIB": "miles",
+        "PRCP": "inches"
+      },
+      "coverage": {
+        "first": "2023-01-01",
+        "last": "2023-12-31",
+        "requestedYear": 2023
+      },
+      "location": {
+        "stationID": "41216099999",
+        "name": "BATEEN, AE",
+        "latitude": 24.428333,
+        "longitude": 54.458084,
+        "metadata": {
+          "USAF": "412160",
+          "WBAN": "99999",
+          "STATION NAME": "AL BATEEN EXECUTIVE",
+          "CTRY": "AE",
+          "STATE": "",
+          "ICAO": "OMAD",
+          "LAT": "+24.428",
+          "LON": "+054.458",
+          "ELEV(M)": "+0004.9",
+          "BEGIN": "19830101",
+          "END": "20250824"
+        }
+      },
+      "notes": {
+        "missingByField": {
+          "TEMP": 0,
+          "DEWP": 0,
+          "SLP": 2,
+          "STP": 0,
+          "VISIB": 0,
+          "WDSP": 0,
+          "MXSPD": 1,
+          "GUST": 356,
+          "MAX": 0,
+          "MIN": 0,
+          "PRCP": 4,
+          "SNDP": 365
+        },
+        "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+        "missingCalendarDaysWithinCoverage": 0
+      }
+    },
+    {
+      "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2024/41216099999.csv",
+      "retrievedUTC": "2026-11-03T03:29:04+00:00",
+      "status": "ok",
+      "relativePath": "raw/noaa_gsod/al_bateen_2024.csv",
+      "sha256": "7a70af8516e42057bdd89a90c7d3db79c0a1ae4c42b0da2e3fc416155425cbfc",
+      "bytes": 79474,
+      "rows": 355,
+      "units": {
+        "TEMP/DEWP/MAX/MIN": "deg F",
+        "WDSP/MXSPD/GUST": "knots",
+        "SLP/STP": "hPa",
+        "VISIB": "miles",
+        "PRCP": "inches"
+      },
+      "coverage": {
+        "first": "2024-01-01",
+        "last": "2024-12-31",
+        "requestedYear": 2024
+      },
+      "location": {
+        "stationID": "41216099999",
+        "name": "BATEEN, AE",
+        "latitude": 24.428333,
+        "longitude": 54.458084,
+        "metadata": {
+          "USAF": "412160",
+          "WBAN": "99999",
+          "STATION NAME": "AL BATEEN EXECUTIVE",
+          "CTRY": "AE",
+          "STATE": "",
+          "ICAO": "OMAD",
+          "LAT": "+24.428",
+          "LON": "+054.458",
+          "ELEV(M)": "+0004.9",
+          "BEGIN": "19830101",
+          "END": "20250824"
+        }
+      },
+      "notes": {
+        "missingByField": {
+          "TEMP": 0,
+          "DEWP": 0,
+          "SLP": 3,
+          "STP": 0,
+          "VISIB": 0,
+          "WDSP": 0,
+          "MXSPD": 0,
+          "GUST": 345,
+          "MAX": 0,
+          "MIN": 0,
+          "PRCP": 7,
+          "SNDP": 355
+        },
+        "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+        "missingCalendarDaysWithinCoverage": 11
+      }
+    },
+    {
+      "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2025/41216099999.csv",
+      "retrievedUTC": "2026-11-03T03:29:05+00:00",
+      "status": "ok",
+      "relativePath": "raw/noaa_gsod/al_bateen_2025.csv",
+      "sha256": "dbf8f4bfbb52e7256dabef7d376042061a27533db7b0f775428a82f42f2a7db6",
+      "bytes": 55533,
+      "rows": 234,
+      "units": {
+        "TEMP/DEWP/MAX/MIN": "deg F",
+        "WDSP/MXSPD/GUST": "knots",
+        "SLP/STP": "hPa",
+        "VISIB": "miles",
+        "PRCP": "inches"
+      },
+      "coverage": {
+        "first": "2025-01-01",
+        "last": "2025-08-24",
+        "requestedYear": 2025
+      },
+      "location": {
+        "stationID": "41216099999",
+        "name": "AL BATEEN EXECUTIVE, AE",
+        "latitude": 24.428333,
+        "longitude": 54.458084,
+        "metadata": {
+          "USAF": "412160",
+          "WBAN": "99999",
+          "STATION NAME": "AL BATEEN EXECUTIVE",
+          "CTRY": "AE",
+          "STATE": "",
+          "ICAO": "OMAD",
+          "LAT": "+24.428",
+          "LON": "+054.458",
+          "ELEV(M)": "+0004.9",
+          "BEGIN": "19830101",
+          "END": "20250824"
+        }
+      },
+      "notes": {
+        "missingByField": {
+          "TEMP": 0,
+          "DEWP": 0,
+          "SLP": 117,
+          "STP": 0,
+          "VISIB": 0,
+          "WDSP": 0,
+          "MXSPD": 0,
+          "GUST": 226,
+          "MAX": 0,
+          "MIN": 0,
+          "PRCP": 2,
+          "SNDP": 234
+        },
+        "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+        "missingCalendarDaysWithinCoverage": 2
+      }
+    },
+    {
+      "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2020/41218099999.csv",
+      "retrievedUTC": "2026-11-03T03:29:07+00:00",
+      "status": "ok",
+      "relativePath": "raw/noaa_gsod/al_ain_2020.csv",
+      "sha256": "b48098dd06762b796cd042d04bf7aa8b70ecf8a35d1262596ecf8a10c57a05a5",
+      "bytes": 87066,
+      "rows": 363,
+      "units": {
+        "TEMP/DEWP/MAX/MIN": "deg F",
+        "WDSP/MXSPD/GUST": "knots",
+        "SLP/STP": "hPa",
+        "VISIB": "miles",
+        "PRCP": "inches"
+      },
+      "coverage": {
+        "first": "2020-01-01",
+        "last": "2020-12-31",
+        "requestedYear": 2020
+      },
+      "location": {
+        "stationID": "41218099999",
+        "name": "AL AIN INTERNATIONAL, AE",
+        "latitude": 24.261667,
+        "longitude": 55.609167,
+        "metadata": {
+          "USAF": "412180",
+          "WBAN": "99999",
+          "STATION NAME": "AL AIN INTL",
+          "CTRY": "AE",
+          "STATE": "",
+          "ICAO": "OMAL",
+          "LAT": "+24.262",
+          "LON": "+055.609",
+          "ELEV(M)": "+0264.9",
+          "BEGIN": "19940308",
+          "END": "20250824"
+        }
+      },
+      "notes": {
+        "missingByField": {
+          "TEMP": 0,
+          "DEWP": 0,
+          "SLP": 3,
+          "STP": 0,
+          "VISIB": 0,
+          "WDSP": 0,
+          "MXSPD": 0,
+          "GUST": 323,
+          "MAX": 0,
+          "MIN": 0,
+          "PRCP": 17,
+          "SNDP": 363
+        },
+        "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+        "missingCalendarDaysWithinCoverage": 3
+      }
+    },
+    {
+      "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2021/41218099999.csv",
+      "retrievedUTC": "2026-11-03T03:29:08+00:00",
+      "status": "ok",
+      "relativePath": "raw/noaa_gsod/al_ain_2021.csv",
+      "sha256": "ca262fc5d4d36db48ac9778750f50baae696acb8cd11b0f83be051a08bb6a860",
+      "bytes": 86827,
+      "rows": 362,
+      "units": {
+        "TEMP/DEWP/MAX/MIN": "deg F",
+        "WDSP/MXSPD/GUST": "knots",
+        "SLP/STP": "hPa",
+        "VISIB": "miles",
+        "PRCP": "inches"
+      },
+      "coverage": {
+        "first": "2021-01-01",
+        "last": "2021-12-31",
+        "requestedYear": 2021
+      },
+      "location": {
+        "stationID": "41218099999",
+        "name": "AL AIN INTERNATIONAL, AE",
+        "latitude": 24.261667,
+        "longitude": 55.609167,
+        "metadata": {
+          "USAF": "412180",
+          "WBAN": "99999",
+          "STATION NAME": "AL AIN INTL",
+          "CTRY": "AE",
+          "STATE": "",
+          "ICAO": "OMAL",
+          "LAT": "+24.262",
+          "LON": "+055.609",
+          "ELEV(M)": "+0264.9",
+          "BEGIN": "19940308",
+          "END": "20250824"
+        }
+      },
+      "notes": {
+        "missingByField": {
+          "TEMP": 0,
+          "DEWP": 0,
+          "SLP": 132,
+          "STP": 0,
+          "VISIB": 0,
+          "WDSP": 0,
+          "MXSPD": 0,
+          "GUST": 332,
+          "MAX": 0,
+          "MIN": 0,
+          "PRCP": 7,
+          "SNDP": 362
+        },
+        "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+        "missingCalendarDaysWithinCoverage": 3
+      }
+    },
+    {
+      "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2022/41218099999.csv",
+      "retrievedUTC": "2026-11-03T03:29:09+00:00",
+      "status": "ok",
+      "relativePath": "raw/noaa_gsod/al_ain_2022.csv",
+      "sha256": "62dee1b4aa9629c130bf6190e99f58de395d0b5b54ff696d5d4029f7de444b5e",
+      "bytes": 87066,
+      "rows": 363,
+      "units": {
+        "TEMP/DEWP/MAX/MIN": "deg F",
+        "WDSP/MXSPD/GUST": "knots",
+        "SLP/STP": "hPa",
+        "VISIB": "miles",
+        "PRCP": "inches"
+      },
+      "coverage": {
+        "first": "2022-01-01",
+        "last": "2022-12-31",
+        "requestedYear": 2022
+      },
+      "location": {
+        "stationID": "41218099999",
+        "name": "AL AIN INTERNATIONAL, AE",
+        "latitude": 24.261667,
+        "longitude": 55.609167,
+        "metadata": {
+          "USAF": "412180",
+          "WBAN": "99999",
+          "STATION NAME": "AL AIN INTL",
+          "CTRY": "AE",
+          "STATE": "",
+          "ICAO": "OMAL",
+          "LAT": "+24.262",
+          "LON": "+055.609",
+          "ELEV(M)": "+0264.9",
+          "BEGIN": "19940308",
+          "END": "20250824"
+        }
+      },
+      "notes": {
+        "missingByField": {
+          "TEMP": 0,
+          "DEWP": 0,
+          "SLP": 176,
+          "STP": 0,
+          "VISIB": 0,
+          "WDSP": 0,
+          "MXSPD": 0,
+          "GUST": 339,
+          "MAX": 0,
+          "MIN": 0,
+          "PRCP": 14,
+          "SNDP": 363
+        },
+        "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+        "missingCalendarDaysWithinCoverage": 2
+      }
+    },
+    {
+      "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2023/41218099999.csv",
+      "retrievedUTC": "2026-11-03T03:29:11+00:00",
+      "status": "ok",
+      "relativePath": "raw/noaa_gsod/al_ain_2023.csv",
+      "sha256": "36da8f9f71da2dd2a45ded8697bd45523c8ac45b33f72d65fdaad8395d9a7cf8",
+      "bytes": 87544,
+      "rows": 365,
+      "units": {
+        "TEMP/DEWP/MAX/MIN": "deg F",
+        "WDSP/MXSPD/GUST": "knots",
+        "SLP/STP": "hPa",
+        "VISIB": "miles",
+        "PRCP": "inches"
+      },
+      "coverage": {
+        "first": "2023-01-01",
+        "last": "2023-12-31",
+        "requestedYear": 2023
+      },
+      "location": {
+        "stationID": "41218099999",
+        "name": "AL AIN INTERNATIONAL, AE",
+        "latitude": 24.261667,
+        "longitude": 55.609167,
+        "metadata": {
+          "USAF": "412180",
+          "WBAN": "99999",
+          "STATION NAME": "AL AIN INTL",
+          "CTRY": "AE",
+          "STATE": "",
+          "ICAO": "OMAL",
+          "LAT": "+24.262",
+          "LON": "+055.609",
+          "ELEV(M)": "+0264.9",
+          "BEGIN": "19940308",
+          "END": "20250824"
+        }
+      },
+      "notes": {
+        "missingByField": {
+          "TEMP": 0,
+          "DEWP": 0,
+          "SLP": 1,
+          "STP": 0,
+          "VISIB": 0,
+          "WDSP": 0,
+          "MXSPD": 0,
+          "GUST": 336,
+          "MAX": 0,
+          "MIN": 0,
+          "PRCP": 5,
+          "SNDP": 365
+        },
+        "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+        "missingCalendarDaysWithinCoverage": 0
+      }
+    },
+    {
+      "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2024/41218099999.csv",
+      "retrievedUTC": "2026-11-03T03:29:12+00:00",
+      "status": "ok",
+      "relativePath": "raw/noaa_gsod/al_ain_2024.csv",
+      "sha256": "ca991116b8a87898b19df0e108bdc1867599bea00ddce0f4139251214d9033a7",
+      "bytes": 85154,
+      "rows": 355,
+      "units": {
+        "TEMP/DEWP/MAX/MIN": "deg F",
+        "WDSP/MXSPD/GUST": "knots",
+        "SLP/STP": "hPa",
+        "VISIB": "miles",
+        "PRCP": "inches"
+      },
+      "coverage": {
+        "first": "2024-01-01",
+        "last": "2024-12-31",
+        "requestedYear": 2024
+      },
+      "location": {
+        "stationID": "41218099999",
+        "name": "AL AIN INTERNATIONAL, AE",
+        "latitude": 24.261667,
+        "longitude": 55.609167,
+        "metadata": {
+          "USAF": "412180",
+          "WBAN": "99999",
+          "STATION NAME": "AL AIN INTL",
+          "CTRY": "AE",
+          "STATE": "",
+          "ICAO": "OMAL",
+          "LAT": "+24.262",
+          "LON": "+055.609",
+          "ELEV(M)": "+0264.9",
+          "BEGIN": "19940308",
+          "END": "20250824"
+        }
+      },
+      "notes": {
+        "missingByField": {
+          "TEMP": 0,
+          "DEWP": 0,
+          "SLP": 2,
+          "STP": 0,
+          "VISIB": 0,
+          "WDSP": 0,
+          "MXSPD": 0,
+          "GUST": 329,
+          "MAX": 0,
+          "MIN": 0,
+          "PRCP": 6,
+          "SNDP": 355
+        },
+        "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+        "missingCalendarDaysWithinCoverage": 11
+      }
+    },
+    {
+      "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2025/41218099999.csv",
+      "retrievedUTC": "2026-11-03T03:29:13+00:00",
+      "status": "ok",
+      "relativePath": "raw/noaa_gsod/al_ain_2025.csv",
+      "sha256": "e9bad1f1ebcd602bac9f96000c3b40ef8c4abb51d15898e482a3b1420e1279f4",
+      "bytes": 54801,
+      "rows": 228,
+      "units": {
+        "TEMP/DEWP/MAX/MIN": "deg F",
+        "WDSP/MXSPD/GUST": "knots",
+        "SLP/STP": "hPa",
+        "VISIB": "miles",
+        "PRCP": "inches"
+      },
+      "coverage": {
+        "first": "2025-01-01",
+        "last": "2025-08-24",
+        "requestedYear": 2025
+      },
+      "location": {
+        "stationID": "41218099999",
+        "name": "AL AIN INTERNATIONAL, AE",
+        "latitude": 24.261667,
+        "longitude": 55.609167,
+        "metadata": {
+          "USAF": "412180",
+          "WBAN": "99999",
+          "STATION NAME": "AL AIN INTL",
+          "CTRY": "AE",
+          "STATE": "",
+          "ICAO": "OMAL",
+          "LAT": "+24.262",
+          "LON": "+055.609",
+          "ELEV(M)": "+0264.9",
+          "BEGIN": "19940308",
+          "END": "20250824"
+        }
+      },
+      "notes": {
+        "missingByField": {
+          "TEMP": 0,
+          "DEWP": 0,
+          "SLP": 0,
+          "STP": 0,
+          "VISIB": 0,
+          "WDSP": 0,
+          "MXSPD": 0,
+          "GUST": 215,
+          "MAX": 0,
+          "MIN": 0,
+          "PRCP": 1,
+          "SNDP": 228
+        },
+        "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+        "missingCalendarDaysWithinCoverage": 8
+      }
+    },
+    {
+      "sourceURL": "https://power.larc.nasa.gov/api/temporal/hourly/point?parameters=T2M%2CRH2M%2CWS10M%2CALLSKY_SFC_SW_DWN%2CPS&community=RE&longitude=54.5&latitude=24.35&start=20250801&end=20250801&format=JSON&time-standard=UTC",
+      "retrievedUTC": "2026-11-03T03:29:14+00:00",
+      "status": "ok",
+      "relativePath": "raw/nasa_power/mussafah_hourly_20250801_20250801.json",
+      "sha256": "e87596fdbb2edb8c4f94e5be59274e934d1a645a8bf717552f20923aade9fe97",
+      "bytes": 3030,
+      "rows": 24,
+      "units": {
+        "T2M": "C",
+        "RH2M": "%",
+        "WS10M": "m/s",
+        "ALLSKY_SFC_SW_DWN": "Wh/m^2",
+        "PS": "kPa"
+      },
+      "coverage": {
+        "first": "20250801",
+        "last": "20250801",
+        "temporal": "hourly",
+        "timeStandard": "UTC"
+      },
+      "location": {
+        "requestedLatitude": 24.35,
+        "requestedLongitude": 54.5,
+        "returnedCoordinates": [
+          54.5,
+          24.35,
+          8.25
+        ]
+      },
+      "notes": {
+        "missingByParameter": {
+          "T2M": 0,
+          "RH2M": 0,
+          "WS10M": 0,
+          "ALLSKY_SFC_SW_DWN": 0,
+          "PS": 0
+        },
+        "fillValue": -999.0,
+        "sources": [
+          "SYN1DEG",
+          "MERRA2",
+          "POWER"
+        ],
+        "apiVersion": "v2.10.3"
+      }
+    },
+    {
+      "sourceURL": "https://power.larc.nasa.gov/api/temporal/hourly/point?parameters=T2M%2CRH2M%2CWS10M%2CALLSKY_SFC_SW_DWN%2CPS&community=RE&longitude=54.5&latitude=24.35&start=20250801&end=20250801&format=JSON&time-standard=UTC",
+      "retrievedUTC": "2026-11-03T03:29:14+00:00",
+      "status": "ok",
+      "relativePath": "raw/nasa_power/mussafah_hourly_20250801_20250801.csv",
+      "sha256": "566afafd258b3d175464396798c85b49943bc549998384eaf90de844bd2de960",
+      "bytes": 1296,
+      "rows": 24,
+      "units": {
+        "T2M": "C",
+        "RH2M": "%",
+        "WS10M": "m/s",
+        "ALLSKY_SFC_SW_DWN": "Wh/m^2",
+        "PS": "kPa"
+      },
+      "coverage": {
+        "first": "20250801",
+        "last": "20250801",
+        "temporal": "hourly",
+        "timeStandard": "UTC"
+      },
+      "location": {
+        "requestedLatitude": 24.35,
+        "requestedLongitude": 54.5,
+        "returnedCoordinates": [
+          54.5,
+          24.35,
+          8.25
+        ]
+      },
+      "notes": {
+        "missingByParameter": {
+          "T2M": 0,
+          "RH2M": 0,
+          "WS10M": 0,
+          "ALLSKY_SFC_SW_DWN": 0,
+          "PS": 0
+        },
+        "fillValue": -999.0,
+        "sources": [
+          "SYN1DEG",
+          "MERRA2",
+          "POWER"
+        ],
+        "apiVersion": "v2.10.3",
+        "derivedFrom": "raw/nasa_power/mussafah_hourly_20250801_20250801.json",
+        "missingValues": "blank CSV cells"
+      }
+    },
+    {
+      "sourceURL": "https://power.larc.nasa.gov/api/temporal/hourly/point?parameters=T2M%2CRH2M%2CWS10M%2CALLSKY_SFC_SW_DWN%2CPS&community=RE&longitude=54.5&latitude=24.35&start=20240804&end=20240804&format=JSON&time-standard=UTC",
+      "retrievedUTC": "2026-11-03T03:29:15+00:00",
+      "status": "ok",
+      "relativePath": "raw/nasa_power/mussafah_hourly_20240804_20240804.json",
+      "sha256": "c84bf2e86da2e7a14f0b37cd326e7708cf09dcd2fbf4f4594aeec08e7a45313e",
+      "bytes": 3037,
+      "rows": 24,
+      "units": {
+        "T2M": "C",
+        "RH2M": "%",
+        "WS10M": "m/s",
+        "ALLSKY_SFC_SW_DWN": "Wh/m^2",
+        "PS": "kPa"
+      },
+      "coverage": {
+        "first": "20240804",
+        "last": "20240804",
+        "temporal": "hourly",
+        "timeStandard": "UTC"
+      },
+      "location": {
+        "requestedLatitude": 24.35,
+        "requestedLongitude": 54.5,
+        "returnedCoordinates": [
+          54.5,
+          24.35,
+          8.25
+        ]
+      },
+      "notes": {
+        "missingByParameter": {
+          "T2M": 0,
+          "RH2M": 0,
+          "WS10M": 0,
+          "ALLSKY_SFC_SW_DWN": 0,
+          "PS": 0
+        },
+        "fillValue": -999.0,
+        "sources": [
+          "SYN1DEG",
+          "MERRA2",
+          "POWER"
+        ],
+        "apiVersion": "v2.10.3"
+      }
+    },
+    {
+      "sourceURL": "https://power.larc.nasa.gov/api/temporal/hourly/point?parameters=T2M%2CRH2M%2CWS10M%2CALLSKY_SFC_SW_DWN%2CPS&community=RE&longitude=54.5&latitude=24.35&start=20240804&end=20240804&format=JSON&time-standard=UTC",
+      "retrievedUTC": "2026-11-03T03:29:15+00:00",
+      "status": "ok",
+      "relativePath": "raw/nasa_power/mussafah_hourly_20240804_20240804.csv",
+      "sha256": "a36f9c9a69050e652ef8aee69556ced21d56326f9f84c1c32ff22210e9c28fd7",
+      "bytes": 1303,
+      "rows": 24,
+      "units": {
+        "T2M": "C",
+        "RH2M": "%",
+        "WS10M": "m/s",
+        "ALLSKY_SFC_SW_DWN": "Wh/m^2",
+        "PS": "kPa"
+      },
+      "coverage": {
+        "first": "20240804",
+        "last": "20240804",
+        "temporal": "hourly",
+        "timeStandard": "UTC"
+      },
+      "location": {
+        "requestedLatitude": 24.35,
+        "requestedLongitude": 54.5,
+        "returnedCoordinates": [
+          54.5,
+          24.35,
+          8.25
+        ]
+      },
+      "notes": {
+        "missingByParameter": {
+          "T2M": 0,
+          "RH2M": 0,
+          "WS10M": 0,
+          "ALLSKY_SFC_SW_DWN": 0,
+          "PS": 0
+        },
+        "fillValue": -999.0,
+        "sources": [
+          "SYN1DEG",
+          "MERRA2",
+          "POWER"
+        ],
+        "apiVersion": "v2.10.3",
+        "derivedFrom": "raw/nasa_power/mussafah_hourly_20240804_20240804.json",
+        "missingValues": "blank CSV cells"
+      }
+    },
+    {
+      "sourceURL": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M%2CRH2M%2CWS10M%2CALLSKY_SFC_SW_DWN%2CPS&community=RE&longitude=54.5&latitude=24.35&start=20230601&end=20230930&format=JSON&time-standard=UTC",
+      "retrievedUTC": "2026-11-03T03:29:16+00:00",
+      "status": "ok",
+      "relativePath": "raw/nasa_power/mussafah_daily_20230601_20230930.json",
+      "sha256": "0fd7f85548fc25702bd66c75efe00566d637de0b054705ad74e2d1342e544d49",
+      "bytes": 11148,
+      "rows": 122,
+      "units": {
+        "T2M": "C",
+        "RH2M": "%",
+        "WS10M": "m/s",
+        "ALLSKY_SFC_SW_DWN": "kW-hr/m^2/day",
+        "PS": "kPa"
+      },
+      "coverage": {
+        "first": "20230601",
+        "last": "20230930",
+        "temporal": "daily",
+        "timeStandard": "UTC"
+      },
+      "location": {
+        "requestedLatitude": 24.35,
+        "requestedLongitude": 54.5,
+        "returnedCoordinates": [
+          54.5,
+          24.35,
+          8.25
+        ]
+      },
+      "notes": {
+        "missingByParameter": {
+          "T2M": 0,
+          "RH2M": 0,
+          "WS10M": 0,
+          "ALLSKY_SFC_SW_DWN": 0,
+          "PS": 0
+        },
+        "fillValue": -999.0,
+        "sources": [
+          "MERRA2",
+          "SYN1DEG",
+          "POWER"
+        ],
+        "apiVersion": "v2.10.1"
+      }
+    },
+    {
+      "sourceURL": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M%2CRH2M%2CWS10M%2CALLSKY_SFC_SW_DWN%2CPS&community=RE&longitude=54.5&latitude=24.35&start=20230601&end=20230930&format=JSON&time-standard=UTC",
+      "retrievedUTC": "2026-11-03T03:29:16+00:00",
+      "status": "ok",
+      "relativePath": "raw/nasa_power/mussafah_daily_20230601_20230930.csv",
+      "sha256": "355acdc967433664435a1f7793df417c912df17c81d4e87ed2d746f3a42803cf",
+      "bytes": 5142,
+      "rows": 122,
+      "units": {
+        "T2M": "C",
+        "RH2M": "%",
+        "WS10M": "m/s",
+        "ALLSKY_SFC_SW_DWN": "kW-hr/m^2/day",
+        "PS": "kPa"
+      },
+      "coverage": {
+        "first": "20230601",
+        "last": "20230930",
+        "temporal": "daily",
+        "timeStandard": "UTC"
+      },
+      "location": {
+        "requestedLatitude": 24.35,
+        "requestedLongitude": 54.5,
+        "returnedCoordinates": [
+          54.5,
+          24.35,
+          8.25
+        ]
+      },
+      "notes": {
+        "missingByParameter": {
+          "T2M": 0,
+          "RH2M": 0,
+          "WS10M": 0,
+          "ALLSKY_SFC_SW_DWN": 0,
+          "PS": 0
+        },
+        "fillValue": -999.0,
+        "sources": [
+          "MERRA2",
+          "SYN1DEG",
+          "POWER"
+        ],
+        "apiVersion": "v2.10.1",
+        "derivedFrom": "raw/nasa_power/mussafah_daily_20230601_20230930.json",
+        "missingValues": "blank CSV cells"
+      }
+    },
+    {
+      "sourceURL": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M%2CRH2M%2CWS10M%2CALLSKY_SFC_SW_DWN%2CPS&community=RE&longitude=54.5&latitude=24.35&start=20240601&end=20240930&format=JSON&time-standard=UTC",
+      "retrievedUTC": "2026-11-03T03:29:17+00:00",
+      "status": "ok",
+      "relativePath": "raw/nasa_power/mussafah_daily_20240601_20240930.json",
+      "sha256": "683fd1fa2c58153c9872d7002c8c3a89543d66153dd40729de6c62faeb83639f",
+      "bytes": 11160,
+      "rows": 122,
+      "units": {
+        "T2M": "C",
+        "RH2M": "%",
+        "WS10M": "m/s",
+        "ALLSKY_SFC_SW_DWN": "kW-hr/m^2/day",
+        "PS": "kPa"
+      },
+      "coverage": {
+        "first": "20240601",
+        "last": "20240930",
+        "temporal": "daily",
+        "timeStandard": "UTC"
+      },
+      "location": {
+        "requestedLatitude": 24.35,
+        "requestedLongitude": 54.5,
+        "returnedCoordinates": [
+          54.5,
+          24.35,
+          8.25
+        ]
+      },
+      "notes": {
+        "missingByParameter": {
+          "T2M": 0,
+          "RH2M": 0,
+          "WS10M": 0,
+          "ALLSKY_SFC_SW_DWN": 0,
+          "PS": 0
+        },
+        "fillValue": -999.0,
+        "sources": [
+          "MERRA2",
+          "SYN1DEG",
+          "POWER"
+        ],
+        "apiVersion": "v2.10.1"
+      }
+    },
+    {
+      "sourceURL": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M%2CRH2M%2CWS10M%2CALLSKY_SFC_SW_DWN%2CPS&community=RE&longitude=54.5&latitude=24.35&start=20240601&end=20240930&format=JSON&time-standard=UTC",
+      "retrievedUTC": "2026-11-03T03:29:17+00:00",
+      "status": "ok",
+      "relativePath": "raw/nasa_power/mussafah_daily_20240601_20240930.csv",
+      "sha256": "61c2cc2097c5ea23f57159effbd949127975cfdd880566e6ade455a0f8027497",
+      "bytes": 5155,
+      "rows": 122,
+      "units": {
+        "T2M": "C",
+        "RH2M": "%",
+        "WS10M": "m/s",
+        "ALLSKY_SFC_SW_DWN": "kW-hr/m^2/day",
+        "PS": "kPa"
+      },
+      "coverage": {
+        "first": "20240601",
+        "last": "20240930",
+        "temporal": "daily",
+        "timeStandard": "UTC"
+      },
+      "location": {
+        "requestedLatitude": 24.35,
+        "requestedLongitude": 54.5,
+        "returnedCoordinates": [
+          54.5,
+          24.35,
+          8.25
+        ]
+      },
+      "notes": {
+        "missingByParameter": {
+          "T2M": 0,
+          "RH2M": 0,
+          "WS10M": 0,
+          "ALLSKY_SFC_SW_DWN": 0,
+          "PS": 0
+        },
+        "fillValue": -999.0,
+        "sources": [
+          "MERRA2",
+          "SYN1DEG",
+          "POWER"
+        ],
+        "apiVersion": "v2.10.1",
+        "derivedFrom": "raw/nasa_power/mussafah_daily_20240601_20240930.json",
+        "missingValues": "blank CSV cells"
+      }
+    },
+    {
+      "sourceURL": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M%2CRH2M%2CWS10M%2CALLSKY_SFC_SW_DWN%2CPS&community=RE&longitude=54.5&latitude=24.35&start=20250601&end=20250930&format=JSON&time-standard=UTC",
+      "retrievedUTC": "2026-11-03T03:29:17+00:00",
+      "status": "ok",
+      "relativePath": "raw/nasa_power/mussafah_daily_20250601_20250930.json",
+      "sha256": "79b45ce9605296640a345cc1c8b13cd26b50e6425da76fbca030482882859d33",
+      "bytes": 11140,
+      "rows": 122,
+      "units": {
+        "T2M": "C",
+        "RH2M": "%",
+        "WS10M": "m/s",
+        "ALLSKY_SFC_SW_DWN": "kW-hr/m^2/day",
+        "PS": "kPa"
+      },
+      "coverage": {
+        "first": "20250601",
+        "last": "20250930",
+        "temporal": "daily",
+        "timeStandard": "UTC"
+      },
+      "location": {
+        "requestedLatitude": 24.35,
+        "requestedLongitude": 54.5,
+        "returnedCoordinates": [
+          54.5,
+          24.35,
+          8.25
+        ]
+      },
+      "notes": {
+        "missingByParameter": {
+          "T2M": 0,
+          "RH2M": 0,
+          "WS10M": 0,
+          "ALLSKY_SFC_SW_DWN": 0,
+          "PS": 0
+        },
+        "fillValue": -999.0,
+        "sources": [
+          "MERRA2",
+          "SYN1DEG",
+          "POWER"
+        ],
+        "apiVersion": "v2.10.1"
+      }
+    },
+    {
+      "sourceURL": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M%2CRH2M%2CWS10M%2CALLSKY_SFC_SW_DWN%2CPS&community=RE&longitude=54.5&latitude=24.35&start=20250601&end=20250930&format=JSON&time-standard=UTC",
+      "retrievedUTC": "2026-11-03T03:29:17+00:00",
+      "status": "ok",
+      "relativePath": "raw/nasa_power/mussafah_daily_20250601_20250930.csv",
+      "sha256": "e3cd74cf68b558144da4761cb34f1697d1c36aaa7d32d8f52490d6b4d2f07bfb",
+      "bytes": 5134,
+      "rows": 122,
+      "units": {
+        "T2M": "C",
+        "RH2M": "%",
+        "WS10M": "m/s",
+        "ALLSKY_SFC_SW_DWN": "kW-hr/m^2/day",
+        "PS": "kPa"
+      },
+      "coverage": {
+        "first": "20250601",
+        "last": "20250930",
+        "temporal": "daily",
+        "timeStandard": "UTC"
+      },
+      "location": {
+        "requestedLatitude": 24.35,
+        "requestedLongitude": 54.5,
+        "returnedCoordinates": [
+          54.5,
+          24.35,
+          8.25
+        ]
+      },
+      "notes": {
+        "missingByParameter": {
+          "T2M": 0,
+          "RH2M": 0,
+          "WS10M": 0,
+          "ALLSKY_SFC_SW_DWN": 0,
+          "PS": 0
+        },
+        "fillValue": -999.0,
+        "sources": [
+          "MERRA2",
+          "SYN1DEG",
+          "POWER"
+        ],
+        "apiVersion": "v2.10.1",
+        "derivedFrom": "raw/nasa_power/mussafah_daily_20250601_20250930.json",
+        "missingValues": "blank CSV cells"
+      }
+    }
+  ],
+  "failures": [],
+  "sourceDocumentation": [
+    "https://www.ncei.noaa.gov/access/search/datasets/global-summary-of-the-day/",
+    "https://power.larc.nasa.gov/docs/services/api/temporal/",
+    "https://power.larc.nasa.gov/docs/faqs/other/"
+  ]
+}

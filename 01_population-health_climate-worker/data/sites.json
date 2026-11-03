@@ -1,0 +1,22 @@
+{
+  "timezone": "Asia/Dubai",
+  "coordinate_basis": "Representative locality points chosen for this download, not recovered original implementation coordinates or specific work sites. Requested and returned model grid coordinates differ; consult each manifest entry.",
+  "sites": {
+    "abu_dhabi_city": {
+      "latitude": 24.4539,
+      "longitude": 54.3773
+    },
+    "mussafah": {
+      "latitude": 24.35,
+      "longitude": 54.5
+    },
+    "al_ain": {
+      "latitude": 24.2075,
+      "longitude": 55.7447
+    },
+    "ruwais": {
+      "latitude": 24.08,
+      "longitude": 52.73
+    }
+  }
+}

@@ -1,0 +1,4707 @@
+{
+  "schema_version": 1,
+  "verified_at_utc": "2026-11-03T03:34:22.203288+00:00",
+  "scope": "Public Heat-Safe reference inputs. No synthetic workers, medical outcomes or live work-front observations.",
+  "source_manifests": {
+    "weather": {
+      "provider": "Open-Meteo / ERA5 / CAMS",
+      "entries": [
+        {
+          "source_url": "https://archive-api.open-meteo.com/v1/archive?latitude=24.4539&longitude=54.3773&timezone=Asia%2FDubai&hourly=temperature_2m%2Crelative_humidity_2m%2Cdew_point_2m%2Csurface_pressure%2Cwind_speed_10m%2Cshortwave_radiation%2Cdirect_radiation%2Cdiffuse_radiation&start_date=2023-06-01&end_date=2023-09-30&models=era5&wind_speed_unit=ms",
+          "site": "abu_dhabi_city",
+          "requested_coordinates": {
+            "latitude": 24.4539,
+            "longitude": 54.3773
+          },
+          "kind": "era5",
+          "period": "2023",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "downloaded",
+          "files": [
+            {
+              "path": "raw/weather/era5_abu_dhabi_city_2023.json",
+              "bytes": 171280,
+              "sha256": "036b1a220dc11e8a3d4205e0aba5b30650de1d670fdb02a3f9fc53a2d98a4356"
+            },
+            {
+              "path": "raw/weather/era5_abu_dhabi_city_2023.csv",
+              "bytes": 167439,
+              "sha256": "2b73c083af912ee56789e07a7d0082c6cacaab249182e67505ade6b298d0adb8"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:27:42.315229+00:00",
+          "rows": 2928,
+          "null_counts": {
+            "temperature_2m": 0,
+            "relative_humidity_2m": 0,
+            "dew_point_2m": 0,
+            "surface_pressure": 0,
+            "wind_speed_10m": 0,
+            "shortwave_radiation": 0,
+            "direct_radiation": 0,
+            "diffuse_radiation": 0
+          },
+          "units": {
+            "time": "iso8601",
+            "temperature_2m": "\u00b0C",
+            "relative_humidity_2m": "%",
+            "dew_point_2m": "\u00b0C",
+            "surface_pressure": "hPa",
+            "wind_speed_10m": "m/s",
+            "shortwave_radiation": "W/m\u00b2",
+            "direct_radiation": "W/m\u00b2",
+            "diffuse_radiation": "W/m\u00b2"
+          },
+          "coverage_start": "2023-06-01T00:00",
+          "coverage_end": "2023-09-30T23:00",
+          "returned_grid": {
+            "latitude": 24.5,
+            "longitude": 54.5,
+            "elevation": 5.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=24.4539&longitude=54.3773&timezone=Asia%2FDubai&hourly=pm10%2Cpm2_5%2Cdust%2Caerosol_optical_depth%2Cuv_index%2Cus_aqi&start_date=2023-06-01&end_date=2023-09-30&domains=cams_global",
+          "site": "abu_dhabi_city",
+          "requested_coordinates": {
+            "latitude": 24.4539,
+            "longitude": 54.3773
+          },
+          "kind": "cams_archive",
+          "period": "2023",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "downloaded",
+          "files": [
+            {
+              "path": "raw/air_quality/cams_archive_abu_dhabi_city_2023.json",
+              "bytes": 144980,
+              "sha256": "9c8345d963e0f9b2aa0d2a3da31ce1b7b6361316b6b3a1757663f457354ad897"
+            },
+            {
+              "path": "raw/air_quality/cams_archive_abu_dhabi_city_2023.csv",
+              "bytes": 139248,
+              "sha256": "3c37cbe8142effdf05a42444d5d00caba3ae6db6fdf33a361f2cb3baea12ff70"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:27:39.988074+00:00",
+          "rows": 2928,
+          "null_counts": {
+            "pm10": 0,
+            "pm2_5": 0,
+            "dust": 0,
+            "aerosol_optical_depth": 0,
+            "uv_index": 0,
+            "us_aqi": 0
+          },
+          "units": {
+            "time": "iso8601",
+            "pm10": "\u03bcg/m\u00b3",
+            "pm2_5": "\u03bcg/m\u00b3",
+            "dust": "\u03bcg/m\u00b3",
+            "aerosol_optical_depth": "",
+            "uv_index": "",
+            "us_aqi": "USAQI"
+          },
+          "coverage_start": "2023-06-01T00:00",
+          "coverage_end": "2023-09-30T23:00",
+          "returned_grid": {
+            "latitude": 24.5,
+            "longitude": 54.40001,
+            "elevation": 5.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://archive-api.open-meteo.com/v1/archive?latitude=24.4539&longitude=54.3773&timezone=Asia%2FDubai&hourly=temperature_2m%2Crelative_humidity_2m%2Cdew_point_2m%2Csurface_pressure%2Cwind_speed_10m%2Cshortwave_radiation%2Cdirect_radiation%2Cdiffuse_radiation&start_date=2024-06-01&end_date=2024-09-30&models=era5&wind_speed_unit=ms",
+          "site": "abu_dhabi_city",
+          "requested_coordinates": {
+            "latitude": 24.4539,
+            "longitude": 54.3773
+          },
+          "kind": "era5",
+          "period": "2024",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "downloaded",
+          "files": [
+            {
+              "path": "raw/weather/era5_abu_dhabi_city_2024.json",
+              "bytes": 171138,
+              "sha256": "1e39547f1f7111fe2e587c9162a2543189d92bb66e34845a0fc9ab3db960ad7c"
+            },
+            {
+              "path": "raw/weather/era5_abu_dhabi_city_2024.csv",
+              "bytes": 167399,
+              "sha256": "ff3bbd5c6ffa82ffb800d73902f25435e7d62d349c8e61d980ac359ba299c4f0"
+            },
+            {
+              "path": "processed/replay/era5_abu_dhabi_city_2024-08-04.csv",
+              "bytes": 1509,
+              "sha256": "90320e00421884e5200991605b027aea62e9a369a56a913a6ae3c27f81430c32",
+              "rows": 24,
+              "derived_from": "raw/weather/era5_abu_dhabi_city_2024.json",
+              "coverage_date": "2024-08-04"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:27:42.193177+00:00",
+          "rows": 2928,
+          "null_counts": {
+            "temperature_2m": 0,
+            "relative_humidity_2m": 0,
+            "dew_point_2m": 0,
+            "surface_pressure": 0,
+            "wind_speed_10m": 0,
+            "shortwave_radiation": 0,
+            "direct_radiation": 0,
+            "diffuse_radiation": 0
+          },
+          "units": {
+            "time": "iso8601",
+            "temperature_2m": "\u00b0C",
+            "relative_humidity_2m": "%",
+            "dew_point_2m": "\u00b0C",
+            "surface_pressure": "hPa",
+            "wind_speed_10m": "m/s",
+            "shortwave_radiation": "W/m\u00b2",
+            "direct_radiation": "W/m\u00b2",
+            "diffuse_radiation": "W/m\u00b2"
+          },
+          "coverage_start": "2024-06-01T00:00",
+          "coverage_end": "2024-09-30T23:00",
+          "returned_grid": {
+            "latitude": 24.5,
+            "longitude": 54.5,
+            "elevation": 5.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=24.4539&longitude=54.3773&timezone=Asia%2FDubai&hourly=pm10%2Cpm2_5%2Cdust%2Caerosol_optical_depth%2Cuv_index%2Cus_aqi&start_date=2024-06-01&end_date=2024-09-30&domains=cams_global",
+          "site": "abu_dhabi_city",
+          "requested_coordinates": {
+            "latitude": 24.4539,
+            "longitude": 54.3773
+          },
+          "kind": "cams_archive",
+          "period": "2024",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "downloaded",
+          "files": [
+            {
+              "path": "raw/air_quality/cams_archive_abu_dhabi_city_2024.json",
+              "bytes": 145073,
+              "sha256": "33081ab420fb2eaee2b33bdc0a12113f91511ee5e16911b05d92e919d30034ac"
+            },
+            {
+              "path": "raw/air_quality/cams_archive_abu_dhabi_city_2024.csv",
+              "bytes": 139384,
+              "sha256": "a1319b340cfbfe4f96f414b4f1ebdb85df42dec088ba416b521a189d19ba4852"
+            },
+            {
+              "path": "processed/replay/cams_archive_abu_dhabi_city_2024-08-04.csv",
+              "bytes": 1220,
+              "sha256": "f813970d325a54497fcc2e1ab3b9895e4c860d947476a09b9d7c86e593473e59",
+              "rows": 24,
+              "derived_from": "raw/air_quality/cams_archive_abu_dhabi_city_2024.json",
+              "coverage_date": "2024-08-04"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:27:42.318121+00:00",
+          "rows": 2928,
+          "null_counts": {
+            "pm10": 0,
+            "pm2_5": 0,
+            "dust": 0,
+            "aerosol_optical_depth": 0,
+            "uv_index": 0,
+            "us_aqi": 0
+          },
+          "units": {
+            "time": "iso8601",
+            "pm10": "\u03bcg/m\u00b3",
+            "pm2_5": "\u03bcg/m\u00b3",
+            "dust": "\u03bcg/m\u00b3",
+            "aerosol_optical_depth": "",
+            "uv_index": "",
+            "us_aqi": "USAQI"
+          },
+          "coverage_start": "2024-06-01T00:00",
+          "coverage_end": "2024-09-30T23:00",
+          "returned_grid": {
+            "latitude": 24.5,
+            "longitude": 54.40001,
+            "elevation": 5.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://archive-api.open-meteo.com/v1/archive?latitude=24.4539&longitude=54.3773&timezone=Asia%2FDubai&hourly=temperature_2m%2Crelative_humidity_2m%2Cdew_point_2m%2Csurface_pressure%2Cwind_speed_10m%2Cshortwave_radiation%2Cdirect_radiation%2Cdiffuse_radiation&start_date=2025-06-01&end_date=2025-09-30&models=era5&wind_speed_unit=ms",
+          "site": "abu_dhabi_city",
+          "requested_coordinates": {
+            "latitude": 24.4539,
+            "longitude": 54.3773
+          },
+          "kind": "era5",
+          "period": "2025",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "downloaded",
+          "files": [
+            {
+              "path": "raw/weather/era5_abu_dhabi_city_2025.json",
+              "bytes": 171095,
+              "sha256": "09a9648a889d25408bc0a01592825eb9534e81cbf99352d131b51a319fc0d110"
+            },
+            {
+              "path": "raw/weather/era5_abu_dhabi_city_2025.csv",
+              "bytes": 167347,
+              "sha256": "320ca6d626fe482209e8043413f7cee014d6d51c5c033709f11e254aba116160"
+            },
+            {
+              "path": "processed/replay/era5_abu_dhabi_city_2025-08-01.csv",
+              "bytes": 1505,
+              "sha256": "88c92c29ddca803bfd039faaa05e80be5d50d818020e396119d4eaa7288fda3f",
+              "rows": 24,
+              "derived_from": "raw/weather/era5_abu_dhabi_city_2025.json",
+              "coverage_date": "2025-08-01"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:27:45.672238+00:00",
+          "rows": 2928,
+          "null_counts": {
+            "temperature_2m": 0,
+            "relative_humidity_2m": 0,
+            "dew_point_2m": 0,
+            "surface_pressure": 0,
+            "wind_speed_10m": 0,
+            "shortwave_radiation": 0,
+            "direct_radiation": 0,
+            "diffuse_radiation": 0
+          },
+          "units": {
+            "time": "iso8601",
+            "temperature_2m": "\u00b0C",
+            "relative_humidity_2m": "%",
+            "dew_point_2m": "\u00b0C",
+            "surface_pressure": "hPa",
+            "wind_speed_10m": "m/s",
+            "shortwave_radiation": "W/m\u00b2",
+            "direct_radiation": "W/m\u00b2",
+            "diffuse_radiation": "W/m\u00b2"
+          },
+          "coverage_start": "2025-06-01T00:00",
+          "coverage_end": "2025-09-30T23:00",
+          "returned_grid": {
+            "latitude": 24.5,
+            "longitude": 54.5,
+            "elevation": 5.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=24.4539&longitude=54.3773&timezone=Asia%2FDubai&hourly=pm10%2Cpm2_5%2Cdust%2Caerosol_optical_depth%2Cuv_index%2Cus_aqi&start_date=2025-06-01&end_date=2025-09-30&domains=cams_global",
+          "site": "abu_dhabi_city",
+          "requested_coordinates": {
+            "latitude": 24.4539,
+            "longitude": 54.3773
+          },
+          "kind": "cams_archive",
+          "period": "2025",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "downloaded",
+          "files": [
+            {
+              "path": "raw/air_quality/cams_archive_abu_dhabi_city_2025.json",
+              "bytes": 143548,
+              "sha256": "20c10f60111d85652c602b9dafeeb0f3560bd5673cdeedaa1a87353168649732"
+            },
+            {
+              "path": "raw/air_quality/cams_archive_abu_dhabi_city_2025.csv",
+              "bytes": 137806,
+              "sha256": "f063975b0502cdb185b1a79795176f15a8d0f49724f574cf2c3acba420594e38"
+            },
+            {
+              "path": "processed/replay/cams_archive_abu_dhabi_city_2025-08-01.csv",
+              "bytes": 1206,
+              "sha256": "76f94b5a0d7181e5fed346da70f796b8a15d22161326becdb45f3cf9dd7450f0",
+              "rows": 24,
+              "derived_from": "raw/air_quality/cams_archive_abu_dhabi_city_2025.json",
+              "coverage_date": "2025-08-01"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:27:44.493802+00:00",
+          "rows": 2928,
+          "null_counts": {
+            "pm10": 0,
+            "pm2_5": 0,
+            "dust": 0,
+            "aerosol_optical_depth": 0,
+            "uv_index": 0,
+            "us_aqi": 0
+          },
+          "units": {
+            "time": "iso8601",
+            "pm10": "\u03bcg/m\u00b3",
+            "pm2_5": "\u03bcg/m\u00b3",
+            "dust": "\u03bcg/m\u00b3",
+            "aerosol_optical_depth": "",
+            "uv_index": "",
+            "us_aqi": "USAQI"
+          },
+          "coverage_start": "2025-06-01T00:00",
+          "coverage_end": "2025-09-30T23:00",
+          "returned_grid": {
+            "latitude": 24.5,
+            "longitude": 54.40001,
+            "elevation": 5.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://api.open-meteo.com/v1/forecast?latitude=24.4539&longitude=54.3773&timezone=Asia%2FDubai&hourly=temperature_2m%2Crelative_humidity_2m%2Cdew_point_2m%2Csurface_pressure%2Cwind_speed_10m%2Cshortwave_radiation%2Cdirect_radiation%2Cdiffuse_radiation%2Cuv_index&forecast_days=16&wind_speed_unit=ms",
+          "site": "abu_dhabi_city",
+          "requested_coordinates": {
+            "latitude": 24.4539,
+            "longitude": 54.3773
+          },
+          "kind": "forecast",
+          "period": "20261103T032734Z",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "partial",
+          "files": [
+            {
+              "path": "raw/weather/forecast_abu_dhabi_city_20261103T032734Z.json",
+              "bytes": 24981,
+              "sha256": "ed08d62fda5c2d9eacacb35d25c7f1e0c4de43735a33602033b99bbae818ea4d"
+            },
+            {
+              "path": "raw/weather/forecast_abu_dhabi_city_20261103T032734Z.csv",
+              "bytes": 23753,
+              "sha256": "bf6f0404b0b00b778326d806b31befc59b71e9fff701fb60fb061d524897113a"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:27:43.999902+00:00",
+          "rows": 384,
+          "null_counts": {
+            "temperature_2m": 1,
+            "relative_humidity_2m": 1,
+            "dew_point_2m": 1,
+            "surface_pressure": 1,
+            "wind_speed_10m": 1,
+            "shortwave_radiation": 1,
+            "direct_radiation": 1,
+            "diffuse_radiation": 1,
+            "uv_index": 1
+          },
+          "units": {
+            "time": "iso8601",
+            "temperature_2m": "\u00b0C",
+            "relative_humidity_2m": "%",
+            "dew_point_2m": "\u00b0C",
+            "surface_pressure": "hPa",
+            "wind_speed_10m": "m/s",
+            "shortwave_radiation": "W/m\u00b2",
+            "direct_radiation": "W/m\u00b2",
+            "diffuse_radiation": "W/m\u00b2",
+            "uv_index": ""
+          },
+          "coverage_start": "2026-11-03T00:00",
+          "coverage_end": "2026-11-18T23:00",
+          "returned_grid": {
+            "latitude": 24.428822,
+            "longitude": 54.364998,
+            "elevation": 5.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=24.4539&longitude=54.3773&timezone=Asia%2FDubai&hourly=pm10%2Cpm2_5%2Cdust%2Caerosol_optical_depth%2Cuv_index%2Cus_aqi&forecast_days=5&domains=cams_global",
+          "site": "abu_dhabi_city",
+          "requested_coordinates": {
+            "latitude": 24.4539,
+            "longitude": 54.3773
+          },
+          "kind": "cams_forecast",
+          "period": "20261103T032734Z",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "partial",
+          "files": [
+            {
+              "path": "raw/air_quality/cams_forecast_abu_dhabi_city_20261103T032734Z.json",
+              "bytes": 6188,
+              "sha256": "18abadf85ccea1a10ac2e65bc1b8729b40ebe072e4f5e06d82b30c0f7a6daeda"
+            },
+            {
+              "path": "raw/air_quality/cams_forecast_abu_dhabi_city_20261103T032734Z.csv",
+              "bytes": 5451,
+              "sha256": "f82cf5e426c8abe43bb2a3b7fcfd415f234fc3812fbe75fb8ae395afe5b0787b"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:27:45.230974+00:00",
+          "rows": 120,
+          "null_counts": {
+            "pm10": 7,
+            "pm2_5": 7,
+            "dust": 7,
+            "aerosol_optical_depth": 7,
+            "uv_index": 7,
+            "us_aqi": 6
+          },
+          "units": {
+            "time": "iso8601",
+            "pm10": "\u03bcg/m\u00b3",
+            "pm2_5": "\u03bcg/m\u00b3",
+            "dust": "\u03bcg/m\u00b3",
+            "aerosol_optical_depth": "",
+            "uv_index": "",
+            "us_aqi": "USAQI"
+          },
+          "coverage_start": "2026-11-03T00:00",
+          "coverage_end": "2026-11-07T23:00",
+          "returned_grid": {
+            "latitude": 24.5,
+            "longitude": 54.40001,
+            "elevation": 5.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://archive-api.open-meteo.com/v1/archive?latitude=24.35&longitude=54.5&timezone=Asia%2FDubai&hourly=temperature_2m%2Crelative_humidity_2m%2Cdew_point_2m%2Csurface_pressure%2Cwind_speed_10m%2Cshortwave_radiation%2Cdirect_radiation%2Cdiffuse_radiation&start_date=2023-06-01&end_date=2023-09-30&models=era5&wind_speed_unit=ms",
+          "site": "mussafah",
+          "requested_coordinates": {
+            "latitude": 24.35,
+            "longitude": 54.5
+          },
+          "kind": "era5",
+          "period": "2023",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "downloaded",
+          "files": [
+            {
+              "path": "raw/weather/era5_mussafah_2023.json",
+              "bytes": 171281,
+              "sha256": "4208cfb0f333c91e1b92ea2c4a8d474f05a72de6bc392e0122c9c0af8d244c7f"
+            },
+            {
+              "path": "raw/weather/era5_mussafah_2023.csv",
+              "bytes": 167435,
+              "sha256": "5e619ac1d6894972c525d35e58ea083236e236b7070822036a656d0ef7b6219e"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:27:47.043733+00:00",
+          "rows": 2928,
+          "null_counts": {
+            "temperature_2m": 0,
+            "relative_humidity_2m": 0,
+            "dew_point_2m": 0,
+            "surface_pressure": 0,
+            "wind_speed_10m": 0,
+            "shortwave_radiation": 0,
+            "direct_radiation": 0,
+            "diffuse_radiation": 0
+          },
+          "units": {
+            "time": "iso8601",
+            "temperature_2m": "\u00b0C",
+            "relative_humidity_2m": "%",
+            "dew_point_2m": "\u00b0C",
+            "surface_pressure": "hPa",
+            "wind_speed_10m": "m/s",
+            "shortwave_radiation": "W/m\u00b2",
+            "direct_radiation": "W/m\u00b2",
+            "diffuse_radiation": "W/m\u00b2"
+          },
+          "coverage_start": "2023-06-01T00:00",
+          "coverage_end": "2023-09-30T23:00",
+          "returned_grid": {
+            "latitude": 24.25,
+            "longitude": 54.5,
+            "elevation": 6.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=24.35&longitude=54.5&timezone=Asia%2FDubai&hourly=pm10%2Cpm2_5%2Cdust%2Caerosol_optical_depth%2Cuv_index%2Cus_aqi&start_date=2023-06-01&end_date=2023-09-30&domains=cams_global",
+          "site": "mussafah",
+          "requested_coordinates": {
+            "latitude": 24.35,
+            "longitude": 54.5
+          },
+          "kind": "cams_archive",
+          "period": "2023",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "downloaded",
+          "files": [
+            {
+              "path": "raw/air_quality/cams_archive_mussafah_2023.json",
+              "bytes": 144980,
+              "sha256": "85aa23f86b28ac9c0a6da5eb9c6323d5a38aefdcb46f4f06a2823797987c96fa"
+            },
+            {
+              "path": "raw/air_quality/cams_archive_mussafah_2023.csv",
+              "bytes": 139248,
+              "sha256": "3c37cbe8142effdf05a42444d5d00caba3ae6db6fdf33a361f2cb3baea12ff70"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:27:47.455593+00:00",
+          "rows": 2928,
+          "null_counts": {
+            "pm10": 0,
+            "pm2_5": 0,
+            "dust": 0,
+            "aerosol_optical_depth": 0,
+            "uv_index": 0,
+            "us_aqi": 0
+          },
+          "units": {
+            "time": "iso8601",
+            "pm10": "\u03bcg/m\u00b3",
+            "pm2_5": "\u03bcg/m\u00b3",
+            "dust": "\u03bcg/m\u00b3",
+            "aerosol_optical_depth": "",
+            "uv_index": "",
+            "us_aqi": "USAQI"
+          },
+          "coverage_start": "2023-06-01T00:00",
+          "coverage_end": "2023-09-30T23:00",
+          "returned_grid": {
+            "latitude": 24.400002,
+            "longitude": 54.5,
+            "elevation": 6.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://archive-api.open-meteo.com/v1/archive?latitude=24.35&longitude=54.5&timezone=Asia%2FDubai&hourly=temperature_2m%2Crelative_humidity_2m%2Cdew_point_2m%2Csurface_pressure%2Cwind_speed_10m%2Cshortwave_radiation%2Cdirect_radiation%2Cdiffuse_radiation&start_date=2024-06-01&end_date=2024-09-30&models=era5&wind_speed_unit=ms",
+          "site": "mussafah",
+          "requested_coordinates": {
+            "latitude": 24.35,
+            "longitude": 54.5
+          },
+          "kind": "era5",
+          "period": "2024",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "downloaded",
+          "files": [
+            {
+              "path": "raw/weather/era5_mussafah_2024.json",
+              "bytes": 171097,
+              "sha256": "dd6f0e212aa6199b6d98d7833f382e5b0a8ad824c13c1c13ccef15805b322003"
+            },
+            {
+              "path": "raw/weather/era5_mussafah_2024.csv",
+              "bytes": 167319,
+              "sha256": "dae0a337560f041923c97edd41743b5a7707127383548b9b5c0f062a665917d8"
+            },
+            {
+              "path": "processed/replay/era5_mussafah_2024-08-04.csv",
+              "bytes": 1507,
+              "sha256": "624a51248b74304fd2088fc8c5e2e346237048b958782be2721d5c544b556cc2",
+              "rows": 24,
+              "derived_from": "raw/weather/era5_mussafah_2024.json",
+              "coverage_date": "2024-08-04"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:27:48.307415+00:00",
+          "rows": 2928,
+          "null_counts": {
+            "temperature_2m": 0,
+            "relative_humidity_2m": 0,
+            "dew_point_2m": 0,
+            "surface_pressure": 0,
+            "wind_speed_10m": 0,
+            "shortwave_radiation": 0,
+            "direct_radiation": 0,
+            "diffuse_radiation": 0
+          },
+          "units": {
+            "time": "iso8601",
+            "temperature_2m": "\u00b0C",
+            "relative_humidity_2m": "%",
+            "dew_point_2m": "\u00b0C",
+            "surface_pressure": "hPa",
+            "wind_speed_10m": "m/s",
+            "shortwave_radiation": "W/m\u00b2",
+            "direct_radiation": "W/m\u00b2",
+            "diffuse_radiation": "W/m\u00b2"
+          },
+          "coverage_start": "2024-06-01T00:00",
+          "coverage_end": "2024-09-30T23:00",
+          "returned_grid": {
+            "latitude": 24.25,
+            "longitude": 54.5,
+            "elevation": 6.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=24.35&longitude=54.5&timezone=Asia%2FDubai&hourly=pm10%2Cpm2_5%2Cdust%2Caerosol_optical_depth%2Cuv_index%2Cus_aqi&start_date=2024-06-01&end_date=2024-09-30&domains=cams_global",
+          "site": "mussafah",
+          "requested_coordinates": {
+            "latitude": 24.35,
+            "longitude": 54.5
+          },
+          "kind": "cams_archive",
+          "period": "2024",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "downloaded",
+          "files": [
+            {
+              "path": "raw/air_quality/cams_archive_mussafah_2024.json",
+              "bytes": 145073,
+              "sha256": "4c6649c7008cfd15836dd3ee787814451a201b6ed67c3d744b95be709efb91e2"
+            },
+            {
+              "path": "raw/air_quality/cams_archive_mussafah_2024.csv",
+              "bytes": 139384,
+              "sha256": "a1319b340cfbfe4f96f414b4f1ebdb85df42dec088ba416b521a189d19ba4852"
+            },
+            {
+              "path": "processed/replay/cams_archive_mussafah_2024-08-04.csv",
+              "bytes": 1220,
+              "sha256": "f813970d325a54497fcc2e1ab3b9895e4c860d947476a09b9d7c86e593473e59",
+              "rows": 24,
+              "derived_from": "raw/air_quality/cams_archive_mussafah_2024.json",
+              "coverage_date": "2024-08-04"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:27:49.237390+00:00",
+          "rows": 2928,
+          "null_counts": {
+            "pm10": 0,
+            "pm2_5": 0,
+            "dust": 0,
+            "aerosol_optical_depth": 0,
+            "uv_index": 0,
+            "us_aqi": 0
+          },
+          "units": {
+            "time": "iso8601",
+            "pm10": "\u03bcg/m\u00b3",
+            "pm2_5": "\u03bcg/m\u00b3",
+            "dust": "\u03bcg/m\u00b3",
+            "aerosol_optical_depth": "",
+            "uv_index": "",
+            "us_aqi": "USAQI"
+          },
+          "coverage_start": "2024-06-01T00:00",
+          "coverage_end": "2024-09-30T23:00",
+          "returned_grid": {
+            "latitude": 24.400002,
+            "longitude": 54.5,
+            "elevation": 6.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://archive-api.open-meteo.com/v1/archive?latitude=24.35&longitude=54.5&timezone=Asia%2FDubai&hourly=temperature_2m%2Crelative_humidity_2m%2Cdew_point_2m%2Csurface_pressure%2Cwind_speed_10m%2Cshortwave_radiation%2Cdirect_radiation%2Cdiffuse_radiation&start_date=2025-06-01&end_date=2025-09-30&models=era5&wind_speed_unit=ms",
+          "site": "mussafah",
+          "requested_coordinates": {
+            "latitude": 24.35,
+            "longitude": 54.5
+          },
+          "kind": "era5",
+          "period": "2025",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "downloaded",
+          "files": [
+            {
+              "path": "raw/weather/era5_mussafah_2025.json",
+              "bytes": 171101,
+              "sha256": "9958ec8cb80876c67721578012d5f62bf54fec9e43c79ac4b551b80a140e9987"
+            },
+            {
+              "path": "raw/weather/era5_mussafah_2025.csv",
+              "bytes": 167347,
+              "sha256": "b4f9e01c351f6f894eb90e8d8029b81b5cff59058571bd477140b5db4aa75a1a"
+            },
+            {
+              "path": "processed/replay/era5_mussafah_2025-08-01.csv",
+              "bytes": 1505,
+              "sha256": "4e04a972efb1e70072882e1350622428d71e7b2a349e0049b92be0bde9ff1895",
+              "rows": 24,
+              "derived_from": "raw/weather/era5_mussafah_2025.json",
+              "coverage_date": "2025-08-01"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:27:51.302932+00:00",
+          "rows": 2928,
+          "null_counts": {
+            "temperature_2m": 0,
+            "relative_humidity_2m": 0,
+            "dew_point_2m": 0,
+            "surface_pressure": 0,
+            "wind_speed_10m": 0,
+            "shortwave_radiation": 0,
+            "direct_radiation": 0,
+            "diffuse_radiation": 0
+          },
+          "units": {
+            "time": "iso8601",
+            "temperature_2m": "\u00b0C",
+            "relative_humidity_2m": "%",
+            "dew_point_2m": "\u00b0C",
+            "surface_pressure": "hPa",
+            "wind_speed_10m": "m/s",
+            "shortwave_radiation": "W/m\u00b2",
+            "direct_radiation": "W/m\u00b2",
+            "diffuse_radiation": "W/m\u00b2"
+          },
+          "coverage_start": "2025-06-01T00:00",
+          "coverage_end": "2025-09-30T23:00",
+          "returned_grid": {
+            "latitude": 24.25,
+            "longitude": 54.5,
+            "elevation": 6.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=24.35&longitude=54.5&timezone=Asia%2FDubai&hourly=pm10%2Cpm2_5%2Cdust%2Caerosol_optical_depth%2Cuv_index%2Cus_aqi&start_date=2025-06-01&end_date=2025-09-30&domains=cams_global",
+          "site": "mussafah",
+          "requested_coordinates": {
+            "latitude": 24.35,
+            "longitude": 54.5
+          },
+          "kind": "cams_archive",
+          "period": "2025",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "downloaded",
+          "files": [
+            {
+              "path": "raw/air_quality/cams_archive_mussafah_2025.json",
+              "bytes": 143547,
+              "sha256": "a433f4f2c1ab4b9122fb2f994aba08e9a7bee01a2aa4641ec7a91ba348de98d6"
+            },
+            {
+              "path": "raw/air_quality/cams_archive_mussafah_2025.csv",
+              "bytes": 137806,
+              "sha256": "f063975b0502cdb185b1a79795176f15a8d0f49724f574cf2c3acba420594e38"
+            },
+            {
+              "path": "processed/replay/cams_archive_mussafah_2025-08-01.csv",
+              "bytes": 1206,
+              "sha256": "76f94b5a0d7181e5fed346da70f796b8a15d22161326becdb45f3cf9dd7450f0",
+              "rows": 24,
+              "derived_from": "raw/air_quality/cams_archive_mussafah_2025.json",
+              "coverage_date": "2025-08-01"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:27:50.470536+00:00",
+          "rows": 2928,
+          "null_counts": {
+            "pm10": 0,
+            "pm2_5": 0,
+            "dust": 0,
+            "aerosol_optical_depth": 0,
+            "uv_index": 0,
+            "us_aqi": 0
+          },
+          "units": {
+            "time": "iso8601",
+            "pm10": "\u03bcg/m\u00b3",
+            "pm2_5": "\u03bcg/m\u00b3",
+            "dust": "\u03bcg/m\u00b3",
+            "aerosol_optical_depth": "",
+            "uv_index": "",
+            "us_aqi": "USAQI"
+          },
+          "coverage_start": "2025-06-01T00:00",
+          "coverage_end": "2025-09-30T23:00",
+          "returned_grid": {
+            "latitude": 24.400002,
+            "longitude": 54.5,
+            "elevation": 6.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://api.open-meteo.com/v1/forecast?latitude=24.35&longitude=54.5&timezone=Asia%2FDubai&hourly=temperature_2m%2Crelative_humidity_2m%2Cdew_point_2m%2Csurface_pressure%2Cwind_speed_10m%2Cshortwave_radiation%2Cdirect_radiation%2Cdiffuse_radiation%2Cuv_index&forecast_days=16&wind_speed_unit=ms",
+          "site": "mussafah",
+          "requested_coordinates": {
+            "latitude": 24.35,
+            "longitude": 54.5
+          },
+          "kind": "forecast",
+          "period": "20261103T032734Z",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "partial",
+          "files": [
+            {
+              "path": "raw/weather/forecast_mussafah_20261103T032734Z.json",
+              "bytes": 24970,
+              "sha256": "0b066c942c2b69f0d2ac9e7bccdda5b546045f37f2d9c9aceaa9c58c52d1edb6"
+            },
+            {
+              "path": "raw/weather/forecast_mussafah_20261103T032734Z.csv",
+              "bytes": 23719,
+              "sha256": "79994dc3519563f3d2ab208fa8e34b5677c033631b1b82ae193d25ac53396b0a"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:27:50.710313+00:00",
+          "rows": 384,
+          "null_counts": {
+            "temperature_2m": 1,
+            "relative_humidity_2m": 1,
+            "dew_point_2m": 1,
+            "surface_pressure": 1,
+            "wind_speed_10m": 1,
+            "shortwave_radiation": 1,
+            "direct_radiation": 1,
+            "diffuse_radiation": 1,
+            "uv_index": 1
+          },
+          "units": {
+            "time": "iso8601",
+            "temperature_2m": "\u00b0C",
+            "relative_humidity_2m": "%",
+            "dew_point_2m": "\u00b0C",
+            "surface_pressure": "hPa",
+            "wind_speed_10m": "m/s",
+            "shortwave_radiation": "W/m\u00b2",
+            "direct_radiation": "W/m\u00b2",
+            "diffuse_radiation": "W/m\u00b2",
+            "uv_index": ""
+          },
+          "coverage_start": "2026-11-03T00:00",
+          "coverage_end": "2026-11-18T23:00",
+          "returned_grid": {
+            "latitude": 24.358522,
+            "longitude": 54.498936,
+            "elevation": 6.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=24.35&longitude=54.5&timezone=Asia%2FDubai&hourly=pm10%2Cpm2_5%2Cdust%2Caerosol_optical_depth%2Cuv_index%2Cus_aqi&forecast_days=5&domains=cams_global",
+          "site": "mussafah",
+          "requested_coordinates": {
+            "latitude": 24.35,
+            "longitude": 54.5
+          },
+          "kind": "cams_forecast",
+          "period": "20261103T032734Z",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "partial",
+          "files": [
+            {
+              "path": "raw/air_quality/cams_forecast_mussafah_20261103T032734Z.json",
+              "bytes": 6189,
+              "sha256": "1c4317ed860443fbf49e26e6259c7524b69423cee312d5522e6017b40b725e72"
+            },
+            {
+              "path": "raw/air_quality/cams_forecast_mussafah_20261103T032734Z.csv",
+              "bytes": 5451,
+              "sha256": "f82cf5e426c8abe43bb2a3b7fcfd415f234fc3812fbe75fb8ae395afe5b0787b"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:27:51.750770+00:00",
+          "rows": 120,
+          "null_counts": {
+            "pm10": 7,
+            "pm2_5": 7,
+            "dust": 7,
+            "aerosol_optical_depth": 7,
+            "uv_index": 7,
+            "us_aqi": 6
+          },
+          "units": {
+            "time": "iso8601",
+            "pm10": "\u03bcg/m\u00b3",
+            "pm2_5": "\u03bcg/m\u00b3",
+            "dust": "\u03bcg/m\u00b3",
+            "aerosol_optical_depth": "",
+            "uv_index": "",
+            "us_aqi": "USAQI"
+          },
+          "coverage_start": "2026-11-03T00:00",
+          "coverage_end": "2026-11-07T23:00",
+          "returned_grid": {
+            "latitude": 24.400002,
+            "longitude": 54.5,
+            "elevation": 6.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://archive-api.open-meteo.com/v1/archive?latitude=24.2075&longitude=55.7447&timezone=Asia%2FDubai&hourly=temperature_2m%2Crelative_humidity_2m%2Cdew_point_2m%2Csurface_pressure%2Cwind_speed_10m%2Cshortwave_radiation%2Cdirect_radiation%2Cdiffuse_radiation&start_date=2023-06-01&end_date=2023-09-30&models=era5&wind_speed_unit=ms",
+          "site": "al_ain",
+          "requested_coordinates": {
+            "latitude": 24.2075,
+            "longitude": 55.7447
+          },
+          "kind": "era5",
+          "period": "2023",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "downloaded",
+          "files": [
+            {
+              "path": "raw/weather/era5_al_ain_2023.json",
+              "bytes": 169894,
+              "sha256": "79a4c782db6deb651417f93ed5dee757a81289f41d65794f6fb2b070919f09a1"
+            },
+            {
+              "path": "raw/weather/era5_al_ain_2023.csv",
+              "bytes": 166051,
+              "sha256": "cba4af170d1cb25f1615fc815ace1380df56642410fcfe06159324508fc7b394"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:27:53.117137+00:00",
+          "rows": 2928,
+          "null_counts": {
+            "temperature_2m": 0,
+            "relative_humidity_2m": 0,
+            "dew_point_2m": 0,
+            "surface_pressure": 0,
+            "wind_speed_10m": 0,
+            "shortwave_radiation": 0,
+            "direct_radiation": 0,
+            "diffuse_radiation": 0
+          },
+          "units": {
+            "time": "iso8601",
+            "temperature_2m": "\u00b0C",
+            "relative_humidity_2m": "%",
+            "dew_point_2m": "\u00b0C",
+            "surface_pressure": "hPa",
+            "wind_speed_10m": "m/s",
+            "shortwave_radiation": "W/m\u00b2",
+            "direct_radiation": "W/m\u00b2",
+            "diffuse_radiation": "W/m\u00b2"
+          },
+          "coverage_start": "2023-06-01T00:00",
+          "coverage_end": "2023-09-30T23:00",
+          "returned_grid": {
+            "latitude": 24.25,
+            "longitude": 55.75,
+            "elevation": 275.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=24.2075&longitude=55.7447&timezone=Asia%2FDubai&hourly=pm10%2Cpm2_5%2Cdust%2Caerosol_optical_depth%2Cuv_index%2Cus_aqi&start_date=2023-06-01&end_date=2023-09-30&domains=cams_global",
+          "site": "al_ain",
+          "requested_coordinates": {
+            "latitude": 24.2075,
+            "longitude": 55.7447
+          },
+          "kind": "cams_archive",
+          "period": "2023",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "downloaded",
+          "files": [
+            {
+              "path": "raw/air_quality/cams_archive_al_ain_2023.json",
+              "bytes": 145380,
+              "sha256": "f1d4e343c24949a096300ecf8ad8b806f7e08de3ee8d3ae008a27cb6659dacaf"
+            },
+            {
+              "path": "raw/air_quality/cams_archive_al_ain_2023.csv",
+              "bytes": 139681,
+              "sha256": "10add1359a180adb623d68145d8dc83d9577ed4ac0548032872019dca4c23c0f"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:27:53.529665+00:00",
+          "rows": 2928,
+          "null_counts": {
+            "pm10": 0,
+            "pm2_5": 0,
+            "dust": 0,
+            "aerosol_optical_depth": 0,
+            "uv_index": 0,
+            "us_aqi": 0
+          },
+          "units": {
+            "time": "iso8601",
+            "pm10": "\u03bcg/m\u00b3",
+            "pm2_5": "\u03bcg/m\u00b3",
+            "dust": "\u03bcg/m\u00b3",
+            "aerosol_optical_depth": "",
+            "uv_index": "",
+            "us_aqi": "USAQI"
+          },
+          "coverage_start": "2023-06-01T00:00",
+          "coverage_end": "2023-09-30T23:00",
+          "returned_grid": {
+            "latitude": 24.200005,
+            "longitude": 55.699997,
+            "elevation": 275.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://archive-api.open-meteo.com/v1/archive?latitude=24.2075&longitude=55.7447&timezone=Asia%2FDubai&hourly=temperature_2m%2Crelative_humidity_2m%2Cdew_point_2m%2Csurface_pressure%2Cwind_speed_10m%2Cshortwave_radiation%2Cdirect_radiation%2Cdiffuse_radiation&start_date=2024-06-01&end_date=2024-09-30&models=era5&wind_speed_unit=ms",
+          "site": "al_ain",
+          "requested_coordinates": {
+            "latitude": 24.2075,
+            "longitude": 55.7447
+          },
+          "kind": "era5",
+          "period": "2024",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "downloaded",
+          "files": [
+            {
+              "path": "raw/weather/era5_al_ain_2024.json",
+              "bytes": 169706,
+              "sha256": "78521e0a132cbd8c8ac894d02d5f6acaa8b86d4985651ae7f27d9d255a95fcf7"
+            },
+            {
+              "path": "raw/weather/era5_al_ain_2024.csv",
+              "bytes": 165935,
+              "sha256": "97bb3191c8efc6b7ba0f87f60e93d080f7caef79688538a2224090d69545b9d0"
+            },
+            {
+              "path": "processed/replay/era5_al_ain_2024-08-04.csv",
+              "bytes": 1504,
+              "sha256": "bf0ca15a28ad6cc537ec1c6572adfb44d23420cbe4ec737eff42636ddc60e86d",
+              "rows": 24,
+              "derived_from": "raw/weather/era5_al_ain_2024.json",
+              "coverage_date": "2024-08-04"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:27:53.973386+00:00",
+          "rows": 2928,
+          "null_counts": {
+            "temperature_2m": 0,
+            "relative_humidity_2m": 0,
+            "dew_point_2m": 0,
+            "surface_pressure": 0,
+            "wind_speed_10m": 0,
+            "shortwave_radiation": 0,
+            "direct_radiation": 0,
+            "diffuse_radiation": 0
+          },
+          "units": {
+            "time": "iso8601",
+            "temperature_2m": "\u00b0C",
+            "relative_humidity_2m": "%",
+            "dew_point_2m": "\u00b0C",
+            "surface_pressure": "hPa",
+            "wind_speed_10m": "m/s",
+            "shortwave_radiation": "W/m\u00b2",
+            "direct_radiation": "W/m\u00b2",
+            "diffuse_radiation": "W/m\u00b2"
+          },
+          "coverage_start": "2024-06-01T00:00",
+          "coverage_end": "2024-09-30T23:00",
+          "returned_grid": {
+            "latitude": 24.25,
+            "longitude": 55.75,
+            "elevation": 275.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=24.2075&longitude=55.7447&timezone=Asia%2FDubai&hourly=pm10%2Cpm2_5%2Cdust%2Caerosol_optical_depth%2Cuv_index%2Cus_aqi&start_date=2024-06-01&end_date=2024-09-30&domains=cams_global",
+          "site": "al_ain",
+          "requested_coordinates": {
+            "latitude": 24.2075,
+            "longitude": 55.7447
+          },
+          "kind": "cams_archive",
+          "period": "2024",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "downloaded",
+          "files": [
+            {
+              "path": "raw/air_quality/cams_archive_al_ain_2024.json",
+              "bytes": 146033,
+              "sha256": "ccc51bd60f625262608f34309f5f212c51d69340f5f8e5a21eaf2ef9cadc3be0"
+            },
+            {
+              "path": "raw/air_quality/cams_archive_al_ain_2024.csv",
+              "bytes": 140291,
+              "sha256": "7c7fe050d2e8359f542cad68534678a0f0fdee1b3744f747a4c7ef717a4b09aa"
+            },
+            {
+              "path": "processed/replay/cams_archive_al_ain_2024-08-04.csv",
+              "bytes": 1215,
+              "sha256": "57ee82c4cf9d62532a6af329d5c18985f29739a4665e1d8e12da463183cb8021",
+              "rows": 24,
+              "derived_from": "raw/air_quality/cams_archive_al_ain_2024.json",
+              "coverage_date": "2024-08-04"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:27:55.272612+00:00",
+          "rows": 2928,
+          "null_counts": {
+            "pm10": 0,
+            "pm2_5": 0,
+            "dust": 0,
+            "aerosol_optical_depth": 0,
+            "uv_index": 0,
+            "us_aqi": 0
+          },
+          "units": {
+            "time": "iso8601",
+            "pm10": "\u03bcg/m\u00b3",
+            "pm2_5": "\u03bcg/m\u00b3",
+            "dust": "\u03bcg/m\u00b3",
+            "aerosol_optical_depth": "",
+            "uv_index": "",
+            "us_aqi": "USAQI"
+          },
+          "coverage_start": "2024-06-01T00:00",
+          "coverage_end": "2024-09-30T23:00",
+          "returned_grid": {
+            "latitude": 24.200005,
+            "longitude": 55.699997,
+            "elevation": 275.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://archive-api.open-meteo.com/v1/archive?latitude=24.2075&longitude=55.7447&timezone=Asia%2FDubai&hourly=temperature_2m%2Crelative_humidity_2m%2Cdew_point_2m%2Csurface_pressure%2Cwind_speed_10m%2Cshortwave_radiation%2Cdirect_radiation%2Cdiffuse_radiation&start_date=2025-06-01&end_date=2025-09-30&models=era5&wind_speed_unit=ms",
+          "site": "al_ain",
+          "requested_coordinates": {
+            "latitude": 24.2075,
+            "longitude": 55.7447
+          },
+          "kind": "era5",
+          "period": "2025",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "downloaded",
+          "files": [
+            {
+              "path": "raw/weather/era5_al_ain_2025.json",
+              "bytes": 169831,
+              "sha256": "40a284dadc0b643e1540a7a5eb5491a313197c836c80f8cb839808b98ec10510"
+            },
+            {
+              "path": "raw/weather/era5_al_ain_2025.csv",
+              "bytes": 166068,
+              "sha256": "4012e643d2454cea567adebcd08e7034f0a79906cfd59da80145f93de416d670"
+            },
+            {
+              "path": "processed/replay/era5_al_ain_2025-08-01.csv",
+              "bytes": 1499,
+              "sha256": "c366dec206bfd649ca08d913e2963fb1f018e45e3a263f9ade4eeefbfedcce7a",
+              "rows": 24,
+              "derived_from": "raw/weather/era5_al_ain_2025.json",
+              "coverage_date": "2025-08-01"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:27:55.739767+00:00",
+          "rows": 2928,
+          "null_counts": {
+            "temperature_2m": 0,
+            "relative_humidity_2m": 0,
+            "dew_point_2m": 0,
+            "surface_pressure": 0,
+            "wind_speed_10m": 0,
+            "shortwave_radiation": 0,
+            "direct_radiation": 0,
+            "diffuse_radiation": 0
+          },
+          "units": {
+            "time": "iso8601",
+            "temperature_2m": "\u00b0C",
+            "relative_humidity_2m": "%",
+            "dew_point_2m": "\u00b0C",
+            "surface_pressure": "hPa",
+            "wind_speed_10m": "m/s",
+            "shortwave_radiation": "W/m\u00b2",
+            "direct_radiation": "W/m\u00b2",
+            "diffuse_radiation": "W/m\u00b2"
+          },
+          "coverage_start": "2025-06-01T00:00",
+          "coverage_end": "2025-09-30T23:00",
+          "returned_grid": {
+            "latitude": 24.25,
+            "longitude": 55.75,
+            "elevation": 275.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=24.2075&longitude=55.7447&timezone=Asia%2FDubai&hourly=pm10%2Cpm2_5%2Cdust%2Caerosol_optical_depth%2Cuv_index%2Cus_aqi&start_date=2025-06-01&end_date=2025-09-30&domains=cams_global",
+          "site": "al_ain",
+          "requested_coordinates": {
+            "latitude": 24.2075,
+            "longitude": 55.7447
+          },
+          "kind": "cams_archive",
+          "period": "2025",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "downloaded",
+          "files": [
+            {
+              "path": "raw/air_quality/cams_archive_al_ain_2025.json",
+              "bytes": 145086,
+              "sha256": "f31ab2f21e9960c6883b6a5c2f6dd628733cdf26d9503c05378f2f5427ec7a9e"
+            },
+            {
+              "path": "raw/air_quality/cams_archive_al_ain_2025.csv",
+              "bytes": 139402,
+              "sha256": "d438bc4d8651f40a0526051f8a153f4e051343c1baba31aa643f9bc80b33f310"
+            },
+            {
+              "path": "processed/replay/cams_archive_al_ain_2025-08-01.csv",
+              "bytes": 1208,
+              "sha256": "c1934abdb00f5cc819761370c7d7886cc7f6547d8739fb9861fe818e5b9bb680",
+              "rows": 24,
+              "derived_from": "raw/air_quality/cams_archive_al_ain_2025.json",
+              "coverage_date": "2025-08-01"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:27:56.246368+00:00",
+          "rows": 2928,
+          "null_counts": {
+            "pm10": 0,
+            "pm2_5": 0,
+            "dust": 0,
+            "aerosol_optical_depth": 0,
+            "uv_index": 0,
+            "us_aqi": 0
+          },
+          "units": {
+            "time": "iso8601",
+            "pm10": "\u03bcg/m\u00b3",
+            "pm2_5": "\u03bcg/m\u00b3",
+            "dust": "\u03bcg/m\u00b3",
+            "aerosol_optical_depth": "",
+            "uv_index": "",
+            "us_aqi": "USAQI"
+          },
+          "coverage_start": "2025-06-01T00:00",
+          "coverage_end": "2025-09-30T23:00",
+          "returned_grid": {
+            "latitude": 24.200005,
+            "longitude": 55.699997,
+            "elevation": 275.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://api.open-meteo.com/v1/forecast?latitude=24.2075&longitude=55.7447&timezone=Asia%2FDubai&hourly=temperature_2m%2Crelative_humidity_2m%2Cdew_point_2m%2Csurface_pressure%2Cwind_speed_10m%2Cshortwave_radiation%2Cdirect_radiation%2Cdiffuse_radiation%2Cuv_index&forecast_days=16&wind_speed_unit=ms",
+          "site": "al_ain",
+          "requested_coordinates": {
+            "latitude": 24.2075,
+            "longitude": 55.7447
+          },
+          "kind": "forecast",
+          "period": "20261103T032734Z",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "partial",
+          "files": [
+            {
+              "path": "raw/weather/forecast_al_ain_20261103T032734Z.json",
+              "bytes": 24481,
+              "sha256": "d75da26d5609141c3b80906525e72a76a8ec4e8141611b6e2f3ea1d1cff9d6ee"
+            },
+            {
+              "path": "raw/weather/forecast_al_ain_20261103T032734Z.csv",
+              "bytes": 23237,
+              "sha256": "a74c5e0b289e5349484096d8b0eb4166676ea400016a0991123a2c9a521cbcfe"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:27:56.467793+00:00",
+          "rows": 384,
+          "null_counts": {
+            "temperature_2m": 1,
+            "relative_humidity_2m": 1,
+            "dew_point_2m": 1,
+            "surface_pressure": 1,
+            "wind_speed_10m": 1,
+            "shortwave_radiation": 1,
+            "direct_radiation": 1,
+            "diffuse_radiation": 1,
+            "uv_index": 1
+          },
+          "units": {
+            "time": "iso8601",
+            "temperature_2m": "\u00b0C",
+            "relative_humidity_2m": "%",
+            "dew_point_2m": "\u00b0C",
+            "surface_pressure": "hPa",
+            "wind_speed_10m": "m/s",
+            "shortwave_radiation": "W/m\u00b2",
+            "direct_radiation": "W/m\u00b2",
+            "diffuse_radiation": "W/m\u00b2",
+            "uv_index": ""
+          },
+          "coverage_start": "2026-11-03T00:00",
+          "coverage_end": "2026-11-18T23:00",
+          "returned_grid": {
+            "latitude": 24.217924,
+            "longitude": 55.723408,
+            "elevation": 275.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=24.2075&longitude=55.7447&timezone=Asia%2FDubai&hourly=pm10%2Cpm2_5%2Cdust%2Caerosol_optical_depth%2Cuv_index%2Cus_aqi&forecast_days=5&domains=cams_global",
+          "site": "al_ain",
+          "requested_coordinates": {
+            "latitude": 24.2075,
+            "longitude": 55.7447
+          },
+          "kind": "cams_forecast",
+          "period": "20261103T032734Z",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "partial",
+          "files": [
+            {
+              "path": "raw/air_quality/cams_forecast_al_ain_20261103T032734Z.json",
+              "bytes": 6215,
+              "sha256": "6e219ad178e7b777fcb7368ed00ccc4865d6df4254bd1c114279864e2c379372"
+            },
+            {
+              "path": "raw/air_quality/cams_forecast_al_ain_20261103T032734Z.csv",
+              "bytes": 5470,
+              "sha256": "10f3d00bc22c07c9a02d618a358c3583134bc83a8bbc3489baa7ab3981f3a32b"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:27:56.993639+00:00",
+          "rows": 120,
+          "null_counts": {
+            "pm10": 7,
+            "pm2_5": 7,
+            "dust": 7,
+            "aerosol_optical_depth": 7,
+            "uv_index": 7,
+            "us_aqi": 6
+          },
+          "units": {
+            "time": "iso8601",
+            "pm10": "\u03bcg/m\u00b3",
+            "pm2_5": "\u03bcg/m\u00b3",
+            "dust": "\u03bcg/m\u00b3",
+            "aerosol_optical_depth": "",
+            "uv_index": "",
+            "us_aqi": "USAQI"
+          },
+          "coverage_start": "2026-11-03T00:00",
+          "coverage_end": "2026-11-07T23:00",
+          "returned_grid": {
+            "latitude": 24.200005,
+            "longitude": 55.699997,
+            "elevation": 275.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://archive-api.open-meteo.com/v1/archive?latitude=24.08&longitude=52.73&timezone=Asia%2FDubai&hourly=temperature_2m%2Crelative_humidity_2m%2Cdew_point_2m%2Csurface_pressure%2Cwind_speed_10m%2Cshortwave_radiation%2Cdirect_radiation%2Cdiffuse_radiation&start_date=2023-06-01&end_date=2023-09-30&models=era5&wind_speed_unit=ms",
+          "site": "ruwais",
+          "requested_coordinates": {
+            "latitude": 24.08,
+            "longitude": 52.73
+          },
+          "kind": "era5",
+          "period": "2023",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "downloaded",
+          "files": [
+            {
+              "path": "raw/weather/era5_ruwais_2023.json",
+              "bytes": 171273,
+              "sha256": "74f3b217e3d5c85365d3d31be37f7ab04b85914c0994c9690e0d2bf8ca065af9"
+            },
+            {
+              "path": "raw/weather/era5_ruwais_2023.csv",
+              "bytes": 167410,
+              "sha256": "384327ef1600fcedec71ed4a0230b89953b2b452ac21faedc8d22e0e419541ed"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:27:59.942070+00:00",
+          "rows": 2928,
+          "null_counts": {
+            "temperature_2m": 0,
+            "relative_humidity_2m": 0,
+            "dew_point_2m": 0,
+            "surface_pressure": 0,
+            "wind_speed_10m": 0,
+            "shortwave_radiation": 0,
+            "direct_radiation": 0,
+            "diffuse_radiation": 0
+          },
+          "units": {
+            "time": "iso8601",
+            "temperature_2m": "\u00b0C",
+            "relative_humidity_2m": "%",
+            "dew_point_2m": "\u00b0C",
+            "surface_pressure": "hPa",
+            "wind_speed_10m": "m/s",
+            "shortwave_radiation": "W/m\u00b2",
+            "direct_radiation": "W/m\u00b2",
+            "diffuse_radiation": "W/m\u00b2"
+          },
+          "coverage_start": "2023-06-01T00:00",
+          "coverage_end": "2023-09-30T23:00",
+          "returned_grid": {
+            "latitude": 24.0,
+            "longitude": 52.75,
+            "elevation": 9.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=24.08&longitude=52.73&timezone=Asia%2FDubai&hourly=pm10%2Cpm2_5%2Cdust%2Caerosol_optical_depth%2Cuv_index%2Cus_aqi&start_date=2023-06-01&end_date=2023-09-30&domains=cams_global",
+          "site": "ruwais",
+          "requested_coordinates": {
+            "latitude": 24.08,
+            "longitude": 52.73
+          },
+          "kind": "cams_archive",
+          "period": "2023",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "downloaded",
+          "files": [
+            {
+              "path": "raw/air_quality/cams_archive_ruwais_2023.json",
+              "bytes": 144715,
+              "sha256": "a11a564caeb2872623750d1e24634b85d8e40cf84323e46d09477ae2919029e4"
+            },
+            {
+              "path": "raw/air_quality/cams_archive_ruwais_2023.csv",
+              "bytes": 139012,
+              "sha256": "faf4df0b996a74080aad07afa1fd65b23114588c7a1b0ecd266edd1fded68e36"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:27:58.626070+00:00",
+          "rows": 2928,
+          "null_counts": {
+            "pm10": 0,
+            "pm2_5": 0,
+            "dust": 0,
+            "aerosol_optical_depth": 0,
+            "uv_index": 0,
+            "us_aqi": 0
+          },
+          "units": {
+            "time": "iso8601",
+            "pm10": "\u03bcg/m\u00b3",
+            "pm2_5": "\u03bcg/m\u00b3",
+            "dust": "\u03bcg/m\u00b3",
+            "aerosol_optical_depth": "",
+            "uv_index": "",
+            "us_aqi": "USAQI"
+          },
+          "coverage_start": "2023-06-01T00:00",
+          "coverage_end": "2023-09-30T23:00",
+          "returned_grid": {
+            "latitude": 24.099998,
+            "longitude": 52.699997,
+            "elevation": 9.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://archive-api.open-meteo.com/v1/archive?latitude=24.08&longitude=52.73&timezone=Asia%2FDubai&hourly=temperature_2m%2Crelative_humidity_2m%2Cdew_point_2m%2Csurface_pressure%2Cwind_speed_10m%2Cshortwave_radiation%2Cdirect_radiation%2Cdiffuse_radiation&start_date=2024-06-01&end_date=2024-09-30&models=era5&wind_speed_unit=ms",
+          "site": "ruwais",
+          "requested_coordinates": {
+            "latitude": 24.08,
+            "longitude": 52.73
+          },
+          "kind": "era5",
+          "period": "2024",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "downloaded",
+          "files": [
+            {
+              "path": "raw/weather/era5_ruwais_2024.json",
+              "bytes": 170992,
+              "sha256": "ed3a138c5da37b6ff4c1f1f217d50ec945ae3d3729ff057c7b9cc18e138ac409"
+            },
+            {
+              "path": "raw/weather/era5_ruwais_2024.csv",
+              "bytes": 167200,
+              "sha256": "3e65d3c98bb4978b5b0ada624cc35462609360f30cc5c4b861568ceaa7928802"
+            },
+            {
+              "path": "processed/replay/era5_ruwais_2024-08-04.csv",
+              "bytes": 1507,
+              "sha256": "c8229a2e5c95f9f6f63633243a347e7466b70decf45f0ac629f5755cde807159",
+              "rows": 24,
+              "derived_from": "raw/weather/era5_ruwais_2024.json",
+              "coverage_date": "2024-08-04"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:28:01.608263+00:00",
+          "rows": 2928,
+          "null_counts": {
+            "temperature_2m": 0,
+            "relative_humidity_2m": 0,
+            "dew_point_2m": 0,
+            "surface_pressure": 0,
+            "wind_speed_10m": 0,
+            "shortwave_radiation": 0,
+            "direct_radiation": 0,
+            "diffuse_radiation": 0
+          },
+          "units": {
+            "time": "iso8601",
+            "temperature_2m": "\u00b0C",
+            "relative_humidity_2m": "%",
+            "dew_point_2m": "\u00b0C",
+            "surface_pressure": "hPa",
+            "wind_speed_10m": "m/s",
+            "shortwave_radiation": "W/m\u00b2",
+            "direct_radiation": "W/m\u00b2",
+            "diffuse_radiation": "W/m\u00b2"
+          },
+          "coverage_start": "2024-06-01T00:00",
+          "coverage_end": "2024-09-30T23:00",
+          "returned_grid": {
+            "latitude": 24.0,
+            "longitude": 52.75,
+            "elevation": 9.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=24.08&longitude=52.73&timezone=Asia%2FDubai&hourly=pm10%2Cpm2_5%2Cdust%2Caerosol_optical_depth%2Cuv_index%2Cus_aqi&start_date=2024-06-01&end_date=2024-09-30&domains=cams_global",
+          "site": "ruwais",
+          "requested_coordinates": {
+            "latitude": 24.08,
+            "longitude": 52.73
+          },
+          "kind": "cams_archive",
+          "period": "2024",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "downloaded",
+          "files": [
+            {
+              "path": "raw/air_quality/cams_archive_ruwais_2024.json",
+              "bytes": 145350,
+              "sha256": "5b2d95463dbaf0f06f7762be126fe945e26494a724902b54d56c7f1f92bbb9af"
+            },
+            {
+              "path": "raw/air_quality/cams_archive_ruwais_2024.csv",
+              "bytes": 139627,
+              "sha256": "1cccf035c52d8dad5d704c0b5caaabb0c9c97f11c1e5d8ac888f85a9ebdce0e6"
+            },
+            {
+              "path": "processed/replay/cams_archive_ruwais_2024-08-04.csv",
+              "bytes": 1217,
+              "sha256": "029f46d04d1fbe505e662143e508b357785bd3771f7f4aef477dbcd83a4adcf5",
+              "rows": 24,
+              "derived_from": "raw/air_quality/cams_archive_ruwais_2024.json",
+              "coverage_date": "2024-08-04"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:28:00.812275+00:00",
+          "rows": 2928,
+          "null_counts": {
+            "pm10": 0,
+            "pm2_5": 0,
+            "dust": 0,
+            "aerosol_optical_depth": 0,
+            "uv_index": 0,
+            "us_aqi": 0
+          },
+          "units": {
+            "time": "iso8601",
+            "pm10": "\u03bcg/m\u00b3",
+            "pm2_5": "\u03bcg/m\u00b3",
+            "dust": "\u03bcg/m\u00b3",
+            "aerosol_optical_depth": "",
+            "uv_index": "",
+            "us_aqi": "USAQI"
+          },
+          "coverage_start": "2024-06-01T00:00",
+          "coverage_end": "2024-09-30T23:00",
+          "returned_grid": {
+            "latitude": 24.099998,
+            "longitude": 52.699997,
+            "elevation": 9.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://archive-api.open-meteo.com/v1/archive?latitude=24.08&longitude=52.73&timezone=Asia%2FDubai&hourly=temperature_2m%2Crelative_humidity_2m%2Cdew_point_2m%2Csurface_pressure%2Cwind_speed_10m%2Cshortwave_radiation%2Cdirect_radiation%2Cdiffuse_radiation&start_date=2025-06-01&end_date=2025-09-30&models=era5&wind_speed_unit=ms",
+          "site": "ruwais",
+          "requested_coordinates": {
+            "latitude": 24.08,
+            "longitude": 52.73
+          },
+          "kind": "era5",
+          "period": "2025",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "downloaded",
+          "files": [
+            {
+              "path": "raw/weather/era5_ruwais_2025.json",
+              "bytes": 171061,
+              "sha256": "a6ba5ef663235108f7b0837879bf89689b2bc287d435b3c0d6d4f04338f37bbb"
+            },
+            {
+              "path": "raw/weather/era5_ruwais_2025.csv",
+              "bytes": 167312,
+              "sha256": "b0620d6a44f3ac5023a75f96f87df0b3c66b6d8303b05b4c597359d8b14b8043"
+            },
+            {
+              "path": "processed/replay/era5_ruwais_2025-08-01.csv",
+              "bytes": 1503,
+              "sha256": "48dae7d410ef130c1fc9f33261db6c2d940ff997b6a7d4715ad0b201381fb45c",
+              "rows": 24,
+              "derived_from": "raw/weather/era5_ruwais_2025.json",
+              "coverage_date": "2025-08-01"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:28:02.390630+00:00",
+          "rows": 2928,
+          "null_counts": {
+            "temperature_2m": 0,
+            "relative_humidity_2m": 0,
+            "dew_point_2m": 0,
+            "surface_pressure": 0,
+            "wind_speed_10m": 0,
+            "shortwave_radiation": 0,
+            "direct_radiation": 0,
+            "diffuse_radiation": 0
+          },
+          "units": {
+            "time": "iso8601",
+            "temperature_2m": "\u00b0C",
+            "relative_humidity_2m": "%",
+            "dew_point_2m": "\u00b0C",
+            "surface_pressure": "hPa",
+            "wind_speed_10m": "m/s",
+            "shortwave_radiation": "W/m\u00b2",
+            "direct_radiation": "W/m\u00b2",
+            "diffuse_radiation": "W/m\u00b2"
+          },
+          "coverage_start": "2025-06-01T00:00",
+          "coverage_end": "2025-09-30T23:00",
+          "returned_grid": {
+            "latitude": 24.0,
+            "longitude": 52.75,
+            "elevation": 9.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=24.08&longitude=52.73&timezone=Asia%2FDubai&hourly=pm10%2Cpm2_5%2Cdust%2Caerosol_optical_depth%2Cuv_index%2Cus_aqi&start_date=2025-06-01&end_date=2025-09-30&domains=cams_global",
+          "site": "ruwais",
+          "requested_coordinates": {
+            "latitude": 24.08,
+            "longitude": 52.73
+          },
+          "kind": "cams_archive",
+          "period": "2025",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "downloaded",
+          "files": [
+            {
+              "path": "raw/air_quality/cams_archive_ruwais_2025.json",
+              "bytes": 143912,
+              "sha256": "2dc2ef269dc3a6881905de43bc21c501b7bd359dc82e0f10557a1dabfc2fdb28"
+            },
+            {
+              "path": "raw/air_quality/cams_archive_ruwais_2025.csv",
+              "bytes": 138228,
+              "sha256": "5eee48b1075c1fa6d2283f14a3e12b7820feb04936b48e8cbd7df8bf0d232adb"
+            },
+            {
+              "path": "processed/replay/cams_archive_ruwais_2025-08-01.csv",
+              "bytes": 1199,
+              "sha256": "d8557073377a00a1f6d03c053bc985beb5394c76a20e83b3fdccbd4702977cf1",
+              "rows": 24,
+              "derived_from": "raw/air_quality/cams_archive_ruwais_2025.json",
+              "coverage_date": "2025-08-01"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:28:03.055887+00:00",
+          "rows": 2928,
+          "null_counts": {
+            "pm10": 0,
+            "pm2_5": 0,
+            "dust": 0,
+            "aerosol_optical_depth": 0,
+            "uv_index": 0,
+            "us_aqi": 0
+          },
+          "units": {
+            "time": "iso8601",
+            "pm10": "\u03bcg/m\u00b3",
+            "pm2_5": "\u03bcg/m\u00b3",
+            "dust": "\u03bcg/m\u00b3",
+            "aerosol_optical_depth": "",
+            "uv_index": "",
+            "us_aqi": "USAQI"
+          },
+          "coverage_start": "2025-06-01T00:00",
+          "coverage_end": "2025-09-30T23:00",
+          "returned_grid": {
+            "latitude": 24.099998,
+            "longitude": 52.699997,
+            "elevation": 9.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://api.open-meteo.com/v1/forecast?latitude=24.08&longitude=52.73&timezone=Asia%2FDubai&hourly=temperature_2m%2Crelative_humidity_2m%2Cdew_point_2m%2Csurface_pressure%2Cwind_speed_10m%2Cshortwave_radiation%2Cdirect_radiation%2Cdiffuse_radiation%2Cuv_index&forecast_days=16&wind_speed_unit=ms",
+          "site": "ruwais",
+          "requested_coordinates": {
+            "latitude": 24.08,
+            "longitude": 52.73
+          },
+          "kind": "forecast",
+          "period": "20261103T032734Z",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "partial",
+          "files": [
+            {
+              "path": "raw/weather/forecast_ruwais_20261103T032734Z.json",
+              "bytes": 24980,
+              "sha256": "362078276d344bbe0dd0bf571c458dc2928cf35bdfba3e8d2e44c3aa5a2829cf"
+            },
+            {
+              "path": "raw/weather/forecast_ruwais_20261103T032734Z.csv",
+              "bytes": 23752,
+              "sha256": "bd72a682cb73b3c0353409810cdbab3994366fe01df6f48ee90883bee107a248"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:28:02.980044+00:00",
+          "rows": 384,
+          "null_counts": {
+            "temperature_2m": 1,
+            "relative_humidity_2m": 1,
+            "dew_point_2m": 1,
+            "surface_pressure": 1,
+            "wind_speed_10m": 1,
+            "shortwave_radiation": 1,
+            "direct_radiation": 1,
+            "diffuse_radiation": 1,
+            "uv_index": 1
+          },
+          "units": {
+            "time": "iso8601",
+            "temperature_2m": "\u00b0C",
+            "relative_humidity_2m": "%",
+            "dew_point_2m": "\u00b0C",
+            "surface_pressure": "hPa",
+            "wind_speed_10m": "m/s",
+            "shortwave_radiation": "W/m\u00b2",
+            "direct_radiation": "W/m\u00b2",
+            "diffuse_radiation": "W/m\u00b2",
+            "uv_index": ""
+          },
+          "coverage_start": "2026-11-03T00:00",
+          "coverage_end": "2026-11-18T23:00",
+          "returned_grid": {
+            "latitude": 24.077328,
+            "longitude": 52.738853,
+            "elevation": 9.0
+          },
+          "utc_offset_seconds": 14400
+        },
+        {
+          "source_url": "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=24.08&longitude=52.73&timezone=Asia%2FDubai&hourly=pm10%2Cpm2_5%2Cdust%2Caerosol_optical_depth%2Cuv_index%2Cus_aqi&forecast_days=5&domains=cams_global",
+          "site": "ruwais",
+          "requested_coordinates": {
+            "latitude": 24.08,
+            "longitude": 52.73
+          },
+          "kind": "cams_forecast",
+          "period": "20261103T032734Z",
+          "synthetic": false,
+          "timezone": "Asia/Dubai",
+          "status": "partial",
+          "files": [
+            {
+              "path": "raw/air_quality/cams_forecast_ruwais_20261103T032734Z.json",
+              "bytes": 6165,
+              "sha256": "a6926f9a48d0c1ee6542ffb5eda34953a9bf70a788271c9cc33de4a3141af778"
+            },
+            {
+              "path": "raw/air_quality/cams_forecast_ruwais_20261103T032734Z.csv",
+              "bytes": 5415,
+              "sha256": "3328c185e5834a4e192e532928364551cf6767e9762ef117966d4e377aa1c271"
+            }
+          ],
+          "notes": [
+            "Representative locality coordinates chosen for this download; not a verified construction site.",
+            "Gridded model data, not work-front sensor measurements."
+          ],
+          "retrieved_at_utc": "2026-11-03T03:28:03.652091+00:00",
+          "rows": 120,
+          "null_counts": {
+            "pm10": 7,
+            "pm2_5": 7,
+            "dust": 7,
+            "aerosol_optical_depth": 7,
+            "uv_index": 7,
+            "us_aqi": 6
+          },
+          "units": {
+            "time": "iso8601",
+            "pm10": "\u03bcg/m\u00b3",
+            "pm2_5": "\u03bcg/m\u00b3",
+            "dust": "\u03bcg/m\u00b3",
+            "aerosol_optical_depth": "",
+            "uv_index": "",
+            "us_aqi": "USAQI"
+          },
+          "coverage_start": "2026-11-03T00:00",
+          "coverage_end": "2026-11-07T23:00",
+          "returned_grid": {
+            "latitude": 24.099998,
+            "longitude": 52.699997,
+            "elevation": 9.0
+          },
+          "utc_offset_seconds": 14400
+        }
+      ],
+      "documentation": [
+        "https://open-meteo.com/en/docs/historical-weather-api",
+        "https://open-meteo.com/en/docs/air-quality-api",
+        "https://open-meteo.com/en/docs",
+        "https://open-meteo.com/en/terms"
+      ],
+      "coordinate_note": "Chosen locality reference points; original implementation coordinates unavailable.",
+      "license_note": "Attribute Open-Meteo and underlying providers; free API is non-commercial. Check terms before commercial use."
+    },
+    "station_nasa": {
+      "generatedUTC": "2026-11-03T03:29:17+00:00",
+      "entries": [
+        {
+          "sourceURL": "https://www.ncei.noaa.gov/pub/data/noaa/isd-history.csv",
+          "retrievedUTC": "2026-11-03T03:28:49+00:00",
+          "status": "ok",
+          "relativePath": "raw/noaa_gsod/isd-history.csv",
+          "sha256": "1994747ab4af1b97e63adb434b4d0d022f2daee76f0c144ea9ab46be2d906604",
+          "bytes": 2914601,
+          "rows": 29661,
+          "units": {
+            "LAT": "degrees north",
+            "LON": "degrees east",
+            "ELEV(M)": "m"
+          },
+          "coverage": {
+            "begin": "station-dependent",
+            "end": "station-dependent"
+          },
+          "location": {
+            "abu_dhabi_international": {
+              "USAF": "412170",
+              "WBAN": "99999",
+              "STATION NAME": "ABU DHABI INTL / ZAYED INTL",
+              "CTRY": "AE",
+              "STATE": "",
+              "ICAO": "OMAA",
+              "LAT": "+24.433",
+              "LON": "+054.651",
+              "ELEV(M)": "+0026.8",
+              "BEGIN": "19830102",
+              "END": "20250824"
+            },
+            "al_bateen": {
+              "USAF": "412160",
+              "WBAN": "99999",
+              "STATION NAME": "AL BATEEN EXECUTIVE",
+              "CTRY": "AE",
+              "STATE": "",
+              "ICAO": "OMAD",
+              "LAT": "+24.428",
+              "LON": "+054.458",
+              "ELEV(M)": "+0004.9",
+              "BEGIN": "19830101",
+              "END": "20250824"
+            },
+            "al_ain": {
+              "USAF": "412180",
+              "WBAN": "99999",
+              "STATION NAME": "AL AIN INTL",
+              "CTRY": "AE",
+              "STATE": "",
+              "ICAO": "OMAL",
+              "LAT": "+24.262",
+              "LON": "+055.609",
+              "ELEV(M)": "+0264.9",
+              "BEGIN": "19940308",
+              "END": "20250824"
+            }
+          },
+          "notes": "Official ISD station history; three selected station records in location."
+        },
+        {
+          "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2020/41217099999.csv",
+          "retrievedUTC": "2026-11-03T03:28:51+00:00",
+          "status": "ok",
+          "relativePath": "raw/noaa_gsod/abu_dhabi_international_2020.csv",
+          "sha256": "602293f91fafc6a669d94f718e3520890bc7ab326ea5d4ecb7117224585dfcc7",
+          "bytes": 87792,
+          "rows": 363,
+          "units": {
+            "TEMP/DEWP/MAX/MIN": "deg F",
+            "WDSP/MXSPD/GUST": "knots",
+            "SLP/STP": "hPa",
+            "VISIB": "miles",
+            "PRCP": "inches"
+          },
+          "coverage": {
+            "first": "2020-01-01",
+            "last": "2020-12-31",
+            "requestedYear": 2020
+          },
+          "location": {
+            "stationID": "41217099999",
+            "name": "ABU DHABI INTERNATIONAL, AE",
+            "latitude": 24.432972,
+            "longitude": 54.651138,
+            "metadata": {
+              "USAF": "412170",
+              "WBAN": "99999",
+              "STATION NAME": "ABU DHABI INTL / ZAYED INTL",
+              "CTRY": "AE",
+              "STATE": "",
+              "ICAO": "OMAA",
+              "LAT": "+24.433",
+              "LON": "+054.651",
+              "ELEV(M)": "+0026.8",
+              "BEGIN": "19830102",
+              "END": "20250824"
+            }
+          },
+          "notes": {
+            "missingByField": {
+              "TEMP": 0,
+              "DEWP": 0,
+              "SLP": 3,
+              "STP": 0,
+              "VISIB": 0,
+              "WDSP": 0,
+              "MXSPD": 0,
+              "GUST": 344,
+              "MAX": 0,
+              "MIN": 0,
+              "PRCP": 10,
+              "SNDP": 363
+            },
+            "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+            "missingCalendarDaysWithinCoverage": 3
+          }
+        },
+        {
+          "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2021/41217099999.csv",
+          "retrievedUTC": "2026-11-03T03:28:52+00:00",
+          "status": "ok",
+          "relativePath": "raw/noaa_gsod/abu_dhabi_international_2021.csv",
+          "sha256": "7ab3b1d75a8802c6a1053aad850a807f6e3d9a3ec5719aa9c02b85efd48552f4",
+          "bytes": 87551,
+          "rows": 362,
+          "units": {
+            "TEMP/DEWP/MAX/MIN": "deg F",
+            "WDSP/MXSPD/GUST": "knots",
+            "SLP/STP": "hPa",
+            "VISIB": "miles",
+            "PRCP": "inches"
+          },
+          "coverage": {
+            "first": "2021-01-01",
+            "last": "2021-12-31",
+            "requestedYear": 2021
+          },
+          "location": {
+            "stationID": "41217099999",
+            "name": "ABU DHABI INTERNATIONAL, AE",
+            "latitude": 24.432972,
+            "longitude": 54.651138,
+            "metadata": {
+              "USAF": "412170",
+              "WBAN": "99999",
+              "STATION NAME": "ABU DHABI INTL / ZAYED INTL",
+              "CTRY": "AE",
+              "STATE": "",
+              "ICAO": "OMAA",
+              "LAT": "+24.433",
+              "LON": "+054.651",
+              "ELEV(M)": "+0026.8",
+              "BEGIN": "19830102",
+              "END": "20250824"
+            }
+          },
+          "notes": {
+            "missingByField": {
+              "TEMP": 0,
+              "DEWP": 0,
+              "SLP": 133,
+              "STP": 0,
+              "VISIB": 0,
+              "WDSP": 0,
+              "MXSPD": 0,
+              "GUST": 354,
+              "MAX": 0,
+              "MIN": 0,
+              "PRCP": 1,
+              "SNDP": 362
+            },
+            "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+            "missingCalendarDaysWithinCoverage": 3
+          }
+        },
+        {
+          "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2022/41217099999.csv",
+          "retrievedUTC": "2026-11-03T03:28:54+00:00",
+          "status": "ok",
+          "relativePath": "raw/noaa_gsod/abu_dhabi_international_2022.csv",
+          "sha256": "17a05028cc23377fe8919546636b6b25ee47c1907959a57be5d089eee1dacbee",
+          "bytes": 88274,
+          "rows": 365,
+          "units": {
+            "TEMP/DEWP/MAX/MIN": "deg F",
+            "WDSP/MXSPD/GUST": "knots",
+            "SLP/STP": "hPa",
+            "VISIB": "miles",
+            "PRCP": "inches"
+          },
+          "coverage": {
+            "first": "2022-01-01",
+            "last": "2022-12-31",
+            "requestedYear": 2022
+          },
+          "location": {
+            "stationID": "41217099999",
+            "name": "ABU DHABI INTERNATIONAL, AE",
+            "latitude": 24.432972,
+            "longitude": 54.651138,
+            "metadata": {
+              "USAF": "412170",
+              "WBAN": "99999",
+              "STATION NAME": "ABU DHABI INTL / ZAYED INTL",
+              "CTRY": "AE",
+              "STATE": "",
+              "ICAO": "OMAA",
+              "LAT": "+24.433",
+              "LON": "+054.651",
+              "ELEV(M)": "+0026.8",
+              "BEGIN": "19830102",
+              "END": "20250824"
+            }
+          },
+          "notes": {
+            "missingByField": {
+              "TEMP": 0,
+              "DEWP": 0,
+              "SLP": 179,
+              "STP": 0,
+              "VISIB": 0,
+              "WDSP": 0,
+              "MXSPD": 0,
+              "GUST": 351,
+              "MAX": 0,
+              "MIN": 0,
+              "PRCP": 6,
+              "SNDP": 365
+            },
+            "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+            "missingCalendarDaysWithinCoverage": 0
+          }
+        },
+        {
+          "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2023/41217099999.csv",
+          "retrievedUTC": "2026-11-03T03:28:55+00:00",
+          "status": "ok",
+          "relativePath": "raw/noaa_gsod/abu_dhabi_international_2023.csv",
+          "sha256": "37cb10707a9d0920a3f2e9960e55a5b98576b476d52612f953e2650be55308d5",
+          "bytes": 88274,
+          "rows": 365,
+          "units": {
+            "TEMP/DEWP/MAX/MIN": "deg F",
+            "WDSP/MXSPD/GUST": "knots",
+            "SLP/STP": "hPa",
+            "VISIB": "miles",
+            "PRCP": "inches"
+          },
+          "coverage": {
+            "first": "2023-01-01",
+            "last": "2023-12-31",
+            "requestedYear": 2023
+          },
+          "location": {
+            "stationID": "41217099999",
+            "name": "ABU DHABI INTERNATIONAL, AE",
+            "latitude": 24.432972,
+            "longitude": 54.651138,
+            "metadata": {
+              "USAF": "412170",
+              "WBAN": "99999",
+              "STATION NAME": "ABU DHABI INTL / ZAYED INTL",
+              "CTRY": "AE",
+              "STATE": "",
+              "ICAO": "OMAA",
+              "LAT": "+24.433",
+              "LON": "+054.651",
+              "ELEV(M)": "+0026.8",
+              "BEGIN": "19830102",
+              "END": "20250824"
+            }
+          },
+          "notes": {
+            "missingByField": {
+              "TEMP": 0,
+              "DEWP": 0,
+              "SLP": 0,
+              "STP": 0,
+              "VISIB": 0,
+              "WDSP": 0,
+              "MXSPD": 0,
+              "GUST": 352,
+              "MAX": 0,
+              "MIN": 0,
+              "PRCP": 5,
+              "SNDP": 365
+            },
+            "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+            "missingCalendarDaysWithinCoverage": 0
+          }
+        },
+        {
+          "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2024/41217099999.csv",
+          "retrievedUTC": "2026-11-03T03:28:56+00:00",
+          "status": "ok",
+          "relativePath": "raw/noaa_gsod/abu_dhabi_international_2024.csv",
+          "sha256": "2fcb50b42a1c24c9bbb2015bfb99e9883f3529d02f69269115f43a925ad0c0d9",
+          "bytes": 85864,
+          "rows": 355,
+          "units": {
+            "TEMP/DEWP/MAX/MIN": "deg F",
+            "WDSP/MXSPD/GUST": "knots",
+            "SLP/STP": "hPa",
+            "VISIB": "miles",
+            "PRCP": "inches"
+          },
+          "coverage": {
+            "first": "2024-01-01",
+            "last": "2024-12-31",
+            "requestedYear": 2024
+          },
+          "location": {
+            "stationID": "41217099999",
+            "name": "ABU DHABI INTERNATIONAL, AE",
+            "latitude": 24.432972,
+            "longitude": 54.651138,
+            "metadata": {
+              "USAF": "412170",
+              "WBAN": "99999",
+              "STATION NAME": "ABU DHABI INTL / ZAYED INTL",
+              "CTRY": "AE",
+              "STATE": "",
+              "ICAO": "OMAA",
+              "LAT": "+24.433",
+              "LON": "+054.651",
+              "ELEV(M)": "+0026.8",
+              "BEGIN": "19830102",
+              "END": "20250824"
+            }
+          },
+          "notes": {
+            "missingByField": {
+              "TEMP": 0,
+              "DEWP": 0,
+              "SLP": 2,
+              "STP": 0,
+              "VISIB": 0,
+              "WDSP": 0,
+              "MXSPD": 0,
+              "GUST": 337,
+              "MAX": 0,
+              "MIN": 0,
+              "PRCP": 6,
+              "SNDP": 355
+            },
+            "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+            "missingCalendarDaysWithinCoverage": 11
+          }
+        },
+        {
+          "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2025/41217099999.csv",
+          "retrievedUTC": "2026-11-03T03:28:58+00:00",
+          "status": "ok",
+          "relativePath": "raw/noaa_gsod/abu_dhabi_international_2025.csv",
+          "sha256": "e6653e95154ad712bac79cc60cbab1a05a38c8ebb6964443e1de81735d77a415",
+          "bytes": 61122,
+          "rows": 233,
+          "units": {
+            "TEMP/DEWP/MAX/MIN": "deg F",
+            "WDSP/MXSPD/GUST": "knots",
+            "SLP/STP": "hPa",
+            "VISIB": "miles",
+            "PRCP": "inches"
+          },
+          "coverage": {
+            "first": "2025-01-01",
+            "last": "2025-08-24",
+            "requestedYear": 2025
+          },
+          "location": {
+            "stationID": "41217099999",
+            "name": "ABU DHABI INTERNATIONAL ZAYED INTERNATIONAL, AE",
+            "latitude": 24.432972,
+            "longitude": 54.651138,
+            "metadata": {
+              "USAF": "412170",
+              "WBAN": "99999",
+              "STATION NAME": "ABU DHABI INTL / ZAYED INTL",
+              "CTRY": "AE",
+              "STATE": "",
+              "ICAO": "OMAA",
+              "LAT": "+24.433",
+              "LON": "+054.651",
+              "ELEV(M)": "+0026.8",
+              "BEGIN": "19830102",
+              "END": "20250824"
+            }
+          },
+          "notes": {
+            "missingByField": {
+              "TEMP": 0,
+              "DEWP": 0,
+              "SLP": 0,
+              "STP": 0,
+              "VISIB": 0,
+              "WDSP": 0,
+              "MXSPD": 0,
+              "GUST": 212,
+              "MAX": 0,
+              "MIN": 0,
+              "PRCP": 1,
+              "SNDP": 233
+            },
+            "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+            "missingCalendarDaysWithinCoverage": 3
+          }
+        },
+        {
+          "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2020/41216099999.csv",
+          "retrievedUTC": "2026-11-03T03:28:59+00:00",
+          "status": "ok",
+          "relativePath": "raw/noaa_gsod/al_bateen_2020.csv",
+          "sha256": "eeda96844b5ec04c8b6bb80d927d34a642c08cec3cee882b51fa1cbc4b3de8f7",
+          "bytes": 81704,
+          "rows": 365,
+          "units": {
+            "TEMP/DEWP/MAX/MIN": "deg F",
+            "WDSP/MXSPD/GUST": "knots",
+            "SLP/STP": "hPa",
+            "VISIB": "miles",
+            "PRCP": "inches"
+          },
+          "coverage": {
+            "first": "2020-01-01",
+            "last": "2020-12-31",
+            "requestedYear": 2020
+          },
+          "location": {
+            "stationID": "41216099999",
+            "name": "BATEEN, AE",
+            "latitude": 24.428333,
+            "longitude": 54.458084,
+            "metadata": {
+              "USAF": "412160",
+              "WBAN": "99999",
+              "STATION NAME": "AL BATEEN EXECUTIVE",
+              "CTRY": "AE",
+              "STATE": "",
+              "ICAO": "OMAD",
+              "LAT": "+24.428",
+              "LON": "+054.458",
+              "ELEV(M)": "+0004.9",
+              "BEGIN": "19830101",
+              "END": "20250824"
+            }
+          },
+          "notes": {
+            "missingByField": {
+              "TEMP": 0,
+              "DEWP": 0,
+              "SLP": 3,
+              "STP": 0,
+              "VISIB": 0,
+              "WDSP": 0,
+              "MXSPD": 0,
+              "GUST": 347,
+              "MAX": 0,
+              "MIN": 0,
+              "PRCP": 9,
+              "SNDP": 365
+            },
+            "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+            "missingCalendarDaysWithinCoverage": 1
+          }
+        },
+        {
+          "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2021/41216099999.csv",
+          "retrievedUTC": "2026-11-03T03:29:00+00:00",
+          "status": "ok",
+          "relativePath": "raw/noaa_gsod/al_bateen_2021.csv",
+          "sha256": "3c0a6f17901caa6ba0edd2ec4f21d3e2317a4e52f3387d649acb049dc2f77724",
+          "bytes": 81035,
+          "rows": 362,
+          "units": {
+            "TEMP/DEWP/MAX/MIN": "deg F",
+            "WDSP/MXSPD/GUST": "knots",
+            "SLP/STP": "hPa",
+            "VISIB": "miles",
+            "PRCP": "inches"
+          },
+          "coverage": {
+            "first": "2021-01-01",
+            "last": "2021-12-31",
+            "requestedYear": 2021
+          },
+          "location": {
+            "stationID": "41216099999",
+            "name": "BATEEN, AE",
+            "latitude": 24.428333,
+            "longitude": 54.458084,
+            "metadata": {
+              "USAF": "412160",
+              "WBAN": "99999",
+              "STATION NAME": "AL BATEEN EXECUTIVE",
+              "CTRY": "AE",
+              "STATE": "",
+              "ICAO": "OMAD",
+              "LAT": "+24.428",
+              "LON": "+054.458",
+              "ELEV(M)": "+0004.9",
+              "BEGIN": "19830101",
+              "END": "20250824"
+            }
+          },
+          "notes": {
+            "missingByField": {
+              "TEMP": 0,
+              "DEWP": 0,
+              "SLP": 133,
+              "STP": 0,
+              "VISIB": 0,
+              "WDSP": 0,
+              "MXSPD": 0,
+              "GUST": 357,
+              "MAX": 0,
+              "MIN": 0,
+              "PRCP": 2,
+              "SNDP": 362
+            },
+            "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+            "missingCalendarDaysWithinCoverage": 3
+          }
+        },
+        {
+          "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2022/41216099999.csv",
+          "retrievedUTC": "2026-11-03T03:29:02+00:00",
+          "status": "ok",
+          "relativePath": "raw/noaa_gsod/al_bateen_2022.csv",
+          "sha256": "ed6925cf3778d19d8ae7b0feb8497dc268d01018a908abeca6569b18c3e9a348",
+          "bytes": 81704,
+          "rows": 365,
+          "units": {
+            "TEMP/DEWP/MAX/MIN": "deg F",
+            "WDSP/MXSPD/GUST": "knots",
+            "SLP/STP": "hPa",
+            "VISIB": "miles",
+            "PRCP": "inches"
+          },
+          "coverage": {
+            "first": "2022-01-01",
+            "last": "2022-12-31",
+            "requestedYear": 2022
+          },
+          "location": {
+            "stationID": "41216099999",
+            "name": "BATEEN, AE",
+            "latitude": 24.428333,
+            "longitude": 54.458084,
+            "metadata": {
+              "USAF": "412160",
+              "WBAN": "99999",
+              "STATION NAME": "AL BATEEN EXECUTIVE",
+              "CTRY": "AE",
+              "STATE": "",
+              "ICAO": "OMAD",
+              "LAT": "+24.428",
+              "LON": "+054.458",
+              "ELEV(M)": "+0004.9",
+              "BEGIN": "19830101",
+              "END": "20250824"
+            }
+          },
+          "notes": {
+            "missingByField": {
+              "TEMP": 0,
+              "DEWP": 0,
+              "SLP": 178,
+              "STP": 0,
+              "VISIB": 0,
+              "WDSP": 0,
+              "MXSPD": 0,
+              "GUST": 354,
+              "MAX": 0,
+              "MIN": 0,
+              "PRCP": 10,
+              "SNDP": 365
+            },
+            "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+            "missingCalendarDaysWithinCoverage": 0
+          }
+        },
+        {
+          "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2023/41216099999.csv",
+          "retrievedUTC": "2026-11-03T03:29:03+00:00",
+          "status": "ok",
+          "relativePath": "raw/noaa_gsod/al_bateen_2023.csv",
+          "sha256": "14344863493e350fa645c8e9f13a1c9e62dabe070e6622c85274e81cc95eae66",
+          "bytes": 81704,
+          "rows": 365,
+          "units": {
+            "TEMP/DEWP/MAX/MIN": "deg F",
+            "WDSP/MXSPD/GUST": "knots",
+            "SLP/STP": "hPa",
+            "VISIB": "miles",
+            "PRCP": "inches"
+          },
+          "coverage": {
+            "first": "2023-01-01",
+            "last": "2023-12-31",
+            "requestedYear": 2023
+          },
+          "location": {
+            "stationID": "41216099999",
+            "name": "BATEEN, AE",
+            "latitude": 24.428333,
+            "longitude": 54.458084,
+            "metadata": {
+              "USAF": "412160",
+              "WBAN": "99999",
+              "STATION NAME": "AL BATEEN EXECUTIVE",
+              "CTRY": "AE",
+              "STATE": "",
+              "ICAO": "OMAD",
+              "LAT": "+24.428",
+              "LON": "+054.458",
+              "ELEV(M)": "+0004.9",
+              "BEGIN": "19830101",
+              "END": "20250824"
+            }
+          },
+          "notes": {
+            "missingByField": {
+              "TEMP": 0,
+              "DEWP": 0,
+              "SLP": 2,
+              "STP": 0,
+              "VISIB": 0,
+              "WDSP": 0,
+              "MXSPD": 1,
+              "GUST": 356,
+              "MAX": 0,
+              "MIN": 0,
+              "PRCP": 4,
+              "SNDP": 365
+            },
+            "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+            "missingCalendarDaysWithinCoverage": 0
+          }
+        },
+        {
+          "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2024/41216099999.csv",
+          "retrievedUTC": "2026-11-03T03:29:04+00:00",
+          "status": "ok",
+          "relativePath": "raw/noaa_gsod/al_bateen_2024.csv",
+          "sha256": "7a70af8516e42057bdd89a90c7d3db79c0a1ae4c42b0da2e3fc416155425cbfc",
+          "bytes": 79474,
+          "rows": 355,
+          "units": {
+            "TEMP/DEWP/MAX/MIN": "deg F",
+            "WDSP/MXSPD/GUST": "knots",
+            "SLP/STP": "hPa",
+            "VISIB": "miles",
+            "PRCP": "inches"
+          },
+          "coverage": {
+            "first": "2024-01-01",
+            "last": "2024-12-31",
+            "requestedYear": 2024
+          },
+          "location": {
+            "stationID": "41216099999",
+            "name": "BATEEN, AE",
+            "latitude": 24.428333,
+            "longitude": 54.458084,
+            "metadata": {
+              "USAF": "412160",
+              "WBAN": "99999",
+              "STATION NAME": "AL BATEEN EXECUTIVE",
+              "CTRY": "AE",
+              "STATE": "",
+              "ICAO": "OMAD",
+              "LAT": "+24.428",
+              "LON": "+054.458",
+              "ELEV(M)": "+0004.9",
+              "BEGIN": "19830101",
+              "END": "20250824"
+            }
+          },
+          "notes": {
+            "missingByField": {
+              "TEMP": 0,
+              "DEWP": 0,
+              "SLP": 3,
+              "STP": 0,
+              "VISIB": 0,
+              "WDSP": 0,
+              "MXSPD": 0,
+              "GUST": 345,
+              "MAX": 0,
+              "MIN": 0,
+              "PRCP": 7,
+              "SNDP": 355
+            },
+            "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+            "missingCalendarDaysWithinCoverage": 11
+          }
+        },
+        {
+          "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2025/41216099999.csv",
+          "retrievedUTC": "2026-11-03T03:29:05+00:00",
+          "status": "ok",
+          "relativePath": "raw/noaa_gsod/al_bateen_2025.csv",
+          "sha256": "dbf8f4bfbb52e7256dabef7d376042061a27533db7b0f775428a82f42f2a7db6",
+          "bytes": 55533,
+          "rows": 234,
+          "units": {
+            "TEMP/DEWP/MAX/MIN": "deg F",
+            "WDSP/MXSPD/GUST": "knots",
+            "SLP/STP": "hPa",
+            "VISIB": "miles",
+            "PRCP": "inches"
+          },
+          "coverage": {
+            "first": "2025-01-01",
+            "last": "2025-08-24",
+            "requestedYear": 2025
+          },
+          "location": {
+            "stationID": "41216099999",
+            "name": "AL BATEEN EXECUTIVE, AE",
+            "latitude": 24.428333,
+            "longitude": 54.458084,
+            "metadata": {
+              "USAF": "412160",
+              "WBAN": "99999",
+              "STATION NAME": "AL BATEEN EXECUTIVE",
+              "CTRY": "AE",
+              "STATE": "",
+              "ICAO": "OMAD",
+              "LAT": "+24.428",
+              "LON": "+054.458",
+              "ELEV(M)": "+0004.9",
+              "BEGIN": "19830101",
+              "END": "20250824"
+            }
+          },
+          "notes": {
+            "missingByField": {
+              "TEMP": 0,
+              "DEWP": 0,
+              "SLP": 117,
+              "STP": 0,
+              "VISIB": 0,
+              "WDSP": 0,
+              "MXSPD": 0,
+              "GUST": 226,
+              "MAX": 0,
+              "MIN": 0,
+              "PRCP": 2,
+              "SNDP": 234
+            },
+            "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+            "missingCalendarDaysWithinCoverage": 2
+          }
+        },
+        {
+          "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2020/41218099999.csv",
+          "retrievedUTC": "2026-11-03T03:29:07+00:00",
+          "status": "ok",
+          "relativePath": "raw/noaa_gsod/al_ain_2020.csv",
+          "sha256": "b48098dd06762b796cd042d04bf7aa8b70ecf8a35d1262596ecf8a10c57a05a5",
+          "bytes": 87066,
+          "rows": 363,
+          "units": {
+            "TEMP/DEWP/MAX/MIN": "deg F",
+            "WDSP/MXSPD/GUST": "knots",
+            "SLP/STP": "hPa",
+            "VISIB": "miles",
+            "PRCP": "inches"
+          },
+          "coverage": {
+            "first": "2020-01-01",
+            "last": "2020-12-31",
+            "requestedYear": 2020
+          },
+          "location": {
+            "stationID": "41218099999",
+            "name": "AL AIN INTERNATIONAL, AE",
+            "latitude": 24.261667,
+            "longitude": 55.609167,
+            "metadata": {
+              "USAF": "412180",
+              "WBAN": "99999",
+              "STATION NAME": "AL AIN INTL",
+              "CTRY": "AE",
+              "STATE": "",
+              "ICAO": "OMAL",
+              "LAT": "+24.262",
+              "LON": "+055.609",
+              "ELEV(M)": "+0264.9",
+              "BEGIN": "19940308",
+              "END": "20250824"
+            }
+          },
+          "notes": {
+            "missingByField": {
+              "TEMP": 0,
+              "DEWP": 0,
+              "SLP": 3,
+              "STP": 0,
+              "VISIB": 0,
+              "WDSP": 0,
+              "MXSPD": 0,
+              "GUST": 323,
+              "MAX": 0,
+              "MIN": 0,
+              "PRCP": 17,
+              "SNDP": 363
+            },
+            "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+            "missingCalendarDaysWithinCoverage": 3
+          }
+        },
+        {
+          "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2021/41218099999.csv",
+          "retrievedUTC": "2026-11-03T03:29:08+00:00",
+          "status": "ok",
+          "relativePath": "raw/noaa_gsod/al_ain_2021.csv",
+          "sha256": "ca262fc5d4d36db48ac9778750f50baae696acb8cd11b0f83be051a08bb6a860",
+          "bytes": 86827,
+          "rows": 362,
+          "units": {
+            "TEMP/DEWP/MAX/MIN": "deg F",
+            "WDSP/MXSPD/GUST": "knots",
+            "SLP/STP": "hPa",
+            "VISIB": "miles",
+            "PRCP": "inches"
+          },
+          "coverage": {
+            "first": "2021-01-01",
+            "last": "2021-12-31",
+            "requestedYear": 2021
+          },
+          "location": {
+            "stationID": "41218099999",
+            "name": "AL AIN INTERNATIONAL, AE",
+            "latitude": 24.261667,
+            "longitude": 55.609167,
+            "metadata": {
+              "USAF": "412180",
+              "WBAN": "99999",
+              "STATION NAME": "AL AIN INTL",
+              "CTRY": "AE",
+              "STATE": "",
+              "ICAO": "OMAL",
+              "LAT": "+24.262",
+              "LON": "+055.609",
+              "ELEV(M)": "+0264.9",
+              "BEGIN": "19940308",
+              "END": "20250824"
+            }
+          },
+          "notes": {
+            "missingByField": {
+              "TEMP": 0,
+              "DEWP": 0,
+              "SLP": 132,
+              "STP": 0,
+              "VISIB": 0,
+              "WDSP": 0,
+              "MXSPD": 0,
+              "GUST": 332,
+              "MAX": 0,
+              "MIN": 0,
+              "PRCP": 7,
+              "SNDP": 362
+            },
+            "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+            "missingCalendarDaysWithinCoverage": 3
+          }
+        },
+        {
+          "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2022/41218099999.csv",
+          "retrievedUTC": "2026-11-03T03:29:09+00:00",
+          "status": "ok",
+          "relativePath": "raw/noaa_gsod/al_ain_2022.csv",
+          "sha256": "62dee1b4aa9629c130bf6190e99f58de395d0b5b54ff696d5d4029f7de444b5e",
+          "bytes": 87066,
+          "rows": 363,
+          "units": {
+            "TEMP/DEWP/MAX/MIN": "deg F",
+            "WDSP/MXSPD/GUST": "knots",
+            "SLP/STP": "hPa",
+            "VISIB": "miles",
+            "PRCP": "inches"
+          },
+          "coverage": {
+            "first": "2022-01-01",
+            "last": "2022-12-31",
+            "requestedYear": 2022
+          },
+          "location": {
+            "stationID": "41218099999",
+            "name": "AL AIN INTERNATIONAL, AE",
+            "latitude": 24.261667,
+            "longitude": 55.609167,
+            "metadata": {
+              "USAF": "412180",
+              "WBAN": "99999",
+              "STATION NAME": "AL AIN INTL",
+              "CTRY": "AE",
+              "STATE": "",
+              "ICAO": "OMAL",
+              "LAT": "+24.262",
+              "LON": "+055.609",
+              "ELEV(M)": "+0264.9",
+              "BEGIN": "19940308",
+              "END": "20250824"
+            }
+          },
+          "notes": {
+            "missingByField": {
+              "TEMP": 0,
+              "DEWP": 0,
+              "SLP": 176,
+              "STP": 0,
+              "VISIB": 0,
+              "WDSP": 0,
+              "MXSPD": 0,
+              "GUST": 339,
+              "MAX": 0,
+              "MIN": 0,
+              "PRCP": 14,
+              "SNDP": 363
+            },
+            "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+            "missingCalendarDaysWithinCoverage": 2
+          }
+        },
+        {
+          "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2023/41218099999.csv",
+          "retrievedUTC": "2026-11-03T03:29:11+00:00",
+          "status": "ok",
+          "relativePath": "raw/noaa_gsod/al_ain_2023.csv",
+          "sha256": "36da8f9f71da2dd2a45ded8697bd45523c8ac45b33f72d65fdaad8395d9a7cf8",
+          "bytes": 87544,
+          "rows": 365,
+          "units": {
+            "TEMP/DEWP/MAX/MIN": "deg F",
+            "WDSP/MXSPD/GUST": "knots",
+            "SLP/STP": "hPa",
+            "VISIB": "miles",
+            "PRCP": "inches"
+          },
+          "coverage": {
+            "first": "2023-01-01",
+            "last": "2023-12-31",
+            "requestedYear": 2023
+          },
+          "location": {
+            "stationID": "41218099999",
+            "name": "AL AIN INTERNATIONAL, AE",
+            "latitude": 24.261667,
+            "longitude": 55.609167,
+            "metadata": {
+              "USAF": "412180",
+              "WBAN": "99999",
+              "STATION NAME": "AL AIN INTL",
+              "CTRY": "AE",
+              "STATE": "",
+              "ICAO": "OMAL",
+              "LAT": "+24.262",
+              "LON": "+055.609",
+              "ELEV(M)": "+0264.9",
+              "BEGIN": "19940308",
+              "END": "20250824"
+            }
+          },
+          "notes": {
+            "missingByField": {
+              "TEMP": 0,
+              "DEWP": 0,
+              "SLP": 1,
+              "STP": 0,
+              "VISIB": 0,
+              "WDSP": 0,
+              "MXSPD": 0,
+              "GUST": 336,
+              "MAX": 0,
+              "MIN": 0,
+              "PRCP": 5,
+              "SNDP": 365
+            },
+            "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+            "missingCalendarDaysWithinCoverage": 0
+          }
+        },
+        {
+          "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2024/41218099999.csv",
+          "retrievedUTC": "2026-11-03T03:29:12+00:00",
+          "status": "ok",
+          "relativePath": "raw/noaa_gsod/al_ain_2024.csv",
+          "sha256": "ca991116b8a87898b19df0e108bdc1867599bea00ddce0f4139251214d9033a7",
+          "bytes": 85154,
+          "rows": 355,
+          "units": {
+            "TEMP/DEWP/MAX/MIN": "deg F",
+            "WDSP/MXSPD/GUST": "knots",
+            "SLP/STP": "hPa",
+            "VISIB": "miles",
+            "PRCP": "inches"
+          },
+          "coverage": {
+            "first": "2024-01-01",
+            "last": "2024-12-31",
+            "requestedYear": 2024
+          },
+          "location": {
+            "stationID": "41218099999",
+            "name": "AL AIN INTERNATIONAL, AE",
+            "latitude": 24.261667,
+            "longitude": 55.609167,
+            "metadata": {
+              "USAF": "412180",
+              "WBAN": "99999",
+              "STATION NAME": "AL AIN INTL",
+              "CTRY": "AE",
+              "STATE": "",
+              "ICAO": "OMAL",
+              "LAT": "+24.262",
+              "LON": "+055.609",
+              "ELEV(M)": "+0264.9",
+              "BEGIN": "19940308",
+              "END": "20250824"
+            }
+          },
+          "notes": {
+            "missingByField": {
+              "TEMP": 0,
+              "DEWP": 0,
+              "SLP": 2,
+              "STP": 0,
+              "VISIB": 0,
+              "WDSP": 0,
+              "MXSPD": 0,
+              "GUST": 329,
+              "MAX": 0,
+              "MIN": 0,
+              "PRCP": 6,
+              "SNDP": 355
+            },
+            "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+            "missingCalendarDaysWithinCoverage": 11
+          }
+        },
+        {
+          "sourceURL": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2025/41218099999.csv",
+          "retrievedUTC": "2026-11-03T03:29:13+00:00",
+          "status": "ok",
+          "relativePath": "raw/noaa_gsod/al_ain_2025.csv",
+          "sha256": "e9bad1f1ebcd602bac9f96000c3b40ef8c4abb51d15898e482a3b1420e1279f4",
+          "bytes": 54801,
+          "rows": 228,
+          "units": {
+            "TEMP/DEWP/MAX/MIN": "deg F",
+            "WDSP/MXSPD/GUST": "knots",
+            "SLP/STP": "hPa",
+            "VISIB": "miles",
+            "PRCP": "inches"
+          },
+          "coverage": {
+            "first": "2025-01-01",
+            "last": "2025-08-24",
+            "requestedYear": 2025
+          },
+          "location": {
+            "stationID": "41218099999",
+            "name": "AL AIN INTERNATIONAL, AE",
+            "latitude": 24.261667,
+            "longitude": 55.609167,
+            "metadata": {
+              "USAF": "412180",
+              "WBAN": "99999",
+              "STATION NAME": "AL AIN INTL",
+              "CTRY": "AE",
+              "STATE": "",
+              "ICAO": "OMAL",
+              "LAT": "+24.262",
+              "LON": "+055.609",
+              "ELEV(M)": "+0264.9",
+              "BEGIN": "19940308",
+              "END": "20250824"
+            }
+          },
+          "notes": {
+            "missingByField": {
+              "TEMP": 0,
+              "DEWP": 0,
+              "SLP": 0,
+              "STP": 0,
+              "VISIB": 0,
+              "WDSP": 0,
+              "MXSPD": 0,
+              "GUST": 215,
+              "MAX": 0,
+              "MIN": 0,
+              "PRCP": 1,
+              "SNDP": 228
+            },
+            "timeBasis": "NOAA GSOD DATE; no local-time conversion",
+            "missingCalendarDaysWithinCoverage": 8
+          }
+        },
+        {
+          "sourceURL": "https://power.larc.nasa.gov/api/temporal/hourly/point?parameters=T2M%2CRH2M%2CWS10M%2CALLSKY_SFC_SW_DWN%2CPS&community=RE&longitude=54.5&latitude=24.35&start=20250801&end=20250801&format=JSON&time-standard=UTC",
+          "retrievedUTC": "2026-11-03T03:29:14+00:00",
+          "status": "ok",
+          "relativePath": "raw/nasa_power/mussafah_hourly_20250801_20250801.json",
+          "sha256": "e87596fdbb2edb8c4f94e5be59274e934d1a645a8bf717552f20923aade9fe97",
+          "bytes": 3030,
+          "rows": 24,
+          "units": {
+            "T2M": "C",
+            "RH2M": "%",
+            "WS10M": "m/s",
+            "ALLSKY_SFC_SW_DWN": "Wh/m^2",
+            "PS": "kPa"
+          },
+          "coverage": {
+            "first": "20250801",
+            "last": "20250801",
+            "temporal": "hourly",
+            "timeStandard": "UTC"
+          },
+          "location": {
+            "requestedLatitude": 24.35,
+            "requestedLongitude": 54.5,
+            "returnedCoordinates": [
+              54.5,
+              24.35,
+              8.25
+            ]
+          },
+          "notes": {
+            "missingByParameter": {
+              "T2M": 0,
+              "RH2M": 0,
+              "WS10M": 0,
+              "ALLSKY_SFC_SW_DWN": 0,
+              "PS": 0
+            },
+            "fillValue": -999.0,
+            "sources": [
+              "SYN1DEG",
+              "MERRA2",
+              "POWER"
+            ],
+            "apiVersion": "v2.10.3"
+          }
+        },
+        {
+          "sourceURL": "https://power.larc.nasa.gov/api/temporal/hourly/point?parameters=T2M%2CRH2M%2CWS10M%2CALLSKY_SFC_SW_DWN%2CPS&community=RE&longitude=54.5&latitude=24.35&start=20250801&end=20250801&format=JSON&time-standard=UTC",
+          "retrievedUTC": "2026-11-03T03:29:14+00:00",
+          "status": "ok",
+          "relativePath": "raw/nasa_power/mussafah_hourly_20250801_20250801.csv",
+          "sha256": "566afafd258b3d175464396798c85b49943bc549998384eaf90de844bd2de960",
+          "bytes": 1296,
+          "rows": 24,
+          "units": {
+            "T2M": "C",
+            "RH2M": "%",
+            "WS10M": "m/s",
+            "ALLSKY_SFC_SW_DWN": "Wh/m^2",
+            "PS": "kPa"
+          },
+          "coverage": {
+            "first": "20250801",
+            "last": "20250801",
+            "temporal": "hourly",
+            "timeStandard": "UTC"
+          },
+          "location": {
+            "requestedLatitude": 24.35,
+            "requestedLongitude": 54.5,
+            "returnedCoordinates": [
+              54.5,
+              24.35,
+              8.25
+            ]
+          },
+          "notes": {
+            "missingByParameter": {
+              "T2M": 0,
+              "RH2M": 0,
+              "WS10M": 0,
+              "ALLSKY_SFC_SW_DWN": 0,
+              "PS": 0
+            },
+            "fillValue": -999.0,
+            "sources": [
+              "SYN1DEG",
+              "MERRA2",
+              "POWER"
+            ],
+            "apiVersion": "v2.10.3",
+            "derivedFrom": "raw/nasa_power/mussafah_hourly_20250801_20250801.json",
+            "missingValues": "blank CSV cells"
+          }
+        },
+        {
+          "sourceURL": "https://power.larc.nasa.gov/api/temporal/hourly/point?parameters=T2M%2CRH2M%2CWS10M%2CALLSKY_SFC_SW_DWN%2CPS&community=RE&longitude=54.5&latitude=24.35&start=20240804&end=20240804&format=JSON&time-standard=UTC",
+          "retrievedUTC": "2026-11-03T03:29:15+00:00",
+          "status": "ok",
+          "relativePath": "raw/nasa_power/mussafah_hourly_20240804_20240804.json",
+          "sha256": "c84bf2e86da2e7a14f0b37cd326e7708cf09dcd2fbf4f4594aeec08e7a45313e",
+          "bytes": 3037,
+          "rows": 24,
+          "units": {
+            "T2M": "C",
+            "RH2M": "%",
+            "WS10M": "m/s",
+            "ALLSKY_SFC_SW_DWN": "Wh/m^2",
+            "PS": "kPa"
+          },
+          "coverage": {
+            "first": "20240804",
+            "last": "20240804",
+            "temporal": "hourly",
+            "timeStandard": "UTC"
+          },
+          "location": {
+            "requestedLatitude": 24.35,
+            "requestedLongitude": 54.5,
+            "returnedCoordinates": [
+              54.5,
+              24.35,
+              8.25
+            ]
+          },
+          "notes": {
+            "missingByParameter": {
+              "T2M": 0,
+              "RH2M": 0,
+              "WS10M": 0,
+              "ALLSKY_SFC_SW_DWN": 0,
+              "PS": 0
+            },
+            "fillValue": -999.0,
+            "sources": [
+              "SYN1DEG",
+              "MERRA2",
+              "POWER"
+            ],
+            "apiVersion": "v2.10.3"
+          }
+        },
+        {
+          "sourceURL": "https://power.larc.nasa.gov/api/temporal/hourly/point?parameters=T2M%2CRH2M%2CWS10M%2CALLSKY_SFC_SW_DWN%2CPS&community=RE&longitude=54.5&latitude=24.35&start=20240804&end=20240804&format=JSON&time-standard=UTC",
+          "retrievedUTC": "2026-11-03T03:29:15+00:00",
+          "status": "ok",
+          "relativePath": "raw/nasa_power/mussafah_hourly_20240804_20240804.csv",
+          "sha256": "a36f9c9a69050e652ef8aee69556ced21d56326f9f84c1c32ff22210e9c28fd7",
+          "bytes": 1303,
+          "rows": 24,
+          "units": {
+            "T2M": "C",
+            "RH2M": "%",
+            "WS10M": "m/s",
+            "ALLSKY_SFC_SW_DWN": "Wh/m^2",
+            "PS": "kPa"
+          },
+          "coverage": {
+            "first": "20240804",
+            "last": "20240804",
+            "temporal": "hourly",
+            "timeStandard": "UTC"
+          },
+          "location": {
+            "requestedLatitude": 24.35,
+            "requestedLongitude": 54.5,
+            "returnedCoordinates": [
+              54.5,
+              24.35,
+              8.25
+            ]
+          },
+          "notes": {
+            "missingByParameter": {
+              "T2M": 0,
+              "RH2M": 0,
+              "WS10M": 0,
+              "ALLSKY_SFC_SW_DWN": 0,
+              "PS": 0
+            },
+            "fillValue": -999.0,
+            "sources": [
+              "SYN1DEG",
+              "MERRA2",
+              "POWER"
+            ],
+            "apiVersion": "v2.10.3",
+            "derivedFrom": "raw/nasa_power/mussafah_hourly_20240804_20240804.json",
+            "missingValues": "blank CSV cells"
+          }
+        },
+        {
+          "sourceURL": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M%2CRH2M%2CWS10M%2CALLSKY_SFC_SW_DWN%2CPS&community=RE&longitude=54.5&latitude=24.35&start=20230601&end=20230930&format=JSON&time-standard=UTC",
+          "retrievedUTC": "2026-11-03T03:29:16+00:00",
+          "status": "ok",
+          "relativePath": "raw/nasa_power/mussafah_daily_20230601_20230930.json",
+          "sha256": "0fd7f85548fc25702bd66c75efe00566d637de0b054705ad74e2d1342e544d49",
+          "bytes": 11148,
+          "rows": 122,
+          "units": {
+            "T2M": "C",
+            "RH2M": "%",
+            "WS10M": "m/s",
+            "ALLSKY_SFC_SW_DWN": "kW-hr/m^2/day",
+            "PS": "kPa"
+          },
+          "coverage": {
+            "first": "20230601",
+            "last": "20230930",
+            "temporal": "daily",
+            "timeStandard": "UTC"
+          },
+          "location": {
+            "requestedLatitude": 24.35,
+            "requestedLongitude": 54.5,
+            "returnedCoordinates": [
+              54.5,
+              24.35,
+              8.25
+            ]
+          },
+          "notes": {
+            "missingByParameter": {
+              "T2M": 0,
+              "RH2M": 0,
+              "WS10M": 0,
+              "ALLSKY_SFC_SW_DWN": 0,
+              "PS": 0
+            },
+            "fillValue": -999.0,
+            "sources": [
+              "MERRA2",
+              "SYN1DEG",
+              "POWER"
+            ],
+            "apiVersion": "v2.10.1"
+          }
+        },
+        {
+          "sourceURL": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M%2CRH2M%2CWS10M%2CALLSKY_SFC_SW_DWN%2CPS&community=RE&longitude=54.5&latitude=24.35&start=20230601&end=20230930&format=JSON&time-standard=UTC",
+          "retrievedUTC": "2026-11-03T03:29:16+00:00",
+          "status": "ok",
+          "relativePath": "raw/nasa_power/mussafah_daily_20230601_20230930.csv",
+          "sha256": "355acdc967433664435a1f7793df417c912df17c81d4e87ed2d746f3a42803cf",
+          "bytes": 5142,
+          "rows": 122,
+          "units": {
+            "T2M": "C",
+            "RH2M": "%",
+            "WS10M": "m/s",
+            "ALLSKY_SFC_SW_DWN": "kW-hr/m^2/day",
+            "PS": "kPa"
+          },
+          "coverage": {
+            "first": "20230601",
+            "last": "20230930",
+            "temporal": "daily",
+            "timeStandard": "UTC"
+          },
+          "location": {
+            "requestedLatitude": 24.35,
+            "requestedLongitude": 54.5,
+            "returnedCoordinates": [
+              54.5,
+              24.35,
+              8.25
+            ]
+          },
+          "notes": {
+            "missingByParameter": {
+              "T2M": 0,
+              "RH2M": 0,
+              "WS10M": 0,
+              "ALLSKY_SFC_SW_DWN": 0,
+              "PS": 0
+            },
+            "fillValue": -999.0,
+            "sources": [
+              "MERRA2",
+              "SYN1DEG",
+              "POWER"
+            ],
+            "apiVersion": "v2.10.1",
+            "derivedFrom": "raw/nasa_power/mussafah_daily_20230601_20230930.json",
+            "missingValues": "blank CSV cells"
+          }
+        },
+        {
+          "sourceURL": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M%2CRH2M%2CWS10M%2CALLSKY_SFC_SW_DWN%2CPS&community=RE&longitude=54.5&latitude=24.35&start=20240601&end=20240930&format=JSON&time-standard=UTC",
+          "retrievedUTC": "2026-11-03T03:29:17+00:00",
+          "status": "ok",
+          "relativePath": "raw/nasa_power/mussafah_daily_20240601_20240930.json",
+          "sha256": "683fd1fa2c58153c9872d7002c8c3a89543d66153dd40729de6c62faeb83639f",
+          "bytes": 11160,
+          "rows": 122,
+          "units": {
+            "T2M": "C",
+            "RH2M": "%",
+            "WS10M": "m/s",
+            "ALLSKY_SFC_SW_DWN": "kW-hr/m^2/day",
+            "PS": "kPa"
+          },
+          "coverage": {
+            "first": "20240601",
+            "last": "20240930",
+            "temporal": "daily",
+            "timeStandard": "UTC"
+          },
+          "location": {
+            "requestedLatitude": 24.35,
+            "requestedLongitude": 54.5,
+            "returnedCoordinates": [
+              54.5,
+              24.35,
+              8.25
+            ]
+          },
+          "notes": {
+            "missingByParameter": {
+              "T2M": 0,
+              "RH2M": 0,
+              "WS10M": 0,
+              "ALLSKY_SFC_SW_DWN": 0,
+              "PS": 0
+            },
+            "fillValue": -999.0,
+            "sources": [
+              "MERRA2",
+              "SYN1DEG",
+              "POWER"
+            ],
+            "apiVersion": "v2.10.1"
+          }
+        },
+        {
+          "sourceURL": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M%2CRH2M%2CWS10M%2CALLSKY_SFC_SW_DWN%2CPS&community=RE&longitude=54.5&latitude=24.35&start=20240601&end=20240930&format=JSON&time-standard=UTC",
+          "retrievedUTC": "2026-11-03T03:29:17+00:00",
+          "status": "ok",
+          "relativePath": "raw/nasa_power/mussafah_daily_20240601_20240930.csv",
+          "sha256": "61c2cc2097c5ea23f57159effbd949127975cfdd880566e6ade455a0f8027497",
+          "bytes": 5155,
+          "rows": 122,
+          "units": {
+            "T2M": "C",
+            "RH2M": "%",
+            "WS10M": "m/s",
+            "ALLSKY_SFC_SW_DWN": "kW-hr/m^2/day",
+            "PS": "kPa"
+          },
+          "coverage": {
+            "first": "20240601",
+            "last": "20240930",
+            "temporal": "daily",
+            "timeStandard": "UTC"
+          },
+          "location": {
+            "requestedLatitude": 24.35,
+            "requestedLongitude": 54.5,
+            "returnedCoordinates": [
+              54.5,
+              24.35,
+              8.25
+            ]
+          },
+          "notes": {
+            "missingByParameter": {
+              "T2M": 0,
+              "RH2M": 0,
+              "WS10M": 0,
+              "ALLSKY_SFC_SW_DWN": 0,
+              "PS": 0
+            },
+            "fillValue": -999.0,
+            "sources": [
+              "MERRA2",
+              "SYN1DEG",
+              "POWER"
+            ],
+            "apiVersion": "v2.10.1",
+            "derivedFrom": "raw/nasa_power/mussafah_daily_20240601_20240930.json",
+            "missingValues": "blank CSV cells"
+          }
+        },
+        {
+          "sourceURL": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M%2CRH2M%2CWS10M%2CALLSKY_SFC_SW_DWN%2CPS&community=RE&longitude=54.5&latitude=24.35&start=20250601&end=20250930&format=JSON&time-standard=UTC",
+          "retrievedUTC": "2026-11-03T03:29:17+00:00",
+          "status": "ok",
+          "relativePath": "raw/nasa_power/mussafah_daily_20250601_20250930.json",
+          "sha256": "79b45ce9605296640a345cc1c8b13cd26b50e6425da76fbca030482882859d33",
+          "bytes": 11140,
+          "rows": 122,
+          "units": {
+            "T2M": "C",
+            "RH2M": "%",
+            "WS10M": "m/s",
+            "ALLSKY_SFC_SW_DWN": "kW-hr/m^2/day",
+            "PS": "kPa"
+          },
+          "coverage": {
+            "first": "20250601",
+            "last": "20250930",
+            "temporal": "daily",
+            "timeStandard": "UTC"
+          },
+          "location": {
+            "requestedLatitude": 24.35,
+            "requestedLongitude": 54.5,
+            "returnedCoordinates": [
+              54.5,
+              24.35,
+              8.25
+            ]
+          },
+          "notes": {
+            "missingByParameter": {
+              "T2M": 0,
+              "RH2M": 0,
+              "WS10M": 0,
+              "ALLSKY_SFC_SW_DWN": 0,
+              "PS": 0
+            },
+            "fillValue": -999.0,
+            "sources": [
+              "MERRA2",
+              "SYN1DEG",
+              "POWER"
+            ],
+            "apiVersion": "v2.10.1"
+          }
+        },
+        {
+          "sourceURL": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M%2CRH2M%2CWS10M%2CALLSKY_SFC_SW_DWN%2CPS&community=RE&longitude=54.5&latitude=24.35&start=20250601&end=20250930&format=JSON&time-standard=UTC",
+          "retrievedUTC": "2026-11-03T03:29:17+00:00",
+          "status": "ok",
+          "relativePath": "raw/nasa_power/mussafah_daily_20250601_20250930.csv",
+          "sha256": "e3cd74cf68b558144da4761cb34f1697d1c36aaa7d32d8f52490d6b4d2f07bfb",
+          "bytes": 5134,
+          "rows": 122,
+          "units": {
+            "T2M": "C",
+            "RH2M": "%",
+            "WS10M": "m/s",
+            "ALLSKY_SFC_SW_DWN": "kW-hr/m^2/day",
+            "PS": "kPa"
+          },
+          "coverage": {
+            "first": "20250601",
+            "last": "20250930",
+            "temporal": "daily",
+            "timeStandard": "UTC"
+          },
+          "location": {
+            "requestedLatitude": 24.35,
+            "requestedLongitude": 54.5,
+            "returnedCoordinates": [
+              54.5,
+              24.35,
+              8.25
+            ]
+          },
+          "notes": {
+            "missingByParameter": {
+              "T2M": 0,
+              "RH2M": 0,
+              "WS10M": 0,
+              "ALLSKY_SFC_SW_DWN": 0,
+              "PS": 0
+            },
+            "fillValue": -999.0,
+            "sources": [
+              "MERRA2",
+              "SYN1DEG",
+              "POWER"
+            ],
+            "apiVersion": "v2.10.1",
+            "derivedFrom": "raw/nasa_power/mussafah_daily_20250601_20250930.json",
+            "missingValues": "blank CSV cells"
+          }
+        }
+      ],
+      "failures": [],
+      "sourceDocumentation": [
+        "https://www.ncei.noaa.gov/access/search/datasets/global-summary-of-the-day/",
+        "https://power.larc.nasa.gov/docs/services/api/temporal/",
+        "https://power.larc.nasa.gov/docs/faqs/other/"
+      ]
+    },
+    "onet": {
+      "dataset": "O*NET 30.1 Database",
+      "version": "30.1",
+      "release": "December 2025",
+      "status": "validated",
+      "retrievedUTC": "2026-11-03T03:28:42.474851+00:00",
+      "sourceURL": "https://www.onetcenter.org/dl_files/database/db_30_1_text.zip",
+      "sourceArchive": {
+        "path": "raw/onet/db_30_1_text.zip",
+        "bytes": 13435626,
+        "sha256": "bfdf922f17a5c22d7f6c9498ee2cc49a6752976072085f9b9b1af0f2232a6568"
+      },
+      "documentationURLs": [
+        "https://www.onetcenter.org/db_releases.html",
+        "https://www.onetcenter.org/dictionary/30.1/excel/work_context.html",
+        "https://www.onetcenter.org/dictionary/30.1/excel/work_context_categories.html"
+      ],
+      "archiveStatus": "existing",
+      "licenseStatus": "existing",
+      "license": {
+        "url": "https://www.onetcenter.org/license_db.html",
+        "name": "CC BY 4.0",
+        "file": {
+          "path": "raw/onet/LICENSE.html",
+          "bytes": 40673,
+          "sha256": "c5713b54238da9640d7cad86b08ce00aa6e32b78596a40543af35878a10810b3"
+        },
+        "attribution": "O*NET 30.1 Database by the U.S. Department of Labor, Employment and Training Administration (USDOL/ETA). Used under CC BY 4.0. Extract modified by selecting occupations and Work Context elements; USDOL/ETA has not approved, endorsed, or tested these modifications."
+      },
+      "files": [
+        {
+          "path": "raw/onet/Read Me.txt",
+          "bytes": 516,
+          "sha256": "45cd3154c7f5e1e9ca3a0be6eb565c80acddc9bd7b63feeb76dfdd2e845a6c5f",
+          "rows": null
+        },
+        {
+          "path": "raw/onet/Occupation Data.txt",
+          "bytes": 265794,
+          "sha256": "63e6029d3d30ff5c7cf39b5304a733b77a409e01c65ae7095fe92f6d18d74a66",
+          "rows": 1016
+        },
+        {
+          "path": "raw/onet/Work Context.txt",
+          "bytes": 36782933,
+          "sha256": "d52948bc8457192a56fbf40f96168dcbfcbb3a7bdd1c22b097ab02e833dea190",
+          "rows": 297676
+        },
+        {
+          "path": "raw/onet/Work Context Categories.txt",
+          "bytes": 23269,
+          "sha256": "c10536131f81056d81acf44db1c6f3efb19c09a44420a805f36020db7d1489db",
+          "rows": 281
+        }
+      ],
+      "processed": {
+        "path": "processed/onet_30_1_work_context_heat_proxy.csv",
+        "bytes": 15321,
+        "sha256": "77e77e61b0d85758a54d77d8eb725ccaec06467bafa7c29748d5000f345ed862",
+        "rows": 90
+      },
+      "coverage": {
+        "geography": "United States occupations; proxy for UAE only, not UAE measurements",
+        "occupations": {
+          "47-2061.00": "Construction Laborers",
+          "47-2171.00": "Reinforcing Iron and Rebar Workers",
+          "47-2181.00": "Roofers",
+          "53-3032.00": "Heavy and Tractor-Trailer Truck Drivers",
+          "53-3033.00": "Light Truck Drivers"
+        },
+        "elements": {
+          "4.C.2.a.1.c": "Outdoors, Exposed to All Weather Conditions",
+          "4.C.2.a.1.d": "Outdoors, Under Cover",
+          "4.C.2.b.1.b": "Exposed to Very Hot or Cold Temperatures"
+        },
+        "scales": [
+          "CX",
+          "CXP"
+        ],
+        "scaleMeaning": {
+          "CX": "mean frequency rating",
+          "CXP": "percent of respondents endorsing each frequency category"
+        },
+        "limitations": "The hot/cold item combines very hot and very cold exposure; outdoor conditions are not equivalent to heat exposure. O*NET ratings are US occupational survey data, not UAE exposure or worker health observations."
+      }
+    },
+    "safety": {
+      "generated_utc": "2026-11-03T03:33:53.531306+00:00",
+      "sources": [
+        {
+          "source_url": "https://www.adphc.gov.ae/-/media/Project/ADPHC/ADPHC/PDF/OSHAD-SF/Codes-of-Practise/11---Safety-in-the-Heat-v31-English.pdf",
+          "relative_path": "raw/regulatory/adosh_sf_cop_11_safety_heat_v4_en.pdf",
+          "title": "Safety in the Heat",
+          "version": "4.0",
+          "attempted_utc": "2026-11-03T03:33:19.485609+00:00",
+          "notes": "Fresh download from interrupted prior run; reused after validation",
+          "status": "downloaded",
+          "retrieved_utc": "2026-11-03T03:29:02.226340+00:00",
+          "sha256": "e441dc99ba65ecaf07265a16ccf683707365b1fcebf8055a782d4796f3af0909",
+          "bytes": 341108,
+          "final_url": "https://www.adphc.gov.ae/-/media/Project/ADPHC/ADPHC/PDF/OSHAD-SF/Codes-of-Practise/11---Safety-in-the-Heat-v31-English.pdf"
+        },
+        {
+          "source_url": "https://www.adphc.gov.ae/-/media/Project/ADPHC/ADPHC/PDF/OSHAD-SF/Codes-of-Practise/11---Safety-in-the-Heat-v31-Arabic.pdf",
+          "relative_path": "raw/regulatory/adosh_sf_cop_11_safety_heat_v4_ar.pdf",
+          "title": "Safety in the Heat (Arabic)",
+          "version": "4.0",
+          "attempted_utc": "2026-11-03T03:33:19.486039+00:00",
+          "notes": "Fresh download from interrupted prior run; reused after validation",
+          "status": "downloaded",
+          "retrieved_utc": "2026-11-03T03:29:08.711227+00:00",
+          "sha256": "cf68c0c81ce179cc0ed3de3ee45c9259a0025985842af1288061e8758619790e",
+          "bytes": 342563,
+          "final_url": "https://www.adphc.gov.ae/-/media/Project/ADPHC/ADPHC/PDF/OSHAD-SF/Codes-of-Practise/11---Safety-in-the-Heat-v31-Arabic.pdf"
+        },
+        {
+          "source_url": "https://www.adphc.gov.ae/-/media/Project/ADPHC/ADPHC/PDF/OSHAD-SF/Technical-Guidelines/Safety-in-the-Heat--Eng.pdf",
+          "relative_path": "raw/regulatory/adosh_sf_tg_safety_heat_v4_en.pdf",
+          "title": "Safety in the Heat Technical Guideline",
+          "version": "4.0",
+          "attempted_utc": "2026-11-03T03:33:19.486196+00:00",
+          "notes": "Fresh download from interrupted prior run; reused after validation",
+          "status": "downloaded",
+          "retrieved_utc": "2026-11-03T03:29:17.261552+00:00",
+          "sha256": "3f78cdac1314006fe8970f8eabb7a5edb95ac63106fb3eb3cfd25d0ac9ebd9cd",
+          "bytes": 1232151,
+          "final_url": "https://www.adphc.gov.ae/-/media/Project/ADPHC/ADPHC/PDF/OSHAD-SF/Technical-Guidelines/Safety-in-the-Heat--Eng.pdf"
+        },
+        {
+          "source_url": "https://www.adphc.gov.ae/-/media/Project/ADPHC/ADPHC/PDF/OSHAD-SF/Codes-of-Practise/2026/COP-531--OSH-Construction-Management-Plan-v41-English.pdf",
+          "relative_path": "raw/regulatory/adosh_sf_cop_53_1_construction_v4_1_en.pdf",
+          "title": "OSH Construction Management Plan",
+          "version": "4.1",
+          "attempted_utc": "2026-11-03T03:33:19.552666+00:00",
+          "notes": "Fresh download from interrupted prior run; reused after validation",
+          "status": "downloaded",
+          "retrieved_utc": "2026-11-03T03:29:22.318982+00:00",
+          "sha256": "9b04d1beb20a99026a8e8982bbcf2163e58693f1381c5274f7ee2b42699b2281",
+          "bytes": 482681,
+          "final_url": "https://www.adphc.gov.ae/-/media/Project/ADPHC/ADPHC/PDF/OSHAD-SF/Codes-of-Practise/2026/COP-531--OSH-Construction-Management-Plan-v41-English.pdf"
+        },
+        {
+          "source_url": "https://www.adphc.gov.ae/en/Legislation/Code-of-Practices",
+          "relative_path": "raw/regulatory/adphc_codes_of_practice_index.html",
+          "title": "ADPHC Codes of Practice index",
+          "version": "current",
+          "attempted_utc": "2026-11-03T03:33:19.553124+00:00",
+          "notes": "Fresh download from interrupted prior run; reused after validation",
+          "status": "downloaded",
+          "retrieved_utc": "2026-11-03T03:29:25.102101+00:00",
+          "sha256": "37ae48107b220d164c22d18ecb9bb555ebb8f5c5e850bdc44473d8ea735b6533",
+          "bytes": 93797,
+          "final_url": "https://www.adphc.gov.ae/en/Legislation/Code-of-Practices"
+        },
+        {
+          "source_url": "https://www.mohre.gov.ae/assets/download/11018ec0/Occupational-Health-and-Safety-Guide-EN.pdf.aspx",
+          "relative_path": "raw/regulatory/mohre_occupational_safety_guide_en.pdf",
+          "title": "MoHRE Occupational Health and Safety Guide",
+          "version": "current",
+          "attempted_utc": "2026-11-03T03:33:19.556328+00:00",
+          "status": "unavailable",
+          "notes": "OSError: curl: (28) Connection timed out after 8005 milliseconds"
+        },
+        {
+          "source_url": "https://www.mohre.gov.ae/handlers/download.ashx?YXNzZXQ9NjY1NA%3D%3D=",
+          "relative_path": "raw/regulatory/mohre_midday_resolution_44_2022_en.pdf",
+          "title": "MoHRE Ministerial Resolution 44 of 2022",
+          "version": "2022",
+          "attempted_utc": "2026-11-03T03:33:19.559240+00:00",
+          "status": "unavailable",
+          "notes": "OSError: curl: (28) Connection timed out after 8004 milliseconds"
+        },
+        {
+          "source_url": "https://mohre.gov.ae/assets/download/6786916a/administrative-decision-no-19-of-2023-relating-to-occupational-safety-and-health-and-labour.aspx",
+          "relative_path": "raw/regulatory/mohre_administrative_decision_19_2023_en.pdf",
+          "title": "MoHRE Administrative Decision 19 of 2023",
+          "version": "2023",
+          "attempted_utc": "2026-11-03T03:33:19.582543+00:00",
+          "status": "unavailable",
+          "notes": "OSError: curl: (28) Connection timed out after 8001 milliseconds"
+        },
+        {
+          "source_url": "https://www.uaelegislation.gov.ae/en/legislations/1972/download",
+          "relative_path": "raw/regulatory/uae_pdpl_fdl_45_2021_en.pdf",
+          "title": "UAE Personal Data Protection Law",
+          "version": "2021",
+          "attempted_utc": "2026-11-03T03:33:27.576746+00:00",
+          "status": "unavailable",
+          "notes": "OSError: curl: (56) The requested URL returned error: 403"
+        },
+        {
+          "source_url": "https://uaelegislation.gov.ae/en/legislations/1209/download",
+          "relative_path": "raw/regulatory/uae_health_ict_federal_law_2_2019_en.pdf",
+          "title": "UAE Health ICT Law",
+          "version": "2019",
+          "attempted_utc": "2026-11-03T03:33:27.579703+00:00",
+          "status": "unavailable",
+          "notes": "OSError: curl: (56) The requested URL returned error: 403"
+        },
+        {
+          "source_url": "https://uaelegislation.gov.ae/en/legislations/1444/download",
+          "relative_path": "raw/regulatory/uae_health_ict_regulation_32_2020_en.pdf",
+          "title": "UAE Health ICT Executive Regulation",
+          "version": "2020",
+          "attempted_utc": "2026-11-03T03:33:27.598088+00:00",
+          "status": "unavailable",
+          "notes": "OSError: curl: (56) The requested URL returned error: 403"
+        },
+        {
+          "source_url": "https://www.doh.gov.ae/-/media/Feature/Resources/Standards/ADHICS-v2-standard.ashx",
+          "relative_path": "raw/regulatory/adhics_v2_standard.pdf",
+          "title": "Abu Dhabi Healthcare Information and Cyber Security Standard",
+          "version": "2",
+          "attempted_utc": "2026-11-03T03:33:28.569979+00:00",
+          "status": "downloaded",
+          "retrieved_utc": "2026-11-03T03:33:53.529235+00:00",
+          "sha256": "1593e14f05cb9741200ead46787d1887cdba2f7443f193598d65c985b72f0661",
+          "bytes": 3834582,
+          "final_url": "https://www.doh.gov.ae/-/media/Feature/Resources/Standards/ADHICS-v2-standard.ashx"
+        },
+        {
+          "source_url": "https://www.doh.gov.ae/-/media/Feature/Aamen/ADHICS-FAQ.ashx",
+          "relative_path": "raw/regulatory/adhics_faq.pdf",
+          "title": "ADHICS FAQ",
+          "version": "current",
+          "attempted_utc": "2026-11-03T03:33:28.823532+00:00",
+          "notes": "Fresh download from interrupted prior run; reused after validation",
+          "status": "downloaded",
+          "retrieved_utc": "2026-11-03T03:32:37.933310+00:00",
+          "sha256": "a5d5be0e09d033ed92b2ca0773802ec0ca6f9abf2236e8fda48ee588d888cc47",
+          "bytes": 300044,
+          "final_url": "https://www.doh.gov.ae/-/media/Feature/Aamen/ADHICS-FAQ.ashx"
+        },
+        {
+          "source_url": "https://www.cdc.gov/niosh/docs/2016-106/pdfs/2016-106.pdf",
+          "relative_path": "raw/guidance/niosh_2016_106_heat.pdf",
+          "title": "NIOSH Occupational Exposure to Heat and Hot Environments",
+          "version": "2016-106",
+          "attempted_utc": "2026-11-03T03:33:28.832419+00:00",
+          "status": "downloaded",
+          "retrieved_utc": "2026-11-03T03:33:29.139909+00:00",
+          "sha256": "db50cd0d8c9ac921e6eacad550ba9ed34629891ace4035ccbeffc44fd8ba5ea3",
+          "bytes": 3716182,
+          "final_url": "https://www.cdc.gov/niosh/docs/2016-106/pdfs/2016-106.pdf"
+        },
+        {
+          "source_url": "https://www.ilo.org/sites/default/files/wcmsp5/groups/public/%40dgreports/%40dcomm/%40publ/documents/publication/wcms_711919.pdf",
+          "relative_path": "raw/guidance/ilo_working_on_a_warmer_planet_2019.pdf",
+          "title": "Working on a warmer planet",
+          "version": "2019",
+          "attempted_utc": "2026-11-03T03:33:28.856793+00:00",
+          "notes": "Fresh download from interrupted prior run; reused after validation",
+          "status": "downloaded",
+          "retrieved_utc": "2026-11-03T03:31:29.032794+00:00",
+          "sha256": "23fdd36a207b6136f55781ad64cbdf689222d4fdb76f90d8000b1b18ca0e61d5",
+          "bytes": 3747012,
+          "final_url": "https://www.ilo.org/sites/default/files/wcmsp5/groups/public/%40dgreports/%40dcomm/%40publ/documents/publication/wcms_711919.pdf"
+        },
+        {
+          "source_url": "https://cdn.who.int/media/docs/default-source/climate-change/heat-waves-and-health---guidance-on-warning-system-development.pdf?download=true&sfvrsn=e4813084_2",
+          "relative_path": "raw/guidance/who_wmo_heatwaves_warning_systems_2015.pdf",
+          "title": "Heatwaves and health: warning-system development",
+          "version": "2015/2016",
+          "attempted_utc": "2026-11-03T03:33:28.958205+00:00",
+          "notes": "Fresh download from interrupted prior run; reused after validation",
+          "status": "downloaded",
+          "retrieved_utc": "2026-11-03T03:31:30.426750+00:00",
+          "sha256": "9df0e831085b02eaef186252929ee132e1010ceff07b178a5240a19e98d0785c",
+          "bytes": 2945118,
+          "final_url": "https://cdn.who.int/media/docs/default-source/climate-change/heat-waves-and-health---guidance-on-warning-system-development.pdf?download=true&sfvrsn=e4813084_2"
+        },
+        {
+          "source_url": "https://iris.who.int/bitstream/handle/10665/382351/9789240099814-eng.pdf?sequence=1",
+          "relative_path": "raw/guidance/who_wmo_workplace_heat_stress_2025.pdf",
+          "title": "Climate change and workplace heat stress",
+          "version": "2025",
+          "attempted_utc": "2026-11-03T03:33:29.008957+00:00",
+          "status": "unavailable",
+          "notes": "AssertionError: missing PDF signature"
+        },
+        {
+          "source_url": "https://www.who.int/news-room/fact-sheets/detail/climate-change-heat-and-health",
+          "relative_path": "raw/guidance/who_heat_and_health_factsheet.html",
+          "title": "WHO Heat and health fact sheet",
+          "version": "2026",
+          "attempted_utc": "2026-11-03T03:33:29.141719+00:00",
+          "notes": "Fresh download from interrupted prior run; reused after validation",
+          "status": "downloaded",
+          "retrieved_utc": "2026-11-03T03:31:29.458631+00:00",
+          "sha256": "1f5e375ae4efa3df3fb904425ca1b8ff809ba2322353cf112f16ad143d28d390",
+          "bytes": 120193,
+          "final_url": "https://www.who.int/news-room/fact-sheets/detail/climate-change-heat-and-health"
+        },
+        {
+          "source_url": "https://observatory.mohre.gov.ae/en/uae-labour-market-priorities/social-protection-and-well-being-assurance",
+          "relative_path": "raw/regulatory/mohre_heat_stress_policy.html",
+          "title": "MoHRE Heat Stress Prevention Policy",
+          "version": "2025/2026",
+          "attempted_utc": "2026-11-03T03:33:29.143632+00:00",
+          "status": "downloaded",
+          "retrieved_utc": "2026-11-03T03:33:34.437076+00:00",
+          "sha256": "c860739f9020fc9b0412002c72a97c86f5db37a218991645ec8901a5df101b3a",
+          "bytes": 545902,
+          "final_url": "https://observatory.mohre.gov.ae/en/uae-labour-market-priorities/social-protection-and-well-being-assurance"
+        },
+        {
+          "source_url": "https://wmo.int/resources/publication-series/climate-change-and-workplace-heat-stress/climate-change-and-workplace-heat-stress",
+          "relative_path": "raw/guidance/wmo_workplace_heat_stress_2025.html",
+          "title": "WMO Climate change and workplace heat stress publication",
+          "version": "2025",
+          "attempted_utc": "2026-11-03T03:33:34.437488+00:00",
+          "status": "downloaded",
+          "retrieved_utc": "2026-11-03T03:33:35.597782+00:00",
+          "sha256": "1dea792083d0a5ea23f4036a07e518a533ec2cb7cb013b366e69370b2e2c5e0e",
+          "bytes": 105568,
+          "final_url": "https://wmo.int/resources/publication-series/climate-change-and-workplace-heat-stress/climate-change-and-workplace-heat-stress"
+        }
+      ]
+    }
+  },
+  "files": [
+    {
+      "path": "raw/air_quality/cams_archive_abu_dhabi_city_2023.csv",
+      "bytes": 139248,
+      "sha256": "3c37cbe8142effdf05a42444d5d00caba3ae6db6fdf33a361f2cb3baea12ff70",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_archive_abu_dhabi_city_2023.json",
+      "bytes": 144980,
+      "sha256": "9c8345d963e0f9b2aa0d2a3da31ce1b7b6361316b6b3a1757663f457354ad897",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_archive_abu_dhabi_city_2024.csv",
+      "bytes": 139384,
+      "sha256": "a1319b340cfbfe4f96f414b4f1ebdb85df42dec088ba416b521a189d19ba4852",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_archive_abu_dhabi_city_2024.json",
+      "bytes": 145073,
+      "sha256": "33081ab420fb2eaee2b33bdc0a12113f91511ee5e16911b05d92e919d30034ac",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_archive_abu_dhabi_city_2025.csv",
+      "bytes": 137806,
+      "sha256": "f063975b0502cdb185b1a79795176f15a8d0f49724f574cf2c3acba420594e38",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_archive_abu_dhabi_city_2025.json",
+      "bytes": 143548,
+      "sha256": "20c10f60111d85652c602b9dafeeb0f3560bd5673cdeedaa1a87353168649732",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_archive_al_ain_2023.csv",
+      "bytes": 139681,
+      "sha256": "10add1359a180adb623d68145d8dc83d9577ed4ac0548032872019dca4c23c0f",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_archive_al_ain_2023.json",
+      "bytes": 145380,
+      "sha256": "f1d4e343c24949a096300ecf8ad8b806f7e08de3ee8d3ae008a27cb6659dacaf",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_archive_al_ain_2024.csv",
+      "bytes": 140291,
+      "sha256": "7c7fe050d2e8359f542cad68534678a0f0fdee1b3744f747a4c7ef717a4b09aa",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_archive_al_ain_2024.json",
+      "bytes": 146033,
+      "sha256": "ccc51bd60f625262608f34309f5f212c51d69340f5f8e5a21eaf2ef9cadc3be0",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_archive_al_ain_2025.csv",
+      "bytes": 139402,
+      "sha256": "d438bc4d8651f40a0526051f8a153f4e051343c1baba31aa643f9bc80b33f310",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_archive_al_ain_2025.json",
+      "bytes": 145086,
+      "sha256": "f31ab2f21e9960c6883b6a5c2f6dd628733cdf26d9503c05378f2f5427ec7a9e",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_archive_mussafah_2023.csv",
+      "bytes": 139248,
+      "sha256": "3c37cbe8142effdf05a42444d5d00caba3ae6db6fdf33a361f2cb3baea12ff70",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_archive_mussafah_2023.json",
+      "bytes": 144980,
+      "sha256": "85aa23f86b28ac9c0a6da5eb9c6323d5a38aefdcb46f4f06a2823797987c96fa",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_archive_mussafah_2024.csv",
+      "bytes": 139384,
+      "sha256": "a1319b340cfbfe4f96f414b4f1ebdb85df42dec088ba416b521a189d19ba4852",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_archive_mussafah_2024.json",
+      "bytes": 145073,
+      "sha256": "4c6649c7008cfd15836dd3ee787814451a201b6ed67c3d744b95be709efb91e2",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_archive_mussafah_2025.csv",
+      "bytes": 137806,
+      "sha256": "f063975b0502cdb185b1a79795176f15a8d0f49724f574cf2c3acba420594e38",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_archive_mussafah_2025.json",
+      "bytes": 143547,
+      "sha256": "a433f4f2c1ab4b9122fb2f994aba08e9a7bee01a2aa4641ec7a91ba348de98d6",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_archive_ruwais_2023.csv",
+      "bytes": 139012,
+      "sha256": "faf4df0b996a74080aad07afa1fd65b23114588c7a1b0ecd266edd1fded68e36",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_archive_ruwais_2023.json",
+      "bytes": 144715,
+      "sha256": "a11a564caeb2872623750d1e24634b85d8e40cf84323e46d09477ae2919029e4",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_archive_ruwais_2024.csv",
+      "bytes": 139627,
+      "sha256": "1cccf035c52d8dad5d704c0b5caaabb0c9c97f11c1e5d8ac888f85a9ebdce0e6",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_archive_ruwais_2024.json",
+      "bytes": 145350,
+      "sha256": "5b2d95463dbaf0f06f7762be126fe945e26494a724902b54d56c7f1f92bbb9af",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_archive_ruwais_2025.csv",
+      "bytes": 138228,
+      "sha256": "5eee48b1075c1fa6d2283f14a3e12b7820feb04936b48e8cbd7df8bf0d232adb",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_archive_ruwais_2025.json",
+      "bytes": 143912,
+      "sha256": "2dc2ef269dc3a6881905de43bc21c501b7bd359dc82e0f10557a1dabfc2fdb28",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_forecast_abu_dhabi_city_20261103T032734Z.csv",
+      "bytes": 5451,
+      "sha256": "f82cf5e426c8abe43bb2a3b7fcfd415f234fc3812fbe75fb8ae395afe5b0787b",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_forecast_abu_dhabi_city_20261103T032734Z.json",
+      "bytes": 6188,
+      "sha256": "18abadf85ccea1a10ac2e65bc1b8729b40ebe072e4f5e06d82b30c0f7a6daeda",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_forecast_al_ain_20261103T032734Z.csv",
+      "bytes": 5470,
+      "sha256": "10f3d00bc22c07c9a02d618a358c3583134bc83a8bbc3489baa7ab3981f3a32b",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_forecast_al_ain_20261103T032734Z.json",
+      "bytes": 6215,
+      "sha256": "6e219ad178e7b777fcb7368ed00ccc4865d6df4254bd1c114279864e2c379372",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_forecast_mussafah_20261103T032734Z.csv",
+      "bytes": 5451,
+      "sha256": "f82cf5e426c8abe43bb2a3b7fcfd415f234fc3812fbe75fb8ae395afe5b0787b",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_forecast_mussafah_20261103T032734Z.json",
+      "bytes": 6189,
+      "sha256": "1c4317ed860443fbf49e26e6259c7524b69423cee312d5522e6017b40b725e72",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_forecast_ruwais_20261103T032734Z.csv",
+      "bytes": 5415,
+      "sha256": "3328c185e5834a4e192e532928364551cf6767e9762ef117966d4e377aa1c271",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/air_quality/cams_forecast_ruwais_20261103T032734Z.json",
+      "bytes": 6165,
+      "sha256": "a6926f9a48d0c1ee6542ffb5eda34953a9bf70a788271c9cc33de4a3141af778",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/guidance/ilo_working_on_a_warmer_planet_2019.pdf",
+      "bytes": 3747012,
+      "sha256": "23fdd36a207b6136f55781ad64cbdf689222d4fdb76f90d8000b1b18ca0e61d5",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/guidance/niosh_2016_106_heat.pdf",
+      "bytes": 3716182,
+      "sha256": "db50cd0d8c9ac921e6eacad550ba9ed34629891ace4035ccbeffc44fd8ba5ea3",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/guidance/who_heat_and_health_factsheet.html",
+      "bytes": 120193,
+      "sha256": "1f5e375ae4efa3df3fb904425ca1b8ff809ba2322353cf112f16ad143d28d390",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/guidance/who_wmo_heatwaves_warning_systems_2015.pdf",
+      "bytes": 2945118,
+      "sha256": "9df0e831085b02eaef186252929ee132e1010ceff07b178a5240a19e98d0785c",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/guidance/wmo_workplace_heat_stress_2025.html",
+      "bytes": 105568,
+      "sha256": "1dea792083d0a5ea23f4036a07e518a533ec2cb7cb013b366e69370b2e2c5e0e",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/nasa_power/mussafah_daily_20230601_20230930.csv",
+      "bytes": 5142,
+      "sha256": "355acdc967433664435a1f7793df417c912df17c81d4e87ed2d746f3a42803cf",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/nasa_power/mussafah_daily_20230601_20230930.json",
+      "bytes": 11148,
+      "sha256": "0fd7f85548fc25702bd66c75efe00566d637de0b054705ad74e2d1342e544d49",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/nasa_power/mussafah_daily_20240601_20240930.csv",
+      "bytes": 5155,
+      "sha256": "61c2cc2097c5ea23f57159effbd949127975cfdd880566e6ade455a0f8027497",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/nasa_power/mussafah_daily_20240601_20240930.json",
+      "bytes": 11160,
+      "sha256": "683fd1fa2c58153c9872d7002c8c3a89543d66153dd40729de6c62faeb83639f",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/nasa_power/mussafah_daily_20250601_20250930.csv",
+      "bytes": 5134,
+      "sha256": "e3cd74cf68b558144da4761cb34f1697d1c36aaa7d32d8f52490d6b4d2f07bfb",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/nasa_power/mussafah_daily_20250601_20250930.json",
+      "bytes": 11140,
+      "sha256": "79b45ce9605296640a345cc1c8b13cd26b50e6425da76fbca030482882859d33",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/nasa_power/mussafah_hourly_20240804_20240804.csv",
+      "bytes": 1303,
+      "sha256": "a36f9c9a69050e652ef8aee69556ced21d56326f9f84c1c32ff22210e9c28fd7",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/nasa_power/mussafah_hourly_20240804_20240804.json",
+      "bytes": 3037,
+      "sha256": "c84bf2e86da2e7a14f0b37cd326e7708cf09dcd2fbf4f4594aeec08e7a45313e",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/nasa_power/mussafah_hourly_20250801_20250801.csv",
+      "bytes": 1296,
+      "sha256": "566afafd258b3d175464396798c85b49943bc549998384eaf90de844bd2de960",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/nasa_power/mussafah_hourly_20250801_20250801.json",
+      "bytes": 3030,
+      "sha256": "e87596fdbb2edb8c4f94e5be59274e934d1a645a8bf717552f20923aade9fe97",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/noaa_gsod/abu_dhabi_international_2020.csv",
+      "bytes": 87792,
+      "sha256": "602293f91fafc6a669d94f718e3520890bc7ab326ea5d4ecb7117224585dfcc7",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/noaa_gsod/abu_dhabi_international_2021.csv",
+      "bytes": 87551,
+      "sha256": "7ab3b1d75a8802c6a1053aad850a807f6e3d9a3ec5719aa9c02b85efd48552f4",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/noaa_gsod/abu_dhabi_international_2022.csv",
+      "bytes": 88274,
+      "sha256": "17a05028cc23377fe8919546636b6b25ee47c1907959a57be5d089eee1dacbee",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/noaa_gsod/abu_dhabi_international_2023.csv",
+      "bytes": 88274,
+      "sha256": "37cb10707a9d0920a3f2e9960e55a5b98576b476d52612f953e2650be55308d5",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/noaa_gsod/abu_dhabi_international_2024.csv",
+      "bytes": 85864,
+      "sha256": "2fcb50b42a1c24c9bbb2015bfb99e9883f3529d02f69269115f43a925ad0c0d9",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/noaa_gsod/abu_dhabi_international_2025.csv",
+      "bytes": 61122,
+      "sha256": "e6653e95154ad712bac79cc60cbab1a05a38c8ebb6964443e1de81735d77a415",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/noaa_gsod/al_ain_2020.csv",
+      "bytes": 87066,
+      "sha256": "b48098dd06762b796cd042d04bf7aa8b70ecf8a35d1262596ecf8a10c57a05a5",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/noaa_gsod/al_ain_2021.csv",
+      "bytes": 86827,
+      "sha256": "ca262fc5d4d36db48ac9778750f50baae696acb8cd11b0f83be051a08bb6a860",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/noaa_gsod/al_ain_2022.csv",
+      "bytes": 87066,
+      "sha256": "62dee1b4aa9629c130bf6190e99f58de395d0b5b54ff696d5d4029f7de444b5e",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/noaa_gsod/al_ain_2023.csv",
+      "bytes": 87544,
+      "sha256": "36da8f9f71da2dd2a45ded8697bd45523c8ac45b33f72d65fdaad8395d9a7cf8",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/noaa_gsod/al_ain_2024.csv",
+      "bytes": 85154,
+      "sha256": "ca991116b8a87898b19df0e108bdc1867599bea00ddce0f4139251214d9033a7",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/noaa_gsod/al_ain_2025.csv",
+      "bytes": 54801,
+      "sha256": "e9bad1f1ebcd602bac9f96000c3b40ef8c4abb51d15898e482a3b1420e1279f4",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/noaa_gsod/al_bateen_2020.csv",
+      "bytes": 81704,
+      "sha256": "eeda96844b5ec04c8b6bb80d927d34a642c08cec3cee882b51fa1cbc4b3de8f7",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/noaa_gsod/al_bateen_2021.csv",
+      "bytes": 81035,
+      "sha256": "3c0a6f17901caa6ba0edd2ec4f21d3e2317a4e52f3387d649acb049dc2f77724",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/noaa_gsod/al_bateen_2022.csv",
+      "bytes": 81704,
+      "sha256": "ed6925cf3778d19d8ae7b0feb8497dc268d01018a908abeca6569b18c3e9a348",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/noaa_gsod/al_bateen_2023.csv",
+      "bytes": 81704,
+      "sha256": "14344863493e350fa645c8e9f13a1c9e62dabe070e6622c85274e81cc95eae66",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/noaa_gsod/al_bateen_2024.csv",
+      "bytes": 79474,
+      "sha256": "7a70af8516e42057bdd89a90c7d3db79c0a1ae4c42b0da2e3fc416155425cbfc",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/noaa_gsod/al_bateen_2025.csv",
+      "bytes": 55533,
+      "sha256": "dbf8f4bfbb52e7256dabef7d376042061a27533db7b0f775428a82f42f2a7db6",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/noaa_gsod/isd-history.csv",
+      "bytes": 2914601,
+      "sha256": "1994747ab4af1b97e63adb434b4d0d022f2daee76f0c144ea9ab46be2d906604",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/onet/LICENSE.html",
+      "bytes": 40673,
+      "sha256": "c5713b54238da9640d7cad86b08ce00aa6e32b78596a40543af35878a10810b3",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/onet/Occupation Data.txt",
+      "bytes": 265794,
+      "sha256": "63e6029d3d30ff5c7cf39b5304a733b77a409e01c65ae7095fe92f6d18d74a66",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/onet/Read Me.txt",
+      "bytes": 516,
+      "sha256": "45cd3154c7f5e1e9ca3a0be6eb565c80acddc9bd7b63feeb76dfdd2e845a6c5f",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/onet/Work Context Categories.txt",
+      "bytes": 23269,
+      "sha256": "c10536131f81056d81acf44db1c6f3efb19c09a44420a805f36020db7d1489db",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/onet/Work Context.txt",
+      "bytes": 36782933,
+      "sha256": "d52948bc8457192a56fbf40f96168dcbfcbb3a7bdd1c22b097ab02e833dea190",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/onet/db_30_1_text.zip",
+      "bytes": 13435626,
+      "sha256": "bfdf922f17a5c22d7f6c9498ee2cc49a6752976072085f9b9b1af0f2232a6568",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/regulatory/adhics_faq.pdf",
+      "bytes": 300044,
+      "sha256": "a5d5be0e09d033ed92b2ca0773802ec0ca6f9abf2236e8fda48ee588d888cc47",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/regulatory/adhics_v2_standard.pdf",
+      "bytes": 3834582,
+      "sha256": "1593e14f05cb9741200ead46787d1887cdba2f7443f193598d65c985b72f0661",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/regulatory/adosh_sf_cop_11_safety_heat_v4_ar.pdf",
+      "bytes": 342563,
+      "sha256": "cf68c0c81ce179cc0ed3de3ee45c9259a0025985842af1288061e8758619790e",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/regulatory/adosh_sf_cop_11_safety_heat_v4_en.pdf",
+      "bytes": 341108,
+      "sha256": "e441dc99ba65ecaf07265a16ccf683707365b1fcebf8055a782d4796f3af0909",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/regulatory/adosh_sf_cop_53_1_construction_v4_1_en.pdf",
+      "bytes": 482681,
+      "sha256": "9b04d1beb20a99026a8e8982bbcf2163e58693f1381c5274f7ee2b42699b2281",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/regulatory/adosh_sf_tg_safety_heat_v4_en.pdf",
+      "bytes": 1232151,
+      "sha256": "3f78cdac1314006fe8970f8eabb7a5edb95ac63106fb3eb3cfd25d0ac9ebd9cd",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/regulatory/adphc_codes_of_practice_index.html",
+      "bytes": 93797,
+      "sha256": "37ae48107b220d164c22d18ecb9bb555ebb8f5c5e850bdc44473d8ea735b6533",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/regulatory/mohre_heat_stress_policy.html",
+      "bytes": 545902,
+      "sha256": "c860739f9020fc9b0412002c72a97c86f5db37a218991645ec8901a5df101b3a",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/era5_abu_dhabi_city_2023.csv",
+      "bytes": 167439,
+      "sha256": "2b73c083af912ee56789e07a7d0082c6cacaab249182e67505ade6b298d0adb8",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/era5_abu_dhabi_city_2023.json",
+      "bytes": 171280,
+      "sha256": "036b1a220dc11e8a3d4205e0aba5b30650de1d670fdb02a3f9fc53a2d98a4356",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/era5_abu_dhabi_city_2024.csv",
+      "bytes": 167399,
+      "sha256": "ff3bbd5c6ffa82ffb800d73902f25435e7d62d349c8e61d980ac359ba299c4f0",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/era5_abu_dhabi_city_2024.json",
+      "bytes": 171138,
+      "sha256": "1e39547f1f7111fe2e587c9162a2543189d92bb66e34845a0fc9ab3db960ad7c",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/era5_abu_dhabi_city_2025.csv",
+      "bytes": 167347,
+      "sha256": "320ca6d626fe482209e8043413f7cee014d6d51c5c033709f11e254aba116160",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/era5_abu_dhabi_city_2025.json",
+      "bytes": 171095,
+      "sha256": "09a9648a889d25408bc0a01592825eb9534e81cbf99352d131b51a319fc0d110",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/era5_al_ain_2023.csv",
+      "bytes": 166051,
+      "sha256": "cba4af170d1cb25f1615fc815ace1380df56642410fcfe06159324508fc7b394",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/era5_al_ain_2023.json",
+      "bytes": 169894,
+      "sha256": "79a4c782db6deb651417f93ed5dee757a81289f41d65794f6fb2b070919f09a1",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/era5_al_ain_2024.csv",
+      "bytes": 165935,
+      "sha256": "97bb3191c8efc6b7ba0f87f60e93d080f7caef79688538a2224090d69545b9d0",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/era5_al_ain_2024.json",
+      "bytes": 169706,
+      "sha256": "78521e0a132cbd8c8ac894d02d5f6acaa8b86d4985651ae7f27d9d255a95fcf7",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/era5_al_ain_2025.csv",
+      "bytes": 166068,
+      "sha256": "4012e643d2454cea567adebcd08e7034f0a79906cfd59da80145f93de416d670",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/era5_al_ain_2025.json",
+      "bytes": 169831,
+      "sha256": "40a284dadc0b643e1540a7a5eb5491a313197c836c80f8cb839808b98ec10510",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/era5_mussafah_2023.csv",
+      "bytes": 167435,
+      "sha256": "5e619ac1d6894972c525d35e58ea083236e236b7070822036a656d0ef7b6219e",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/era5_mussafah_2023.json",
+      "bytes": 171281,
+      "sha256": "4208cfb0f333c91e1b92ea2c4a8d474f05a72de6bc392e0122c9c0af8d244c7f",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/era5_mussafah_2024.csv",
+      "bytes": 167319,
+      "sha256": "dae0a337560f041923c97edd41743b5a7707127383548b9b5c0f062a665917d8",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/era5_mussafah_2024.json",
+      "bytes": 171097,
+      "sha256": "dd6f0e212aa6199b6d98d7833f382e5b0a8ad824c13c1c13ccef15805b322003",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/era5_mussafah_2025.csv",
+      "bytes": 167347,
+      "sha256": "b4f9e01c351f6f894eb90e8d8029b81b5cff59058571bd477140b5db4aa75a1a",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/era5_mussafah_2025.json",
+      "bytes": 171101,
+      "sha256": "9958ec8cb80876c67721578012d5f62bf54fec9e43c79ac4b551b80a140e9987",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/era5_ruwais_2023.csv",
+      "bytes": 167410,
+      "sha256": "384327ef1600fcedec71ed4a0230b89953b2b452ac21faedc8d22e0e419541ed",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/era5_ruwais_2023.json",
+      "bytes": 171273,
+      "sha256": "74f3b217e3d5c85365d3d31be37f7ab04b85914c0994c9690e0d2bf8ca065af9",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/era5_ruwais_2024.csv",
+      "bytes": 167200,
+      "sha256": "3e65d3c98bb4978b5b0ada624cc35462609360f30cc5c4b861568ceaa7928802",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/era5_ruwais_2024.json",
+      "bytes": 170992,
+      "sha256": "ed3a138c5da37b6ff4c1f1f217d50ec945ae3d3729ff057c7b9cc18e138ac409",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/era5_ruwais_2025.csv",
+      "bytes": 167312,
+      "sha256": "b0620d6a44f3ac5023a75f96f87df0b3c66b6d8303b05b4c597359d8b14b8043",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/era5_ruwais_2025.json",
+      "bytes": 171061,
+      "sha256": "a6ba5ef663235108f7b0837879bf89689b2bc287d435b3c0d6d4f04338f37bbb",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/forecast_abu_dhabi_city_20261103T032734Z.csv",
+      "bytes": 23753,
+      "sha256": "bf6f0404b0b00b778326d806b31befc59b71e9fff701fb60fb061d524897113a",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/forecast_abu_dhabi_city_20261103T032734Z.json",
+      "bytes": 24981,
+      "sha256": "ed08d62fda5c2d9eacacb35d25c7f1e0c4de43735a33602033b99bbae818ea4d",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/forecast_al_ain_20261103T032734Z.csv",
+      "bytes": 23237,
+      "sha256": "a74c5e0b289e5349484096d8b0eb4166676ea400016a0991123a2c9a521cbcfe",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/forecast_al_ain_20261103T032734Z.json",
+      "bytes": 24481,
+      "sha256": "d75da26d5609141c3b80906525e72a76a8ec4e8141611b6e2f3ea1d1cff9d6ee",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/forecast_mussafah_20261103T032734Z.csv",
+      "bytes": 23719,
+      "sha256": "79994dc3519563f3d2ab208fa8e34b5677c033631b1b82ae193d25ac53396b0a",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/forecast_mussafah_20261103T032734Z.json",
+      "bytes": 24970,
+      "sha256": "0b066c942c2b69f0d2ac9e7bccdda5b546045f37f2d9c9aceaa9c58c52d1edb6",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/forecast_ruwais_20261103T032734Z.csv",
+      "bytes": 23752,
+      "sha256": "bd72a682cb73b3c0353409810cdbab3994366fe01df6f48ee90883bee107a248",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "raw/weather/forecast_ruwais_20261103T032734Z.json",
+      "bytes": 24980,
+      "sha256": "362078276d344bbe0dd0bf571c458dc2928cf35bdfba3e8d2e44c3aa5a2829cf",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "processed/onet_30_1_work_context_heat_proxy.csv",
+      "bytes": 15321,
+      "sha256": "77e77e61b0d85758a54d77d8eb725ccaec06467bafa7c29748d5000f345ed862",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "processed/replay/cams_archive_abu_dhabi_city_2024-08-04.csv",
+      "bytes": 1220,
+      "sha256": "f813970d325a54497fcc2e1ab3b9895e4c860d947476a09b9d7c86e593473e59",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "processed/replay/cams_archive_abu_dhabi_city_2025-08-01.csv",
+      "bytes": 1206,
+      "sha256": "76f94b5a0d7181e5fed346da70f796b8a15d22161326becdb45f3cf9dd7450f0",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "processed/replay/cams_archive_al_ain_2024-08-04.csv",
+      "bytes": 1215,
+      "sha256": "57ee82c4cf9d62532a6af329d5c18985f29739a4665e1d8e12da463183cb8021",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "processed/replay/cams_archive_al_ain_2025-08-01.csv",
+      "bytes": 1208,
+      "sha256": "c1934abdb00f5cc819761370c7d7886cc7f6547d8739fb9861fe818e5b9bb680",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "processed/replay/cams_archive_mussafah_2024-08-04.csv",
+      "bytes": 1220,
+      "sha256": "f813970d325a54497fcc2e1ab3b9895e4c860d947476a09b9d7c86e593473e59",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "processed/replay/cams_archive_mussafah_2025-08-01.csv",
+      "bytes": 1206,
+      "sha256": "76f94b5a0d7181e5fed346da70f796b8a15d22161326becdb45f3cf9dd7450f0",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "processed/replay/cams_archive_ruwais_2024-08-04.csv",
+      "bytes": 1217,
+      "sha256": "029f46d04d1fbe505e662143e508b357785bd3771f7f4aef477dbcd83a4adcf5",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "processed/replay/cams_archive_ruwais_2025-08-01.csv",
+      "bytes": 1199,
+      "sha256": "d8557073377a00a1f6d03c053bc985beb5394c76a20e83b3fdccbd4702977cf1",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "processed/replay/era5_abu_dhabi_city_2024-08-04.csv",
+      "bytes": 1509,
+      "sha256": "90320e00421884e5200991605b027aea62e9a369a56a913a6ae3c27f81430c32",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "processed/replay/era5_abu_dhabi_city_2025-08-01.csv",
+      "bytes": 1505,
+      "sha256": "88c92c29ddca803bfd039faaa05e80be5d50d818020e396119d4eaa7288fda3f",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "processed/replay/era5_al_ain_2024-08-04.csv",
+      "bytes": 1504,
+      "sha256": "bf0ca15a28ad6cc537ec1c6572adfb44d23420cbe4ec737eff42636ddc60e86d",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "processed/replay/era5_al_ain_2025-08-01.csv",
+      "bytes": 1499,
+      "sha256": "c366dec206bfd649ca08d913e2963fb1f018e45e3a263f9ade4eeefbfedcce7a",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "processed/replay/era5_mussafah_2024-08-04.csv",
+      "bytes": 1507,
+      "sha256": "624a51248b74304fd2088fc8c5e2e346237048b958782be2721d5c544b556cc2",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "processed/replay/era5_mussafah_2025-08-01.csv",
+      "bytes": 1505,
+      "sha256": "4e04a972efb1e70072882e1350622428d71e7b2a349e0049b92be0bde9ff1895",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "processed/replay/era5_ruwais_2024-08-04.csv",
+      "bytes": 1507,
+      "sha256": "c8229a2e5c95f9f6f63633243a347e7466b70decf45f0ac629f5755cde807159",
+      "source_manifest_hash_checked": true
+    },
+    {
+      "path": "processed/replay/era5_ruwais_2025-08-01.csv",
+      "bytes": 1503,
+      "sha256": "48dae7d410ef130c1fc9f33261db6c2d940ff997b6a7d4715ad0b201381fb45c",
+      "source_manifest_hash_checked": true
+    }
+  ],
+  "validation": {
+    "files_checked_against_source_manifests": 129,
+    "raw_and_processed_files": 129,
+    "bytes": 80514620
+  }
+}
