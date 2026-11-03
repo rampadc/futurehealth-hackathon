@@ -10,7 +10,7 @@ import layout from '../../demo/cross-scenario/site_layout.json';
 import plan from '../../demo/cross-scenario/schedule_plan.json';
 import './SiteOperations.css';
 
-type Props = { session: any; onOpenRegister?: () => void };
+type Props = { session: any; onOpenRegister?: () => void; onOpenIncident?: () => void };
 type SiteZone = typeof zones[number];
 
 const time = (value: string) => new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Dubai', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(value));
@@ -32,14 +32,18 @@ function zoneTone(zone: SiteZone, state: any): string {
   return assessThermalReading(reading?.sensor_id === zone.sensor_id ? reading : null, state.clock, state.sensor_status[zone.sensor_id]).band;
 }
 
-export default function SiteOperations({ session, onOpenRegister }: Props) {
+export default function SiteOperations({ session, onOpenRegister, onOpenIncident }: Props) {
   const [selectedZone, setSelectedZone] = useState('civil_exposed');
+  const [selectedTask, setSelectedTask] = useState<string | null>('civil_heavy');
   const [contractor, setContractor] = useState('all');
   const [detail, setDetail] = useState<string | null>(null);
   const detailTrigger = useRef<HTMLButtonElement | null>(null);
   const state = session.state;
   const selected = zones.find(zone => zone.id === selectedZone) || zones[0];
   const selectedTasks = tasks.filter(task => task.zone_id === selected.id);
+  const inspectedTask = selectedTasks.find(task => task.id === selectedTask);
+  const inspectedCrew = inspectedTask && crews.find(crew => crew.id === inspectedTask.crew_id);
+  const inspectedPeople = inspectedTask ? (state.assignments[inspectedTask.id] || []).map((id: string) => people.find(person => person.id === id)?.name || id) : [];
   const present = zonePresence(selected, state);
   const delivery = deliveries[0];
   const supplier = organisations.find(org => org.id === delivery.supplier_id)!;
@@ -53,7 +57,9 @@ export default function SiteOperations({ session, onOpenRegister }: Props) {
   const detailCrew = detailTask && crews.find(crew => crew.id === detailTask.crew_id);
   const detailZone = detailTask && zones.find(zone => zone.id === detailTask.zone_id);
   const detailAssignees = detailTask ? (state.assignments[detailTask.id] || []).map((id: string) => people.find(person => person.id === id)).filter(Boolean) : [];
-  const openDetail = (id: string, trigger: HTMLButtonElement) => { detailTrigger.current = trigger; setDetail(id); };
+  const selectZone = (id: string) => { setSelectedZone(id); setSelectedTask(tasks.find(task => task.zone_id === id)?.id || null); setContractor('all'); };
+  const selectContractor = (id: string) => { setContractor(id); if (id !== 'all') { const task = tasks.find(item => crews.find(crew => crew.id === item.crew_id)?.organisation_id === id); if (task) { setSelectedTask(task.id); setSelectedZone(task.zone_id); } } };
+  const openDetail = (id: string, trigger: HTMLButtonElement) => { const task = tasks.find(item => item.id === id); if (task) { setSelectedZone(task.zone_id); setSelectedTask(id); } detailTrigger.current = trigger; setDetail(id); };
   const viewZone = (id: string) => { setSelectedZone(id); setDetail(null); requestAnimationFrame(() => document.getElementById('so-map-title')?.scrollIntoView({ behavior: 'smooth', block: 'start' })); };
 
   return <div className="so-root">
@@ -67,10 +73,10 @@ export default function SiteOperations({ session, onOpenRegister }: Props) {
       <div className="so-section-head"><div><div className="so-eyebrow">DAY PLAN · 07:00–16:00 GST</div><h2 id="so-schedule-title">Contractor work schedule</h2></div><div className="so-now"><span/> Site clock {time(state.clock)}</div></div>
       <p className="so-note">Planned windows; badges show the current site record, not actual start or stop times.</p>
       <div className="so-filter" role="group" aria-label="Filter schedule by contractor">
-        <button className={contractor === 'all' ? 'selected' : ''} aria-pressed={contractor === 'all'} onClick={() => setContractor('all')}>All contractors</button>
-        {organisations.filter(org => ['civilco', 'electroco', 'logco'].includes(org.id)).map(org => <button key={org.id} className={contractor === org.id ? 'selected' : ''} aria-pressed={contractor === org.id} onClick={() => setContractor(org.id)}>{shortOrg[org.id]}</button>)}
+        <button className={contractor === 'all' ? 'selected' : ''} aria-pressed={contractor === 'all'} onClick={() => selectContractor('all')}>All contractors</button>
+        {organisations.filter(org => ['civilco', 'electroco', 'logco'].includes(org.id)).map(org => <button key={org.id} className={contractor === org.id ? 'selected' : ''} aria-pressed={contractor === org.id} onClick={() => selectContractor(org.id)}>{shortOrg[org.id]}</button>)}
       </div>
-      <WorkSchedule state={state} contractor={contractor} earlyWindowSuggested={earlyWindowSuggested} proposalLabel={proposalLabel} accepted={accepted} onOpen={openDetail}/>
+      <WorkSchedule state={state} contractor={contractor} selectedTaskId={selectedTask} earlyWindowSuggested={earlyWindowSuggested} proposalLabel={proposalLabel} accepted={accepted} onOpen={openDetail}/>
       <div className="so-schedule-foot"><span><i className="so-key-plan"/> Planned work</span><span><i className="so-key-held"/> Current hold over plan</span>{earlyWindowSuggested && <span><i className="so-key-suggested"/> Suggested 08:00–11:00; no clearance</span>}<span><i className="so-key-restricted"/> Outdoor restriction 12:30–15:00</span><span><i className="so-key-clock"/> Site clock</span></div>
       <p className="so-delivery-note">Aggregate: original {time(delivery.site_slot)} slot · {accepted ? `current confirmed booking ${time(state.delivery.slot)}` : `${time(proposed)} ${proposalLabel.toLowerCase()}`}. A slot changes only after supplier acceptance.</p>
     </section>
@@ -87,7 +93,7 @@ export default function SiteOperations({ session, onOpenRegister }: Props) {
             const readingStatus = zone.sensor_id ? assessThermalReading(localReading, state.clock, state.sensor_status[zone.sensor_id]) : null;
             const count = zonePresence(zone, state).length;
             const held = tasks.some(task => task.zone_id === zone.id && state.task_status[task.id] === 'held');
-            return <button key={zone.id} className={`so-zone ${tone} ${selectedZone === zone.id ? 'selected' : ''}`} style={{ left: `${box.x}%`, top: `${box.y}%`, width: `${box.w}%`, height: `${box.h}%` }} aria-pressed={selectedZone === zone.id} aria-label={`${zone.name}; ${zone.sensor_id ? `${zone.sensor_id.toUpperCase()} ${tone === 'unknown' ? 'reading unavailable' : `${tone} environmental band`}` : 'cooled space'}; ${count} ${zone.type === 'cooled' ? 'recorded present' : 'assigned to active tasks'}${held ? '; work held' : ''}`} onClick={() => setSelectedZone(zone.id)}><strong>{shortZone[zone.id]}</strong><span>{zone.sensor_id ? <><Radio size={12}/> {zone.sensor_id.toUpperCase()} · {readingStatus?.reason === 'current' ? `${readingStatus.lastValue} W/m² · ${tone}` : 'unverified'}</> : <>{count} recorded present</>}</span>{held && <em>WORK HELD</em>}</button>;
+            return <button key={zone.id} className={`so-zone ${tone} ${selectedZone === zone.id ? 'selected' : ''}`} style={{ left: `${box.x}%`, top: `${box.y}%`, width: `${box.w}%`, height: `${box.h}%` }} aria-pressed={selectedZone === zone.id} aria-label={`${zone.name}; ${zone.sensor_id ? `${zone.sensor_id.toUpperCase()} ${tone === 'unknown' ? 'reading unavailable' : `${tone} environmental band`}` : 'cooled space'}; ${count} ${zone.type === 'cooled' ? 'recorded present' : 'assigned to active tasks'}${held ? '; work held' : ''}`} onClick={() => selectZone(zone.id)}><strong>{shortZone[zone.id]}</strong><span>{zone.sensor_id ? <><Radio size={12}/> {zone.sensor_id.toUpperCase()} · {readingStatus?.reason === 'current' ? `${readingStatus.lastValue} W/m² · ${tone}` : 'unverified'}</> : <>{count} recorded present</>}</span>{held && <em>WORK HELD</em>}</button>;
           })}
         </div>
         <div className="so-heat-legend"><span><i className="red"/> High risk</span><span><i className="amber"/> Caution</span><span><i className="green"/> Low environmental risk</span><span><i className="unknown"/> Stale / unavailable</span><span><i className="cooled"/> Cooled, no reading</span></div>
@@ -97,10 +103,11 @@ export default function SiteOperations({ session, onOpenRegister }: Props) {
         <div className="so-detail-metric"><span><Users size={15}/> {selected.type === 'cooled' ? 'Recorded present' : 'Assigned to active work'}</span><strong>{present.length}{selected.capacity ? ` / ${selected.capacity} places` : ''}</strong></div>
         <small className="so-presence-source">{selected.type === 'cooled' ? 'Occupancy recorded in the site record.' : 'Active assignments exclude people in cooled spaces and held tasks. Assignment does not confirm physical presence.'}</small>
         {present.length > 0 && <details className="so-people"><summary>{selected.type === 'cooled' ? 'People recorded here' : 'People assigned to active work'}</summary><p>{present.map(id => people.find(person => person.id === id)?.name || id).join(', ')}</p></details>}
-        <div className="so-detail-tasks"><h3>Work assigned to this zone</h3>{selectedTasks.length ? selectedTasks.map(task => <div key={task.id}><strong>{shortTask[task.id]}</strong><span>{shortOrg[crews.find(crew => crew.id === task.crew_id)!.organisation_id]} · {(state.assignments[task.id] || []).length} assigned</span><em className={`so-status ${state.task_status[task.id]}`}>{state.task_status[task.id] === 'idle' ? 'Not started' : state.task_status[task.id] === 'held' ? 'Held now' : state.task_status[task.id]}</em></div>) : <p>No work task assigned. Occupancy is tracked separately.</p>}</div>
+        {inspectedTask && inspectedCrew && <div className="so-task-inspector" aria-label="Selected task"><div className="so-eyebrow">SELECTED WORK</div><h3>{shortTask[inspectedTask.id]}</h3><p>{inspectedTask.description}</p><dl><div><dt>Contractor</dt><dd>{shortOrg[inspectedCrew.organisation_id]}</dd></div><div><dt>Status</dt><dd><span className={`so-status ${state.task_status[inspectedTask.id]}`}>{state.task_status[inspectedTask.id] === 'idle' ? 'Not started' : state.task_status[inspectedTask.id] === 'held' ? 'Held now' : state.task_status[inspectedTask.id]}</span></dd></div><div><dt>People</dt><dd>{inspectedPeople.length} assigned</dd></div></dl>{inspectedPeople.length > 0 && <details className="so-inspector-people"><summary>View assigned people</summary><p>{inspectedPeople.join(', ')}</p></details>}{onOpenIncident && inspectedTask.id === 'civil_heavy' && state.task_status.civil_heavy === 'held' && <button type="button" onClick={onOpenIncident}>Review incident <ArrowUpRight size={14}/></button>}</div>}
+        <div className="so-detail-tasks"><h3>Work assigned to this zone</h3>{selectedTasks.length ? selectedTasks.map(task => <button type="button" key={task.id} className={selectedTask === task.id ? 'selected' : ''} aria-pressed={selectedTask === task.id} onClick={() => setSelectedTask(task.id)}><strong>{shortTask[task.id]}</strong><span>{shortOrg[crews.find(crew => crew.id === task.crew_id)!.organisation_id]} · {(state.assignments[task.id] || []).length} assigned</span><em className={`so-status ${state.task_status[task.id]}`}>{state.task_status[task.id] === 'idle' ? 'Not started' : state.task_status[task.id] === 'held' ? 'Held now' : state.task_status[task.id]}</em></button>) : <p>No work task assigned. Occupancy is tracked separately.</p>}</div>
       </aside>
     </div>
-    <section className="so-panel so-topology" aria-labelledby="so-topology-title"><div className="so-section-head"><div><div className="so-eyebrow">WHO DIRECTS THE WORK</div><h2 id="so-topology-title">Contractor topology</h2></div><span>Choose a subcontractor to filter the schedule</span></div><div className="so-topology-grid"><div className="so-principal"><small>PRINCIPAL CONTRACTOR</small><strong>{organisations[0].name}</strong><span>Site programme, safety controls and welfare · {crews[0].member_ids.length} staff</span></div><div className="so-subcontractors">{organisations.filter(org => ['civilco', 'electroco', 'logco'].includes(org.id)).map(org => { const crew = crews.find(item => item.organisation_id === org.id)!; const lead = people.find(person => person.id === crew.lead_id); return <button key={org.id} className={contractor === org.id ? 'selected' : ''} onClick={() => { setContractor(org.id); document.getElementById('so-schedule-title')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}><small>{org.role.toUpperCase()}</small><strong>{org.name}</strong><span>{crew.member_ids.length} crew · lead {lead?.name || crew.lead_id}</span></button>; })}</div><div className="so-external"><div><small>SUPPLIER</small><strong>{supplier.name}</strong><span>Aggregate booking and slot acceptance</span></div><div><small>CLIENT</small><strong>{organisations.find(org => org.id === 'clientco')!.name}</strong><span>Contractual milestones</span></div></div></div></section>
+    <section className="so-panel so-topology" aria-labelledby="so-topology-title"><div className="so-section-head"><div><div className="so-eyebrow">WHO DIRECTS THE WORK</div><h2 id="so-topology-title">Contractor topology</h2></div><span>Choose a subcontractor to filter the schedule</span></div><div className="so-topology-grid"><div className="so-principal"><small>PRINCIPAL CONTRACTOR</small><strong>{organisations[0].name}</strong><span>Site programme, safety controls and welfare · {crews[0].member_ids.length} staff</span></div><div className="so-subcontractors">{organisations.filter(org => ['civilco', 'electroco', 'logco'].includes(org.id)).map(org => { const crew = crews.find(item => item.organisation_id === org.id)!; const lead = people.find(person => person.id === crew.lead_id); return <button key={org.id} className={contractor === org.id ? 'selected' : ''} onClick={() => { selectContractor(org.id); document.getElementById('so-schedule-title')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}><small>{org.role.toUpperCase()}</small><strong>{org.name}</strong><span>{crew.member_ids.length} crew · lead {lead?.name || crew.lead_id}</span></button>; })}</div><div className="so-external"><div><small>SUPPLIER</small><strong>{supplier.name}</strong><span>Aggregate booking and slot acceptance</span></div><div><small>CLIENT</small><strong>{organisations.find(org => org.id === 'clientco')!.name}</strong><span>Contractual milestones</span></div></div></div></section>
     <p className="so-provenance">Readings, tasks, occupancy and supplier responses are shown from the site record.</p>
     <Dialog.Root open={detail !== null} onOpenChange={open => { if (!open) setDetail(null); }}>
       <Dialog.Portal>
