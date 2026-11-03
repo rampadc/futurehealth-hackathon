@@ -43,10 +43,10 @@ export function ThermalReading({ reading, clock, sensorStatus, compact = false }
     {measured && <span className="thermal-measured">Measured {measured} GST</span>}
     <div className="thermal-lights" role="group" aria-label="Environmental TWL traffic light">
       {lights.map(light => <span key={light.band} className={`thermal-lamp thermal-lamp-${light.band}${status.band === light.band ? ' active' : ''}`} role="img" aria-label={`${light.band} lamp: ${light.label}, ${status.band === light.band ? 'on' : 'off'}`} />)}
-      <span className="thermal-band">{statusLabel}</span>
+      <span className="thermal-band">{statusLabel}{status.band === 'green' ? ' · environmental band only' : ''}</span>
     </div>
     <p className="thermal-reason">{reason}</p>
-    {status.reason === 'current' && status.lastValue !== null && status.lastValue <= 150 && <p className="thermal-site-hold">Sandline site rule: heavy work remains on hold at ≤150 W/m².</p>}
+    {status.reason === 'current' && status.lastValue !== null && status.lastValue <= 150 && <div className="thermal-site-hold"><strong>Heavy-work threshold reached</strong><p>{status.band === 'green' ? 'Green starts at 140 W/m²; Sandline’s stricter heavy-work rule requires a hold at 150 W/m² or below.' : 'Sandline requires heavy trench work to be held at 150 W/m² or below.'}</p><p>An active hold stays in place until Rashid approves restart.</p></div>}
     {!compact && <p className="thermal-caveat">Environmental band is not a work clearance. Follow active holds and the site review process.</p>}
   </div>;
 }
