@@ -2,7 +2,10 @@
 .response-queue__intro { margin-bottom: var(--space-6); }
 .response-queue__intro p { margin: var(--space-2) 0 0; color: var(--text-muted); }
 .response-queue__summary { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-4); }
-.response-queue__summary span { display: flex; align-items: baseline; gap: var(--space-2); padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text-muted); font-size: 12px; }
+.response-queue__summary button { display: flex; align-items: baseline; gap: var(--space-2); padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text-muted); font: inherit; font-size: 12px; cursor: pointer; }
+.response-queue__summary button:hover { background: var(--surface-subtle); }
+.response-queue__summary button.is-selected { border-color: var(--text-body); background: var(--surface-subtle); color: var(--text-strong); box-shadow: inset 0 0 0 1px var(--text-body); }
+.response-queue__summary button:focus-visible { outline: 2px solid var(--text-body); outline-offset: 2px; }
 .response-queue__summary strong { color: var(--text-strong); font-size: 18px; }
 .response-queue__summary .is-overdue strong, .response-queue__incident-foot .is-overdue { color: #ae4430; }
 .response-queue__incident { margin-bottom: var(--space-6); padding: var(--space-6); border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }

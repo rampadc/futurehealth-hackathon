@@ -53,7 +53,7 @@ export default function CostActions({ session, actingAs, onRecord, onReviewAssig
         {costActions.map(action => {
           const saved = checks.find(check => check.id === action.id);
           const person = action.actorId === 'C01' ? 'Huda' : action.actorId === 'P05' ? 'Noura' : 'Amal';
-          return <div className="cost-actions__check" key={action.id}>
+          return <div id={`queue-cost-${action.id}`} tabIndex={-1} className="cost-actions__check" key={action.id}>
             <div><strong>{person}</strong><span>{action.id === 'recovery_roster' ? 'Confirm recovery and workshop headcounts.' : action.id === 'supplier_quote_request' ? 'Request actual rescheduling and standby fees.' : 'Review exposure and identify missing evidence.'}</span></div>
             {saved ? <div className="cost-actions__saved">Recorded · {time(saved.at)}<small>At record: {saved.snapshot?.recoveringCount ?? '?'} recovering, {saved.snapshot?.workshopCount ?? '?'} workshop, {saved.snapshot?.deliveryStatus ?? 'unknown'} booking</small></div> : <button type="button" disabled={actingAs !== action.actorId || (action.id === 'recovery_roster' && !plan.originalRecoveryCount)} onClick={() => onRecord(action.id)}>{action.label}</button>}
             {!saved && actingAs !== action.actorId && <small>Choose {person} in “Acting as” to record this check.</small>}

@@ -313,15 +313,15 @@ function App() {
   const openQueueAction = (action?: QueueAction) => {
     setView(action?.target === 'handover' ? 'handover' : 'overview');
     setDeskDetail(action?.target !== 'handover');
-    if (!action) { window.setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0); return; }
-    const selector = action?.id === 'cost:recovery_roster' ? '.cost-actions__check:nth-child(1)'
-      : action?.id === 'cost:supplier_quote_request' ? '.cost-actions__check:nth-child(2)'
-      : action?.id === 'cost:exposure_review' ? '.cost-actions__check:nth-child(3)'
-      : action?.target === 'handover' ? '#cost-actions-title'
-      : action?.id === 'crew-briefing' ? '.connected-commercial-action:not(.concern) button'
-      : action?.id === 'commercial-concern' ? '.connected-commercial-action.concern button'
-      : action?.id.startsWith('event:') ? '.copilot-action button.button-primary' : '.incident-card';
-    window.setTimeout(() => document.querySelector(selector)?.scrollIntoView({ block: 'center', behavior: 'smooth' }), 0);
+    window.setTimeout(() => {
+      const id = action?.id.startsWith('cost:') ? `queue-cost-${action.id.slice(5)}`
+        : action?.id === 'crew-briefing' || action?.id === 'commercial-concern' ? `queue-${action.id}`
+        : action?.id.startsWith('event:') ? 'queue-pending-action' : action?.target === 'handover' ? 'cost-actions-title' : 'queue-incident';
+      const target = document.getElementById(id) ?? document.getElementById('queue-incident');
+      if (action?.id === 'crew-briefing' || action?.id === 'commercial-concern') target?.querySelector('details.action-copy')?.setAttribute('open', '');
+      target?.focus({ preventScroll: true });
+      target?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }, 0);
   };
   const selectCase = (id: ScenarioId) => { update(s => resetSession(structuredClone(s), id)); setBrowsedCase(id); setNotice(`${caseName(id)} loaded`); };
   const applyStep = () => {
@@ -461,7 +461,7 @@ function IncidentView({operation,session,pending,activities,actingAs,onAction,on
   const acknowledgmentDue = facts.hold?.at ? new Date(Date.parse(facts.hold.at) + 120_000).toISOString() : null;
   const acknowledgmentStatus = !facts.hold ? 'Awaiting hold instruction' : facts.hold.acknowledged ? 'Huda acknowledged' : facts.hold.status === 'escalated' ? 'Escalated to Rashid' : acknowledgmentDue ? `${Date.parse(session.state.clock) >= Date.parse(acknowledgmentDue) ? 'Overdue' : 'Due'} ${time(acknowledgmentDue)} GST` : 'Deadline unavailable';
   const provenance: Record<StreamActivity['provenance'],string> = { synthetic_feed:'Site input', scripted_assistant:'Assistant', policy_engine:'Deterministic policy check', human_action:'Named team action' };
-  return <section className="incident-card" aria-label="Current incident">
+  return <section id="queue-incident" tabIndex={-1} className="incident-card" aria-label="Current incident">
     <div className="incident-document">
       <div className="incident-meta"><span>{session.state.case_id || `CASE ${session.scenarioId.slice(0,2)}`}</span><span>{connected ? 'Dune Civil · 11 workers + Huda' : operation.affected}</span><span>{time(session.state.clock)} GST</span>{connected && <span className={!facts.hold?.acknowledged && facts.hold && facts.hold.status !== 'escalated' && Date.parse(session.state.clock) >= Date.parse(acknowledgmentDue!) ? 'incident-meta-overdue' : ''}>Ack: {acknowledgmentStatus}</span>}</div>
       <div className="incident-head"><div><div className="eyebrow">{preview ? 'CASE PREVIEW · ' : ''}{caseOrigin[session.scenarioId as ScenarioId]}</div><h2>{headline}</h2></div><Status tone={pending ? 'warn' : facts.held ? 'danger' : 'blue'}>{pending ? yours ? 'Your decision' : `Waiting on ${personName(pending.actor_id).split(' ')[0]}` : facts.held ? 'Work held' : scenarioComplete(session) ? 'Case events recorded' : 'Awaiting site update'}</Status></div>
@@ -474,8 +474,8 @@ function IncidentView({operation,session,pending,activities,actingAs,onAction,on
           <div><span>RECOVERY PAY</span><strong>Dune’s ordinary-shift term applies to this civil crew</strong><p>Required recovery is paid rest under Dune’s shift agreement. Payroll is not verified.</p></div>
           <div><span>DELAY AND DELIVERY COSTS</span><strong>Amal owns the outstanding review</strong><p>Amal needs verified delay, output and supplier charges before agreeing who pays.</p></div>
         </div>
-        {facts.held ? <><div className="connected-commercial-action"><div><span>HUDA · CREW BRIEFING</span><small>{session.crewBriefing ? `Recorded at ${time(session.crewBriefing.at)} GST` : 'Briefing not recorded'}</small><details className="action-copy"><summary>Read prepared crew briefing</summary><p>{session.crewBriefing?.text || crewBriefingText}</p></details></div>{!session.crewBriefing && <button className="button button-soft" onClick={onBriefing} disabled={actingAs !== 'C01' || preview}>Record briefing</button>}</div>
-        <div className="connected-commercial-action concern"><div><span>COST REVIEW · {concernStatus(session.commercialConcern)}</span><small>{concernStep[concernStage as keyof typeof concernStep]}{concernAction.actorId && actingAs !== concernAction.actorId ? ` Choose ${personName(concernAction.actorId)} to continue.` : ''}</small><details className="action-copy"><summary>Read concern wording</summary><p>{concernText}</p></details></div>{concernAction.actorId && <button className="button button-soft" onClick={onConcern} disabled={!canRecordConcern}>{concernLabels[concernStage as keyof typeof concernLabels]}</button>}</div></> : <div className="connected-commercial-action"><div><span>PREPARED CREW BRIEFING AND COST RECORD</span><p>Huda’s crew briefing and the output and pay concern become available after the site rule places heavy work on hold.</p></div></div>}
+        {facts.held ? <><div id="queue-crew-briefing" tabIndex={-1} className="connected-commercial-action"><div><span>HUDA · CREW BRIEFING</span><small>{session.crewBriefing ? `Recorded at ${time(session.crewBriefing.at)} GST` : 'Briefing not recorded'}</small><details className="action-copy"><summary>Read prepared crew briefing</summary><p>{session.crewBriefing?.text || crewBriefingText}</p></details></div>{!session.crewBriefing && <button className="button button-soft" onClick={onBriefing} disabled={actingAs !== 'C01' || preview}>Record briefing</button>}</div>
+        <div id="queue-commercial-concern" tabIndex={-1} className="connected-commercial-action concern"><div><span>COST REVIEW · {concernStatus(session.commercialConcern)}</span><small>{concernStep[concernStage as keyof typeof concernStep]}{concernAction.actorId && actingAs !== concernAction.actorId ? ` Choose ${personName(concernAction.actorId)} to continue.` : ''}</small><details className="action-copy"><summary>Read concern wording</summary><p>{concernText}</p></details></div>{concernAction.actorId && <button className="button button-soft" onClick={onConcern} disabled={!canRecordConcern}>{concernLabels[concernStage as keyof typeof concernLabels]}</button>}</div></> : <div className="connected-commercial-action"><div><span>PREPARED CREW BRIEFING AND COST RECORD</span><p>Huda’s crew briefing and the output and pay concern become available after the site rule places heavy work on hold.</p></div></div>}
         {!!session.commercialConcern?.entries?.length && <ol className="concern-history">{session.commercialConcern.entries.map((entry:{stage:string;actorId:string;at:string},index:number) => <li key={index}>{personName(entry.actorId)} · {stageName(entry.stage)} · {time(entry.at)} GST · local note</li>)}</ol>}
         <details className="decision-details"><summary>Agreement and supporting records <ChevronDown size={13}/></summary><p><strong>Shift agreement:</strong> Dune Civil Works Heat Rest Schedule, ordinary rostered shift only. Dune’s employer team must confirm individual payroll.</p><p><strong>Existing process:</strong> {readableItem(decision.existingProcess)}</p><p><strong>Records still needed:</strong> {decision.evidenceNeeded.map(readableItem).join('; ')}.</p><p>The assistant can prepare a chronology and drafts. It cannot confirm wages, settle cost allocation or approve a claim.</p></details>
       </div> : <div className="decision-context" aria-label="Trust and money coordination">
@@ -490,7 +490,7 @@ function IncidentView({operation,session,pending,activities,actingAs,onAction,on
     <aside className="incident-copilot" aria-label="Case assistant">
       <div className="copilot-heading"><Sparkles size={16}/><strong>Next named action</strong><span>Decision support</span></div>
       <div className="copilot-content"><div className="eyebrow">{pending ? yours ? 'Your decision' : `Waiting on ${owner}` : 'Current site response'}</div><h3>{pending ? actionLabel(pending) : operation.headline}</h3><p>{pending ? actionExplanation(pending, session) : operation.nextAction} </p>
-      {pending && <div className="copilot-action"><div className="decision-owner"><span>Decision owner</span><strong>{owner}</strong></div>{policyId && <button className="decision-policy" onClick={() => onOpenPolicy(policyId)}>Decision basis: {policyName(policyId)} <ArrowUpRight size={13}/></button>}<button className="button button-primary" onClick={onAction} disabled={!yours || preview}>{actionLabel(pending)} <ArrowRight size={15}/></button>{!yours && <p className="role-block">{owner} must confirm. Choose their role in “Acting as”.</p>}</div>}
+      {pending && <div id="queue-pending-action" tabIndex={-1} className="copilot-action"><div className="decision-owner"><span>Decision owner</span><strong>{owner}</strong></div>{policyId && <button className="decision-policy" onClick={() => onOpenPolicy(policyId)}>Decision basis: {policyName(policyId)} <ArrowUpRight size={13}/></button>}<button className="button button-primary" onClick={onAction} disabled={!yours || preview}>{actionLabel(pending)} <ArrowRight size={15}/></button>{!yours && <p className="role-block">{owner} must confirm. Choose their role in “Acting as”.</p>}</div>}
       <details className="copilot-options" open={!pending}><summary>Options prepared <span>{operation.options.length}</span><ChevronDown size={14}/></summary>{operation.options.map(item => <div className="copilot-option" key={item.title}><div><span className={`option-indicator ${item.available ? 'available' : ''}`}/><strong>{item.title}</strong></div><p>{item.detail} {item.reason}</p></div>)}</details></div>
       <div className="copilot-foot"><ShieldCheck size={14}/> Actions require the named person</div>
     </aside>
