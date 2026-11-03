@@ -47,6 +47,18 @@ const caseNames: Record<ScenarioId,string> = {
   '09_restart_review':'Rashid checks restart; a later stale reading blocks it',
   '10_handover_and_evidence':'Hand over the held trench, seven recovering workers and delivery',
 };
+const incidentTitles: Record<ScenarioId, string> = {
+  '01_pre_shift_planning': 'Morning work plan',
+  '02_heat_alert_response': 'Trench heat hold',
+  '03_constrained_reassignment': 'Trench heat hold',
+  '04_delivery_coordination': 'Trench heat hold',
+  '05_restricted_worker_assignment': 'Worker assignment review',
+  '06_sensor_failure': 'Trench monitor failure',
+  '07_unacknowledged_alert': 'Unanswered trench hold',
+  '08_symptom_escalation': 'Worker needs first aid',
+  '09_restart_review': 'Trench restart review',
+  '10_handover_and_evidence': 'Trench heat hold',
+};
 const caseName = (id: string) => caseNames[id as ScenarioId] || fixtures[id as ScenarioId].meta.title;
 const time = (value?: string) => value ? new Date(value).toLocaleTimeString('en-AU', { timeZone: 'Asia/Dubai', hour: '2-digit', minute: '2-digit', hour12: false }) : '—';
 const fmt = (value: unknown) => isValidElement(value) ? value : Array.isArray(value) ? value.join(', ') : typeof value === 'object' && value !== null ? JSON.stringify(value) : String(value ?? '—');
@@ -412,10 +424,12 @@ function App() {
   <main className="content">
     {view === 'overview' && !deskDetail && <ResponseQueue session={session} actingAs={actingAs} onOpen={openQueueAction}/>}
     {view === 'overview' && deskDetail && <>
-      <button className="button button-quiet response-queue-back" onClick={() => setDeskDetail(false)}><ChevronLeft size={16}/> Back to response queue</button><div className="page-intro overview-intro">
-        <div><div className="eyebrow">PROJECT SANDLINE · {caseName(session.scenarioId)}</div><h1>Response desk</h1></div>
+      <header className="incident-page-header">
+        <button className="incident-back-link" onClick={() => setDeskDetail(false)}><ChevronLeft size={14}/> Response queue</button>
+        <div className="incident-page-heading"><div><h1>{incidentTitles[session.scenarioId]}</h1><p>Project Sandline <span aria-hidden="true">·</span> {session.state.case_id ? session.state.case_id.replace(/_/g, ' ') : 'Site planning'}</p></div>
         <Status tone={heldTasks.length || pending ? 'warn' : complete ? 'good' : 'neutral'}>{heldTasks.length ? 'Heavy work held' : pending?.type === 'hold' ? 'Hold decision pending' : pending ? 'Action pending' : complete ? 'Replay complete' : 'Monitoring'}</Status>
-      </div>
+        </div>
+      </header>
       {connectedSequence.includes(session.scenarioId) && <JourneyProgress session={session}/>}
       <IncidentView operation={operation} session={session} pending={pending} activities={session.activityLog || []} actingAs={actingAs} onAction={applyAction} onConcern={applyConcern} onBriefing={applyBriefing} onCostAction={applyCostAction} onOpenPolicy={setPolicyId}/>
       {connectedSequence.includes(session.scenarioId) && <CostActions session={session} actingAs={actingAs} onRecord={applyCostAction} onReviewAssignment={()=>document.querySelector('.copilot-action')?.scrollIntoView({block:'center',behavior:'smooth'})}/>}
