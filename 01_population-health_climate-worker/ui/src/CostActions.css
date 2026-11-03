@@ -25,3 +25,9 @@
 .cost-actions__check button:disabled { background: #e4ebe6; color: #7b8b81; cursor: not-allowed; }
 .cost-actions__saved { color: #12694e; font-weight: 700; }
 @media (max-width: 760px) { .cost-actions__grid, .cost-actions__checks { grid-template-columns: 1fr; } .cost-actions { padding: 14px; } }
+
+.cost-actions__request { margin-top: 12px; font-size: .8rem; color: #52525b; }
+.cost-actions__request summary { cursor: pointer; padding: 8px 0; font-weight: 600; }
+.cost-actions__request summary:focus-visible { outline: 2px solid #52525b; outline-offset: 3px; }
+.cost-actions__request p { margin: 6px 0; }
+.cost-actions__saved small { display: block; margin-top: 5px; color: #71717a; font-weight: 400; }

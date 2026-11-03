@@ -13,8 +13,8 @@ export default function CostActions({ session, actingAs, onRecord, onReviewAssig
     <header className="cost-actions__header">
       <div>
         <span className="cost-actions__eyebrow">Cost planning · next {costAssumptions.window_minutes} minutes</span>
-        <h2 id="cost-actions-title">People and delivery costs</h2>
-        <p>Planning estimates from the recorded roster and booking. No charge or work restart is approved here.</p>
+        <h2 id="cost-actions-title">Recovery and delivery decisions</h2>
+        <p>Compare the next 30 minutes. Estimates do not approve charges or restart work.</p>
       </div>
     </header>
 
@@ -26,10 +26,10 @@ export default function CostActions({ session, actingAs, onRecord, onReviewAssig
           <div className="cost-actions__rows">
             <div><span>Current recovery · {plan.recoveringCount} × 0.5 h</span><strong>{plan.recoveryHours} worker h · AED {plan.illustrativeRemainingExposureAed} <small>≈ USD {usd(plan.illustrativeRemainingExposureAed)}</small></strong></div>
             <div><span>After eligible workshop move · {plan.recoveringCount - plan.workshopPotentialCount} × 0.5 h</span><strong>{plan.projectedRecoveryHours} worker h · AED {plan.illustrativeProjectedExposureAed} <small>≈ USD {usd(plan.illustrativeProjectedExposureAed)}</small></strong></div>
-            <div><span>Already assigned to cooled workshop{plan.workshopNames.length ? ` · ${plan.workshopNames.join(', ')}` : ''}</span><strong>{plan.workshopCount} × 0.5 h = {plan.workshopHours} potential productive h</strong></div>
-            <div><span>Additional eligible subset{plan.workshopPotentialNames.length ? ` · ${plan.workshopPotentialNames.join(', ')}` : ''}</span><strong>{plan.workshopPotentialCount} × 0.5 h = {plan.workshopPotentialHours} potential productive h</strong></div>
+            <div><span>Already assigned to workshop</span><strong>{plan.workshopCount} × 0.5 h = {plan.workshopHours} potential productive h</strong></div>
+            <div><span>Eligible for workshop</span><strong>{plan.workshopPotentialCount} × 0.5 h = {plan.workshopPotentialHours} potential productive h</strong></div>
           </div>
-          <p className="cost-actions__fine">Original recovery: {plan.originalRecoveryCount} people, {plan.originalRecoveryHours} worker h. Based on an assumed AED {costAssumptions.illustrative_burdened_rate_aed_per_worker_hour}/worker h (≈ USD {usd(costAssumptions.illustrative_burdened_rate_aed_per_worker_hour)}), not a wage quote. Workshop hours are possible output, not cash saved.</p>
+          <details className="cost-actions__request"><summary>Workers and calculation basis</summary><p>{plan.workshopPotentialNames.length ? `Eligible: ${plan.workshopPotentialNames.join(", ")}.` : "No additional workshop move available."} {plan.workshopNames.length ? `Assigned: ${plan.workshopNames.join(", ")}.` : ""}</p><p className="cost-actions__fine">Original recovery: {plan.originalRecoveryCount} people, {plan.originalRecoveryHours} worker h. Based on an assumed AED {costAssumptions.illustrative_burdened_rate_aed_per_worker_hour}/worker h (≈ USD {usd(costAssumptions.illustrative_burdened_rate_aed_per_worker_hour)}), not a wage quote. Workshop hours are possible output, not cash saved.</p></details>
         </> : <p className="cost-actions__empty">Recovery has not been recorded. The roster and worker-hour estimate will appear after Huda records it.</p>}
         {plan.workshopPotentialCount > 0 && onReviewAssignment && <button className="button button-soft" onClick={onReviewAssignment}>Review workshop move</button>}<p className="cost-actions__guard">Only qualified workers may move to the cooled workshop. Recovery and the trench hold continue.</p>
       </article>
@@ -54,7 +54,7 @@ export default function CostActions({ session, actingAs, onRecord, onReviewAssig
           const saved = checks.find(check => check.id === action.id);
           const person = action.actorId === 'C01' ? 'Huda' : action.actorId === 'P05' ? 'Noura' : 'Amal';
           return <div className="cost-actions__check" key={action.id}>
-            <div><strong>{person}</strong><span>{action.id === 'recovery_roster' ? 'Verify who remains in recovery and who is assigned to the cooled workshop.' : action.id === 'supplier_quote_request' ? 'Prepare a request for the actual reschedule and standby terms.' : 'Review the estimated exposure and decide what evidence is still needed.'}</span></div>
+            <div><strong>{person}</strong><span>{action.id === 'recovery_roster' ? 'Confirm recovery and workshop headcounts.' : action.id === 'supplier_quote_request' ? 'Request actual rescheduling and standby fees.' : 'Review exposure and identify missing evidence.'}</span></div>
             {saved ? <div className="cost-actions__saved">Recorded · {time(saved.at)}<small>At record: {saved.snapshot?.recoveringCount ?? '?'} recovering, {saved.snapshot?.workshopCount ?? '?'} workshop, {saved.snapshot?.deliveryStatus ?? 'unknown'} booking</small></div> : <button type="button" disabled={actingAs !== action.actorId || (action.id === 'recovery_roster' && !plan.originalRecoveryCount)} onClick={() => onRecord(action.id)}>{action.label}</button>}
             {!saved && actingAs !== action.actorId && <small>Choose {person} in “Acting as” to record this check.</small>}
           </div>;
