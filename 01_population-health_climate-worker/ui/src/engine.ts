@@ -295,8 +295,16 @@ function apply(session: Session, event: FixtureEvent): StepResult {
 export function stepSession(session: Session): StepResult {
   const event = fixtures[session.scenarioId].events[session.cursor];
   if (!event) return { status: 'complete' };
-  if (humanAuthority[event.type]) { session.pendingEvent = event; return { status: 'awaiting_actor', event }; }
+  const pending = prepareNextHumanAction(session);
+  if (pending) return { status: 'awaiting_actor', event: pending };
   return apply(session, event);
+}
+/** Stage only the next named decision; never advance a signal or change site time. */
+export function prepareNextHumanAction(session: Session): FixtureEvent | null {
+  const event = fixtures[session.scenarioId].events[session.cursor];
+  if (!event || !humanAuthority[event.type]) return null;
+  session.pendingEvent = event;
+  return event;
 }
 /** Apply the pending human event if the actor matches its authority; invalid attempts do not advance. */
 export function act(session: Session, actorId: string): StepResult {
