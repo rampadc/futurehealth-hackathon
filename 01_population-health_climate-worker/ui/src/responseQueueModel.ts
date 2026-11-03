@@ -56,11 +56,11 @@ export function buildResponseQueue(session: Session): QueueAction[] {
     if (held && !session.crewBriefing) add({ id: 'crew-briefing', title: 'Record crew briefing', detail: 'Huda can record the hold and recovery briefing in the incident.', actorId: 'C01', target: 'incident', ready: true });
     if (held) {
       const concern = nextConcernAction(session.commercialConcern);
-      if (concern.actorId) add({ id: 'commercial-concern', title: concern.stage === 'raised' ? 'Raise pay and lost-output concern' : concern.stage === 'routed' ? 'Route cost concern to Amal' : 'Record cost concern receipt', detail: 'Record the next named commercial concern step in the incident.', actorId: concern.actorId, target: 'incident', ready: true });
+      if (concern.actorId) add({ id: 'commercial-concern', title: concern.stage === 'raised' ? 'Raise pay and lost-output concern' : concern.stage === 'routed' ? 'Route cost concern to Amal' : 'Record cost concern receipt', detail: concern.stage === 'raised' ? 'Record the crew’s pay concern and work affected by the hold.' : concern.stage === 'routed' ? 'Send the recorded concern to Amal for cost review.' : 'Confirm receipt and keep unverified costs open.', actorId: concern.actorId, target: 'incident', ready: true });
       for (const item of costActions) {
         if ((session.commercialChecks ?? []).some(check => check.id === item.id)) continue;
         const ready = item.id !== 'recovery_roster' || recovery + workshop > 0;
-        add({ id: `cost:${item.id}`, title: item.id === 'recovery_roster' ? 'Verify recovery roster' : item.id === 'supplier_quote_request' ? 'Prepare supplier cost enquiry' : 'Record cost exposure review', detail: ready ? 'Record this local check in People and delivery costs.' : 'Available after the crew recovery is recorded.', actorId: item.actorId, target: 'handover', ready });
+        add({ id: `cost:${item.id}`, title: item.id === 'recovery_roster' ? 'Verify recovery roster' : item.id === 'supplier_quote_request' ? 'Prepare supplier cost enquiry' : 'Record cost exposure review', detail: ready ? item.id === 'recovery_roster' ? 'Confirm who is in recovery and who has moved to the workshop.' : item.id === 'supplier_quote_request' ? 'Prepare an enquiry for actual rescheduling and standby fees.' : 'Review worker-hours, estimated charges and missing evidence.' : 'Available after the crew recovery is recorded.', actorId: item.actorId, target: 'handover', ready });
       }
     }
     if (held && state.delivery.status === 'sent') add({ id: 'supplier-response', title: 'Await supplier acceptance', detail: 'The 15:30 request is sent; the original booking remains confirmed until Oasis accepts.', actorId: 'P05', target: 'incident', ready: false });
