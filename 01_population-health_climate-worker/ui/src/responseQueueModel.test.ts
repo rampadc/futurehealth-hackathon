@@ -26,9 +26,11 @@ describe('response queue', () => {
 
   it('keeps an escalated hold with Rashid and never invents a due time', () => {
     const session = createSession('07_unacknowledged_alert');
-    session.state.alerts.alert = { task_id: 'civil_heavy', status: 'escalated', acknowledged: false };
+    session.state.alerts.alert = { task_id: 'civil_heavy', status: 'escalated', acknowledged: false, at: '2025-08-04T08:01:00+04:00' };
+    session.state.clock = '2025-08-04T08:04:00+04:00';
     const action = buildResponseQueue(session).find(item => item.id === 'hold-verify');
     expect(action).toMatchObject({ actorId: 'P02', ready: false });
     expect(action?.dueAt).toBeUndefined();
+    expect(action?.overdue).toBeUndefined();
   });
 });
