@@ -1,6 +1,6 @@
 # 01. Plan before conditions change
 
-The superintendent reviews the exposed civil task and the booked aggregate delivery. A synthetic forecast suggests a hot period, but it is not a measurement of either work front.
+The superintendent reviews the exposed civil task and the booked aggregate delivery through Sandline's existing heat programme and delivery book. A synthetic forecast suggests a hot period, but it is not a measurement of either work front. The open coordination question is whether C01, P05 and the crew have the same plan before local conditions change; P01 owns any later programme-cost review.
 
 **Demonstrated value:** Earlier preparation and a clear distinction between planning information and current exposure.
 

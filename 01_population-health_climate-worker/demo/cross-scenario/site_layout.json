@@ -1,0 +1,15 @@
+{
+  "site_id": "sandline_mussafah_01",
+  "name": "Project Sandline",
+  "subtitle": "Mussafah utility corridor · Abu Dhabi",
+  "provenance": "Fictional schematic for the synthetic 4 August 2025 replay; coordinates show relative work-front locations, not surveyed or geographic positions.",
+  "zones": [
+    { "zone_id": "civil_exposed", "x": 6, "y": 13, "w": 35, "h": 32 },
+    { "zone_id": "electrical_exposed", "x": 45, "y": 13, "w": 30, "h": 24 },
+    { "zone_id": "yard", "x": 78, "y": 13, "w": 17, "h": 49 },
+    { "zone_id": "workshop", "x": 46, "y": 43, "w": 28, "h": 21 },
+    { "zone_id": "shelter_a", "x": 7, "y": 57, "w": 29, "h": 17 },
+    { "zone_id": "shelter_b", "x": 39, "y": 72, "w": 30, "h": 17 },
+    { "zone_id": "welfare", "x": 72, "y": 72, "w": 23, "h": 17 }
+  ]
+}

@@ -1,6 +1,6 @@
 # 09. Require current evidence at restart
 
-A civil task starts in a held state. An improved local reading is available, but improvement alone does not authorise resumption.
+A civil task starts in a held state. Sandline's existing local monitor later shows an improved band, but improvement alone does not authorise resumption. P02 and P04 must make a current, inspectable safety decision; P01 reviews any resulting programme cost separately. The crew should be able to see whose instruction changed and on what evidence.
 
 **Demonstrated value:** Prevent an earlier review from becoming a reusable permission that overrides changed conditions.
 

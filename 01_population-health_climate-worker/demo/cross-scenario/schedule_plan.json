@@ -1,0 +1,16 @@
+{
+  "site_id": "sandline_mussafah_01",
+  "date": "2025-08-04",
+  "timezone": "Asia/Dubai",
+  "provenance": "Fictional planning windows for visual coordination only. These are not event timestamps or evidence that work began, stopped, or finished.",
+  "window": { "start": "07:00", "end": "16:00" },
+  "midday_restriction": { "start": "12:30", "end": "15:00", "policy_id": "p_midday" },
+  "lanes": [
+    { "task_id": "civil_heavy", "start": "07:00", "end": "12:30" },
+    { "task_id": "civil_light", "start": "07:30", "end": "12:30" },
+    { "task_id": "electrical_prep", "start": "07:30", "end": "12:30" },
+    { "task_id": "yard_receive", "start": "11:00", "end": "12:30" },
+    { "task_id": "workshop_prep", "start": "08:00", "end": "12:30", "contingent": true }
+  ],
+  "delivery": { "delivery_id": "delivery_aggregate_01", "original_slot": "11:30", "proposed_slot": "15:30" }
+}

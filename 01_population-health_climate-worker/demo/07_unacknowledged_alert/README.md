@@ -1,6 +1,6 @@
 # 07. Escalate a response that has no owner acknowledgement
 
-A local heat hold has been raised, but the civil foreman has not acknowledged it. The superintendent is the escalation contact.
+The existing civil beacon and radio route have raised a local heat hold, but C01's response is missing from the manual register. Radio congestion or an omitted entry are plausible; the gap is not proof that the crew ignored the instruction. P02 is the site escalation contact and verifies the crew's actual state. P01 reviews any later disputed interval only after the times are reconciled.
 
 **Demonstrated value:** Reveal an unattended response and route it to a defined accountable person.
 
