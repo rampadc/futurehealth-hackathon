@@ -1,4 +1,4 @@
-import { act, createSession, getConnectedNext, scenarioComplete, stepSession, type Session, type StepResult } from './engine';
+import { act, createSession, getConnectedNext, prepareNextHumanAction, scenarioComplete, stepSession, type Session, type StepResult } from './engine';
 import type { FixtureEvent } from './fixtures';
 import { people, zones } from './fixtures';
 
@@ -151,6 +151,11 @@ function finish(session: Session, activities: StreamActivity[], status: StreamUp
   return { session, activities, status, pendingEvent: session.pendingEvent, result };
 }
 
+function prepareFollowingAction(session: Session): StreamActivity[] {
+  const event = prepareNextHumanAction(session);
+  return event ? [activity(event, 'preparation', 'scripted_assistant', pendingDetail(session, event))] : [];
+}
+
 /** One stream tick. It applies external fixture signals and stages human actions, never executes them. */
 export function driveStream(source: Session): StreamUpdate {
   const session = structuredClone(source);
@@ -185,7 +190,8 @@ export function driveStream(source: Session): StreamUpdate {
     : result.event.type === 'twl' && result.event.payload.zone_id === 'civil_exposed' && result.event.payload.twl <= 150
       ? `The trench reading is ${result.event.payload.twl} W/m², at or below the site’s 150 W/m² limit. The site rule put heavy trench work on hold; Huda still needs to confirm the crew stopped.`
       : undefined;
-  return finish(session, [activity(result.event, result.status === 'rejected' ? 'blocked' : 'signal', result.status === 'rejected' ? 'policy_engine' : 'synthetic_feed', detail)], 'advanced', result);
+  const activities = [activity(result.event, result.status === 'rejected' ? 'blocked' : 'signal', result.status === 'rejected' ? 'policy_engine' : 'synthetic_feed', detail), ...prepareFollowingAction(session)];
+  return finish(session, activities, session.pendingEvent ? 'awaiting_actor' : 'advanced', result);
 }
 
 /** Only call from an explicit human action; a timer must use driveStream alone. */
@@ -197,7 +203,8 @@ export function applyHumanAction(source: Session, actorId: string): StreamUpdate
     return finish(session, [activity(result.event, 'blocked', 'policy_engine', explainReason(result.reason))], 'denied', result);
   }
   if (result.status === 'rejected') {
-    return finish(session, [activity(result.event, 'blocked', 'policy_engine', explainReason(result.reason))], 'advanced', result);
+    const activities = [activity(result.event, 'blocked', 'policy_engine', explainReason(result.reason)), ...prepareFollowingAction(session)];
+    return finish(session, activities, session.pendingEvent ? 'awaiting_actor' : 'advanced', result);
   }
   const actor = personName(actorId);
   const decisionDetail: Record<string, string> = {
@@ -213,5 +220,6 @@ export function applyHumanAction(source: Session, actorId: string): StreamUpdate
   };
   const recorded = activity(result.event, 'decision', 'human_action', decisionDetail[result.event.type] ?? `${actor} recorded the required site action.`);
   recorded.title = completed[result.event.type] ?? names[result.event.type] ?? 'Decision recorded';
-  return finish(session, [recorded], 'advanced', result);
+  const activities = [recorded, ...prepareFollowingAction(session)];
+  return finish(session, activities, session.pendingEvent ? 'awaiting_actor' : 'advanced', result);
 }

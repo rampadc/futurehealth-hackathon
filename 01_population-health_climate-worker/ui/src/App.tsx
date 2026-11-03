@@ -9,7 +9,7 @@ import {
 import { ReactFlow, Background, Controls, Handle, Position, type Edge, type Node } from '@xyflow/react';
 import * as Dialog from '@radix-ui/react-dialog';
 import '@xyflow/react/dist/style.css';
-import { act, advanceClock, createSession, getConnectedNext, resetSession, scenarioComplete, stepSession } from './engine';
+import { act, advanceClock, createSession, getConnectedNext, prepareNextHumanAction, resetSession, scenarioComplete, stepSession } from './engine';
 import { assets, connectedSequence, crews, deliveries, fixtures, organisations, people, policies, scenarioIds, sources, tasks, zones, type ScenarioId } from './fixtures';
 import { ThermalReading } from './ThermalReading';
 import ForecastPlan from './ForecastPlan';
@@ -100,17 +100,22 @@ function chapterActionStatus(session: any, type: string, carriedState: boolean) 
 }
 
 function initialSession() {
-  try { const stored = JSON.parse(localStorage.getItem(STORE) || 'null'); if (stored?.scenarioId && scenarioIds.includes(stored.scenarioId)) return stored; } catch { /* Ignore stale demo state. */ }
+  try { const stored = JSON.parse(localStorage.getItem(STORE) || 'null'); if (stored?.scenarioId && scenarioIds.includes(stored.scenarioId)) return readySession(stored); } catch { /* Ignore stale demo state. */ }
   return createSession('02_heat_alert_response');
+}
+
+function readySession(session: any) {
+  if (!session.pendingEvent) prepareNextHumanAction(session);
+  return session;
 }
 
 function useDemoSession() {
   const [session, setSession] = useState<any>(initialSession);
   const sessionRef = useRef(session);
   useEffect(() => {
-    const onStorage = (e: StorageEvent) => { if (e.key === STORE && e.newValue) { try { const next = JSON.parse(e.newValue); sessionRef.current = next; setSession(next); } catch { /* Ignore malformed external state. */ } } };
+    const onStorage = (e: StorageEvent) => { if (e.key === STORE && e.newValue) { try { const next = readySession(JSON.parse(e.newValue)); sessionRef.current = next; setSession(next); } catch { /* Ignore malformed external state. */ } } };
     const channel = new BroadcastChannel(CHANNEL);
-    channel.onmessage = () => { try { const next = JSON.parse(localStorage.getItem(STORE) || 'null'); if (next) { sessionRef.current = next; setSession(next); } } catch { /* Ignore malformed external state. */ } };
+    channel.onmessage = () => { try { const next = JSON.parse(localStorage.getItem(STORE) || 'null'); if (next) { readySession(next); sessionRef.current = next; setSession(next); } } catch { /* Ignore malformed external state. */ } };
     window.addEventListener('storage', onStorage);
     return () => { channel.close(); window.removeEventListener('storage', onStorage); };
   }, []);
