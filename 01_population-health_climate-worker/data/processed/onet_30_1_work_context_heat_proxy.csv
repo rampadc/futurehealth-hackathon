@@ -1,0 +1,91 @@
+occupation_code,occupation_title,element_id,element_name,scale_id,category,category_description,data_value,n,standard_error,lower_ci_bound,upper_ci_bound,recommend_suppress,not_relevant,date,domain_source
+47-2061.00,Construction Laborers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CX,n/a,,4.63,21,0.2721,4.0585,5.0000,N,n/a,08/2020,Incumbent
+47-2061.00,Construction Laborers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CXP,1,Never,0.00,21,0.0000,n/a,n/a,N,n/a,08/2020,Incumbent
+47-2061.00,Construction Laborers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CXP,2,Once a year or more but not every month,0.00,21,0.0000,n/a,n/a,N,n/a,08/2020,Incumbent
+47-2061.00,Construction Laborers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CXP,3,Once a month or more but not every week,18.57,21,13.5938,3.3771,59.7978,N,n/a,08/2020,Incumbent
+47-2061.00,Construction Laborers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CXP,4,Once a week or more but not every day,0.25,21,0.2921,0.0228,2.7521,N,n/a,08/2020,Incumbent
+47-2061.00,Construction Laborers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CXP,5,Every day,81.18,21,13.6196,40.1847,96.5148,N,n/a,08/2020,Incumbent
+47-2061.00,Construction Laborers,4.C.2.a.1.d,"Outdoors, Under Cover",CX,n/a,,3.22,20,0.3603,2.4612,3.9694,N,n/a,08/2020,Incumbent
+47-2061.00,Construction Laborers,4.C.2.a.1.d,"Outdoors, Under Cover",CXP,1,Never,17.62,20,9.5569,5.1153,45.9027,N,n/a,08/2020,Incumbent
+47-2061.00,Construction Laborers,4.C.2.a.1.d,"Outdoors, Under Cover",CXP,2,Once a year or more but not every month,0.68,20,0.5081,0.1433,3.1919,N,n/a,08/2020,Incumbent
+47-2061.00,Construction Laborers,4.C.2.a.1.d,"Outdoors, Under Cover",CXP,3,Once a month or more but not every week,40.42,20,5.0547,30.4261,51.2871,N,n/a,08/2020,Incumbent
+47-2061.00,Construction Laborers,4.C.2.a.1.d,"Outdoors, Under Cover",CXP,4,Once a week or more but not every day,25.09,20,9.5719,10.3455,49.3059,N,n/a,08/2020,Incumbent
+47-2061.00,Construction Laborers,4.C.2.a.1.d,"Outdoors, Under Cover",CXP,5,Every day,16.18,20,13.2518,2.4356,59.8757,N,n/a,08/2020,Incumbent
+47-2061.00,Construction Laborers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CX,n/a,,4.48,21,0.1875,4.0846,4.8668,N,n/a,08/2020,Incumbent
+47-2061.00,Construction Laborers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CXP,1,Never,0.00,21,0.0000,n/a,n/a,N,n/a,08/2020,Incumbent
+47-2061.00,Construction Laborers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CXP,2,Once a year or more but not every month,0.00,21,0.0000,n/a,n/a,N,n/a,08/2020,Incumbent
+47-2061.00,Construction Laborers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CXP,3,Once a month or more but not every week,0.47,21,0.3578,0.0938,2.2856,N,n/a,08/2020,Incumbent
+47-2061.00,Construction Laborers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CXP,4,Once a week or more but not every day,51.50,21,18.7352,18.1726,83.5427,Y,n/a,08/2020,Incumbent
+47-2061.00,Construction Laborers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CXP,5,Every day,48.04,21,18.7395,16.1834,81.5686,Y,n/a,08/2020,Incumbent
+47-2171.00,Reinforcing Iron and Rebar Workers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CX,n/a,,4.60,22,0.3704,3.8317,5.0000,N,n/a,07/2015,Incumbent
+47-2171.00,Reinforcing Iron and Rebar Workers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CXP,1,Never,0.00,22,0.0000,n/a,n/a,N,n/a,07/2015,Incumbent
+47-2171.00,Reinforcing Iron and Rebar Workers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CXP,2,Once a year or more but not every month,0.00,22,0.0000,n/a,n/a,N,n/a,07/2015,Incumbent
+47-2171.00,Reinforcing Iron and Rebar Workers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CXP,3,Once a month or more but not every week,19.90,22,18.5196,2.1702,73.5664,Y,n/a,07/2015,Incumbent
+47-2171.00,Reinforcing Iron and Rebar Workers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CXP,4,Once a week or more but not every day,0.00,22,0.0000,n/a,n/a,N,n/a,07/2015,Incumbent
+47-2171.00,Reinforcing Iron and Rebar Workers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CXP,5,Every day,80.10,22,18.5196,26.4336,97.8298,Y,n/a,07/2015,Incumbent
+47-2171.00,Reinforcing Iron and Rebar Workers,4.C.2.a.1.d,"Outdoors, Under Cover",CX,n/a,,2.22,22,0.4583,1.2690,3.1752,N,n/a,07/2015,Incumbent
+47-2171.00,Reinforcing Iron and Rebar Workers,4.C.2.a.1.d,"Outdoors, Under Cover",CXP,1,Never,38.36,22,19.7763,9.8545,77.9905,Y,n/a,07/2015,Incumbent
+47-2171.00,Reinforcing Iron and Rebar Workers,4.C.2.a.1.d,"Outdoors, Under Cover",CXP,2,Once a year or more but not every month,29.44,22,10.8070,12.3872,55.1742,N,n/a,07/2015,Incumbent
+47-2171.00,Reinforcing Iron and Rebar Workers,4.C.2.a.1.d,"Outdoors, Under Cover",CXP,3,Once a month or more but not every week,7.06,22,5.0992,1.4848,27.6646,N,n/a,07/2015,Incumbent
+47-2171.00,Reinforcing Iron and Rebar Workers,4.C.2.a.1.d,"Outdoors, Under Cover",CXP,4,Once a week or more but not every day,21.92,22,11.5614,6.4440,53.3555,N,n/a,07/2015,Incumbent
+47-2171.00,Reinforcing Iron and Rebar Workers,4.C.2.a.1.d,"Outdoors, Under Cover",CXP,5,Every day,3.23,22,2.8986,0.4816,18.6853,N,n/a,07/2015,Incumbent
+47-2171.00,Reinforcing Iron and Rebar Workers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CX,n/a,,4.42,22,0.2889,3.8159,5.0000,N,n/a,07/2015,Incumbent
+47-2171.00,Reinforcing Iron and Rebar Workers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CXP,1,Never,0.00,22,0.0000,n/a,n/a,N,n/a,07/2015,Incumbent
+47-2171.00,Reinforcing Iron and Rebar Workers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CXP,2,Once a year or more but not every month,0.00,22,0.0000,n/a,n/a,N,n/a,07/2015,Incumbent
+47-2171.00,Reinforcing Iron and Rebar Workers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CXP,3,Once a month or more but not every week,16.03,22,10.0540,3.8826,47.4354,N,n/a,07/2015,Incumbent
+47-2171.00,Reinforcing Iron and Rebar Workers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CXP,4,Once a week or more but not every day,26.26,22,10.7383,10.1055,53.0161,N,n/a,07/2015,Incumbent
+47-2171.00,Reinforcing Iron and Rebar Workers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CXP,5,Every day,57.71,22,19.3376,20.8002,87.6365,Y,n/a,07/2015,Incumbent
+47-2181.00,Roofers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CX,n/a,,4.98,22,0.0074,4.9631,4.9940,N,n/a,07/2015,Incumbent
+47-2181.00,Roofers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CXP,1,Never,0.00,22,0.0000,n/a,n/a,N,n/a,07/2015,Incumbent
+47-2181.00,Roofers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CXP,2,Once a year or more but not every month,0.00,22,0.0000,n/a,n/a,N,n/a,07/2015,Incumbent
+47-2181.00,Roofers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CXP,3,Once a month or more but not every week,0.00,22,0.0000,n/a,n/a,N,n/a,07/2015,Incumbent
+47-2181.00,Roofers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CXP,4,Once a week or more but not every day,2.15,22,0.7449,1.0377,4.3845,N,n/a,07/2015,Incumbent
+47-2181.00,Roofers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CXP,5,Every day,97.85,22,0.7449,95.6155,98.9623,N,n/a,07/2015,Incumbent
+47-2181.00,Roofers,4.C.2.a.1.d,"Outdoors, Under Cover",CX,n/a,,2.20,22,0.2378,1.7093,2.6985,N,n/a,07/2015,Incumbent
+47-2181.00,Roofers,4.C.2.a.1.d,"Outdoors, Under Cover",CXP,1,Never,14.27,22,6.5665,5.1666,33.6961,N,n/a,07/2015,Incumbent
+47-2181.00,Roofers,4.C.2.a.1.d,"Outdoors, Under Cover",CXP,2,Once a year or more but not every month,64.84,22,6.8501,49.6747,77.4981,N,n/a,07/2015,Incumbent
+47-2181.00,Roofers,4.C.2.a.1.d,"Outdoors, Under Cover",CXP,3,Once a month or more but not every week,9.33,22,8.2456,1.3392,43.8487,N,n/a,07/2015,Incumbent
+47-2181.00,Roofers,4.C.2.a.1.d,"Outdoors, Under Cover",CXP,4,Once a week or more but not every day,9.37,22,8.0917,1.4054,42.8557,N,n/a,07/2015,Incumbent
+47-2181.00,Roofers,4.C.2.a.1.d,"Outdoors, Under Cover",CXP,5,Every day,2.19,22,2.3459,0.2303,17.8930,N,n/a,07/2015,Incumbent
+47-2181.00,Roofers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CX,n/a,,4.19,22,0.2950,3.5749,4.8018,N,n/a,07/2015,Incumbent
+47-2181.00,Roofers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CXP,1,Never,0.00,22,0.0000,n/a,n/a,N,n/a,07/2015,Incumbent
+47-2181.00,Roofers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CXP,2,Once a year or more but not every month,10.47,22,10.1231,1.2216,52.4981,N,n/a,07/2015,Incumbent
+47-2181.00,Roofers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CXP,3,Once a month or more but not every week,1.07,22,1.1357,0.1170,9.1222,N,n/a,07/2015,Incumbent
+47-2181.00,Roofers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CXP,4,Once a week or more but not every day,47.62,22,8.3573,31.1716,64.5986,N,n/a,07/2015,Incumbent
+47-2181.00,Roofers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CXP,5,Every day,40.84,22,11.2690,20.7432,64.5524,N,n/a,07/2015,Incumbent
+53-3032.00,Heavy and Tractor-Trailer Truck Drivers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CX,n/a,,4.76,41,0.0956,4.5713,4.9579,N,n/a,08/2022,Incumbent
+53-3032.00,Heavy and Tractor-Trailer Truck Drivers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CXP,1,Never,0.00,41,0.0000,n/a,n/a,N,n/a,08/2022,Incumbent
+53-3032.00,Heavy and Tractor-Trailer Truck Drivers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CXP,2,Once a year or more but not every month,0.00,41,0.0000,n/a,n/a,N,n/a,08/2022,Incumbent
+53-3032.00,Heavy and Tractor-Trailer Truck Drivers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CXP,3,Once a month or more but not every week,0.00,41,0.0000,n/a,n/a,N,n/a,08/2022,Incumbent
+53-3032.00,Heavy and Tractor-Trailer Truck Drivers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CXP,4,Once a week or more but not every day,23.54,41,9.5639,9.5146,47.3965,N,n/a,08/2022,Incumbent
+53-3032.00,Heavy and Tractor-Trailer Truck Drivers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CXP,5,Every day,76.46,41,9.5639,52.6035,90.4854,N,n/a,08/2022,Incumbent
+53-3032.00,Heavy and Tractor-Trailer Truck Drivers,4.C.2.a.1.d,"Outdoors, Under Cover",CX,n/a,,2.81,42,0.3147,2.1738,3.4450,N,n/a,08/2022,Incumbent
+53-3032.00,Heavy and Tractor-Trailer Truck Drivers,4.C.2.a.1.d,"Outdoors, Under Cover",CXP,1,Never,30.91,42,10.1171,14.6692,53.8061,N,n/a,08/2022,Incumbent
+53-3032.00,Heavy and Tractor-Trailer Truck Drivers,4.C.2.a.1.d,"Outdoors, Under Cover",CXP,2,Once a year or more but not every month,14.90,42,7.6565,4.9149,37.2138,N,n/a,08/2022,Incumbent
+53-3032.00,Heavy and Tractor-Trailer Truck Drivers,4.C.2.a.1.d,"Outdoors, Under Cover",CXP,3,Once a month or more but not every week,15.61,42,6.7392,6.1754,34.1999,N,n/a,08/2022,Incumbent
+53-3032.00,Heavy and Tractor-Trailer Truck Drivers,4.C.2.a.1.d,"Outdoors, Under Cover",CXP,4,Once a week or more but not every day,19.50,42,8.4756,7.5261,41.8851,N,n/a,08/2022,Incumbent
+53-3032.00,Heavy and Tractor-Trailer Truck Drivers,4.C.2.a.1.d,"Outdoors, Under Cover",CXP,5,Every day,19.08,42,7.9994,7.6507,40.1700,N,n/a,08/2022,Incumbent
+53-3032.00,Heavy and Tractor-Trailer Truck Drivers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CX,n/a,,4.24,42,0.1450,3.9490,4.5345,N,n/a,08/2022,Incumbent
+53-3032.00,Heavy and Tractor-Trailer Truck Drivers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CXP,1,Never,0.00,42,0.0000,n/a,n/a,N,n/a,08/2022,Incumbent
+53-3032.00,Heavy and Tractor-Trailer Truck Drivers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CXP,2,Once a year or more but not every month,1.66,42,1.2177,0.3749,7.0687,N,n/a,08/2022,Incumbent
+53-3032.00,Heavy and Tractor-Trailer Truck Drivers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CXP,3,Once a month or more but not every week,18.03,42,8.1512,6.7358,40.1206,N,n/a,08/2022,Incumbent
+53-3032.00,Heavy and Tractor-Trailer Truck Drivers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CXP,4,Once a week or more but not every day,34.77,42,9.7280,18.3157,55.9023,N,n/a,08/2022,Incumbent
+53-3032.00,Heavy and Tractor-Trailer Truck Drivers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CXP,5,Every day,45.53,42,8.9470,28.7439,63.3972,N,n/a,08/2022,Incumbent
+53-3033.00,Light Truck Drivers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CX,n/a,,4.15,29,0.4353,3.2591,5.0000,N,n/a,08/2023,Incumbent
+53-3033.00,Light Truck Drivers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CXP,1,Never,18.64,29,10.4488,5.2920,48.4447,N,n/a,08/2023,Incumbent
+53-3033.00,Light Truck Drivers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CXP,2,Once a year or more but not every month,0.21,29,0.2212,0.0236,1.8143,N,n/a,08/2023,Incumbent
+53-3033.00,Light Truck Drivers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CXP,3,Once a month or more but not every week,0.00,29,0.0000,n/a,n/a,N,n/a,08/2023,Incumbent
+53-3033.00,Light Truck Drivers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CXP,4,Once a week or more but not every day,9.74,29,5.5642,2.8640,28.2935,N,n/a,08/2023,Incumbent
+53-3033.00,Light Truck Drivers,4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions",CXP,5,Every day,71.41,29,12.9865,40.4316,90.1910,N,n/a,08/2023,Incumbent
+53-3033.00,Light Truck Drivers,4.C.2.a.1.d,"Outdoors, Under Cover",CX,n/a,,2.58,29,0.2968,1.9760,3.1920,N,n/a,08/2023,Incumbent
+53-3033.00,Light Truck Drivers,4.C.2.a.1.d,"Outdoors, Under Cover",CXP,1,Never,48.19,29,11.6159,26.3952,70.6926,N,n/a,08/2023,Incumbent
+53-3033.00,Light Truck Drivers,4.C.2.a.1.d,"Outdoors, Under Cover",CXP,2,Once a year or more but not every month,10.99,29,7.6004,2.4524,37.7487,N,n/a,08/2023,Incumbent
+53-3033.00,Light Truck Drivers,4.C.2.a.1.d,"Outdoors, Under Cover",CXP,3,Once a month or more but not every week,5.20,29,3.9951,1.0341,22.3848,N,n/a,08/2023,Incumbent
+53-3033.00,Light Truck Drivers,4.C.2.a.1.d,"Outdoors, Under Cover",CXP,4,Once a week or more but not every day,5.47,29,4.2153,1.0778,23.5093,N,n/a,08/2023,Incumbent
+53-3033.00,Light Truck Drivers,4.C.2.a.1.d,"Outdoors, Under Cover",CXP,5,Every day,30.15,29,8.1733,16.3108,48.8691,N,n/a,08/2023,Incumbent
+53-3033.00,Light Truck Drivers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CX,n/a,,3.48,29,0.2778,2.9071,4.0450,N,n/a,08/2023,Incumbent
+53-3033.00,Light Truck Drivers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CXP,1,Never,25.53,29,8.1432,12.4799,45.1871,N,n/a,08/2023,Incumbent
+53-3033.00,Light Truck Drivers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CXP,2,Once a year or more but not every month,2.33,29,1.8349,0.4540,11.0714,N,n/a,08/2023,Incumbent
+53-3033.00,Light Truck Drivers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CXP,3,Once a month or more but not every week,6.11,29,3.8777,1.6038,20.6262,N,n/a,08/2023,Incumbent
+53-3033.00,Light Truck Drivers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CXP,4,Once a week or more but not every day,31.06,29,9.0174,15.9803,51.6354,N,n/a,08/2023,Incumbent
+53-3033.00,Light Truck Drivers,4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,CXP,5,Every day,34.97,29,10.0089,17.9147,56.9810,N,n/a,08/2023,Incumbent
