@@ -1,23 +1,11 @@
-# 01. Plan before conditions change
+# 01. Plan the shift before the heat arrives
 
-The superintendent reviews the exposed civil task and the booked aggregate delivery through Sandline's existing heat programme and delivery book. A synthetic forecast suggests a hot period, but it is not a measurement of either work front. The open coordination question is whether C01, P05 and the crew have the same plan before local conditions change; P01 owns any later programme-cost review.
+Sandline has exposed civil work planned and a truck booked to deliver aggregate: sand, gravel or crushed stone. A forecast points to a hot period later in the day. It helps the team plan, but it does not tell them the conditions at the work front now.
 
-**Demonstrated value:** Earlier preparation and a clear distinction between planning information and current exposure.
+Maya Al Qamar, the safety officer, recommends reviewing the work timing with Rashid Al Wadi, the superintendent. Huda Al Nadir, the civil foreman, and Noura Al Nadir, the logistics coordinator, need a shared plan for the crew and the delivery. The suggestion is to consider doing exposed work earlier, before the forecast peak and the midday outdoor restriction. Amal Al Nadir, the project manager, owns any later discussion about costs or changes to the work schedule.
 
-## Walkthrough
+The result is a planning recommendation, not a changed work schedule or an agreement with the supplier. The forecast alone neither clears work nor puts it on hold. The crew still needs current local conditions and the usual site decision before acting.
 
-1. Open the work plan and forecast together; identify the civil task and delivery dependency.
-2. Show an advisory to review timing with the foreman and logistics coordinator.
-3. Keep existing permissions unchanged: a forecast alone neither clears nor prohibits work.
+## Related records
 
-## Expected result
-
-A planning recommendation exists, with its assumptions visible. No actual rescheduling or supplier agreement is claimed.
-
-The machine-readable assertions, deliberate rejections and forbidden actions are in [expected_outcomes.json](expected_outcomes.json). Policy references: `p_heat_program, p_twl_assumptions`; see the shared [SOP](../cross-scenario/HEAT_PROGRAM_AND_SOP.md) and [policy register](../cross-scenario/policies.json).
-
-## Inputs and replay
-
-Load the shared [baseline](../cross-scenario/baseline_state.json), apply `initial_overrides` from [scenario.json](scenario.json), then process [signals.jsonl](signals.jsonl) in recorded order. The timestamps are simulation time on 4 August 2025 (`+04:00`), not a command to wait in real time. See [example_interaction.md](example_interaction.md) for an illustrative dialogue.
-
-All people, readings and actions are fictional. This demonstrates workflow behaviour, not clinical effectiveness, actual supplier communications or production safety approval.
+[Scenario](scenario.json) · [Events](signals.jsonl) · [Expected outcomes](expected_outcomes.json) · [Example conversation](example_interaction.md). Policies: `p_heat_program`, `p_twl_assumptions` in the shared [heat programme](../cross-scenario/HEAT_PROGRAM_AND_SOP.md) and [policy register](../cross-scenario/policies.json).

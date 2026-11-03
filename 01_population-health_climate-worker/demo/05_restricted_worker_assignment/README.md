@@ -1,23 +1,11 @@
-# 05. Respect mobilisation restrictions
+# 05. Keep new starters on suitable work
 
-C13 and C14 are newly mobilised civil workers. C01's existing roster places them on supervised light work. An attempted assignment to exposed heavy work conflicts with their restrictions and could put social pressure on new starters to accept. P01 may need to plan around a real capacity gap, but no worker pay or subcontract adjustment follows automatically from this roster entry.
+Noor Al Nadir and Adil Al Wadi are civil workers who have just joined the site. Huda Al Nadir, their foreman, has already placed them on supervised light work while they complete their period of gradually getting used to working in the heat. A proposed move to heavy work in the exposed area conflicts with that restriction. New starters may feel pressure to accept an assignment, so the check needs to happen before they start.
 
-**Demonstrated value:** Catch an assignment mistake before work starts, without disclosing a diagnosis or a full HR record.
+The proposed heavy-work assignment is rejected. The explanation gives Huda the operational reason without exposing a diagnosis or a full personnel record. A follow-up check confirms that Noor and Adil remain assigned to supervised light work.
 
-## Walkthrough
+The result is a real capacity gap for the exposed task, which Amal Al Nadir may need to allow for in the work schedule. The roster entry does not decide anyone's wages or change the Dune–Sandline subcontract terms. It protects the workers while leaving those employment and commercial questions with their proper owners.
 
-1. Display the proposed assignment and only the operational restriction needed for the decision.
-2. Reject the heavy-task proposal and explain the restriction.
-3. Confirm that the supervised light assignment remains in place.
+## Related records
 
-## Expected result
-
-The prohibited assignment is rejected and the original suitable assignment is preserved.
-
-The machine-readable assertions, deliberate rejections and forbidden actions are in [expected_outcomes.json](expected_outcomes.json). Policy references: `p_heat_program, p_twl_assumptions`; see the shared [SOP](../cross-scenario/HEAT_PROGRAM_AND_SOP.md) and [policy register](../cross-scenario/policies.json).
-
-## Inputs and replay
-
-Load the shared [baseline](../cross-scenario/baseline_state.json), apply `initial_overrides` from [scenario.json](scenario.json), then process [signals.jsonl](signals.jsonl) in recorded order. The timestamps are simulation time on 4 August 2025 (`+04:00`), not a command to wait in real time. See [example_interaction.md](example_interaction.md) for an illustrative dialogue.
-
-All people, readings and actions are fictional. This demonstrates workflow behaviour, not clinical effectiveness, actual supplier communications or production safety approval.
+[Scenario](scenario.json) · [Events](signals.jsonl) · [Expected outcomes](expected_outcomes.json) · [Example conversation](example_interaction.md). Policies: `p_heat_program`, `p_twl_assumptions` in the shared [heat programme](../cross-scenario/HEAT_PROGRAM_AND_SOP.md) and [policy register](../cross-scenario/policies.json).

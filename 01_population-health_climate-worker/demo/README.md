@@ -1,20 +1,20 @@
-# Project Sandline — synthetic Heat-Safe demonstration
+# Project Sandline — a day on site
 
-Start with one fictional utilities-construction site in Mussafah, Abu Dhabi, on **4 August 2025 (Asia/Dubai, UTC+04:00)**. The site already has a heat programme, local monitor and beacon, radio procedure and manual register. These cases explore how an assistant could help people apply the existing instruction, coordinate changes and preserve evidence across employers. The open questions are who can confirm a stop, what the crew can trust about rest and pay, and who owns its cost.
+Follow a utilities-construction site in Mussafah, Abu Dhabi, on **4 August 2025 (Asia/Dubai, UTC+04:00)**. The site already has a heat programme, local monitor and beacon, radio procedure and manual register. These cases explore how an assistant could help people apply the existing instruction, coordinate changes and preserve evidence across employers. The open questions are who can confirm a stop, what the crew can trust about rest and pay, and who owns its cost.
 
-All people, companies, measurements and operational actions are synthetic. The package is a dossier and replayable fixtures, not an application, live integration or operational safety approval.
+The site, people and events are authored for this project. Rule classifications and original sources remain available in the linked policy register.
 
 ## Read the site before running a scenario
 
 1. [Site context](cross-scenario/SITE_CONTEXT.md): organisations, personnel, resources, work and authority.
-2. [Heat programme and SOP](cross-scenario/HEAT_PROGRAM_AND_SOP.md): response steps and the distinction between published requirements and invented demo policies.
+2. [Heat programme and SOP](cross-scenario/HEAT_PROGRAM_AND_SOP.md): response steps and the distinction between published requirements and Sandline’s own site rules.
 3. [Policy register](cross-scenario/policies.json) and [source register](cross-scenario/sources.json): evidence behind each rule.
 4. [Decision context](cross-scenario/decision_context.json): the existing process, trust and money questions, named commercial owner and evidence needed for each scenario.
-5. [Fictional Heat Rest Schedule](cross-scenario/HEAT_REST_SCHEDULE.md): the scoped Dune employer commitment and the unresolved cross-party costs.
+5. [Heat Rest Schedule](cross-scenario/HEAT_REST_SCHEDULE.md): the scoped Dune employer commitment and the unresolved cross-party costs.
 
 The shared JSON files define 36 regular personnel, their crews, tasks, zones, assets and delivery. Scenario folders reuse those IDs; they do not introduce a different company each time.
 
-## Choose a demonstration
+## Follow the scenarios
 
 | Scenario | Value to show |
 |---|---|
@@ -29,7 +29,18 @@ The shared JSON files define 36 regular personnel, their crews, tasks, zones, as
 | [09. Require current evidence at restart](09_restart_review/README.md) | Prevent an earlier review from becoming a reusable permission that overrides changed conditions. |
 | [10. Explain what happened and what remains open](10_handover_and_evidence/README.md) | Produce an inspectable handover that preserves unresolved work instead of writing a misleading success summary. |
 
-For a presentation, use **02 → 03 → 04 → 10** as one disputed day: the existing civil beacon alerts; C01 follows P02's authorised hold before commercial resolution; Dune's fictional Heat Rest Schedule supports a scoped crew reassurance, while reimbursement remains open; four people take feasible alternative work; the supplier confirms a later booking without agreeing charges; P02 hands a verified timeline and unresolved cost question to P01. Use **06** as the independent failure demonstration. The other cases are focused tests or alternate demonstrations.
+Read **02 → 03 → 04 → 10** as one connected shift:
+
+1. The trench heat alarm sounds. Huda, the foreman, must confirm the crew has stopped and moved to recovery.
+2. Four qualified workers can move to the cooled workshop once they are ready. Seven remain in recovery.
+3. Noura, the logistics coordinator, asks the supplier to move its truck booking from 11:30 to 15:30. The booking changes only after the supplier accepts.
+4. Rashid, the superintendent, hands over the work hold and unfinished checks. Amal, the project manager, reviews lost work time and any supplier charges separately.
+
+The truck carries **aggregate: sand, gravel or crushed stone used in construction**. “Aggregate delivery” simply means that load arriving on site; these records do not specify the exact material.
+
+Throughout the shift, Huda can explain Dune’s agreement covering required recovery during the ordinary shift. That agreement does not establish whether individual wages have been paid or who will cover the contractor’s lost output. Protecting the crew does not wait for those money questions to be settled.
+
+The remaining scenarios cover planning, restricted assignments, a failed monitor, an unanswered alert, a worker feeling unwell and restart checks.
 
 ## How the data fits together
 
