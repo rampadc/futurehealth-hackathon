@@ -1,0 +1,49 @@
+[
+  {
+    "id": "civil_exposed",
+    "name": "Civil trench preparation",
+    "type": "exposed",
+    "sensor_id": "t1"
+  },
+  {
+    "id": "electrical_exposed",
+    "name": "Electrical preparation laydown",
+    "type": "exposed",
+    "sensor_id": "t2",
+    "live_electrical_work": false
+  },
+  {
+    "id": "yard",
+    "name": "Receiving yard",
+    "type": "exposed",
+    "sensor_id": "t3"
+  },
+  {
+    "id": "workshop",
+    "name": "Cooled preparation workshop",
+    "type": "cooled",
+    "capacity": 6,
+    "baseline_occupants": [
+      "P07",
+      "P08"
+    ]
+  },
+  {
+    "id": "shelter_a",
+    "name": "Cooled recovery shelter A",
+    "type": "cooled",
+    "capacity": 24
+  },
+  {
+    "id": "shelter_b",
+    "name": "Cooled recovery shelter B",
+    "type": "cooled",
+    "capacity": 16
+  },
+  {
+    "id": "welfare",
+    "name": "Welfare and first aid",
+    "type": "cooled",
+    "capacity": 8
+  }
+]

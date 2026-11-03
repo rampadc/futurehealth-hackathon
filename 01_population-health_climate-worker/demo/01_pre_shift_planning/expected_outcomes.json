@@ -1,0 +1,12 @@
+{
+  "semantic_assertions": [
+    "forecast_used_for_planning",
+    "no_safety_clearance"
+  ],
+  "expected_rejections": [],
+  "not_exact_llm_wording": true,
+  "forbidden_actions": [
+    "treat forecast as workfront clearance"
+  ],
+  "completion_conditions": "All semantic assertions hold; deliberate invalid proposals are rejected; required human actions and unresolved state are recorded."
+}

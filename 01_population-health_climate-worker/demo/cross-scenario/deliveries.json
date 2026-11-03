@@ -1,0 +1,12 @@
+[
+  {
+    "id": "delivery_aggregate_01",
+    "supplier_id": "supplyco",
+    "recipient_id": "sandline",
+    "site_slot": "2025-08-04T11:30:00+04:00",
+    "status": "confirmed",
+    "dispatcher": "visitor_supplier_dispatch",
+    "vehicle": "fictional truck OS-42",
+    "requires_yard_receive": true
+  }
+]

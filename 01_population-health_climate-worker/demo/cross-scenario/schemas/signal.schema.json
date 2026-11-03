@@ -1,0 +1,802 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Sandline signal envelope",
+  "type": "object",
+  "required": [
+    "event_id",
+    "scenario_id",
+    "occurred_at",
+    "received_at",
+    "source",
+    "synthetic",
+    "type",
+    "payload"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string"
+    },
+    "scenario_id": {
+      "type": "string"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "received_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "const": "synthetic_fixture"
+    },
+    "synthetic": {
+      "const": true
+    },
+    "type": {
+      "enum": [
+        "ack",
+        "assign",
+        "assign_attempt",
+        "check",
+        "clearance_attempt",
+        "clock",
+        "delivery_accept",
+        "delivery_approve",
+        "delivery_draft",
+        "delivery_send",
+        "escalate",
+        "first_aid",
+        "forecast",
+        "handover",
+        "hold",
+        "recommendation",
+        "recover",
+        "restart",
+        "restart_attempt",
+        "review",
+        "sensor_fail",
+        "stop",
+        "symptom",
+        "twl"
+      ]
+    },
+    "payload": {
+      "type": "object"
+    },
+    "actor_id": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "forecast"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "max_air_c",
+              "source"
+            ],
+            "properties": {
+              "source": {
+                "type": "string"
+              },
+              "max_air_c": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "recommendation"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "clearance",
+              "kind",
+              "tasks"
+            ],
+            "properties": {
+              "clearance": {
+                "type": "boolean"
+              },
+              "tasks": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "kind": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "twl"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "measured_at",
+              "quality",
+              "sensor_id",
+              "twl",
+              "unit",
+              "zone_id"
+            ],
+            "properties": {
+              "quality": {
+                "type": "string"
+              },
+              "sensor_id": {
+                "type": "string"
+              },
+              "measured_at": {
+                "type": "string"
+              },
+              "twl": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string"
+              },
+              "zone_id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "hold"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "alert_id",
+              "case_id",
+              "task_id"
+            ],
+            "properties": {
+              "alert_id": {
+                "type": "string"
+              },
+              "case_id": {
+                "type": "string"
+              },
+              "task_id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "ack"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "actor_id",
+              "alert_id"
+            ],
+            "properties": {
+              "actor_id": {
+                "type": "string"
+              },
+              "alert_id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "stop"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "actor_id",
+              "task_id"
+            ],
+            "properties": {
+              "actor_id": {
+                "type": "string"
+              },
+              "task_id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "recover"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "person_ids",
+              "zone_id"
+            ],
+            "properties": {
+              "person_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "zone_id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "assign_attempt"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "expect_reject",
+              "person_ids",
+              "task_id",
+              "zone_id"
+            ],
+            "properties": {
+              "person_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "task_id": {
+                "type": "string"
+              },
+              "expect_reject": {
+                "type": "string"
+              },
+              "zone_id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "assign"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "person_ids",
+              "task_id",
+              "zone_id"
+            ],
+            "properties": {
+              "person_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "task_id": {
+                "type": "string"
+              },
+              "zone_id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "check"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "person_ids",
+              "task_id"
+            ],
+            "properties": {
+              "person_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "task_id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "delivery_draft"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "delivery_id",
+              "new_slot",
+              "reason"
+            ],
+            "properties": {
+              "reason": {
+                "type": "string"
+              },
+              "delivery_id": {
+                "type": "string"
+              },
+              "new_slot": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "delivery_approve"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "actor_id"
+            ],
+            "properties": {
+              "actor_id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "delivery_send"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "actor_id",
+              "recipient",
+              "synthetic_external_message"
+            ],
+            "properties": {
+              "actor_id": {
+                "type": "string"
+              },
+              "synthetic_external_message": {
+                "type": "boolean"
+              },
+              "recipient": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "delivery_accept"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "actor"
+            ],
+            "properties": {
+              "actor": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "sensor_fail"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "sensor_id"
+            ],
+            "properties": {
+              "sensor_id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "clearance_attempt"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "expect_reject",
+              "using_sensor_id",
+              "zone_id"
+            ],
+            "properties": {
+              "using_sensor_id": {
+                "type": "string"
+              },
+              "expect_reject": {
+                "type": "string"
+              },
+              "zone_id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "clock"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "minutes"
+            ],
+            "properties": {
+              "minutes": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "escalate"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "actor_id",
+              "alert_id"
+            ],
+            "properties": {
+              "actor_id": {
+                "type": "string"
+              },
+              "alert_id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "symptom"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "case_id",
+              "observation",
+              "person_id"
+            ],
+            "properties": {
+              "case_id": {
+                "type": "string"
+              },
+              "person_id": {
+                "type": "string"
+              },
+              "observation": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "first_aid"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "action",
+              "actor_id",
+              "person_id"
+            ],
+            "properties": {
+              "actor_id": {
+                "type": "string"
+              },
+              "action": {
+                "type": "string"
+              },
+              "person_id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "restart_attempt"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "actor_id",
+              "expect_reject",
+              "task_id"
+            ],
+            "properties": {
+              "actor_id": {
+                "type": "string"
+              },
+              "task_id": {
+                "type": "string"
+              },
+              "expect_reject": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "review"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "actor_id",
+              "checks",
+              "task_id"
+            ],
+            "properties": {
+              "actor_id": {
+                "type": "string"
+              },
+              "checks": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "task_id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "restart"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "actor_id",
+              "task_id"
+            ],
+            "properties": {
+              "actor_id": {
+                "type": "string"
+              },
+              "task_id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "handover"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "actor_id",
+              "case_id",
+              "references",
+              "unresolved"
+            ],
+            "properties": {
+              "actor_id": {
+                "type": "string"
+              },
+              "case_id": {
+                "type": "string"
+              },
+              "references": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "unresolved": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

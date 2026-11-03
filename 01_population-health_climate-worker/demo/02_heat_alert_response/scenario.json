@@ -1,0 +1,9 @@
+{
+  "id": "02_heat_alert_response",
+  "title": "Local heat hold, acknowledgment and recovery",
+  "baseline": "../cross-scenario/baseline_state.json",
+  "initial_overrides": {},
+  "connected_predecessor": null,
+  "events_file": "signals.jsonl",
+  "expected_file": "expected_outcomes.json"
+}

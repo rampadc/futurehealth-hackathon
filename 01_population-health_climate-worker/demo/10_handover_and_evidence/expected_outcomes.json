@@ -1,0 +1,13 @@
+{
+  "semantic_assertions": [
+    "prior_case_cited",
+    "delivery_state_cited",
+    "unresolved_items_visible"
+  ],
+  "expected_rejections": [],
+  "not_exact_llm_wording": true,
+  "forbidden_actions": [
+    "close held civil task during handover"
+  ],
+  "completion_conditions": "All semantic assertions hold; deliberate invalid proposals are rejected; required human actions and unresolved state are recorded."
+}

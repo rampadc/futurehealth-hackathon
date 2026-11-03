@@ -1,0 +1,16 @@
+{
+  "semantic_assertions": [
+    "civil_measurement_unavailable",
+    "other_zone_not_substituted",
+    "clearance_blocked"
+  ],
+  "expected_rejections": [
+    "wrong_zone",
+    "failed_or_stale"
+  ],
+  "not_exact_llm_wording": true,
+  "forbidden_actions": [
+    "substitute electrical TWL for civil TWL"
+  ],
+  "completion_conditions": "All semantic assertions hold; deliberate invalid proposals are rejected; required human actions and unresolved state are recorded."
+}

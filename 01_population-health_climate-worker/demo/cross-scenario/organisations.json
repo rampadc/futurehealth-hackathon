@@ -1,0 +1,38 @@
+[
+  {
+    "id": "sandline",
+    "name": "Sandline Infrastructure LLC",
+    "role": "principal contractor",
+    "authority": "Site safety stop, welfare, integrated programme"
+  },
+  {
+    "id": "civilco",
+    "name": "Dune Civil Works LLC",
+    "role": "civil subcontractor",
+    "authority": "Direct civil crew and confirm stopped work"
+  },
+  {
+    "id": "electroco",
+    "name": "Copper Palm Electromechanical LLC",
+    "role": "electrical subcontractor",
+    "authority": "Direct electrical preparation crew; no live electrical work"
+  },
+  {
+    "id": "logco",
+    "name": "Sirocco Site Logistics LLC",
+    "role": "logistics subcontractor",
+    "authority": "Direct logistics crew under principal site controls"
+  },
+  {
+    "id": "supplyco",
+    "name": "Oasis Aggregate Supply LLC",
+    "role": "supplier",
+    "authority": "Accept delivery slot change through named dispatcher"
+  },
+  {
+    "id": "clientco",
+    "name": "Mussafah Water Assets PJSC",
+    "role": "fictional client",
+    "authority": "Approve contractual milestone changes, not override site safety controls"
+  }
+]

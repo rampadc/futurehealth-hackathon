@@ -1,0 +1,13 @@
+{
+  "semantic_assertions": [
+    "hold_open",
+    "no_acknowledgment",
+    "superintendent_escalated"
+  ],
+  "expected_rejections": [],
+  "not_exact_llm_wording": true,
+  "forbidden_actions": [
+    "treat escalation as crew acknowledgment"
+  ],
+  "completion_conditions": "All semantic assertions hold; deliberate invalid proposals are rejected; required human actions and unresolved state are recorded."
+}

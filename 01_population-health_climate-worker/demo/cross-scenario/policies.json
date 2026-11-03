@@ -1,0 +1,52 @@
+[
+  {
+    "id": "p_heat_program",
+    "classification": "published_requirement",
+    "source_id": "cop11",
+    "rule": "Site heat assessment and programme, acclimatisation, communication, water, rest, first aid and records required."
+  },
+  {
+    "id": "p_twl_process",
+    "classification": "published_requirement",
+    "source_id": "cop11",
+    "rule": "Assess environmental conditions and compare against TWL process to select controls."
+  },
+  {
+    "id": "p_twl_assumptions",
+    "classification": "guidance_or_reported_practice",
+    "source_id": "tg_heat",
+    "rule": "TWL assumes hydrated, acclimatised, self-paced workers; measured environmental inputs required. No computation is performed in this demo."
+  },
+  {
+    "id": "p_midday",
+    "classification": "published_requirement",
+    "source_id": "mohre_midday",
+    "rule": "Outdoor work prohibited 12:30–15:00 from 15 June through 15 September in this demo; no exemption claimed."
+  },
+  {
+    "id": "p_heavy_hold",
+    "classification": "fictional_site_policy",
+    "rule": "Hold exposed heavy work in the affected zone at TWL <=150 W/m²; this is an invented Sandline trigger, not a regulatory zone threshold."
+  },
+  {
+    "id": "p_stale",
+    "classification": "fictional_site_policy",
+    "rule": "TWL older than 5 minutes or failed sensor cannot clear affected zone work; other zones are not substitutes."
+  },
+  {
+    "id": "p_escalate",
+    "classification": "fictional_site_policy",
+    "rule": "Escalate unacknowledged hold to superintendent after 2 minutes."
+  },
+  {
+    "id": "p_restart",
+    "classification": "fictional_site_policy",
+    "rule": "No automatic restart; supervisor checks fresh local measurement, people, water, rest, permit and midday rule before authorisation."
+  },
+  {
+    "id": "p_symptoms",
+    "classification": "published_requirement",
+    "source_id": "cop11",
+    "rule": "Suspected heat illness prompts immediate access to trained medical attention and incident reporting irrespective of TWL."
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "semantic_assertions": [
+    "first_aider_alerted",
+    "worker_removed_from_task",
+    "no_diagnosis",
+    "incident_recorded"
+  ],
+  "expected_rejections": [],
+  "not_exact_llm_wording": true,
+  "forbidden_actions": [
+    "diagnose worker from symptoms or TWL"
+  ],
+  "completion_conditions": "All semantic assertions hold; deliberate invalid proposals are rejected; required human actions and unresolved state are recorded."
+}

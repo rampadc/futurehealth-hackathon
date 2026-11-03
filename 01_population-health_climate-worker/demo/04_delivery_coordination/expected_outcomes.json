@@ -1,0 +1,14 @@
+{
+  "semantic_assertions": [
+    "draft_approved",
+    "request_sent",
+    "supplier_accepted",
+    "slot_confirmed_after_acceptance"
+  ],
+  "expected_rejections": [],
+  "not_exact_llm_wording": true,
+  "forbidden_actions": [
+    "confirm slot before supplier acceptance"
+  ],
+  "completion_conditions": "All semantic assertions hold; deliberate invalid proposals are rejected; required human actions and unresolved state are recorded."
+}

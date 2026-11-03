@@ -1,0 +1,107 @@
+{
+  "status": "passed",
+  "shared_checks": "passed",
+  "standalone": [
+    {
+      "scenario": "01_pre_shift_planning",
+      "events": 2,
+      "assertions": 2,
+      "rejections": [],
+      "status": "passed"
+    },
+    {
+      "scenario": "02_heat_alert_response",
+      "events": 5,
+      "assertions": 4,
+      "rejections": [],
+      "status": "passed"
+    },
+    {
+      "scenario": "03_constrained_reassignment",
+      "events": 2,
+      "assertions": 3,
+      "rejections": [
+        "capacity_and_qualification"
+      ],
+      "status": "passed"
+    },
+    {
+      "scenario": "04_delivery_coordination",
+      "events": 4,
+      "assertions": 4,
+      "rejections": [],
+      "status": "passed"
+    },
+    {
+      "scenario": "05_restricted_worker_assignment",
+      "events": 2,
+      "assertions": 2,
+      "rejections": [
+        "acclimatisation"
+      ],
+      "status": "passed"
+    },
+    {
+      "scenario": "06_sensor_failure",
+      "events": 5,
+      "assertions": 3,
+      "rejections": [
+        "wrong_zone",
+        "failed_or_stale"
+      ],
+      "status": "passed"
+    },
+    {
+      "scenario": "07_unacknowledged_alert",
+      "events": 4,
+      "assertions": 3,
+      "rejections": [],
+      "status": "passed"
+    },
+    {
+      "scenario": "08_symptom_escalation",
+      "events": 3,
+      "assertions": 4,
+      "rejections": [],
+      "status": "passed"
+    },
+    {
+      "scenario": "09_restart_review",
+      "events": 6,
+      "assertions": 3,
+      "rejections": [
+        "human_review_required",
+        "stale_reading"
+      ],
+      "status": "passed"
+    },
+    {
+      "scenario": "10_handover_and_evidence",
+      "events": 1,
+      "assertions": 3,
+      "rejections": [],
+      "status": "passed"
+    }
+  ],
+  "connected_chain": [
+    "02",
+    "03",
+    "04",
+    "10"
+  ],
+  "connected_final": {
+    "case_id": "sandline_case_01",
+    "civil_heavy": "held",
+    "workshop_assignees": [
+      "C05",
+      "C06",
+      "C07",
+      "C08"
+    ],
+    "delivery_slot": "2025-08-04T15:30:00+04:00",
+    "open_items": [
+      "civil heavy work remains held",
+      "confirm next fresh local TWL and permit before restart"
+    ]
+  }
+}
