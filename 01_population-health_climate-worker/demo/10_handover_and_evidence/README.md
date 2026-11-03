@@ -1,25 +1,11 @@
-# 10. Explain what happened and what remains open
+# 10. Hand over the open case clearly
 
-The incoming supervisor needs the state of the same disputed case used in scenarios 02–04: the civil hold, recovery, workshop reassignment and supplier-confirmed delivery change. P01 also needs the cost question, clearly separate from the safety handover.
+The incoming supervisor needs one account of the civil heat hold and what followed. Huda Al Nadir, the foreman, stopped exposed work and directed recovery. Four qualified workers later moved to covered preparation work. The supplier accepted a later slot for the aggregate truck, which will deliver sand, gravel or crushed stone; the booking is confirmed, but delivery has not yet happened.
 
-**Demonstrated value:** Produce an inspectable handover that preserves unresolved work instead of writing a misleading success summary.
+Rashid Al Wadi, the superintendent, prepares a handover that ties those events to their existing records. It distinguishes actions that happened from recommendations and keeps exposed civil work marked as held. The next supervisor still needs a fresh local heat reading and permit review before any restart decision. A confirmed delivery slot cannot settle that safety question.
 
-## Walkthrough
+Amal Al Nadir, the project manager, receives the chronology of the stop, recovery, four-person alternative work and delivery change for a separate Dune–Sandline cost review. Dune's ordinary-shift rest term is relevant context, but this record does not verify payroll or establish a reimbursable claim. The handover makes the open work visible rather than treating the case as closed.
 
-1. Load the connected case or its explicit standalone evidence snapshot.
-2. Show the alert reference and separate recorded actions from recommendations.
-3. Summarise the supplier-confirmed slot without describing it as a completed delivery.
-4. Highlight that exposed civil work is still held and identify the outstanding measurement and permit review.
-5. Give P01 the stop, recovery, four-person work and booking chronology for contract review. Record that Dune's fictional ordinary-shift rest term is distinct from actual payroll verification and unresolved reimbursement.
+## Related records
 
-## Expected result
-
-The handover references existing case evidence, reports the delivery state accurately and retains the open safety items. P01 owns the unresolved cross-party cost allocation; the timeline establishes events, not a payable claim.
-
-The machine-readable assertions, deliberate rejections and forbidden actions are in [expected_outcomes.json](expected_outcomes.json). Policy references: `p_heavy_hold, p_restart`; see the shared [SOP](../cross-scenario/HEAT_PROGRAM_AND_SOP.md) and [policy register](../cross-scenario/policies.json).
-
-## Inputs and replay
-
-Load the shared [baseline](../cross-scenario/baseline_state.json), apply `initial_overrides` from [scenario.json](scenario.json), then process [signals.jsonl](signals.jsonl) in recorded order. The timestamps are simulation time on 4 August 2025 (`+04:00`), not a command to wait in real time. See [example_interaction.md](example_interaction.md) for an illustrative dialogue.
-
-All people, readings and actions are fictional. This demonstrates workflow behaviour, not clinical effectiveness, actual supplier communications or production safety approval.
+[Scenario](scenario.json) · [Events](signals.jsonl) · [Expected outcomes](expected_outcomes.json) · [Example conversation](example_interaction.md). Policies: `p_heavy_hold`, `p_restart` in the shared [heat programme](../cross-scenario/HEAT_PROGRAM_AND_SOP.md) and [policy register](../cross-scenario/policies.json).

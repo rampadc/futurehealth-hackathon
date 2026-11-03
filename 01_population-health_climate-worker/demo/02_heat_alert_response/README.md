@@ -1,24 +1,11 @@
-# 02. Respond to the local heat trigger
+# 02. Stop exposed work when the local heat limit is reached
 
-The civil crew is working in the exposed area. Sandline's existing local monitor drives a beacon when its simulated TWL crosses the fictional heavy-work hold threshold. The open decision is whether the instruction reached the crew and what happened next. Dune's output pressure makes the stop costly, but P02's site authority and C01's protective action do not wait for a commercial settlement or for a worker to refuse the task. Workers retain their independent route to report symptoms or unsafe work.
+The civil crew is doing heavy work outdoors when Sandline's local heat monitor reaches the site's hold threshold. The beacon alerts the area, and Maya Al Qamar, the safety officer, records a hold on the task. Output is under pressure, but Rashid Al Wadi, the superintendent, has site safety authority. The crew does not have to wait for a cost agreement or for an individual worker to refuse the work.
 
-**Demonstrated value:** Connect an existing alert to P02's authorised instruction, C01's actual stop, recovery and a separate commercial owner without confusing any of those steps.
+Huda Al Nadir, the civil foreman, acknowledges the alert, confirms that the work stopped and directs eleven crew members to the recovery shelter. These are separate steps: seeing an alert does not prove that work ceased, and a headcount does not clear the task to restart. Workers can also report symptoms or unsafe work through their own route.
 
-## Walkthrough
+The exposed task remains on hold after recovery is recorded. Dune's ordinary-shift rest terms can help explain the crew's position, but the event record does not verify payroll. Amal Al Nadir, the project manager, takes the unresolved Dune–Sandline cost question; Dune handles individual pay questions as the employer. Neither discussion grants permission to resume work.
 
-1. Show the new local reading and its measurement time, quality and source.
-2. Show the derived heavy-task hold and the exact fictional policy behind it.
-3. Step through foreman acknowledgement, confirmation that work stopped, and the recorded recovery headcount. C01 can explain the fictional Heat Rest Schedule's ordinary-shift scope; the log does not prove payroll payment.
-4. Route the unresolved Dune/Sandline cost question to P01. Keep the task held; acknowledgement, recovery and pay discussion do not authorise a restart.
+## Related records
 
-## Expected result
-
-The hold is acknowledged, cessation is confirmed and recovery is recorded. The case remains open. Worker pay questions follow Dune's employer channel; no subcontract or client reimbursement is inferred.
-
-The machine-readable assertions, deliberate rejections and forbidden actions are in [expected_outcomes.json](expected_outcomes.json). Policy references: `p_heavy_hold, p_heat_program, p_restart`; see the shared [SOP](../cross-scenario/HEAT_PROGRAM_AND_SOP.md) and [policy register](../cross-scenario/policies.json).
-
-## Inputs and replay
-
-Load the shared [baseline](../cross-scenario/baseline_state.json), apply `initial_overrides` from [scenario.json](scenario.json), then process [signals.jsonl](signals.jsonl) in recorded order. The timestamps are simulation time on 4 August 2025 (`+04:00`), not a command to wait in real time. See [example_interaction.md](example_interaction.md) for an illustrative dialogue.
-
-All people, readings and actions are fictional. This demonstrates workflow behaviour, not clinical effectiveness, actual supplier communications or production safety approval.
+[Scenario](scenario.json) · [Events](signals.jsonl) · [Expected outcomes](expected_outcomes.json) · [Example conversation](example_interaction.md). Policies: `p_heavy_hold`, `p_heat_program`, `p_restart` in the shared [heat programme](../cross-scenario/HEAT_PROGRAM_AND_SOP.md) and [policy register](../cross-scenario/policies.json).

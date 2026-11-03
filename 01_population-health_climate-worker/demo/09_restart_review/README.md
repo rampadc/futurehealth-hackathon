@@ -1,24 +1,11 @@
-# 09. Require current evidence at restart
+# 09. Review the evidence before restarting
 
-A civil task starts in a held state. Sandline's existing local monitor later shows an improved band, but improvement alone does not authorise resumption. P02 and P04 must make a current, inspectable safety decision; P01 reviews any resulting programme cost separately. The crew should be able to see whose instruction changed and on what evidence.
+The exposed civil task is on hold when a new local heat reading shows improvement. Huda Al Nadir, the civil foreman, tries to restart it, but the attempt is rejected because a current human review is still required. A better reading alone does not change the instruction to the crew.
 
-**Demonstrated value:** Prevent an earlier review from becoming a reusable permission that overrides changed conditions.
+Rashid Al Wadi, the superintendent, reviews the local reading, where the people are, water and rest arrangements, the permit and the midday outdoor restriction. Tariq Al Safa, the permit coordinator, supports the permit check. Rashid then records an authorised restart while those conditions are satisfied. The decision gives the crew a clear account of who changed the instruction and why.
 
-## Walkthrough
+When time passes and the reading becomes stale, another restart attempt is rejected. The earlier review cannot be reused to overrule changed conditions. Failed instruments and the midday restriction must also be checked at the time of any later action. Amal Al Nadir handles costs caused by changes to the work schedule separately from this safety decision.
 
-1. Attempt to resume without the required human review and show the rejection.
-2. Review the task and current prerequisites; record the authorised supervisor’s decision.
-3. Show the authorised resumption only while current conditions satisfy the configured gates.
-4. Demonstrate the stale-reading branch and the separate validation regressions for failed sensors and the midday restriction.
+## Related records
 
-## Expected result
-
-A valid reviewed restart is distinct from a blocked stale attempt. Mandatory restrictions are rechecked at the action time.
-
-The machine-readable assertions, deliberate rejections and forbidden actions are in [expected_outcomes.json](expected_outcomes.json). Policy references: `p_restart, p_stale, p_midday`; see the shared [SOP](../cross-scenario/HEAT_PROGRAM_AND_SOP.md) and [policy register](../cross-scenario/policies.json).
-
-## Inputs and replay
-
-Load the shared [baseline](../cross-scenario/baseline_state.json), apply `initial_overrides` from [scenario.json](scenario.json), then process [signals.jsonl](signals.jsonl) in recorded order. The timestamps are simulation time on 4 August 2025 (`+04:00`), not a command to wait in real time. See [example_interaction.md](example_interaction.md) for an illustrative dialogue.
-
-All people, readings and actions are fictional. This demonstrates workflow behaviour, not clinical effectiveness, actual supplier communications or production safety approval.
+[Scenario](scenario.json) · [Events](signals.jsonl) · [Expected outcomes](expected_outcomes.json) · [Example conversation](example_interaction.md). Policies: `p_restart`, `p_stale`, `p_midday` in the shared [heat programme](../cross-scenario/HEAT_PROGRAM_AND_SOP.md) and [policy register](../cross-scenario/policies.json).
