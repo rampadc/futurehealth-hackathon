@@ -4,12 +4,14 @@ A local, synthetic operations workspace for the Project Sandline heat-response f
 
 ## Run
 
+Requires Node.js 22.12+ and npm. Run these commands from this `ui/` directory.
+
 ```sh
-npm install
+npm ci
 npm run dev
 ```
 
-Open the localhost URL printed by Vite for the operator workspace. Open `/presenter` in another tab for scenario selection and replay controls. The two views share state through localStorage and BroadcastChannel, so the operator view updates when the presenter advances an event.
+Open http://127.0.0.1:5173/ for the stakeholder workspace. The server uses a fixed port and fails if another process already occupies it. Open `/presenter` in another tab for scenario selection and replay controls. The two views share state through localStorage and BroadcastChannel, so the operator view updates when the presenter advances an event.
 
 ## Demo path
 
@@ -26,7 +28,9 @@ npm test
 npm run build
 ```
 
-Browser checks require Google Chrome and a running `npm run dev` on port 5173. Run `npm run test:browser` in another terminal. They cover all ten scenarios, the connected journey, wrong-actor rejection, policy drawer, graph inspection, tab synchronisation, refresh, tablet overflow and absence of external requests.
+Browser checks require Google Chrome and a running `npm run dev` on port 5173. Run `npm run test:browser` in another terminal. These scripts exercise all ten scenarios, the connected journey, wrong-actor rejection, policy drawer, graph inspection, tab synchronisation, refresh, tablet overflow and absence of external requests.
+
+The browser scripts may need updates when interaction flows change; unit tests and the production build are the primary automated checks.
 
 Presenter clock controls can deliberately invalidate scheduled fixture events. If time is advanced beyond an event timestamp, the event is blocked; reset to replay the authored sequence.
 

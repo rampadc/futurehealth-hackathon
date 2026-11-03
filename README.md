@@ -12,6 +12,22 @@ For the recommended competition choice, commercial comparison and execution cale
 
 These are researched opportunity hypotheses, not validated customer demand. Public announcements, vendor claims, and procurement notices are labelled according to what they establish. Proposed prices and revenue scenarios are assumptions to test, not market forecasts. No buyer interviews or partner commitments are implied.
 
+## Run the Heat-Safe demo
+
+Use Node.js 22.12+ and npm. From the repository root:
+
+```sh
+cd 01_population-health_climate-worker/ui
+npm ci
+npm run dev
+```
+
+Open **http://127.0.0.1:5173/** for the team-facing workspace and **http://127.0.0.1:5173/presenter** in a separate tab for presenter controls. Use the same browser and origin for both tabs. The app stays on port 5173; if it is occupied, stop the existing server first.
+
+The demo runs entirely in the browser with the checked-in Project Sandline fixtures. No API keys, backend or hardware are needed. Local browser storage retains progress; use the presenter reset to start again.
+
+See the [UI guide](01_population-health_climate-worker/ui/README.md) for replay and verification, and the [scenario dossier](01_population-health_climate-worker/demo/README.md) for the ten scenarios and shared context. Keep `ui/` and `demo/` together: the UI imports those fixtures at build time.
+
 ## Supporting material
 
 The `ideation/` folders preserve the original concepts. The `research/` and `rfqs/` folders retain the earlier source archive; refreshed citations are in the plans themselves. The former business briefs and pitch files remain available with superseded notices for traceability. They are not additional required reading.
