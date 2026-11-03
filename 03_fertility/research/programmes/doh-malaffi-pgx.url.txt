@@ -1,0 +1,4 @@
+URL: https://www.doh.gov.ae/en/news/doh-enables-healthcare-providers-to-personalised-treatment-options-through-pharmacogenomic-reports
+Retrieved: 2026-11-03
+Status: TLS failure from archive environment; open manually.
+Summary: Pharmacogenomic reports via Malaffi (ADHDS/M42) for consented patients / EGP participants.

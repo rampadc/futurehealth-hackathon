@@ -1,0 +1,261 @@
+## STANDARD FOR ASSISTED REPRODUCTIVE TECHNOLOGY SERVICES AND TREATMENT
+
+Document Title Standard for Assisted Reproductive Technology Services and Treatment
+
+Document Ref. Number DOH/SD/ART/V.4/2022 Version 4
+
+New / Revised Revised
+
+Publication Date March 2023
+
+Effective Date
+
+It is the start date of deploying the standard and it may or may not match the approval/publication date. The deployment start date must be discussed based on finalizing all the needs necessary to implementation requirements and the standard implementation plan.
+
+Document Control DoH Strategy Sector
+
+Applies To DOH Licensed Fertilization Centers
+
+Owner Healthcare Facility Sector
+
+Revision Date March 2026
+
+Revision Period Three years from the date of publication
+
+Contact
+
+Healthcare Facility Sector hcps@doh.gov.ae
+
+| | | | | | |
+| --- | --- | --- | --- | --- | --- |
+| | 1. Standard Scope | | | | |
+| 1. | Scope 1.1. This standard applies to DOH licensed fertilization centers and professionals licensed by DOH to provide ART services; and 1.2. This standard aims to ensure the delivery of quality and safe clinical care for Assisted Reproductive Technologies (ARTs) in the Emirate of Abu Dhabi by identifying: 1.2.1 Duties of providers of ART Services; 1.2.2 Licensure Requirements; 1.2.3 Quality Management System Requirements; 1.2.4 Quality Management System Requirements for Gametes Handling and Storage; 1.2.5 Patient Eligibility Criteria for ART treatment; 1.2.6 Data Reporting Requirements; 1.2.7 Patients Counselling and Information Requirements. | | | | |
+| | 2. Definitions and Abbreviations | | | | |
+| No. | Term / Abbreviation | Definition | | | |
+| 2.1 2.2 2.3 2.4 2.5 2.6 2.7 1 WHO https://www.who.int/news-room/fact-sheets/detail/infertility | Assisted Reproductive Techniques (ART): Fertilization centers: Infertility: Complete Full Cycle: Unsuccessful Cycle: Incomplete Cycle: Intracytoplasmic Sperm Injection (ICSI): | ART includes any experiencing reproductive establishing a pregnancy. These treatments include, but are not limited to, ovulation induction with timed intercourse, intrauterine insemination, intracytoplasmic sperm injection, gamete cryopreservation, gamete intra fallopian transfer (GIFT). For the purpose of this standard, fertilization centers are any licensed facilities where assisted reproductive techniques are performed, including all clinical and biological procedures that are necessary to effectuate extracorporeal conception. Infertility is a disease of the male or female reproductive system defined by the failure to achieve a pregnancy after 12 months or more of regular unprotected sexual intercourse. is one or more episodes of ovarian stimulation resulting in embryo transfer or more than one embryo transfer cycle originating from the ART cycles per year is three cycles as defined in this standard. The ART cycle that failed to conceive following transfer of embryos The ART cycle, which failed any stage for any reason before oocyte or embryo freezing or embryo transfer. Procedure of injecting a spermatozoon into the cytoplasm of a mature oocyte. | lawful treatments offered problems for the purpose in vitro fertilization, same stimulation. The maximum allowed | to couples of 1 2 | |
+
+| | | |
+| --- | --- | --- |
+| 2.8 | Ovulation induction: | A pharmacological treatment of women with anovulation or oligo-ovulation with the intention of inducing normal ovulatory cycles2. The maximum allowed trials per year of ovulation induction with gonadotropins injections is six trials. |
+| 2.9 | Superovulation: | A pharmacological treatment of ovulatory women with the intention of superovulation (for unexplained infertility, endometriosis etc). The maximum allowed trials per year and superovulation with gonadotropins injections is six trials. |
+| 2.10 | Ovarian hyper-stimulation syndrome (OHSS): | an exaggerated systemic response to ovarian stimulation characterized by a wide spectrum of clinical and laboratory manifestations. It is classified as mild, moderate or severe according to the degree of abdominal distention, ovarian enlargement and respiratory, hemodynamic and metabolic complications 3. |
+
+### 3. Standard Requirements and Specifications
+
+3.1 Licensure Requirements 3.1.1 Fertilization Centers must be licensed by DOH either: 3.1.1.1 As a new facility with a new DOH license application under the Facility Category “Fertilization Center”.
+
+3.1.2 DOH Facility Licensure requirements to provide ART Services in the Emirate of Abu Dhabi comprises of the following elements: 3.1.2.1 Satisfying the DOH requirements for healthcare facility and healthcare professionals’ licensure; 3.1.2.2 Satisfying the federally mandated technical conditions and specifications as per UAE Federal Law on Assisted Reproduction.
+
+3.1.3 Fertilization Centers must satisfy the following accreditation requirements for licensure 3.1.3.1 New Fertilization Centers to have either the College of American Pathology Reproduction accreditation or ISO accreditation or UK NEQAS accreditation of their laboratories within (6 to 12) months of DOH licensure; 3.1.3.2 Existing Fertilization Centers to have either the College of American Pathology or ISO accreditation or UK NEQAS accreditation within (6 to 12) months of issuance of this Standard.
+
+3.2 Patient Eligibility Criteria for ART Treatment 3.2.1 In line with the Federal Law on Medically Assisted Reproduction Fertilization Centers must ensure that ART treatment is provided to patients who meet the following criteria: 3.2.1.1 The couple have been trying for pregnancy for at least 1 year or one or both individuals have been diagnosed with infertility problems;
+
+2https://www.who.int/reproductivehealth/publications/infertility/art_terminology.pdf 
+3https://www.who.int/reproductivehealth/publications/infertility/art_terminology.pdf 
+3 
+
+3.2.2.2 Both husband and wife have consented for ART treatment; 3.2.2.3 Both husband and wife commit to undertake the necessary follow up by an ART Consultant/Specialist.
+
+3.2.2 Where patients do not meet the eligibility criteria, clinicians at the Fertilization Centers must ensure patients are given adequate information on the reasons and clinical decisions. This must also be documented in the patients’ medical file;
+
+3.2.3 Women with significant obstetrical/surgical/medical problems e.g. diabetes making them high risk at pregnancy/delivery would be offered Fertility/ART treatment only after appropriate pre-conception counselling of the couple.
+
+3.3 Patients Counselling and Information 3.3.1 Couples experiencing fertility problems must be seen together as decisions surrounding investigations and treatment will affect both partners;
+
+3.3.2 Fertilization Centers should comply with the requirements of patient informed consent ensuring that patients have all the required information for each stage of the intervention explained and document the patients’ consent and as per the federal law.
+
+3.3.3 The Fertilization Center must ensure that couples seeking fertility treatment be provided with clear information on: 3.3.3.1 Diagnosis and management options; 3.3.3.2 The associated risks mentioned in Appendix 1; 3.3.3.3 The likelihood of successful pregnancy; 3.3.3.4 The treatment-associated procedures and their risks and benefits including required tests; 3.3.3.5 The need for treatment and care pre and post interventions; 3.3.3.6 Couples suitability for ART intervention and the likelihood of its success and Predicted Success Rates; 3.3.3.7 Risk of cycle cancellation due to no response or over response to ovarian stimulation; 3.3.3.8 Risk of multiple pregnancies and the associated morbidity to the mother and unborn children; 3.3.3.9 Informed of any procedures that are likely to affect their fertility and the option to preserve the sperm and/or unfertilized ova by freezing must be offered; 3.3.3.10 Offered the information leaflets specified above in Arabic and English.
+
+3.3.4 All couple’s notes must be clearly documented.
+
+3.3.5 Couples must be: 3.3.5.1 Given a “cooling off” period of at least a week between diagnosis and initiation of treatment so that they have the ability to read the investigations and information sheets provided to them, including the specific consent forms; 3.3.5.2 Informed that multiple pregnancies should not be regarded as the ideal outcome of IVF treatment. High order multiple pregnancies (i.e. triplets and above) must be documented as a serious untoward incident and reported to DOH; 3.3.5.3 Provided with a written summary of their diagnosis and planned treatments prior to the commencement of any ART procedure; 3.3.5.4 Informed of any procedures that are likely to affect their fertility and the option to preserve the sperm and/or unfertilized ova by freezing must be offered; 3.5.5.5 Given advice on their fertility potential in line with evidence-based practice; 3.5.5.6 Offered counselling by a DOH licensed clinician specialized in ARTs treatment prior, during and after assessment or treatment.
+
+3.3.6 Consent must be undertaken at each decision-making point (treatment and/or storage) and must be clearly documented by the treating physician in the patient’s notes. Evidence of the patient’s/couple’s written consent must also be documented: 3.3.6.1 Separate “Consent for Treatment” must be obtained for the following: 3.3.6.1.1 Consent to undergo ART treatment and treatment type (couples); 3.3.6.1.2 Consent from the wife to use her eggs for her treatment; 3.3.6.1.3 Consent to use the husband’s sperm for his wife; 3.3.6.1.4 Couples consent to transfer the embryo(s) into the uterus or fallopian tube. 3.3.6.2 Separate consent for Storage must be obtained for the following and as per section 6 including: 3.3.6.2.1 Consent to the storage of the female’s eggs; 3.3.6.2.2 Consent to the storage of the male’s sperm; 3.3.6.2.3 Consent to use male’s sperm following storage; 3.3.6.2.4 Consent to use the female’s eggs following storage; 3.3.6.2.5 Consent to extend the storage of the male’s/husband’s sperm in line with the UAE Federal Law on Medically Assisted Reproduction; 3.3.6.2.6 Consent to extend the storage of the unfertilized eggs in line with the UAE Federal Law on Medically Assisted Reproduction.
+
+3.4 Data Reporting Requirements: Fertilization Centers must: 3.4.1 Present evidence to DOH, when requested, on achieving quality and safety through records on the: 3.4.1.1 Number of ART cases performed per licensed embryologist per day and demonstrate that these are comparable to international evidence based best practice; 3.4.1.2 Number of collected oocytes, resulted embryos and number of unsuccessful cycles per licensed embryologist per day; 3.4.1.3 Number of stored oocytes and number of stored embryos.
+
+3.4.2 Providers are required to present evidence to DOH, when requested, on achieving quality and safety through records on the number of ICSI cases performed per licensed embryologist per day, and demonstrate that these are comparable to international evidence based best practice.
+
+3.4.3 Ensure compliance with the DOH reporting requirements, including Jawda KPIs for ART and serious untoward incidents associated with ART treatments mentioned in Appendix 1 in addition to the requirements for DOH Standard for Adverse Events Management and Reporting in the Emirate of Abu Dhabi and DOH Standard for Reporting Adverse Reactions;
+
+3.4.4 Report and submit e-Claims data in accordance with the Chapter on Data Management, Healthcare Regulator Manual Version 1.0 and as set out in the DOH Data Standards and Procedures.
+
+### 4. Key Stakeholder Roles and Responsibilities
+
+4.1General Duties of Fertilization Centers: 
+Fertilization Centers should ensure that they meet Federal Law of Medically Assisted Reproduction and 
+DOH regulations governing: 
+4.1.1 Staffing: 
+4.1.1.1 Appoint a qualified and experienced Director for the Center as required by the 
+implementing regulation of the Law of Medically Assisted Regulation and reflected in DOH 
+licensure requirements. Duties of the Director should include ensuring that the Center 
+meets all Federal and local regulatory requirements; 
+4.1.1.2 Ensure the availability of a multi-disciplinary team composed of a sufficient number of all 
+licensed personnel necessary for the delivery of services in accordance to the UAE Federal 
+Law Concerning Assisted Reproductive Techniques and based on patients’ volume to 
+guarantee safe clinical and laboratory practice; 
+4.1.1.3 Appoint a quality lead who ensures compliance with DOH stipulated reporting 
+requirements, including Jawda KPIs for ART, incidents, and adverse event as per DOH 
+Standard for Adverse Events Management and reporting of Abu Dhabi and DOH Standard 
+for Reporting Adverse Reactions. The person should also ensure that performance data 
+are reviewed, improvement action plans are developed and approved by senior 
+management. 
+
+4.1.2 Supplies and equipment: 4.1.2.1 Ensure that adequate levels of supplies are available to serve the population of patients treated; and 4.1.2.2 Equipment are routinely maintained and serviced in accordance with the manufacturer’s recommendations, and retain records to evidence this.
+
+4.1.3 Facility design: 4.1.3.1 Provide a supportive environment that recognizes the personal and cultural sensitivities associated with infertility and couples’ needs for privacy and confidentiality; 4.1.3.1 Provide quiet areas for counselling in order to minimize psychological stress.
+
+4.1.4 Patient Engagement and Education: 4.1.4.1 Provide access to both English and Arabic qualified healthcare professionals and staff that can support decision making process; 4.1.4.2 Provide the needed guidance and information on treatment, care and follow up procedures and resources.
+
+4.1.5 Continuity of Care: Have a written agreement with a named admitting hospital for admission of all cases that require hospital assessment, treatment or admission as a result of treatment carried out in the Fertilization Center.
+
+4.1.6 Emergency Planning: Ensure that the Center’s Emergency Plan sets out, in writing, the actions to be taken by the center during an emergency to include: 4.1.6.1 Measures to safeguard the Center’s clinic personnel and patients as required by DOH Emergency & Disaster Management Policy and related standards; and 4.1.6.2 Measures to safeguard Stored Gametes. In that regard, the Fertilization Center may have a written agreement with a third-party licensed fertilization center for transporting the stored patients’ gametes urgently in the cases of emergency; 4.1.6.3 Measures to safeguard critical equipment and records.
+
+4.1.7 Audit and Inspection:
+
+4.1.7.1 Comply with DOH requests to inspect and audit records and cooperate with DOH authorized auditors, as required for inspections and audits by DOH.
+
+4.1.8 Legally required documentation and legally allowed practices: Follow all articles of the UAE Federal Law on Assisted Reproduction and its implementing regulation encompassing: 4.1.8.1 Patient eligibility and documentation verifying eligibility; 4.1.8.2 Cryopreservation of eggs, their treatment and their use; 4.1.8.3 Duration of period for the preservation of gametes; 4.1.8.4 Destruction of unused fertilized eggs; 4.1.8.5 Prohibited practices; 4.1.8.6 Research-related constraints on the use of gametes; 4.1.8.7 Genetic diagnosis; 4.1.8.8 Conditions for the transfer of gametes and fertilized eggs between centers domestically and internationally; 4.1.8.9 Obligations of fertilization centers and their staff.
+
+4.2 Specific Duties of Healthcare Providers providing ART Services - Fertilization Centers: Fertilization Centers should develop:
+
+4.2.1 Quality Management System: Fertilization Centers must have a system for Quality Management that includes: 4.1.2.1 Quality objectives, quality manual, quality review, quality indicators, document control, Internal Audit policies, External reviews, Risk management; 4.1.2.2 Documented standard operating procedures (SOPs) for all activities carried out in the course of providing ART treatment services, both those authorized by license and other activities that do not require a license including gametes handling and gametes storing; 4.1.2.3 A policy for the reduction and management of adverse events such as high order multiple pregnancies; 4.1.2.4 Laboratory procedures approved by the nominated Director to manage ICSI cases; 4.1.2.5 Detailed risk assessments for laboratory procedures all activities carried out in the course of providing ART treatment services; 4.1.2.6 Detailed records of fertilization center performance including details of all performed full, incomplete and unsuccessful cycles, incidents and Jawda KPI’s. 4.1.2.7 Detailed patient journey pathway including all steps from consultation to post delivery follow up. 4.1.2.8 Management procedures of nonconformities relating to incidents, audit and inspection findings; 4.1.2.9 Ensure that the monitoring data are reviewed and action plans are developed to address low performance and make it available to DOH for auditing, as and when requested to do.
+
+4.2.2 Quality Management System for Gametes Handling and Storage Fertilization Centers must have a system for gametes handling and storage. In support of and further to the requirements set by the Federal Law Concerning Licensing of Fertilization Centers in the State, the Centers must: 4.2.2.1 Establish documented procedures for all clinical activities and to ensure that all storage and handling of gametes comply with licenced conditions, Federal Regulations, and relevant patient consent as per this standard; 4.2.2.2 Have documented procedures to ensure gametes are stored under controlled conditions that are validated and monitored; 4.2.2.3 Keep records of resulted and stored gametes for each patient and from each cycle. 4.2.2.4 Keep records indicating every occasion when gametes are handled during storage and release, and by whom records are kept indicating that gametes meet requirements for safety and quality before release;
+
+4.2.2.5 Ensure that the storage facilities for gametes: 4.2.2.5.1 Are dedicated for the purpose, and adequate for the volume and types of activities; 4.2.2.5.2 Are designed to avoid proximity to ionizing radiation (radioactive material), any known potential source of infection, or chemical or atmospheric contamination; 4.2.2.5.3 Have a storage-location system that minimizes the amount of handling required to retrieve gametes; 4.2.2.5.4 Have a system in place for specimen tracing to ensure proper gamete handling and identification; 4.2.2.5.5 Have emergency management procedures to deal with damage to storage vessels, failure of storage conditions or both.
+
+4.2.2.6 Ensure that gametes are packaged for storage in a way that: 4.2.2.6.1 Prevents any adverse effects on the material; 4.2.2.6.2 Minimizes the risk of contamination.
+
+4.2.2.7 Ensure that proper risk assessments (approved by the director of the ART facility) are done to determine the fate of all stored material whenever any of the following is introduced: 4.2.2.7.1 A new processing step to enhance safety, quality or both; and 4.2.2.7.2 A new procedure for appropriate disposal of gametes.
+
+4.2.2.8 Ensure the safety of equipment used to store cryopreserved gametes by: 4.2.2.8.1 Storing gametes in a designated area where access to this area must be limited to authorized staff; 4.2.2.8.2 Ensuring that Cryopreservation Dewars should be fitted with local alarms and be linked to an auto-dial or similar facility, (e.g. a link to a fire alarm board) to alert staff to non-conformities outside normal working hours; 4.2.2.8.3 Having adequate number of staff for an ‘on-call’ system to respond to alarms during out-of-office hours, and adequate spare storage capacity to enable transfer of samples if a Dewar fails.
+
+4.2.2.9 Divide individual patients’ samples into separate storage vessels for those patients whose future fertility may be impaired by a medical condition or procedure. This is important in the case of Dewar failure.
+
+4.2.2.10 Establish documented procedures to ensure that reviews of stored gametes are conducted at least once every year to: 4.2.2.10.1 Reconcile the Center’s records with the material in storage; 4.2.2.10.2 Review the purpose and duration of storage; and 4.2.2.10.3 Identify any action needed.
+
+4.2.2.11 Ensure the following with respect to storage of gametes and related information provided to patients: 4.2.2.11.1 That they operate a bring-forward system in order to ensure sufficient advance notice of the end of the statutory storage period (or such shorter period as specified by a person who provided the gametes) for gametes in storage; 4.2.2.11.2 If one of the gamete providers withdraws consent to the continued storage of gametes intended for treatment (created from their gametes), the Center must notify both recipient(s) prior to disposal; 4.2.2.11.3 Not store gametes after the expiry of the legal storage period identified in the UAE federal law, or the period specified when the gametes were stored, if shorter; 4.2.2.11.4 Explain to gamete providers and current patients the importance of informing the center of any change in their contact details and document their efforts
+
+to stay in contact with patients who have gametes in storage for their own 
+treatment; 
+4.2.2.11.5 Inform patients who have gametes in storage for their own treatment when 
+the end of the permitted storage period is approaching and inform them of 
+the options available to them. Patients should be given enough notice to 
+enable them to consider those options, and to access appropriate advice; 
+4.2.2.11.6 Obtain written consent from both husband and wife prior to the disposal of 
+gametes; 
+4.2.2.11.7 Comply with the UAE Federal Law Concerning the Licensing of Fertilization 
+Centers in the State in disposing of the gametes when the period of storage 
+is finished for couples that they lost; 
+4.2.2.11.8 Clearly explain the Federal UAE Law on Medically Assisted Reproduction and 
+its implementing regulation to all patients before starting the ART treatment 
+with clear documentation of the same especially for cases of unreachable 
+couples. 
+
+### 5. Monitoring and Evaluation
+
+This standard has clear monitoring mechanisms in place for assessing its success factors and outcomes.
+
+### 6. Enforcement and Sanctions
+
+6.1 Fertilization centers providers, payer and TPAs, must comply with law, the terms and requirements of this 
+Standard, the DOH Standard Provider Contract and the DOH Data Standards and Procedures. 
+6.2 DOH may impose sanctions in relation to any breach of requirements under this standard in accordance 
+with the Chapter on Complaints, Investigations, Regulatory Action and Sanctions, Healthcare Regulator 
+Manual: (https://www.haad.ae/haad/tabid/1276/Default.aspx). 
+
+### 7. Relevant Reference Documents
+
+| Reference No. Date | Reference Name | Relation Explanation / Coding / Publication Links |
+| --- | --- | --- |
+| 2019 | 07 | Federal Law No. (07) of 2019 Concerning the Medically Assisted Reproduction and its implementing regulation. |
+| 2019 | 05 | Federal Law No. (5) Of 2019 on the Subject of Regulating the Practice of the Profession of Human Medicine. |
+| 2016 | 04 | Federal Decree No. (4) Of 2016 on the Subject of Medical Liability. |
+| | | DOH Policy on Emergency & Disaster Management. |
+| | | DOH Consent Guideline. |
+| | | DOH Standard for Adverse Events Management & Reporting. |
+| | | DOH Standard for Infection Control. |
+| | | DOH Policy for THIQA Coverage of Assisted Reproductive Services and Treatment. |
+| 8. Revision List (Changes) | | |
+| Issue No. Revision Date | Clause No. | Revision Explanation (changes) |
+| 8th Nov 2022 | Appendix 2, Item 7 | Revised minimum clinical investigation list |
+| 8th Nov 2022 | Appendix 2, Item 9 | Exemption to the lower age limit for cancer patients |
+| th 12 Feb 2023 | Clauses: 3.1.3.1 and 3.1.3.2 | Added UK NEQAS accreditation as an option |
+
+### 9. Appendices
+
+### Appendix 1: Reporting Form for Serious Untoward Incidents Related to ART
+
+Reporting Facility Name:
+
+Reporting Physician Name:
+
+Patient Data:
+
+1) Patient ID 
+2) Date of referral 
+3) Source of referral and referrers/clinicians’ details 
+4) Patient Date of Birth 
+5) Patient Address 
+6) Date(s) of egg collection 
+8) Date of frozen cycle (where appropriate) 
+9) Patient Outcome(s) 
+10) Prognosis 
+11) Additional comments (Description of condition) 
+
+### Appendix 2: Principles of Care for the Provision of ART Services in Abu Dhabi Emirate
+
+| 1. | Treatment | a) b) c) d) | The treating physician should take account of potential adverse obstetric outcomes and complications, such as early pregnancy failure, ovarian hyper stimulation syndrome, and neonatal complications when providing ART and must explain these potential adverse events to the couple seeking the treatment; In line with DOH Policy on Quality, investigations and interventions should be based on the latest evidence and guidelines; The most effective and least risk associated procedure should always be offered as a first line treatment option; and Infertility may be diagnosed prior to one year if there are features or findings indicative of subfertility. These include: I. II. III. IV. V. VI. VII. | Oligo or amenorrhea; Inability to have intercourse due to a medical condition; Previous adjuvant therapy for cancer in either partner; History indicating an increased risk of Fallopian tube occlusion (i.e. previous pelvic infection or previous pelvic surgery); Abnormality in one or more semen parameters as an indication of male factor infertility (normal semen as: volume ≥1.5 ml; pH ≥7.2; sperm concentration ≥15 million spermatozoa/ml; total sperm number: ≥39 million spermatozoa per ejaculate; total motility ≥40% motile, or ≥32% with progressive motility; vitality: ≥58% live spermatozoa; percentage of sperm with normal morphology ≥4%)); Reduced ovarian reserve; Identified high-risk patients should be treated by consultants. |
+| --- | --- | --- | --- | --- |
+| 2. | Ovarian Hyper stimulation | a) | Where undertaken before treatment starts and women identified to be at risk must have a clear treatment plan that outlines the risk reduction strategies. | the risk of ovarian hyper-stimulation is high, a risk assessment should be |
+| 3. | Allowed number of transferred embryos | a) | For patients undergoing an embryo transfer procedure, single embryo transfer should be the preferred choice (Appendix 3). However, depending on the quality of the embryos and the clinical judgement of the physician, double embryo transfer could be an alternative, if deemed necessary to improve the chance of a pregnancy. | |
+| 4. | Ovarian Induction Drugs | a) | Usage of Ovarian Induction Drugs in the Emirate of Abu Dhabi should be limited to DOH licensed Reproductive Endocrinologists/ IVF Specialists and Consultants. | |
+| 5. | Procedures | a) | All ART related procedures, including monitoring, intrauterine inseminations, oocyte retrievals, embryo transfer procedures should be only performed by DOH licensed Reproductive Endocrinologists/ IVF Specialists and Consultants. | |
+| 6. | ICSI | a) | Laboratories licensed by DOH should have in place written procedures approved by the nominated Director to manage the ICSI cases and ensure quality and patient safety are prioritized. | |
+
+### 7. Clinical Investigations for ART Treatment
+
+| Treatment Phase | Patient | Investigations |
+| --- | --- | --- |
+| UAE Federal Requirements prior to handling of gametes for ART | Female and Male | HIV (I and II), Hepatitis B (Antigen / Antibody) and Hepatitis C Antibody |
+| Recommended Baseline Investigations (To establish the diagnosis of infertility or to plan for the ART treatment) | Female Male | Blood type, Rhesus Factor CBC High Vaginal Swab, Syphilis, Chlamydia and Gonorrhea Rubella IgG Pap / Cervical smear TSH, Prolactin, AMH, FSH, LH, Estradiol, Vitamin D Transvaginal ultrasound Blood type, Rhesus Factor Semen analysis, Syphilis |
+
+ART cycle - Investigations Female Estradiol, LH, FSH, Progesterone Ultrasound (Transvaginal or perineal or rectal or abdominal) Coagulation tests (PT, PTT and INR before each oocyte pickup (OPU))
+
+| 8. Genetic a) Investigations | Fertilization centers should comply with the UAE federal law on genetic testing. | | | | |
+| --- | --- | --- | --- | --- | --- |
+| 9. Women’s Age a) and Body Mass Index (BMI) b) c) | The preferred age range for women seeking fertility is between 18-47* years (completed years i.e. 18 years 0 days till less than 48 years 0 days). *For women aged 46 to 47 years (completed years i.e. from 46 years 0 days till less than 48 years 0 days), ART treatment could be considered if the AFC (antral follicle count only if done by a fertility expert) is equal to or above 5 (as per ESHRE Bologna criteria) There is an exception to the lower age limit for fertility preservation (cryopreservation) in female patients diagnosed with cancer. b.1. b.2. b.3. b.4. b.5. BMI eligibility range 19-40. However, women with BMI between 35-40 who are seeking fertility treatments should be: | The patient could be less than 18 years of age. Patient must have reached reproductive age (post-pubertal sexual maturity) A person whose age is less than 18 years opting for ART treatment must have a substitute consent giver to sign on the application or request for the treatment. Oncologist-approved fertility preservation documentation. The following referral pathway must be established. | *MDT (Multidisciplinary team) composition: for women seeking THIQA coverage for fertility treatment is from | • • • | Reproductive endocrinologist and infertility expert Oncologist Psychologist |
+
+c.1.1. Informed of the increased risk of failure in fertility treatment and risk to pregnancy and child as a direct result of their physical condition; and c.1.2. Advised to consult a registered dietitian for weight management intervention for minimum of three months.
+
+Appendix 3: Contraindications for dual embryo transfer. (*Refer to Appendix 2 clause number 3)
+
+The treating clinician can consider these conditions and decide after complete clinical assessment including medical history, family history and investigations.
+
+❑ BMI less than <18 or >35 
+❑ Short stature i.e. less than 150 cm 
+❑ Small pelvis 
+❑ Previous IVF success 
+❑ Systemic diseases such as: 
+❑ Hypertension 
+❑ Diabetes 
+❑ Sickle cell 
+❑ Type 1 DM, Uncontrolled Type II DM, DM with end organ damage 
+❑ Chronic kidney disease 
+❑ Cardiopathy, 
+❑ Autoimmune diseases 
+❑ High risk of developing deep vein thrombosis (DVT) like APS or ATIII deficiency or a personal history of 
+unprovoked DVT 
+❑ Previous history of twins 
+❑ History of spontaneous preterm delivery 
+❑ History of premature rupture of membranes 
+❑ History of abnormal placentation such as placenta accreta, increta, percreta or previa 
+❑ History of obstetrical complications or outcomes (intrauterine growth restriction, abruptio placentae, 
+postpartum bleeding, intrauterine fetal death etc) 
+❑ Two or more previous C-sections 
+❑ Uterine/Mullerian anomalies such as septum, double uterus, etc. 
+❑ Intramural fibroids >4 cm in diameter 
+❑ Previous myomectomy of an intramural fibroid 4cm or larger 
+❑ Patients having history for uterine surgery with opening of endometrial cavity 
+
