@@ -1,0 +1,911 @@
+{
+  "$defs": {
+    "Action": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "owner_id": {
+          "title": "Owner Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "required",
+            "overdue"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "due_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Due At"
+        },
+        "person_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Person Ids",
+          "type": "array"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "policy_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Policy Ids",
+          "type": "array"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "owner_id",
+        "status",
+        "due_at",
+        "person_ids",
+        "evidence_ids",
+        "policy_ids",
+        "message"
+      ],
+      "title": "Action",
+      "type": "object"
+    },
+    "Control": {
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "title": "Task Id",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "hold_required",
+            "held",
+            "clearance_blocked",
+            "no_new_hold"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "reason_codes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Reason Codes",
+          "type": "array"
+        },
+        "policy_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Policy Ids",
+          "type": "array"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "task_id",
+        "state",
+        "reason_codes",
+        "policy_ids",
+        "evidence_ids"
+      ],
+      "title": "Control",
+      "type": "object"
+    },
+    "HeatResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "2.1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "request_id": {
+          "title": "Request Id",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "decision_at": {
+          "format": "date-time",
+          "title": "Decision At",
+          "type": "string"
+        },
+        "profile_id": {
+          "const": "sandline_operational_demo_v1",
+          "title": "Profile Id",
+          "type": "string"
+        },
+        "policy_versions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Policy Versions",
+          "type": "array"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "input_fingerprint": {
+          "title": "Input Fingerprint",
+          "type": "string"
+        },
+        "applied": {
+          "const": false,
+          "title": "Applied",
+          "type": "boolean"
+        },
+        "controls": {
+          "items": {
+            "$ref": "#/$defs/Control"
+          },
+          "title": "Controls",
+          "type": "array"
+        },
+        "held_task_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Held Task Ids",
+          "type": "array"
+        },
+        "clearance_blockers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Clearance Blockers",
+          "type": "array"
+        },
+        "actions": {
+          "items": {
+            "$ref": "#/$defs/Action"
+          },
+          "title": "Actions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema_version",
+        "request_id",
+        "snapshot_id",
+        "decision_at",
+        "profile_id",
+        "policy_versions",
+        "evidence_ids",
+        "input_fingerprint",
+        "applied",
+        "controls",
+        "held_task_ids",
+        "clearance_blockers",
+        "actions"
+      ],
+      "title": "HeatResponse",
+      "type": "object"
+    },
+    "Interval": {
+      "additionalProperties": false,
+      "properties": {
+        "person_id": {
+          "enum": [
+            "C02",
+            "C03",
+            "C04",
+            "C05",
+            "C06",
+            "C07",
+            "C08",
+            "C09",
+            "C10",
+            "C11",
+            "C12"
+          ],
+          "title": "Person Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "work",
+            "recovery",
+            "unavailable"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "const": "workshop_prep",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Task Id"
+        },
+        "zone_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+          "title": "Zone Id",
+          "type": "string"
+        },
+        "starts_at": {
+          "format": "date-time",
+          "title": "Starts At",
+          "type": "string"
+        },
+        "ends_at": {
+          "format": "date-time",
+          "title": "Ends At",
+          "type": "string"
+        },
+        "requires_revalidation": {
+          "title": "Requires Revalidation",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "person_id",
+        "kind",
+        "task_id",
+        "zone_id",
+        "starts_at",
+        "ends_at",
+        "requires_revalidation"
+      ],
+      "title": "Interval",
+      "type": "object"
+    },
+    "Occupancy": {
+      "additionalProperties": false,
+      "properties": {
+        "starts_at": {
+          "format": "date-time",
+          "title": "Starts At",
+          "type": "string"
+        },
+        "ends_at": {
+          "format": "date-time",
+          "title": "Ends At",
+          "type": "string"
+        },
+        "zone_id": {
+          "title": "Zone Id",
+          "type": "string"
+        },
+        "count": {
+          "title": "Count",
+          "type": "integer"
+        },
+        "capacity": {
+          "title": "Capacity",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "starts_at",
+        "ends_at",
+        "zone_id",
+        "count",
+        "capacity"
+      ],
+      "title": "Occupancy",
+      "type": "object"
+    },
+    "PlanResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "2.1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "request_id": {
+          "title": "Request Id",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "decision_at": {
+          "format": "date-time",
+          "title": "Decision At",
+          "type": "string"
+        },
+        "profile_id": {
+          "const": "sandline_operational_demo_v1",
+          "title": "Profile Id",
+          "type": "string"
+        },
+        "policy_versions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Policy Versions",
+          "type": "array"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "input_fingerprint": {
+          "title": "Input Fingerprint",
+          "type": "string"
+        },
+        "applied": {
+          "const": false,
+          "title": "Applied",
+          "type": "boolean"
+        },
+        "planning_status": {
+          "enum": [
+            "planned",
+            "recovery_only",
+            "blocked",
+            "missing_policy",
+            "missing_information",
+            "infeasible",
+            "unknown",
+            "model_invalid"
+          ],
+          "title": "Planning Status",
+          "type": "string"
+        },
+        "solver_status": {
+          "anyOf": [
+            {
+              "enum": [
+                "OPTIMAL",
+                "FEASIBLE",
+                "INFEASIBLE",
+                "UNKNOWN",
+                "MODEL_INVALID"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Solver Status"
+        },
+        "optimal": {
+          "title": "Optimal",
+          "type": "boolean"
+        },
+        "policy_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Policy Id"
+        },
+        "timing_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TimingPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "policy_source": {
+          "default": "none",
+          "enum": [
+            "supplied",
+            "registered",
+            "none"
+          ],
+          "title": "Policy Source",
+          "type": "string"
+        },
+        "horizon_end": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Horizon End"
+        },
+        "recovery_reservation_end": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Recovery Reservation End"
+        },
+        "intervals": {
+          "items": {
+            "$ref": "#/$defs/Interval"
+          },
+          "title": "Intervals",
+          "type": "array"
+        },
+        "occupancy": {
+          "items": {
+            "$ref": "#/$defs/Occupancy"
+          },
+          "title": "Occupancy",
+          "type": "array"
+        },
+        "carry_forward_rest": {
+          "items": {
+            "$ref": "#/$defs/RestObligation"
+          },
+          "title": "Carry Forward Rest",
+          "type": "array"
+        },
+        "useful_worker_minutes": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Useful Worker Minutes"
+        },
+        "unmet_worker_minutes": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Unmet Worker Minutes"
+        },
+        "blockers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Blockers",
+          "type": "array"
+        },
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "held_task_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Held Task Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema_version",
+        "request_id",
+        "snapshot_id",
+        "decision_at",
+        "profile_id",
+        "policy_versions",
+        "evidence_ids",
+        "input_fingerprint",
+        "applied",
+        "planning_status",
+        "solver_status",
+        "optimal",
+        "policy_id",
+        "horizon_end",
+        "recovery_reservation_end",
+        "intervals",
+        "occupancy",
+        "carry_forward_rest",
+        "useful_worker_minutes",
+        "unmet_worker_minutes",
+        "blockers",
+        "assumptions",
+        "held_task_ids"
+      ],
+      "title": "PlanResponse",
+      "type": "object"
+    },
+    "ProtectiveResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "2.1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "request_id": {
+          "title": "Request Id",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "decision_at": {
+          "format": "date-time",
+          "title": "Decision At",
+          "type": "string"
+        },
+        "profile_id": {
+          "const": "sandline_operational_demo_v1",
+          "title": "Profile Id",
+          "type": "string"
+        },
+        "policy_versions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Policy Versions",
+          "type": "array"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "input_fingerprint": {
+          "title": "Input Fingerprint",
+          "type": "string"
+        },
+        "applied": {
+          "const": false,
+          "title": "Applied",
+          "type": "boolean"
+        },
+        "actions": {
+          "items": {
+            "$ref": "#/$defs/Action"
+          },
+          "title": "Actions",
+          "type": "array"
+        },
+        "excluded_worker_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Excluded Worker Ids",
+          "type": "array"
+        },
+        "planning_blockers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Planning Blockers",
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema_version",
+        "request_id",
+        "snapshot_id",
+        "decision_at",
+        "profile_id",
+        "policy_versions",
+        "evidence_ids",
+        "input_fingerprint",
+        "applied",
+        "actions",
+        "excluded_worker_ids",
+        "planning_blockers"
+      ],
+      "title": "ProtectiveResponse",
+      "type": "object"
+    },
+    "RestObligation": {
+      "additionalProperties": false,
+      "properties": {
+        "person_id": {
+          "enum": [
+            "C02",
+            "C03",
+            "C04",
+            "C05",
+            "C06",
+            "C07",
+            "C08",
+            "C09",
+            "C10",
+            "C11",
+            "C12"
+          ],
+          "title": "Person Id",
+          "type": "string"
+        },
+        "remaining_minutes": {
+          "title": "Remaining Minutes",
+          "type": "integer"
+        },
+        "earliest_rest_complete_at": {
+          "format": "date-time",
+          "title": "Earliest Rest Complete At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "person_id",
+        "remaining_minutes",
+        "earliest_rest_complete_at"
+      ],
+      "title": "RestObligation",
+      "type": "object"
+    },
+    "RestartResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "2.1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "request_id": {
+          "title": "Request Id",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "decision_at": {
+          "format": "date-time",
+          "title": "Decision At",
+          "type": "string"
+        },
+        "profile_id": {
+          "const": "sandline_operational_demo_v1",
+          "title": "Profile Id",
+          "type": "string"
+        },
+        "policy_versions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Policy Versions",
+          "type": "array"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "input_fingerprint": {
+          "title": "Input Fingerprint",
+          "type": "string"
+        },
+        "applied": {
+          "const": false,
+          "title": "Applied",
+          "type": "boolean"
+        },
+        "status": {
+          "enum": [
+            "blocked",
+            "ready_for_human_review",
+            "not_requested"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "blockers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Blockers",
+          "type": "array"
+        },
+        "required_owner_id": {
+          "const": "P02",
+          "title": "Required Owner Id",
+          "type": "string"
+        },
+        "held_task_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Held Task Ids",
+          "type": "array"
+        },
+        "actions": {
+          "items": {
+            "$ref": "#/$defs/Action"
+          },
+          "title": "Actions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema_version",
+        "request_id",
+        "snapshot_id",
+        "decision_at",
+        "profile_id",
+        "policy_versions",
+        "evidence_ids",
+        "input_fingerprint",
+        "applied",
+        "status",
+        "blockers",
+        "required_owner_id",
+        "held_task_ids",
+        "actions"
+      ],
+      "title": "RestartResponse",
+      "type": "object"
+    },
+    "TimingPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "initial_recovery_minutes": {
+          "maximum": 120,
+          "minimum": 0,
+          "title": "Initial Recovery Minutes",
+          "type": "integer"
+        },
+        "max_work_minutes": {
+          "maximum": 120,
+          "minimum": 1,
+          "title": "Max Work Minutes",
+          "type": "integer"
+        },
+        "between_work_recovery_minutes": {
+          "maximum": 120,
+          "minimum": 1,
+          "title": "Between Work Recovery Minutes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "initial_recovery_minutes",
+        "max_work_minutes",
+        "between_work_recovery_minutes"
+      ],
+      "title": "TimingPolicy",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "2.1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "request_id": {
+      "title": "Request Id",
+      "type": "string"
+    },
+    "snapshot_id": {
+      "title": "Snapshot Id",
+      "type": "string"
+    },
+    "decision_at": {
+      "format": "date-time",
+      "title": "Decision At",
+      "type": "string"
+    },
+    "profile_id": {
+      "const": "sandline_operational_demo_v1",
+      "title": "Profile Id",
+      "type": "string"
+    },
+    "policy_versions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Policy Versions",
+      "type": "array"
+    },
+    "evidence_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Evidence Ids",
+      "type": "array"
+    },
+    "input_fingerprint": {
+      "title": "Input Fingerprint",
+      "type": "string"
+    },
+    "applied": {
+      "const": false,
+      "title": "Applied",
+      "type": "boolean"
+    },
+    "heat": {
+      "$ref": "#/$defs/HeatResponse"
+    },
+    "protective_response": {
+      "$ref": "#/$defs/ProtectiveResponse"
+    },
+    "crew_rest": {
+      "$ref": "#/$defs/PlanResponse"
+    },
+    "restart": {
+      "$ref": "#/$defs/RestartResponse"
+    }
+  },
+  "required": [
+    "schema_version",
+    "request_id",
+    "snapshot_id",
+    "decision_at",
+    "profile_id",
+    "policy_versions",
+    "evidence_ids",
+    "input_fingerprint",
+    "applied",
+    "heat",
+    "protective_response",
+    "crew_rest",
+    "restart"
+  ],
+  "title": "ResponsePlan",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

@@ -1,0 +1,427 @@
+{
+  "schema_version": "2.1",
+  "request_id": "alternate_timing_policy",
+  "profile_id": "sandline_operational_demo_v1",
+  "snapshot_id": "synthetic-alternate_timing_policy",
+  "decision_at": "2025-08-04T08:11:00+04:00",
+  "locations": [
+    {
+      "id": "civil_exposed",
+      "label": "Civil trench preparation",
+      "capacity": 20,
+      "capabilities": [
+        "exposed_civil"
+      ]
+    },
+    {
+      "id": "electrical_exposed",
+      "label": "Electrical preparation laydown",
+      "capacity": 20,
+      "capabilities": [
+        "exposed_electrical"
+      ]
+    },
+    {
+      "id": "yard",
+      "label": "Receiving yard",
+      "capacity": 20,
+      "capabilities": [
+        "yard"
+      ]
+    },
+    {
+      "id": "workshop",
+      "label": "Cooled preparation workshop",
+      "capacity": 6,
+      "capabilities": [
+        "light_work"
+      ]
+    },
+    {
+      "id": "shelter_a",
+      "label": "Cooled recovery shelter A",
+      "capacity": 24,
+      "capabilities": [
+        "cooled_recovery"
+      ]
+    },
+    {
+      "id": "shelter_b",
+      "label": "Cooled recovery shelter B",
+      "capacity": 16,
+      "capabilities": [
+        "cooled_recovery"
+      ]
+    },
+    {
+      "id": "welfare",
+      "label": "Welfare and first aid",
+      "capacity": 8,
+      "capabilities": [
+        "first_aid_support"
+      ]
+    }
+  ],
+  "task_locations": {
+    "civil_heavy": "civil_exposed",
+    "civil_light": "civil_exposed",
+    "workshop_prep": "workshop"
+  },
+  "snapshot": {
+    "readings": [
+      {
+        "evidence_id": "02_heat_alert_response_e01",
+        "sensor_id": "t1",
+        "zone_id": "civil_exposed",
+        "twl": 145.0,
+        "unit": "W/m²",
+        "quality": "valid",
+        "measured_at": "2025-08-04T08:00:00+04:00",
+        "received_at": "2025-08-04T08:00:00+04:00"
+      }
+    ],
+    "sensor_status": {
+      "t1": "serviceable",
+      "t2": "serviceable",
+      "t3": "serviceable"
+    },
+    "held_task_ids": [
+      "civil_heavy"
+    ],
+    "instruction": {
+      "evidence_id": "02_heat_alert_response_e02",
+      "alert_id": "heat_case_01",
+      "issued_at": "2025-08-04T08:01:00+04:00",
+      "issued_by": "P03",
+      "acknowledged_at": "2025-08-04T08:02:00+04:00",
+      "acknowledged_by": "C01"
+    },
+    "cessation": {
+      "evidence_id": "02_heat_alert_response_e04",
+      "confirmed_at": "2025-08-04T08:03:00+04:00",
+      "actor_id": "C01"
+    },
+    "recovery": {
+      "evidence_id": "02_heat_alert_response_e05",
+      "recorded_at": "2025-08-04T08:04:00+04:00",
+      "actor_id": "C01",
+      "person_ids": [
+        "C02",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C12"
+      ],
+      "zone_id": "shelter_a"
+    },
+    "workers": [
+      {
+        "person_id": "C02",
+        "readiness": null,
+        "availability": "available",
+        "location_id": "shelter_a"
+      },
+      {
+        "person_id": "C03",
+        "readiness": null,
+        "availability": "available",
+        "location_id": "shelter_a"
+      },
+      {
+        "person_id": "C04",
+        "readiness": null,
+        "availability": "available",
+        "location_id": "shelter_a"
+      },
+      {
+        "person_id": "C05",
+        "readiness": {
+          "status": "ready",
+          "task_id": "workshop_prep",
+          "confirmed_by": "C01",
+          "confirmed_at": "2025-08-04T08:10:30+04:00",
+          "valid_until": "2025-08-04T10:30:00+04:00",
+          "evidence_id": "readiness-C05",
+          "basis": "Supervisor confirmed suitability for the light workshop task under the fictional demo arrangement.",
+          "source": "synthetic_fixture"
+        },
+        "availability": "available",
+        "location_id": "workshop"
+      },
+      {
+        "person_id": "C06",
+        "readiness": {
+          "status": "ready",
+          "task_id": "workshop_prep",
+          "confirmed_by": "C01",
+          "confirmed_at": "2025-08-04T08:10:30+04:00",
+          "valid_until": "2025-08-04T10:30:00+04:00",
+          "evidence_id": "readiness-C06",
+          "basis": "Supervisor confirmed suitability for the light workshop task under the fictional demo arrangement.",
+          "source": "synthetic_fixture"
+        },
+        "availability": "available",
+        "location_id": "workshop"
+      },
+      {
+        "person_id": "C07",
+        "readiness": {
+          "status": "ready",
+          "task_id": "workshop_prep",
+          "confirmed_by": "C01",
+          "confirmed_at": "2025-08-04T08:10:30+04:00",
+          "valid_until": "2025-08-04T10:30:00+04:00",
+          "evidence_id": "readiness-C07",
+          "basis": "Supervisor confirmed suitability for the light workshop task under the fictional demo arrangement.",
+          "source": "synthetic_fixture"
+        },
+        "availability": "available",
+        "location_id": "workshop"
+      },
+      {
+        "person_id": "C08",
+        "readiness": {
+          "status": "ready",
+          "task_id": "workshop_prep",
+          "confirmed_by": "C01",
+          "confirmed_at": "2025-08-04T08:10:30+04:00",
+          "valid_until": "2025-08-04T10:30:00+04:00",
+          "evidence_id": "readiness-C08",
+          "basis": "Supervisor confirmed suitability for the light workshop task under the fictional demo arrangement.",
+          "source": "synthetic_fixture"
+        },
+        "availability": "available",
+        "location_id": "workshop"
+      },
+      {
+        "person_id": "C09",
+        "readiness": null,
+        "availability": "available",
+        "location_id": "shelter_a"
+      },
+      {
+        "person_id": "C10",
+        "readiness": null,
+        "availability": "available",
+        "location_id": "shelter_a"
+      },
+      {
+        "person_id": "C11",
+        "readiness": null,
+        "availability": "available",
+        "location_id": "shelter_a"
+      },
+      {
+        "person_id": "C12",
+        "readiness": null,
+        "availability": "available",
+        "location_id": "shelter_a"
+      }
+    ],
+    "activity_history": [
+      {
+        "evidence_id": "cooled-C02",
+        "person_id": "C02",
+        "kind": "recovery",
+        "task_id": null,
+        "zone_id": "shelter_a",
+        "starts_at": "2025-08-04T08:04:00+04:00",
+        "ends_at": "2025-08-04T08:11:00+04:00",
+        "recorded_at": "2025-08-04T08:11:00+04:00",
+        "observed": true,
+        "source": "synthetic_fixture"
+      },
+      {
+        "evidence_id": "cooled-C03",
+        "person_id": "C03",
+        "kind": "recovery",
+        "task_id": null,
+        "zone_id": "shelter_a",
+        "starts_at": "2025-08-04T08:04:00+04:00",
+        "ends_at": "2025-08-04T08:11:00+04:00",
+        "recorded_at": "2025-08-04T08:11:00+04:00",
+        "observed": true,
+        "source": "synthetic_fixture"
+      },
+      {
+        "evidence_id": "cooled-C04",
+        "person_id": "C04",
+        "kind": "recovery",
+        "task_id": null,
+        "zone_id": "shelter_a",
+        "starts_at": "2025-08-04T08:04:00+04:00",
+        "ends_at": "2025-08-04T08:11:00+04:00",
+        "recorded_at": "2025-08-04T08:11:00+04:00",
+        "observed": true,
+        "source": "synthetic_fixture"
+      },
+      {
+        "evidence_id": "cooled-C05",
+        "person_id": "C05",
+        "kind": "recovery",
+        "task_id": null,
+        "zone_id": "shelter_a",
+        "starts_at": "2025-08-04T08:04:00+04:00",
+        "ends_at": "2025-08-04T08:11:00+04:00",
+        "recorded_at": "2025-08-04T08:11:00+04:00",
+        "observed": true,
+        "source": "synthetic_fixture"
+      },
+      {
+        "evidence_id": "cooled-C06",
+        "person_id": "C06",
+        "kind": "recovery",
+        "task_id": null,
+        "zone_id": "shelter_a",
+        "starts_at": "2025-08-04T08:04:00+04:00",
+        "ends_at": "2025-08-04T08:11:00+04:00",
+        "recorded_at": "2025-08-04T08:11:00+04:00",
+        "observed": true,
+        "source": "synthetic_fixture"
+      },
+      {
+        "evidence_id": "cooled-C07",
+        "person_id": "C07",
+        "kind": "recovery",
+        "task_id": null,
+        "zone_id": "shelter_a",
+        "starts_at": "2025-08-04T08:04:00+04:00",
+        "ends_at": "2025-08-04T08:11:00+04:00",
+        "recorded_at": "2025-08-04T08:11:00+04:00",
+        "observed": true,
+        "source": "synthetic_fixture"
+      },
+      {
+        "evidence_id": "cooled-C08",
+        "person_id": "C08",
+        "kind": "recovery",
+        "task_id": null,
+        "zone_id": "shelter_a",
+        "starts_at": "2025-08-04T08:04:00+04:00",
+        "ends_at": "2025-08-04T08:11:00+04:00",
+        "recorded_at": "2025-08-04T08:11:00+04:00",
+        "observed": true,
+        "source": "synthetic_fixture"
+      },
+      {
+        "evidence_id": "cooled-C09",
+        "person_id": "C09",
+        "kind": "recovery",
+        "task_id": null,
+        "zone_id": "shelter_a",
+        "starts_at": "2025-08-04T08:04:00+04:00",
+        "ends_at": "2025-08-04T08:11:00+04:00",
+        "recorded_at": "2025-08-04T08:11:00+04:00",
+        "observed": true,
+        "source": "synthetic_fixture"
+      },
+      {
+        "evidence_id": "cooled-C10",
+        "person_id": "C10",
+        "kind": "recovery",
+        "task_id": null,
+        "zone_id": "shelter_a",
+        "starts_at": "2025-08-04T08:04:00+04:00",
+        "ends_at": "2025-08-04T08:11:00+04:00",
+        "recorded_at": "2025-08-04T08:11:00+04:00",
+        "observed": true,
+        "source": "synthetic_fixture"
+      },
+      {
+        "evidence_id": "cooled-C11",
+        "person_id": "C11",
+        "kind": "recovery",
+        "task_id": null,
+        "zone_id": "shelter_a",
+        "starts_at": "2025-08-04T08:04:00+04:00",
+        "ends_at": "2025-08-04T08:11:00+04:00",
+        "recorded_at": "2025-08-04T08:11:00+04:00",
+        "observed": true,
+        "source": "synthetic_fixture"
+      },
+      {
+        "evidence_id": "cooled-C12",
+        "person_id": "C12",
+        "kind": "recovery",
+        "task_id": null,
+        "zone_id": "shelter_a",
+        "starts_at": "2025-08-04T08:04:00+04:00",
+        "ends_at": "2025-08-04T08:11:00+04:00",
+        "recorded_at": "2025-08-04T08:11:00+04:00",
+        "observed": true,
+        "source": "synthetic_fixture"
+      }
+    ],
+    "workshop": {
+      "staffing_demand": {
+        "minimum": 1,
+        "maximum": 4
+      },
+      "permit_status": "valid",
+      "resource_status": "available",
+      "supervision_status": "available"
+    },
+    "zone_windows": [
+      {
+        "zone_id": "workshop",
+        "starts_at": "2025-08-04T08:00:00+04:00",
+        "ends_at": "2025-08-04T11:30:00+04:00",
+        "status": "available",
+        "fixed_occupant_ids": [
+          "P07",
+          "P08"
+        ]
+      },
+      {
+        "zone_id": "shelter_a",
+        "starts_at": "2025-08-04T08:00:00+04:00",
+        "ends_at": "2025-08-04T11:30:00+04:00",
+        "status": "available",
+        "fixed_occupant_ids": []
+      },
+      {
+        "zone_id": "shelter_b",
+        "starts_at": "2025-08-04T08:00:00+04:00",
+        "ends_at": "2025-08-04T11:30:00+04:00",
+        "status": "available",
+        "fixed_occupant_ids": []
+      },
+      {
+        "zone_id": "welfare",
+        "starts_at": "2025-08-04T08:00:00+04:00",
+        "ends_at": "2025-08-04T11:30:00+04:00",
+        "status": "available",
+        "fixed_occupant_ids": []
+      }
+    ],
+    "task_windows": [
+      {
+        "task_id": "workshop_prep",
+        "starts_at": "2025-08-04T08:00:00+04:00",
+        "ends_at": "2025-08-04T11:30:00+04:00",
+        "permit_status": "valid",
+        "resource_status": "available",
+        "supervision_status": "available"
+      }
+    ],
+    "incidents": []
+  },
+  "planning": {
+    "policy_id": "demo-work-rest-alternate",
+    "starts_at": "2025-08-04T08:11:00+04:00",
+    "horizon_minutes": 60
+  },
+  "timing_policy": {
+    "id": "demo-work-rest-alternate",
+    "initial_recovery_minutes": 10,
+    "max_work_minutes": 20,
+    "between_work_recovery_minutes": 15
+  },
+  "restart": null
+}

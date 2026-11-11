@@ -1,0 +1,42 @@
+{
+  "schema_version": "2.1",
+  "request_id": "restart_ready",
+  "snapshot_id": "synthetic-restart_ready",
+  "decision_at": "2025-08-04T08:11:00+04:00",
+  "profile_id": "sandline_operational_demo_v1",
+  "policy_versions": [
+    "sandline-heat-rules-v1"
+  ],
+  "evidence_ids": [
+    "02_heat_alert_response_e02",
+    "02_heat_alert_response_e04",
+    "02_heat_alert_response_e05",
+    "fresh-restart-reading",
+    "readiness-C05",
+    "readiness-C06",
+    "readiness-C07",
+    "readiness-C08"
+  ],
+  "input_fingerprint": "2084b28bd06cd4abf829cc3ad7b812852f4e816ededf764b52d1e144340b8190",
+  "applied": false,
+  "status": "ready_for_human_review",
+  "blockers": [],
+  "required_owner_id": "P02",
+  "held_task_ids": [
+    "civil_heavy"
+  ],
+  "actions": [
+    {
+      "code": "human_restart_review",
+      "owner_id": "P02",
+      "status": "required",
+      "due_at": null,
+      "person_ids": [],
+      "evidence_ids": [],
+      "policy_ids": [
+        "p_restart"
+      ],
+      "message": "Review the evidence and decide whether to authorize restart."
+    }
+  ]
+}
