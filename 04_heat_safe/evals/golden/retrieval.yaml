@@ -1,0 +1,132 @@
+# Retrieval golden set for search_guidance: question -> the page(s) a careful reader would cite.
+#
+# Labels were found by reading the documents and searching their text (heat_safe.corpus chunks),
+# NOT by looking at what search_guidance returned. Labelling from the system's own output is
+# circular: it can only confirm what the system already does.
+#
+# expected: a hit is any result whose doc matches and, if pages are given, whose page is listed.
+#   Omit pages when any page of that document is a fair answer (broad international guidance).
+# why: what this question protects. "trap" names a plausible wrong source.
+
+- id: supervisor_training
+  query: What heat training must managers and supervisors receive?
+  expected: [{doc: adosh_cop_11, pages: [5]}]
+  why: Basic binding-requirement lookup; NIOSH has a long training section that competes.
+
+- id: new_starter_training
+  query: What must new employees be trained on within 10 days of starting work?
+  expected: [{doc: adosh_cop_11, pages: [4]}]
+  why: Specific clause (2(d)) inside a list; tests that list chunks keep their context.
+
+- id: heat_programme_trigger
+  query: When is an employer required to have a heat stress program?
+  expected: [{doc: adosh_cop_11, pages: [6]}]
+  why: The 35 °C trigger, CoP 11.0 §3.1(e); the reason the tool flags heat_programme_required.
+
+- id: fluids_high_zone
+  query: How much water should workers drink per hour in the high risk zone?
+  expected: [{doc: adosh_tg_heat, pages: [5]}]
+  trap: sharjah_cop33 p.7 has a similar table with different numbers
+  why: Table 1 is an image in the PDF; only the transcribed chunk can answer this.
+
+- id: work_rest_medium_heavy
+  query: What work/rest cycle applies to heavy work in the medium risk TWL zone?
+  expected: [{doc: adosh_tg_heat, pages: [5]}]
+  trap: sharjah_cop33 p.7 says 40/20 where ADOSH-SF says 45/15
+  why: The clearest case where the wrong emirate gives a wrong number.
+
+- id: acclimatisation_new_employee
+  query: How should a new employee be acclimatised over their first days in the heat?
+  expected: [{doc: adosh_tg_heat, pages: [6]}]
+  why: Table extracted as flattened text; tests that flattened tables still retrieve.
+
+- id: reacclimatisation_after_illness
+  query: A worker was off sick for a week. How much of a full workload can they do on return?
+  expected: [{doc: adosh_tg_heat, pages: [6]}]
+  why: Paraphrase with no shared keywords ("re-acclimatization", "absence") with the source.
+
+- id: heat_stroke_first_aid
+  query: A worker is confused and has stopped sweating. What first aid should we give?
+  expected: [{doc: adosh_tg_heat, pages: [9]}]
+  trap: niosh_2016 p.80 describes heat stroke clinically
+  why: Emergency guidance must come from the Abu Dhabi document first.
+
+- id: heat_cramps
+  query: What are the symptoms of heat cramps and how are they treated?
+  expected: [{doc: adosh_tg_heat, pages: [7]}]
+  why: Section lookup by illness name.
+
+- id: urine_colour
+  query: How can workers check their own hydration using urine colour?
+  expected: [{doc: adosh_tg_heat, pages: [14]}]
+  why: The chart itself is an image; only the appendix intro text is retrievable.
+
+- id: flag_system
+  query: Is there a flag system for communicating heat conditions on a large site?
+  expected: [{doc: adosh_tg_heat, pages: [23]}]
+  why: Appendix lookup.
+
+- id: electrolyte_drinks
+  query: Should workers drink electrolyte or sports drinks instead of water?
+  expected: [{doc: adosh_tg_heat, pages: [11]}]
+  why: Section 5.6; NIOSH and ILO also discuss electrolytes.
+
+- id: construction_plan_heat
+  query: What must a construction OSH management plan cover about heat stress?
+  expected: [{doc: adosh_cop_53_1, pages: [31]}]
+  why: The heat line in a long checklist table; a weak, short passage.
+
+- id: health_data_abroad
+  query: Can workers' health data be stored or processed outside the UAE?
+  expected: [{doc: uae_health_ict, pages: [8]}, {doc: uae_pdpl, pages: [25]}]
+  why: Governance question for the worker app; two laws answer it.
+
+- id: niosh_alert_limit
+  query: What is the NIOSH recommended alert limit for unacclimatised workers?
+  expected: [{doc: niosh_2016}]
+  why: Names an international source explicitly; the authority boost must not bury it.
+
+- id: warning_system_design
+  query: How should a city design a heat-health early warning system?
+  expected: [{doc: who_wmo_2015}]
+  why: Only international guidance covers this; the boost must not push weak local hits above it.
+
+- id: productivity_loss
+  query: How much working time is lost to heat stress globally?
+  expected: [{doc: ilo_2019}]
+  why: Productivity framing for the pitch; ILO is the source.
+
+# --- MoHRE midday break, added 6 Nov after the WAM releases were collected ------------------------
+# Before indexing them, these questions returned only ADOSH-SF pages that never mention the break
+# (best similarity ~0.69). Labels found by searching the release text, before running the eval.
+
+- id: midday_break_hours
+  query: Why must outdoor work stop between 12:30 and 15:00 in summer?
+  expected: [{doc: mohre_break_2024, pages: [1]}, {doc: mohre_break_2025, pages: [1]},
+             {doc: mohre_break_2026, pages: [1]}, {doc: mohre_break_2026_close, pages: [2]}]
+  why: The demo's most visible rule; rules.py cites MoHRE, and until 6 Nov no document backed it.
+
+- id: midday_break_fine
+  query: What is the fine for making workers work during the midday break?
+  expected: [{doc: mohre_break_2024, pages: [3]}, {doc: mohre_break_2025, pages: [4]}]
+  why: Only the 2024 and 2025 releases state the amount; the 2026 release does not.
+
+- id: midday_break_exemptions
+  query: Which jobs are exempt from the midday break, for example pouring concrete?
+  expected: [{doc: mohre_break_2024, pages: [2]}, {doc: mohre_break_2025, pages: [4]},
+             {doc: mohre_break_2026, pages: [2]}]
+  why: Exemptions are a new risk; the agent must find the conditions, not just "concrete is exempt".
+
+- id: midday_break_2026_dates
+  query: When does the 2026 heat stress prevention policy start and end?
+  expected: [{doc: mohre_break_2026, pages: [1]}]
+  trap: the 2024 and 2025 releases give the same dates for other years
+  why: Year-specific question; tests that the year in the short name and text is enough to rank it.
+
+- id: unacclimatised_definition
+  query: Who counts as an unacclimatised worker? Does someone back from a long holiday count?
+  expected: [{doc: adosh_tg_heat, pages: [5]}]
+  why: >
+    TG Table 1 note b is the official definition (new, or off work more than 14 days). It is part of
+    an image, so only the transcribed notes chunk can answer. Added 6 Nov after the definition was
+    missed because it was invisible to text extraction.
