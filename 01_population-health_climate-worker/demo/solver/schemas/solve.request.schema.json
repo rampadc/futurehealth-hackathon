@@ -1,0 +1,282 @@
+{
+  "$defs": {
+    "IncidentInput": {
+      "additionalProperties": false,
+      "properties": {
+        "person_id": {
+          "title": "Person Id",
+          "type": "string"
+        },
+        "location_id": {
+          "const": "welfare",
+          "title": "Location Id",
+          "type": "string"
+        },
+        "responder_id": {
+          "const": "P06",
+          "title": "Responder Id",
+          "type": "string"
+        },
+        "responder_status": {
+          "const": "contacted",
+          "title": "Responder Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "person_id",
+        "location_id",
+        "responder_id",
+        "responder_status"
+      ],
+      "title": "IncidentInput",
+      "type": "object"
+    },
+    "MeasurementInput": {
+      "additionalProperties": false,
+      "properties": {
+        "sensor_id": {
+          "const": "t1",
+          "title": "Sensor Id",
+          "type": "string"
+        },
+        "zone_id": {
+          "const": "civil_exposed",
+          "title": "Zone Id",
+          "type": "string"
+        },
+        "twl": {
+          "exclusiveMaximum": 500,
+          "exclusiveMinimum": 0,
+          "title": "Twl",
+          "type": "number"
+        },
+        "measured_at": {
+          "format": "date-time",
+          "title": "Measured At",
+          "type": "string"
+        },
+        "unit": {
+          "const": "W/m\u00b2",
+          "title": "Unit",
+          "type": "string"
+        },
+        "quality": {
+          "const": "valid",
+          "title": "Quality",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sensor_id",
+        "zone_id",
+        "twl",
+        "measured_at",
+        "unit",
+        "quality"
+      ],
+      "title": "MeasurementInput",
+      "type": "object"
+    },
+    "StaffingDemand": {
+      "additionalProperties": false,
+      "properties": {
+        "minimum": {
+          "const": 1,
+          "title": "Minimum",
+          "type": "integer"
+        },
+        "maximum": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Null means the useful staffing limit is unknown.",
+          "title": "Maximum"
+        }
+      },
+      "required": [
+        "minimum",
+        "maximum"
+      ],
+      "title": "StaffingDemand",
+      "type": "object"
+    },
+    "WorkerInput": {
+      "additionalProperties": false,
+      "properties": {
+        "person_id": {
+          "description": "One member of the frozen recovery pool.",
+          "enum": [
+            "C02",
+            "C03",
+            "C04",
+            "C05",
+            "C06",
+            "C07",
+            "C08",
+            "C09",
+            "C10",
+            "C11",
+            "C12"
+          ],
+          "title": "Person Id",
+          "type": "string"
+        },
+        "readiness": {
+          "description": "Caller supplied immediate suitability for light supervised workshop work; not a medical diagnosis.",
+          "enum": [
+            "ready",
+            "not_ready",
+            "unknown"
+          ],
+          "title": "Readiness",
+          "type": "string"
+        },
+        "availability": {
+          "enum": [
+            "available",
+            "unavailable"
+          ],
+          "title": "Availability",
+          "type": "string"
+        }
+      },
+      "required": [
+        "person_id",
+        "readiness",
+        "availability"
+      ],
+      "title": "WorkerInput",
+      "type": "object"
+    },
+    "WorkshopInput": {
+      "additionalProperties": false,
+      "properties": {
+        "fixed_occupant_ids": {
+          "description": "People already in the six-seat workshop, including P07 and P08.",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 6,
+          "minItems": 2,
+          "title": "Fixed Occupant Ids",
+          "type": "array"
+        },
+        "staffing_demand": {
+          "$ref": "#/$defs/StaffingDemand"
+        },
+        "permit_status": {
+          "description": "Caller claim about the frozen workshop permit; the server retains the permit definition.",
+          "enum": [
+            "valid",
+            "unavailable",
+            "unknown"
+          ],
+          "title": "Permit Status",
+          "type": "string"
+        },
+        "resource_status": {
+          "enum": [
+            "available",
+            "unavailable",
+            "unknown"
+          ],
+          "title": "Resource Status",
+          "type": "string"
+        },
+        "supervision_status": {
+          "description": "Shared external C01 supervision approved by P02 for workshop_prep and civil_light.",
+          "enum": [
+            "available",
+            "unavailable",
+            "unknown"
+          ],
+          "title": "Supervision Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "fixed_occupant_ids",
+        "staffing_demand",
+        "permit_status",
+        "resource_status",
+        "supervision_status"
+      ],
+      "title": "WorkshopInput",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "request_id": {
+      "maxLength": 100,
+      "minLength": 1,
+      "title": "Request Id",
+      "type": "string"
+    },
+    "profile_id": {
+      "const": "sandline_demo_v1",
+      "description": "Fixed fictional site profile with server-owned workers, qualifications, capacities and gates.",
+      "title": "Profile Id",
+      "type": "string"
+    },
+    "decision_at": {
+      "format": "date-time",
+      "title": "Decision At",
+      "type": "string"
+    },
+    "workers": {
+      "description": "Exactly the original eleven C02\u2013C12 recovery workers.",
+      "items": {
+        "$ref": "#/$defs/WorkerInput"
+      },
+      "maxItems": 11,
+      "minItems": 11,
+      "title": "Workers",
+      "type": "array"
+    },
+    "workshop": {
+      "$ref": "#/$defs/WorkshopInput"
+    },
+    "incidents": {
+      "items": {
+        "$ref": "#/$defs/IncidentInput"
+      },
+      "title": "Incidents",
+      "type": "array"
+    },
+    "civil_measurement": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/MeasurementInput"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "request_id",
+    "profile_id",
+    "decision_at",
+    "workers",
+    "workshop",
+    "incidents",
+    "civil_measurement"
+  ],
+  "title": "SolveRequest",
+  "type": "object"
+}

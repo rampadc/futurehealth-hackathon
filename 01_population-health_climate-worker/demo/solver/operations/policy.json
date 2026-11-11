@@ -1,0 +1,20 @@
+{
+  "id": "demo-work-rest-v1",
+  "classification": "fictional_demo_assumption",
+  "description": "Invented test rules for light workshop preparation, not occupational or medical guidance.",
+  "initial_recovery_minutes": 6,
+  "max_work_minutes": 15,
+  "between_work_recovery_minutes": 15,
+  "slot_minutes": 1,
+  "default_horizon_minutes": 60,
+  "max_horizon_minutes": 120,
+  "required_recovery_capability": "cooled_recovery",
+  "task_id": "workshop_prep",
+  "assumptions": [
+    "Location changes are instantaneous at minute boundaries.",
+    "Readiness is a separate caller assertion and is never inferred from elapsed recovery.",
+    "Future work requires rechecking worker suitability and task prerequisites.",
+    "Mandatory recovery beyond the requested horizon is reserved until the selected timing policy's initial or between-work requirement is complete.",
+    "The policy applies only to the eleven affected workers and light workshop work."
+  ]
+}

@@ -1,0 +1,218 @@
+{
+  "$defs": {
+    "Action": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "owner_id": {
+          "title": "Owner Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "required",
+            "overdue"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "due_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Due At"
+        },
+        "person_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Person Ids",
+          "type": "array"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "policy_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Policy Ids",
+          "type": "array"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "owner_id",
+        "status",
+        "due_at",
+        "person_ids",
+        "evidence_ids",
+        "policy_ids",
+        "message"
+      ],
+      "title": "Action",
+      "type": "object"
+    },
+    "Control": {
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "title": "Task Id",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "hold_required",
+            "held",
+            "clearance_blocked",
+            "no_new_hold"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "reason_codes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Reason Codes",
+          "type": "array"
+        },
+        "policy_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Policy Ids",
+          "type": "array"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "task_id",
+        "state",
+        "reason_codes",
+        "policy_ids",
+        "evidence_ids"
+      ],
+      "title": "Control",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "2.1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "request_id": {
+      "title": "Request Id",
+      "type": "string"
+    },
+    "snapshot_id": {
+      "title": "Snapshot Id",
+      "type": "string"
+    },
+    "decision_at": {
+      "format": "date-time",
+      "title": "Decision At",
+      "type": "string"
+    },
+    "profile_id": {
+      "const": "sandline_operational_demo_v1",
+      "title": "Profile Id",
+      "type": "string"
+    },
+    "policy_versions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Policy Versions",
+      "type": "array"
+    },
+    "evidence_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Evidence Ids",
+      "type": "array"
+    },
+    "input_fingerprint": {
+      "title": "Input Fingerprint",
+      "type": "string"
+    },
+    "applied": {
+      "const": false,
+      "title": "Applied",
+      "type": "boolean"
+    },
+    "controls": {
+      "items": {
+        "$ref": "#/$defs/Control"
+      },
+      "title": "Controls",
+      "type": "array"
+    },
+    "held_task_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Held Task Ids",
+      "type": "array"
+    },
+    "clearance_blockers": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Clearance Blockers",
+      "type": "array"
+    },
+    "actions": {
+      "items": {
+        "$ref": "#/$defs/Action"
+      },
+      "title": "Actions",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "request_id",
+    "snapshot_id",
+    "decision_at",
+    "profile_id",
+    "policy_versions",
+    "evidence_ids",
+    "input_fingerprint",
+    "applied",
+    "controls",
+    "held_task_ids",
+    "clearance_blockers",
+    "actions"
+  ],
+  "title": "HeatResponse",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

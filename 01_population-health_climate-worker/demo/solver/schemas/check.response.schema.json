@@ -1,0 +1,228 @@
+{
+  "$defs": {
+    "AllocationProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "const": "workshop_prep",
+          "title": "Task Id",
+          "type": "string"
+        },
+        "worker_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Worker Ids",
+          "type": "array"
+        },
+        "projected_assignments": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Projected Assignments",
+          "type": "object"
+        },
+        "projected_occupancy": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Projected Occupancy",
+          "type": "object"
+        },
+        "projected_task_status": {
+          "additionalProperties": {
+            "enum": [
+              "active",
+              "held",
+              "idle"
+            ],
+            "type": "string"
+          },
+          "title": "Projected Task Status",
+          "type": "object"
+        }
+      },
+      "required": [
+        "task_id",
+        "worker_ids",
+        "projected_assignments",
+        "projected_occupancy",
+        "projected_task_status"
+      ],
+      "title": "AllocationProjection",
+      "type": "object"
+    },
+    "Diagnostics": {
+      "additionalProperties": false,
+      "properties": {
+        "blockers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Blockers",
+          "type": "array"
+        },
+        "free_workshop_places": {
+          "title": "Free Workshop Places",
+          "type": "integer"
+        },
+        "useful_staffing_limit": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Useful Staffing Limit"
+        },
+        "missing_prerequisites": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing Prerequisites",
+          "type": "array"
+        },
+        "ineligible_workers": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Ineligible Workers",
+          "type": "object"
+        }
+      },
+      "required": [
+        "blockers",
+        "free_workshop_places",
+        "useful_staffing_limit",
+        "missing_prerequisites",
+        "ineligible_workers"
+      ],
+      "title": "Diagnostics",
+      "type": "object"
+    },
+    "IncidentContact": {
+      "additionalProperties": false,
+      "properties": {
+        "responder_id": {
+          "const": "P06",
+          "title": "Responder Id",
+          "type": "string"
+        },
+        "status": {
+          "const": "contacted",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "responder_id",
+        "status"
+      ],
+      "title": "IncidentContact",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "request_id": {
+      "title": "Request Id",
+      "type": "string"
+    },
+    "profile_id": {
+      "const": "sandline_demo_v1",
+      "title": "Profile Id",
+      "type": "string"
+    },
+    "decision_at": {
+      "format": "date-time",
+      "title": "Decision At",
+      "type": "string"
+    },
+    "input_fingerprint": {
+      "title": "Input Fingerprint",
+      "type": "string"
+    },
+    "held_task_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Held Task Ids",
+      "type": "array"
+    },
+    "unavailable_worker_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Unavailable Worker Ids",
+      "type": "array"
+    },
+    "responder_status": {
+      "additionalProperties": {
+        "$ref": "#/$defs/IncidentContact"
+      },
+      "title": "Responder Status",
+      "type": "object"
+    },
+    "diagnostics": {
+      "$ref": "#/$defs/Diagnostics"
+    },
+    "applied": {
+      "const": false,
+      "title": "Applied",
+      "type": "boolean"
+    },
+    "accepted": {
+      "title": "Accepted",
+      "type": "boolean"
+    },
+    "violations": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Violations",
+      "type": "array"
+    },
+    "optimality": {
+      "const": "not_evaluated",
+      "title": "Optimality",
+      "type": "string"
+    },
+    "allocation": {
+      "$ref": "#/$defs/AllocationProjection"
+    }
+  },
+  "required": [
+    "schema_version",
+    "request_id",
+    "profile_id",
+    "decision_at",
+    "input_fingerprint",
+    "held_task_ids",
+    "unavailable_worker_ids",
+    "responder_status",
+    "diagnostics",
+    "applied",
+    "accepted",
+    "violations",
+    "optimality",
+    "allocation"
+  ],
+  "title": "CheckResponse",
+  "type": "object"
+}

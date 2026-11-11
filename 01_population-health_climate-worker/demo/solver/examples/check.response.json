@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "request_id": "whole-crew-check",
+  "profile_id": "sandline_demo_v1",
+  "decision_at": "2025-08-04T08:10:45+04:00",
+  "input_fingerprint": "4e953bb580b68a5947f86ad9d1dd7711883c3230331a0bc182d980627c162159",
+  "held_task_ids": [
+    "civil_heavy"
+  ],
+  "unavailable_worker_ids": [],
+  "responder_status": {},
+  "diagnostics": {
+    "blockers": [],
+    "free_workshop_places": 4,
+    "useful_staffing_limit": 4,
+    "missing_prerequisites": [],
+    "ineligible_workers": {
+      "C02": [
+        "qualification",
+        "readiness"
+      ],
+      "C03": [
+        "qualification",
+        "readiness"
+      ],
+      "C04": [
+        "qualification",
+        "readiness"
+      ],
+      "C09": [
+        "readiness"
+      ],
+      "C10": [
+        "readiness"
+      ],
+      "C11": [
+        "readiness"
+      ],
+      "C12": [
+        "readiness"
+      ]
+    }
+  },
+  "applied": false,
+  "accepted": false,
+  "violations": [
+    "capacity",
+    "demand",
+    "outside_candidate_pool",
+    "qualification",
+    "readiness"
+  ],
+  "optimality": "not_evaluated",
+  "allocation": {
+    "task_id": "workshop_prep",
+    "worker_ids": [],
+    "projected_assignments": {
+      "civil_heavy": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C12"
+      ],
+      "civil_light": [
+        "C13",
+        "C14"
+      ],
+      "electrical_prep": [
+        "E01",
+        "E02",
+        "E03",
+        "E04",
+        "E05",
+        "E06",
+        "E07",
+        "E08",
+        "E09",
+        "E10"
+      ],
+      "yard_receive": [
+        "L03",
+        "L04"
+      ],
+      "workshop_prep": []
+    },
+    "projected_occupancy": {
+      "workshop": [
+        "P07",
+        "P08"
+      ],
+      "shelter_a": [
+        "C02",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C12"
+      ],
+      "shelter_b": [],
+      "welfare": []
+    },
+    "projected_task_status": {
+      "civil_heavy": "held",
+      "civil_light": "active",
+      "electrical_prep": "active",
+      "yard_receive": "active",
+      "workshop_prep": "idle"
+    }
+  }
+}
