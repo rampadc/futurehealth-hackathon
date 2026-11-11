@@ -1,0 +1,1219 @@
+{
+  "$defs": {
+    "Activity": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_id": {
+          "title": "Evidence Id",
+          "type": "string"
+        },
+        "person_id": {
+          "enum": [
+            "C02",
+            "C03",
+            "C04",
+            "C05",
+            "C06",
+            "C07",
+            "C08",
+            "C09",
+            "C10",
+            "C11",
+            "C12"
+          ],
+          "title": "Person Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "work",
+            "recovery",
+            "unavailable"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "enum": [
+                "civil_heavy",
+                "workshop_prep"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Task Id"
+        },
+        "zone_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+          "title": "Zone Id",
+          "type": "string"
+        },
+        "starts_at": {
+          "format": "date-time",
+          "title": "Starts At",
+          "type": "string"
+        },
+        "ends_at": {
+          "format": "date-time",
+          "title": "Ends At",
+          "type": "string"
+        },
+        "recorded_at": {
+          "format": "date-time",
+          "title": "Recorded At",
+          "type": "string"
+        },
+        "observed": {
+          "const": true,
+          "title": "Observed",
+          "type": "boolean"
+        },
+        "source": {
+          "enum": [
+            "synthetic_fixture",
+            "human_confirmation"
+          ],
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_id",
+        "person_id",
+        "kind",
+        "task_id",
+        "zone_id",
+        "starts_at",
+        "ends_at",
+        "recorded_at",
+        "observed",
+        "source"
+      ],
+      "title": "Activity",
+      "type": "object"
+    },
+    "Cessation": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_id": {
+          "title": "Evidence Id",
+          "type": "string"
+        },
+        "confirmed_at": {
+          "format": "date-time",
+          "title": "Confirmed At",
+          "type": "string"
+        },
+        "actor_id": {
+          "const": "C01",
+          "title": "Actor Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_id",
+        "confirmed_at",
+        "actor_id"
+      ],
+      "title": "Cessation",
+      "type": "object"
+    },
+    "Confirmation": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": [
+            "confirmed",
+            "not_confirmed",
+            "unknown"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Observed At"
+        },
+        "actor_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Actor Id"
+        }
+      },
+      "required": [
+        "status",
+        "observed_at",
+        "actor_id"
+      ],
+      "title": "Confirmation",
+      "type": "object"
+    },
+    "Incident": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_id": {
+          "title": "Evidence Id",
+          "type": "string"
+        },
+        "person_id": {
+          "enum": [
+            "C02",
+            "C03",
+            "C04",
+            "C05",
+            "C06",
+            "C07",
+            "C08",
+            "C09",
+            "C10",
+            "C11",
+            "C12"
+          ],
+          "title": "Person Id",
+          "type": "string"
+        },
+        "reported_at": {
+          "format": "date-time",
+          "title": "Reported At",
+          "type": "string"
+        },
+        "reported_by": {
+          "const": "C01",
+          "title": "Reported By",
+          "type": "string"
+        },
+        "removed_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Removed At"
+        },
+        "first_aid_contacted_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "First Aid Contacted At"
+        },
+        "location_id": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Location Id"
+        },
+        "responder_id": {
+          "const": "P06",
+          "title": "Responder Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_id",
+        "person_id",
+        "reported_at",
+        "reported_by",
+        "removed_at",
+        "first_aid_contacted_at",
+        "location_id",
+        "responder_id"
+      ],
+      "title": "Incident",
+      "type": "object"
+    },
+    "Instruction": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_id": {
+          "title": "Evidence Id",
+          "type": "string"
+        },
+        "alert_id": {
+          "title": "Alert Id",
+          "type": "string"
+        },
+        "issued_at": {
+          "format": "date-time",
+          "title": "Issued At",
+          "type": "string"
+        },
+        "issued_by": {
+          "const": "P03",
+          "title": "Issued By",
+          "type": "string"
+        },
+        "acknowledged_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Acknowledged At"
+        },
+        "acknowledged_by": {
+          "anyOf": [
+            {
+              "const": "C01",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Acknowledged By"
+        }
+      },
+      "required": [
+        "evidence_id",
+        "alert_id",
+        "issued_at",
+        "issued_by",
+        "acknowledged_at",
+        "acknowledged_by"
+      ],
+      "title": "Instruction",
+      "type": "object"
+    },
+    "Interval": {
+      "additionalProperties": false,
+      "properties": {
+        "person_id": {
+          "enum": [
+            "C02",
+            "C03",
+            "C04",
+            "C05",
+            "C06",
+            "C07",
+            "C08",
+            "C09",
+            "C10",
+            "C11",
+            "C12"
+          ],
+          "title": "Person Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "work",
+            "recovery",
+            "unavailable"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "const": "workshop_prep",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Task Id"
+        },
+        "zone_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+          "title": "Zone Id",
+          "type": "string"
+        },
+        "starts_at": {
+          "format": "date-time",
+          "title": "Starts At",
+          "type": "string"
+        },
+        "ends_at": {
+          "format": "date-time",
+          "title": "Ends At",
+          "type": "string"
+        },
+        "requires_revalidation": {
+          "title": "Requires Revalidation",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "person_id",
+        "kind",
+        "task_id",
+        "zone_id",
+        "starts_at",
+        "ends_at",
+        "requires_revalidation"
+      ],
+      "title": "Interval",
+      "type": "object"
+    },
+    "Location": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "capacity": {
+          "maximum": 10000,
+          "minimum": 0,
+          "title": "Capacity",
+          "type": "integer"
+        },
+        "capabilities": {
+          "items": {
+            "enum": [
+              "exposed_civil",
+              "exposed_electrical",
+              "yard",
+              "light_work",
+              "cooled_recovery",
+              "first_aid_support"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Capabilities",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "capacity",
+        "capabilities"
+      ],
+      "title": "Location",
+      "type": "object"
+    },
+    "PlanningOptions": {
+      "additionalProperties": false,
+      "properties": {
+        "policy_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Policy Id"
+        },
+        "starts_at": {
+          "format": "date-time",
+          "title": "Starts At",
+          "type": "string"
+        },
+        "horizon_minutes": {
+          "maximum": 120,
+          "minimum": 1,
+          "title": "Horizon Minutes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "starts_at",
+        "horizon_minutes"
+      ],
+      "title": "PlanningOptions",
+      "type": "object"
+    },
+    "ReadinessConfirmation": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": [
+            "ready",
+            "not_ready"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "task_id": {
+          "const": "workshop_prep",
+          "title": "Task Id",
+          "type": "string"
+        },
+        "confirmed_by": {
+          "title": "Confirmed By",
+          "type": "string"
+        },
+        "confirmed_at": {
+          "format": "date-time",
+          "title": "Confirmed At",
+          "type": "string"
+        },
+        "valid_until": {
+          "format": "date-time",
+          "title": "Valid Until",
+          "type": "string"
+        },
+        "evidence_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Evidence Id",
+          "type": "string"
+        },
+        "basis": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Basis",
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "synthetic_fixture",
+            "human_confirmation"
+          ],
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "task_id",
+        "confirmed_by",
+        "confirmed_at",
+        "valid_until",
+        "evidence_id",
+        "basis",
+        "source"
+      ],
+      "title": "ReadinessConfirmation",
+      "type": "object"
+    },
+    "Reading": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_id": {
+          "title": "Evidence Id",
+          "type": "string"
+        },
+        "sensor_id": {
+          "enum": [
+            "t1",
+            "t2",
+            "t3"
+          ],
+          "title": "Sensor Id",
+          "type": "string"
+        },
+        "zone_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+          "title": "Zone Id",
+          "type": "string"
+        },
+        "twl": {
+          "exclusiveMaximum": 500,
+          "exclusiveMinimum": 0,
+          "title": "Twl",
+          "type": "number"
+        },
+        "unit": {
+          "const": "W/m²",
+          "title": "Unit",
+          "type": "string"
+        },
+        "quality": {
+          "enum": [
+            "valid",
+            "invalid"
+          ],
+          "title": "Quality",
+          "type": "string"
+        },
+        "measured_at": {
+          "format": "date-time",
+          "title": "Measured At",
+          "type": "string"
+        },
+        "received_at": {
+          "format": "date-time",
+          "title": "Received At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_id",
+        "sensor_id",
+        "zone_id",
+        "twl",
+        "unit",
+        "quality",
+        "measured_at",
+        "received_at"
+      ],
+      "title": "Reading",
+      "type": "object"
+    },
+    "Recovery": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_id": {
+          "title": "Evidence Id",
+          "type": "string"
+        },
+        "recorded_at": {
+          "format": "date-time",
+          "title": "Recorded At",
+          "type": "string"
+        },
+        "actor_id": {
+          "const": "C01",
+          "title": "Actor Id",
+          "type": "string"
+        },
+        "person_ids": {
+          "items": {
+            "enum": [
+              "C02",
+              "C03",
+              "C04",
+              "C05",
+              "C06",
+              "C07",
+              "C08",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "type": "string"
+          },
+          "title": "Person Ids",
+          "type": "array"
+        },
+        "zone_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+          "title": "Zone Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_id",
+        "recorded_at",
+        "actor_id",
+        "person_ids",
+        "zone_id"
+      ],
+      "title": "Recovery",
+      "type": "object"
+    },
+    "RestartEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "proposed_at": {
+          "format": "date-time",
+          "title": "Proposed At",
+          "type": "string"
+        },
+        "task_id": {
+          "const": "civil_heavy",
+          "title": "Task Id",
+          "type": "string"
+        },
+        "permit": {
+          "$ref": "#/$defs/Confirmation"
+        },
+        "personnel": {
+          "$ref": "#/$defs/Confirmation"
+        },
+        "recovery": {
+          "$ref": "#/$defs/Confirmation"
+        },
+        "water": {
+          "$ref": "#/$defs/Confirmation"
+        },
+        "crew_readiness": {
+          "$ref": "#/$defs/Confirmation"
+        }
+      },
+      "required": [
+        "proposed_at",
+        "task_id",
+        "permit",
+        "personnel",
+        "recovery",
+        "water",
+        "crew_readiness"
+      ],
+      "title": "RestartEvidence",
+      "type": "object"
+    },
+    "Snapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "readings": {
+          "items": {
+            "$ref": "#/$defs/Reading"
+          },
+          "title": "Readings",
+          "type": "array"
+        },
+        "sensor_status": {
+          "additionalProperties": {
+            "enum": [
+              "serviceable",
+              "failed",
+              "unknown"
+            ],
+            "type": "string"
+          },
+          "maxProperties": 3,
+          "minProperties": 3,
+          "propertyNames": {
+            "enum": [
+              "t1",
+              "t2",
+              "t3"
+            ]
+          },
+          "title": "Sensor Status",
+          "type": "object"
+        },
+        "held_task_ids": {
+          "items": {
+            "enum": [
+              "civil_heavy",
+              "civil_light",
+              "workshop_prep"
+            ],
+            "type": "string"
+          },
+          "title": "Held Task Ids",
+          "type": "array"
+        },
+        "instruction": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Instruction"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cessation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Cessation"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "recovery": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Recovery"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "workers": {
+          "items": {
+            "$ref": "#/$defs/Worker"
+          },
+          "maxItems": 11,
+          "minItems": 11,
+          "title": "Workers",
+          "type": "array"
+        },
+        "activity_history": {
+          "items": {
+            "$ref": "#/$defs/Activity"
+          },
+          "title": "Activity History",
+          "type": "array"
+        },
+        "workshop": {
+          "$ref": "#/$defs/Workshop"
+        },
+        "zone_windows": {
+          "items": {
+            "$ref": "#/$defs/ZoneWindow"
+          },
+          "title": "Zone Windows",
+          "type": "array"
+        },
+        "task_windows": {
+          "items": {
+            "$ref": "#/$defs/TaskWindow"
+          },
+          "title": "Task Windows",
+          "type": "array"
+        },
+        "incidents": {
+          "items": {
+            "$ref": "#/$defs/Incident"
+          },
+          "title": "Incidents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "readings",
+        "sensor_status",
+        "held_task_ids",
+        "instruction",
+        "cessation",
+        "recovery",
+        "workers",
+        "activity_history",
+        "workshop",
+        "zone_windows",
+        "task_windows",
+        "incidents"
+      ],
+      "title": "Snapshot",
+      "type": "object"
+    },
+    "StaffingDemand": {
+      "additionalProperties": false,
+      "properties": {
+        "minimum": {
+          "const": 1,
+          "title": "Minimum",
+          "type": "integer"
+        },
+        "maximum": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Null means the useful staffing limit is unknown.",
+          "title": "Maximum"
+        }
+      },
+      "required": [
+        "minimum",
+        "maximum"
+      ],
+      "title": "StaffingDemand",
+      "type": "object"
+    },
+    "TaskWindow": {
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "const": "workshop_prep",
+          "title": "Task Id",
+          "type": "string"
+        },
+        "starts_at": {
+          "format": "date-time",
+          "title": "Starts At",
+          "type": "string"
+        },
+        "ends_at": {
+          "format": "date-time",
+          "title": "Ends At",
+          "type": "string"
+        },
+        "permit_status": {
+          "enum": [
+            "valid",
+            "unavailable",
+            "unknown"
+          ],
+          "title": "Permit Status",
+          "type": "string"
+        },
+        "resource_status": {
+          "enum": [
+            "available",
+            "unavailable",
+            "unknown"
+          ],
+          "title": "Resource Status",
+          "type": "string"
+        },
+        "supervision_status": {
+          "enum": [
+            "available",
+            "unavailable",
+            "unknown"
+          ],
+          "title": "Supervision Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "task_id",
+        "starts_at",
+        "ends_at",
+        "permit_status",
+        "resource_status",
+        "supervision_status"
+      ],
+      "title": "TaskWindow",
+      "type": "object"
+    },
+    "TimingPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "initial_recovery_minutes": {
+          "maximum": 120,
+          "minimum": 0,
+          "title": "Initial Recovery Minutes",
+          "type": "integer"
+        },
+        "max_work_minutes": {
+          "maximum": 120,
+          "minimum": 1,
+          "title": "Max Work Minutes",
+          "type": "integer"
+        },
+        "between_work_recovery_minutes": {
+          "maximum": 120,
+          "minimum": 1,
+          "title": "Between Work Recovery Minutes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "initial_recovery_minutes",
+        "max_work_minutes",
+        "between_work_recovery_minutes"
+      ],
+      "title": "TimingPolicy",
+      "type": "object"
+    },
+    "Worker": {
+      "additionalProperties": false,
+      "properties": {
+        "person_id": {
+          "enum": [
+            "C02",
+            "C03",
+            "C04",
+            "C05",
+            "C06",
+            "C07",
+            "C08",
+            "C09",
+            "C10",
+            "C11",
+            "C12"
+          ],
+          "title": "Person Id",
+          "type": "string"
+        },
+        "readiness": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReadinessConfirmation"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "availability": {
+          "enum": [
+            "available",
+            "unavailable"
+          ],
+          "title": "Availability",
+          "type": "string"
+        },
+        "location_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+          "title": "Location Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "person_id",
+        "readiness",
+        "availability",
+        "location_id"
+      ],
+      "title": "Worker",
+      "type": "object"
+    },
+    "Workshop": {
+      "additionalProperties": false,
+      "properties": {
+        "staffing_demand": {
+          "$ref": "#/$defs/StaffingDemand"
+        },
+        "permit_status": {
+          "enum": [
+            "valid",
+            "unavailable",
+            "unknown"
+          ],
+          "title": "Permit Status",
+          "type": "string"
+        },
+        "resource_status": {
+          "enum": [
+            "available",
+            "unavailable",
+            "unknown"
+          ],
+          "title": "Resource Status",
+          "type": "string"
+        },
+        "supervision_status": {
+          "enum": [
+            "available",
+            "unavailable",
+            "unknown"
+          ],
+          "title": "Supervision Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "staffing_demand",
+        "permit_status",
+        "resource_status",
+        "supervision_status"
+      ],
+      "title": "Workshop",
+      "type": "object"
+    },
+    "ZoneWindow": {
+      "additionalProperties": false,
+      "properties": {
+        "zone_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+          "title": "Zone Id",
+          "type": "string"
+        },
+        "starts_at": {
+          "format": "date-time",
+          "title": "Starts At",
+          "type": "string"
+        },
+        "ends_at": {
+          "format": "date-time",
+          "title": "Ends At",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "available",
+            "unavailable",
+            "unknown"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "fixed_occupant_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Fixed Occupant Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "zone_id",
+        "starts_at",
+        "ends_at",
+        "status",
+        "fixed_occupant_ids"
+      ],
+      "title": "ZoneWindow",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "2.1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "request_id": {
+      "maxLength": 100,
+      "minLength": 1,
+      "title": "Request Id",
+      "type": "string"
+    },
+    "profile_id": {
+      "const": "sandline_operational_demo_v1",
+      "title": "Profile Id",
+      "type": "string"
+    },
+    "snapshot_id": {
+      "maxLength": 100,
+      "minLength": 1,
+      "title": "Snapshot Id",
+      "type": "string"
+    },
+    "decision_at": {
+      "format": "date-time",
+      "title": "Decision At",
+      "type": "string"
+    },
+    "locations": {
+      "items": {
+        "$ref": "#/$defs/Location"
+      },
+      "maxItems": 32,
+      "minItems": 1,
+      "title": "Locations",
+      "type": "array"
+    },
+    "task_locations": {
+      "additionalProperties": {
+        "maxLength": 100,
+        "minLength": 1,
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+        "type": "string"
+      },
+      "maxProperties": 3,
+      "minProperties": 3,
+      "propertyNames": {
+        "enum": [
+          "civil_heavy",
+          "civil_light",
+          "workshop_prep"
+        ]
+      },
+      "title": "Task Locations",
+      "type": "object"
+    },
+    "snapshot": {
+      "$ref": "#/$defs/Snapshot"
+    },
+    "planning": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PlanningOptions"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "restart": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RestartEvidence"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "timing_policy": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TimingPolicy"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "proposed_intervals": {
+      "items": {
+        "$ref": "#/$defs/Interval"
+      },
+      "title": "Proposed Intervals",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "request_id",
+    "profile_id",
+    "snapshot_id",
+    "decision_at",
+    "locations",
+    "task_locations",
+    "snapshot",
+    "planning",
+    "restart",
+    "proposed_intervals"
+  ],
+  "title": "CheckRequest",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

@@ -1,0 +1,775 @@
+{
+  "synthetic": true,
+  "classification": "fictional_demo_assumption",
+  "assumptions": [
+    {
+      "id": "a_base_replay",
+      "description": "The common base is scenario 02 events e01\u2013e05 through 08:04, with the civil heavy task still held and C02\u2013C12 in shelter_a recovery."
+    },
+    {
+      "id": "a_immediate_suitability",
+      "description": "A true readiness fact is fictional confirmation of immediate suitability for workshop_prep; absent readiness is unknown and is not illness."
+    },
+    {
+      "id": "a_workshop",
+      "description": "The six-seat workshop starts with P07 and P08; additional fixed occupants reduce free seats."
+    },
+    {
+      "id": "a_supervision",
+      "description": "C01 may oversee civil_light and workshop_prep concurrently only while the approved shared_external_oversight fact is available, from outside the workshop."
+    },
+    {
+      "id": "a_selection",
+      "description": "When eligible workers exceed the applicable seat or demand limit, lower person IDs are selected solely for deterministic fixture output."
+    },
+    {
+      "id": "a_hold",
+      "description": "A later valid reading never releases the civil_heavy hold; the fixture authorizes no restart."
+    },
+    {
+      "id": "a_welfare",
+      "description": "A symptom_report unavailability removes C08 from assignment and shelter recovery into welfare, with P06 contacted; no diagnosis or treatment completion is implied."
+    }
+  ],
+  "snapshots": [
+    {
+      "id": "recovery_0804",
+      "decision_at": "2025-08-04T08:04:00+04:00",
+      "facts": []
+    },
+    {
+      "id": "canonical_081030",
+      "decision_at": "2025-08-04T08:10:30+04:00",
+      "facts": [
+        {
+          "id": "sf_permit_valid",
+          "synthetic": true,
+          "classification": "fictional_demo_assumption",
+          "occurred_at": "2025-08-04T08:09:00+04:00",
+          "recorded_at": "2025-08-04T08:09:00+04:00",
+          "actor_id": "P04",
+          "kind": "permit",
+          "payload": {
+            "permit_id": "permit_workshop_01",
+            "task_id": "workshop_prep",
+            "status": "valid"
+          }
+        },
+        {
+          "id": "sf_resources_available",
+          "synthetic": true,
+          "classification": "fictional_demo_assumption",
+          "occurred_at": "2025-08-04T08:09:00+04:00",
+          "recorded_at": "2025-08-04T08:09:00+04:00",
+          "actor_id": "P03",
+          "kind": "resources",
+          "payload": {
+            "task_id": "workshop_prep",
+            "available": true
+          }
+        },
+        {
+          "id": "sf_demand_four",
+          "synthetic": true,
+          "classification": "fictional_demo_assumption",
+          "occurred_at": "2025-08-04T08:09:00+04:00",
+          "recorded_at": "2025-08-04T08:09:00+04:00",
+          "actor_id": "C01",
+          "kind": "demand",
+          "payload": {
+            "task_id": "workshop_prep",
+            "min_workers": 1,
+            "max_workers": 4
+          }
+        },
+        {
+          "id": "sf_shared_supervision",
+          "synthetic": true,
+          "classification": "fictional_demo_assumption",
+          "occurred_at": "2025-08-04T08:09:00+04:00",
+          "recorded_at": "2025-08-04T08:09:00+04:00",
+          "actor_id": "P02",
+          "kind": "supervision",
+          "payload": {
+            "supervisor_id": "C01",
+            "task_ids": [
+              "civil_light",
+              "workshop_prep"
+            ],
+            "approved_by": "P02",
+            "available": true,
+            "occupies_workshop": false,
+            "mode": "shared_external_oversight"
+          }
+        },
+        {
+          "id": "sf_ready_four",
+          "synthetic": true,
+          "classification": "fictional_demo_assumption",
+          "occurred_at": "2025-08-04T08:10:30+04:00",
+          "recorded_at": "2025-08-04T08:10:30+04:00",
+          "actor_id": "C01",
+          "kind": "readiness",
+          "payload": {
+            "person_ids": [
+              "C05",
+              "C06",
+              "C07",
+              "C08"
+            ],
+            "task_id": "workshop_prep",
+            "ready": true
+          }
+        }
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "id": "readiness_missing",
+      "snapshot_id": "recovery_0804",
+      "decision_at": "2025-08-04T08:04:00+04:00",
+      "facts": [],
+      "proposal": [],
+      "expected": {
+        "accepted": true,
+        "assignees": [],
+        "recovery": [
+          "C02",
+          "C03",
+          "C04",
+          "C05",
+          "C06",
+          "C07",
+          "C08",
+          "C09",
+          "C10",
+          "C11",
+          "C12"
+        ],
+        "workshop_occupants": [
+          "P07",
+          "P08"
+        ],
+        "blockers": [
+          "readiness",
+          "permit",
+          "resources",
+          "supervision",
+          "demand"
+        ],
+        "unavailable": []
+      }
+    },
+    {
+      "id": "canonical",
+      "snapshot_id": "canonical_081030",
+      "decision_at": "2025-08-04T08:10:45+04:00",
+      "facts": [],
+      "proposal": [
+        "C05",
+        "C06",
+        "C07",
+        "C08"
+      ],
+      "expected": {
+        "accepted": true,
+        "assignees": [
+          "C05",
+          "C06",
+          "C07",
+          "C08"
+        ],
+        "recovery": [
+          "C02",
+          "C03",
+          "C04",
+          "C09",
+          "C10",
+          "C11",
+          "C12"
+        ],
+        "workshop_occupants": [
+          "P07",
+          "P08",
+          "C05",
+          "C06",
+          "C07",
+          "C08"
+        ],
+        "blockers": [],
+        "unavailable": []
+      }
+    },
+    {
+      "id": "two_ready",
+      "snapshot_id": "canonical_081030",
+      "decision_at": "2025-08-04T08:10:45+04:00",
+      "facts": [
+        {
+          "id": "cf_two_not_ready",
+          "synthetic": true,
+          "classification": "fictional_demo_assumption",
+          "occurred_at": "2025-08-04T08:10:40+04:00",
+          "recorded_at": "2025-08-04T08:10:40+04:00",
+          "actor_id": "C01",
+          "kind": "readiness",
+          "payload": {
+            "person_ids": [
+              "C07",
+              "C08"
+            ],
+            "task_id": "workshop_prep",
+            "ready": false
+          }
+        }
+      ],
+      "proposal": [
+        "C05",
+        "C06"
+      ],
+      "expected": {
+        "accepted": true,
+        "assignees": [
+          "C05",
+          "C06"
+        ],
+        "recovery": [
+          "C02",
+          "C03",
+          "C04",
+          "C07",
+          "C08",
+          "C09",
+          "C10",
+          "C11",
+          "C12"
+        ],
+        "workshop_occupants": [
+          "P07",
+          "P08",
+          "C05",
+          "C06"
+        ],
+        "blockers": [
+          "readiness"
+        ],
+        "unavailable": []
+      }
+    },
+    {
+      "id": "eight_ready",
+      "snapshot_id": "canonical_081030",
+      "decision_at": "2025-08-04T08:10:45+04:00",
+      "facts": [
+        {
+          "id": "cf_eight_ready",
+          "synthetic": true,
+          "classification": "fictional_demo_assumption",
+          "occurred_at": "2025-08-04T08:10:40+04:00",
+          "recorded_at": "2025-08-04T08:10:40+04:00",
+          "actor_id": "C01",
+          "kind": "readiness",
+          "payload": {
+            "person_ids": [
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "task_id": "workshop_prep",
+            "ready": true
+          }
+        }
+      ],
+      "proposal": [
+        "C05",
+        "C06",
+        "C07",
+        "C08"
+      ],
+      "expected": {
+        "accepted": true,
+        "assignees": [
+          "C05",
+          "C06",
+          "C07",
+          "C08"
+        ],
+        "recovery": [
+          "C02",
+          "C03",
+          "C04",
+          "C09",
+          "C10",
+          "C11",
+          "C12"
+        ],
+        "workshop_occupants": [
+          "P07",
+          "P08",
+          "C05",
+          "C06",
+          "C07",
+          "C08"
+        ],
+        "blockers": [
+          "capacity",
+          "demand"
+        ],
+        "unavailable": []
+      }
+    },
+    {
+      "id": "extra_occupant",
+      "snapshot_id": "canonical_081030",
+      "decision_at": "2025-08-04T08:10:45+04:00",
+      "facts": [
+        {
+          "id": "cf_extra_occupant",
+          "synthetic": true,
+          "classification": "fictional_demo_assumption",
+          "occurred_at": "2025-08-04T08:10:40+04:00",
+          "recorded_at": "2025-08-04T08:10:40+04:00",
+          "actor_id": "P03",
+          "kind": "fixed_occupant",
+          "payload": {
+            "person_id": "P01",
+            "zone_id": "workshop"
+          }
+        }
+      ],
+      "proposal": [
+        "C05",
+        "C06",
+        "C07"
+      ],
+      "expected": {
+        "accepted": true,
+        "assignees": [
+          "C05",
+          "C06",
+          "C07"
+        ],
+        "recovery": [
+          "C02",
+          "C03",
+          "C04",
+          "C08",
+          "C09",
+          "C10",
+          "C11",
+          "C12"
+        ],
+        "workshop_occupants": [
+          "P07",
+          "P08",
+          "P01",
+          "C05",
+          "C06",
+          "C07"
+        ],
+        "blockers": [
+          "capacity"
+        ],
+        "unavailable": []
+      }
+    },
+    {
+      "id": "demand_two",
+      "snapshot_id": "canonical_081030",
+      "decision_at": "2025-08-04T08:10:45+04:00",
+      "facts": [
+        {
+          "id": "cf_demand_two",
+          "synthetic": true,
+          "classification": "fictional_demo_assumption",
+          "occurred_at": "2025-08-04T08:10:40+04:00",
+          "recorded_at": "2025-08-04T08:10:40+04:00",
+          "actor_id": "C01",
+          "kind": "demand",
+          "payload": {
+            "task_id": "workshop_prep",
+            "min_workers": 1,
+            "max_workers": 2
+          }
+        }
+      ],
+      "proposal": [
+        "C05",
+        "C06"
+      ],
+      "expected": {
+        "accepted": true,
+        "assignees": [
+          "C05",
+          "C06"
+        ],
+        "recovery": [
+          "C02",
+          "C03",
+          "C04",
+          "C07",
+          "C08",
+          "C09",
+          "C10",
+          "C11",
+          "C12"
+        ],
+        "workshop_occupants": [
+          "P07",
+          "P08",
+          "C05",
+          "C06"
+        ],
+        "blockers": [
+          "demand"
+        ],
+        "unavailable": []
+      }
+    },
+    {
+      "id": "permit_unavailable",
+      "snapshot_id": "canonical_081030",
+      "decision_at": "2025-08-04T08:10:45+04:00",
+      "facts": [
+        {
+          "id": "cf_permit_unavailable",
+          "synthetic": true,
+          "classification": "fictional_demo_assumption",
+          "occurred_at": "2025-08-04T08:10:40+04:00",
+          "recorded_at": "2025-08-04T08:10:40+04:00",
+          "actor_id": "P04",
+          "kind": "permit",
+          "payload": {
+            "permit_id": "permit_workshop_01",
+            "task_id": "workshop_prep",
+            "status": "unavailable"
+          }
+        }
+      ],
+      "proposal": [],
+      "expected": {
+        "accepted": true,
+        "assignees": [],
+        "recovery": [
+          "C02",
+          "C03",
+          "C04",
+          "C05",
+          "C06",
+          "C07",
+          "C08",
+          "C09",
+          "C10",
+          "C11",
+          "C12"
+        ],
+        "workshop_occupants": [
+          "P07",
+          "P08"
+        ],
+        "blockers": [
+          "permit"
+        ],
+        "unavailable": []
+      }
+    },
+    {
+      "id": "supervision_unavailable",
+      "snapshot_id": "canonical_081030",
+      "decision_at": "2025-08-04T08:10:45+04:00",
+      "facts": [
+        {
+          "id": "cf_supervision_unavailable",
+          "synthetic": true,
+          "classification": "fictional_demo_assumption",
+          "occurred_at": "2025-08-04T08:10:40+04:00",
+          "recorded_at": "2025-08-04T08:10:40+04:00",
+          "actor_id": "P02",
+          "kind": "supervision",
+          "payload": {
+            "supervisor_id": "C01",
+            "task_ids": [
+              "civil_light",
+              "workshop_prep"
+            ],
+            "approved_by": "P02",
+            "available": false,
+            "occupies_workshop": false,
+            "mode": "shared_external_oversight"
+          }
+        }
+      ],
+      "proposal": [],
+      "expected": {
+        "accepted": true,
+        "assignees": [],
+        "recovery": [
+          "C02",
+          "C03",
+          "C04",
+          "C05",
+          "C06",
+          "C07",
+          "C08",
+          "C09",
+          "C10",
+          "C11",
+          "C12"
+        ],
+        "workshop_occupants": [
+          "P07",
+          "P08"
+        ],
+        "blockers": [
+          "supervision"
+        ],
+        "unavailable": []
+      }
+    },
+    {
+      "id": "symptom_no_substitute",
+      "snapshot_id": "canonical_081030",
+      "decision_at": "2025-08-04T08:10:45+04:00",
+      "facts": [
+        {
+          "id": "cf_symptom_no_substitute",
+          "synthetic": true,
+          "classification": "fictional_demo_assumption",
+          "occurred_at": "2025-08-04T08:10:40+04:00",
+          "recorded_at": "2025-08-04T08:10:40+04:00",
+          "actor_id": "C01",
+          "kind": "unavailability",
+          "payload": {
+            "person_id": "C08",
+            "zone_id": "welfare",
+            "responder_id": "P06",
+            "responder_status": "contacted",
+            "reason": "symptom_report"
+          }
+        }
+      ],
+      "proposal": [
+        "C05",
+        "C06",
+        "C07"
+      ],
+      "expected": {
+        "accepted": true,
+        "assignees": [
+          "C05",
+          "C06",
+          "C07"
+        ],
+        "recovery": [
+          "C02",
+          "C03",
+          "C04",
+          "C09",
+          "C10",
+          "C11",
+          "C12"
+        ],
+        "workshop_occupants": [
+          "P07",
+          "P08",
+          "C05",
+          "C06",
+          "C07"
+        ],
+        "blockers": [
+          "readiness",
+          "unavailable"
+        ],
+        "unavailable": [
+          "C08"
+        ]
+      }
+    },
+    {
+      "id": "symptom_substitute",
+      "snapshot_id": "canonical_081030",
+      "decision_at": "2025-08-04T08:10:45+04:00",
+      "facts": [
+        {
+          "id": "cf_symptom_substitute",
+          "synthetic": true,
+          "classification": "fictional_demo_assumption",
+          "occurred_at": "2025-08-04T08:10:40+04:00",
+          "recorded_at": "2025-08-04T08:10:40+04:00",
+          "actor_id": "C01",
+          "kind": "unavailability",
+          "payload": {
+            "person_id": "C08",
+            "zone_id": "welfare",
+            "responder_id": "P06",
+            "responder_status": "contacted",
+            "reason": "symptom_report"
+          }
+        },
+        {
+          "id": "cf_substitute_ready",
+          "synthetic": true,
+          "classification": "fictional_demo_assumption",
+          "occurred_at": "2025-08-04T08:10:40+04:00",
+          "recorded_at": "2025-08-04T08:10:40+04:00",
+          "actor_id": "C01",
+          "kind": "readiness",
+          "payload": {
+            "person_ids": [
+              "C09"
+            ],
+            "task_id": "workshop_prep",
+            "ready": true
+          }
+        }
+      ],
+      "proposal": [
+        "C05",
+        "C06",
+        "C07",
+        "C09"
+      ],
+      "expected": {
+        "accepted": true,
+        "assignees": [
+          "C05",
+          "C06",
+          "C07",
+          "C09"
+        ],
+        "recovery": [
+          "C02",
+          "C03",
+          "C04",
+          "C10",
+          "C11",
+          "C12"
+        ],
+        "workshop_occupants": [
+          "P07",
+          "P08",
+          "C05",
+          "C06",
+          "C07",
+          "C09"
+        ],
+        "blockers": [
+          "unavailable"
+        ],
+        "unavailable": [
+          "C08"
+        ]
+      }
+    },
+    {
+      "id": "whole_crew",
+      "snapshot_id": "canonical_081030",
+      "decision_at": "2025-08-04T08:10:45+04:00",
+      "facts": [],
+      "proposal": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C12",
+        "C13",
+        "C14"
+      ],
+      "expected": {
+        "accepted": false,
+        "assignees": [],
+        "recovery": [
+          "C02",
+          "C03",
+          "C04",
+          "C05",
+          "C06",
+          "C07",
+          "C08",
+          "C09",
+          "C10",
+          "C11",
+          "C12"
+        ],
+        "workshop_occupants": [
+          "P07",
+          "P08"
+        ],
+        "blockers": [
+          "capacity",
+          "qualification",
+          "readiness",
+          "outside_candidate_pool",
+          "demand"
+        ],
+        "unavailable": []
+      }
+    },
+    {
+      "id": "improved_reading",
+      "snapshot_id": "canonical_081030",
+      "decision_at": "2025-08-04T08:10:45+04:00",
+      "facts": [
+        {
+          "id": "cf_improved_reading",
+          "synthetic": true,
+          "classification": "fictional_demo_assumption",
+          "occurred_at": "2025-08-04T08:10:40+04:00",
+          "recorded_at": "2025-08-04T08:10:40+04:00",
+          "actor_id": "P03",
+          "kind": "reading",
+          "payload": {
+            "zone_id": "civil_exposed",
+            "sensor_id": "t1",
+            "twl": 175,
+            "unit": "W/m\u00b2",
+            "quality": "valid"
+          }
+        }
+      ],
+      "proposal": [
+        "C05",
+        "C06",
+        "C07",
+        "C08"
+      ],
+      "expected": {
+        "accepted": true,
+        "assignees": [
+          "C05",
+          "C06",
+          "C07",
+          "C08"
+        ],
+        "recovery": [
+          "C02",
+          "C03",
+          "C04",
+          "C09",
+          "C10",
+          "C11",
+          "C12"
+        ],
+        "workshop_occupants": [
+          "P07",
+          "P08",
+          "C05",
+          "C06",
+          "C07",
+          "C08"
+        ],
+        "blockers": [],
+        "unavailable": []
+      }
+    }
+  ]
+}

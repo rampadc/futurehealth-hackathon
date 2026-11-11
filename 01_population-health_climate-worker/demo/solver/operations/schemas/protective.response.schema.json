@@ -1,0 +1,161 @@
+{
+  "$defs": {
+    "Action": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "owner_id": {
+          "title": "Owner Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "required",
+            "overdue"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "due_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Due At"
+        },
+        "person_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Person Ids",
+          "type": "array"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "policy_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Policy Ids",
+          "type": "array"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "owner_id",
+        "status",
+        "due_at",
+        "person_ids",
+        "evidence_ids",
+        "policy_ids",
+        "message"
+      ],
+      "title": "Action",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "2.1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "request_id": {
+      "title": "Request Id",
+      "type": "string"
+    },
+    "snapshot_id": {
+      "title": "Snapshot Id",
+      "type": "string"
+    },
+    "decision_at": {
+      "format": "date-time",
+      "title": "Decision At",
+      "type": "string"
+    },
+    "profile_id": {
+      "const": "sandline_operational_demo_v1",
+      "title": "Profile Id",
+      "type": "string"
+    },
+    "policy_versions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Policy Versions",
+      "type": "array"
+    },
+    "evidence_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Evidence Ids",
+      "type": "array"
+    },
+    "input_fingerprint": {
+      "title": "Input Fingerprint",
+      "type": "string"
+    },
+    "applied": {
+      "const": false,
+      "title": "Applied",
+      "type": "boolean"
+    },
+    "actions": {
+      "items": {
+        "$ref": "#/$defs/Action"
+      },
+      "title": "Actions",
+      "type": "array"
+    },
+    "excluded_worker_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Excluded Worker Ids",
+      "type": "array"
+    },
+    "planning_blockers": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Planning Blockers",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "request_id",
+    "snapshot_id",
+    "decision_at",
+    "profile_id",
+    "policy_versions",
+    "evidence_ids",
+    "input_fingerprint",
+    "applied",
+    "actions",
+    "excluded_worker_ids",
+    "planning_blockers"
+  ],
+  "title": "ProtectiveResponse",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

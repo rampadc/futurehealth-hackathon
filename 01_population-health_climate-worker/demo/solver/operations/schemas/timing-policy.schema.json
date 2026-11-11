@@ -1,0 +1,39 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "maxLength": 100,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+      "title": "Id",
+      "type": "string"
+    },
+    "initial_recovery_minutes": {
+      "maximum": 120,
+      "minimum": 0,
+      "title": "Initial Recovery Minutes",
+      "type": "integer"
+    },
+    "max_work_minutes": {
+      "maximum": 120,
+      "minimum": 1,
+      "title": "Max Work Minutes",
+      "type": "integer"
+    },
+    "between_work_recovery_minutes": {
+      "maximum": 120,
+      "minimum": 1,
+      "title": "Between Work Recovery Minutes",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "id",
+    "initial_recovery_minutes",
+    "max_work_minutes",
+    "between_work_recovery_minutes"
+  ],
+  "title": "TimingPolicy",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}
