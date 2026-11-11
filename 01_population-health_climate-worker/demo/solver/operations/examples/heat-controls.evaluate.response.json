@@ -1,0 +1,85 @@
+{
+  "schema_version": "2.1",
+  "request_id": "canonical_timed",
+  "snapshot_id": "synthetic-canonical_timed",
+  "decision_at": "2025-08-04T08:11:00+04:00",
+  "profile_id": "sandline_operational_demo_v1",
+  "policy_versions": [
+    "sandline-heat-rules-v1",
+    "demo-work-rest-v1"
+  ],
+  "evidence_ids": [
+    "02_heat_alert_response_e01",
+    "02_heat_alert_response_e02",
+    "02_heat_alert_response_e04",
+    "02_heat_alert_response_e05",
+    "cooled-C02",
+    "cooled-C03",
+    "cooled-C04",
+    "cooled-C05",
+    "cooled-C06",
+    "cooled-C07",
+    "cooled-C08",
+    "cooled-C09",
+    "cooled-C10",
+    "cooled-C11",
+    "cooled-C12",
+    "readiness-C05",
+    "readiness-C06",
+    "readiness-C07",
+    "readiness-C08"
+  ],
+  "input_fingerprint": "53155d92e2f1debbe6e4b2ae25bb7cd7bd193cc644bedebf4dd0dda82c5a80c6",
+  "applied": false,
+  "controls": [
+    {
+      "task_id": "civil_heavy",
+      "state": "held",
+      "reason_codes": [
+        "reading_stale"
+      ],
+      "policy_ids": [
+        "p_stale"
+      ],
+      "evidence_ids": []
+    },
+    {
+      "task_id": "civil_light",
+      "state": "clearance_blocked",
+      "reason_codes": [
+        "reading_stale"
+      ],
+      "policy_ids": [
+        "p_stale"
+      ],
+      "evidence_ids": []
+    },
+    {
+      "task_id": "workshop_prep",
+      "state": "no_new_hold",
+      "reason_codes": [],
+      "policy_ids": [],
+      "evidence_ids": []
+    }
+  ],
+  "held_task_ids": [
+    "civil_heavy"
+  ],
+  "clearance_blockers": [
+    "reading_stale"
+  ],
+  "actions": [
+    {
+      "code": "gather_fresh_local_reading",
+      "owner_id": "P03",
+      "status": "required",
+      "due_at": null,
+      "person_ids": [],
+      "evidence_ids": [],
+      "policy_ids": [
+        "p_stale"
+      ],
+      "message": "Obtain a valid, fresh TWL reading from the t1 monitor at the civil heavy work location."
+    }
+  ]
+}

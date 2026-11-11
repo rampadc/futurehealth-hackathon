@@ -1,0 +1,6317 @@
+{
+  "verified_at": "2026-11-10T15:24:41+11:00",
+  "profile_id": "sandline_demo_v1",
+  "cases": [
+    {
+      "id": "readiness_missing",
+      "label": "Recovery confirmed, readiness unknown",
+      "description": "No productive assignment until the relevant prerequisites are confirmed.",
+      "solve_request": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-readiness_missing",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:04:00+04:00",
+        "workers": [
+          {
+            "person_id": "C02",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C03",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C04",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C05",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C06",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C07",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C08",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C09",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C10",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C11",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C12",
+            "readiness": "unknown",
+            "availability": "available"
+          }
+        ],
+        "workshop": {
+          "fixed_occupant_ids": [
+            "P07",
+            "P08"
+          ],
+          "staffing_demand": {
+            "minimum": 1,
+            "maximum": null
+          },
+          "permit_status": "unknown",
+          "resource_status": "unknown",
+          "supervision_status": "unknown"
+        },
+        "incidents": [],
+        "civil_measurement": null
+      },
+      "solve_response": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-readiness_missing",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:04:00+04:00",
+        "input_fingerprint": "e5872a3165410d950ebd2c0eeaeaee8e0ed0cc63dce1fbfbe69f909bd7a5715c",
+        "held_task_ids": [
+          "civil_heavy"
+        ],
+        "unavailable_worker_ids": [],
+        "responder_status": {},
+        "diagnostics": {
+          "blockers": [
+            "demand",
+            "permit",
+            "readiness",
+            "resources",
+            "supervision"
+          ],
+          "free_workshop_places": 4,
+          "useful_staffing_limit": null,
+          "missing_prerequisites": [
+            "demand",
+            "permit",
+            "resources",
+            "supervision"
+          ],
+          "ineligible_workers": {
+            "C02": [
+              "qualification",
+              "readiness"
+            ],
+            "C03": [
+              "qualification",
+              "readiness"
+            ],
+            "C04": [
+              "qualification",
+              "readiness"
+            ],
+            "C05": [
+              "readiness"
+            ],
+            "C06": [
+              "readiness"
+            ],
+            "C07": [
+              "readiness"
+            ],
+            "C08": [
+              "readiness"
+            ],
+            "C09": [
+              "readiness"
+            ],
+            "C10": [
+              "readiness"
+            ],
+            "C11": [
+              "readiness"
+            ],
+            "C12": [
+              "readiness"
+            ]
+          }
+        },
+        "applied": false,
+        "solver": {
+          "status": "OPTIMAL",
+          "optimal": true,
+          "version": "9.15.6755",
+          "parameters": {
+            "workers": 1,
+            "seed": 0,
+            "time_limit_seconds": 5.0
+          }
+        },
+        "allocation": {
+          "task_id": "workshop_prep",
+          "worker_ids": [],
+          "projected_assignments": {
+            "civil_heavy": [
+              "C01",
+              "C02",
+              "C03",
+              "C04",
+              "C05",
+              "C06",
+              "C07",
+              "C08",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "civil_light": [
+              "C13",
+              "C14"
+            ],
+            "electrical_prep": [
+              "E01",
+              "E02",
+              "E03",
+              "E04",
+              "E05",
+              "E06",
+              "E07",
+              "E08",
+              "E09",
+              "E10"
+            ],
+            "yard_receive": [
+              "L03",
+              "L04"
+            ],
+            "workshop_prep": []
+          },
+          "projected_occupancy": {
+            "workshop": [
+              "P07",
+              "P08"
+            ],
+            "shelter_a": [
+              "C02",
+              "C03",
+              "C04",
+              "C05",
+              "C06",
+              "C07",
+              "C08",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "shelter_b": [],
+            "welfare": []
+          },
+          "projected_task_status": {
+            "civil_heavy": "held",
+            "civil_light": "active",
+            "electrical_prep": "active",
+            "yard_receive": "active",
+            "workshop_prep": "idle"
+          }
+        }
+      },
+      "check_request": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-readiness_missing",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:04:00+04:00",
+        "workers": [
+          {
+            "person_id": "C02",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C03",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C04",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C05",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C06",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C07",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C08",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C09",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C10",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C11",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C12",
+            "readiness": "unknown",
+            "availability": "available"
+          }
+        ],
+        "workshop": {
+          "fixed_occupant_ids": [
+            "P07",
+            "P08"
+          ],
+          "staffing_demand": {
+            "minimum": 1,
+            "maximum": null
+          },
+          "permit_status": "unknown",
+          "resource_status": "unknown",
+          "supervision_status": "unknown"
+        },
+        "incidents": [],
+        "civil_measurement": null,
+        "proposed_worker_ids": []
+      },
+      "check_response": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-readiness_missing",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:04:00+04:00",
+        "input_fingerprint": "e5872a3165410d950ebd2c0eeaeaee8e0ed0cc63dce1fbfbe69f909bd7a5715c",
+        "held_task_ids": [
+          "civil_heavy"
+        ],
+        "unavailable_worker_ids": [],
+        "responder_status": {},
+        "diagnostics": {
+          "blockers": [
+            "demand",
+            "permit",
+            "readiness",
+            "resources",
+            "supervision"
+          ],
+          "free_workshop_places": 4,
+          "useful_staffing_limit": null,
+          "missing_prerequisites": [
+            "demand",
+            "permit",
+            "resources",
+            "supervision"
+          ],
+          "ineligible_workers": {
+            "C02": [
+              "qualification",
+              "readiness"
+            ],
+            "C03": [
+              "qualification",
+              "readiness"
+            ],
+            "C04": [
+              "qualification",
+              "readiness"
+            ],
+            "C05": [
+              "readiness"
+            ],
+            "C06": [
+              "readiness"
+            ],
+            "C07": [
+              "readiness"
+            ],
+            "C08": [
+              "readiness"
+            ],
+            "C09": [
+              "readiness"
+            ],
+            "C10": [
+              "readiness"
+            ],
+            "C11": [
+              "readiness"
+            ],
+            "C12": [
+              "readiness"
+            ]
+          }
+        },
+        "applied": false,
+        "accepted": true,
+        "violations": [],
+        "optimality": "not_evaluated",
+        "allocation": {
+          "task_id": "workshop_prep",
+          "worker_ids": [],
+          "projected_assignments": {
+            "civil_heavy": [
+              "C01",
+              "C02",
+              "C03",
+              "C04",
+              "C05",
+              "C06",
+              "C07",
+              "C08",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "civil_light": [
+              "C13",
+              "C14"
+            ],
+            "electrical_prep": [
+              "E01",
+              "E02",
+              "E03",
+              "E04",
+              "E05",
+              "E06",
+              "E07",
+              "E08",
+              "E09",
+              "E10"
+            ],
+            "yard_receive": [
+              "L03",
+              "L04"
+            ],
+            "workshop_prep": []
+          },
+          "projected_occupancy": {
+            "workshop": [
+              "P07",
+              "P08"
+            ],
+            "shelter_a": [
+              "C02",
+              "C03",
+              "C04",
+              "C05",
+              "C06",
+              "C07",
+              "C08",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "shelter_b": [],
+            "welfare": []
+          },
+          "projected_task_status": {
+            "civil_heavy": "held",
+            "civil_light": "active",
+            "electrical_prep": "active",
+            "yard_receive": "active",
+            "workshop_prep": "idle"
+          }
+        }
+      }
+    },
+    {
+      "id": "canonical",
+      "label": "Four ready workers, four places",
+      "description": "The canonical independent recommendation; compare to the later authored assignment.",
+      "solve_request": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-canonical",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "workers": [
+          {
+            "person_id": "C02",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C03",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C04",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C05",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C06",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C07",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C08",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C09",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C10",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C11",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C12",
+            "readiness": "unknown",
+            "availability": "available"
+          }
+        ],
+        "workshop": {
+          "fixed_occupant_ids": [
+            "P07",
+            "P08"
+          ],
+          "staffing_demand": {
+            "minimum": 1,
+            "maximum": 4
+          },
+          "permit_status": "valid",
+          "resource_status": "available",
+          "supervision_status": "available"
+        },
+        "incidents": [],
+        "civil_measurement": null
+      },
+      "solve_response": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-canonical",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "input_fingerprint": "1cec2336607e3f6695985439698f68689763b5fa2ab0654f99ba9dbe8c43f13d",
+        "held_task_ids": [
+          "civil_heavy"
+        ],
+        "unavailable_worker_ids": [],
+        "responder_status": {},
+        "diagnostics": {
+          "blockers": [],
+          "free_workshop_places": 4,
+          "useful_staffing_limit": 4,
+          "missing_prerequisites": [],
+          "ineligible_workers": {
+            "C02": [
+              "qualification",
+              "readiness"
+            ],
+            "C03": [
+              "qualification",
+              "readiness"
+            ],
+            "C04": [
+              "qualification",
+              "readiness"
+            ],
+            "C09": [
+              "readiness"
+            ],
+            "C10": [
+              "readiness"
+            ],
+            "C11": [
+              "readiness"
+            ],
+            "C12": [
+              "readiness"
+            ]
+          }
+        },
+        "applied": false,
+        "solver": {
+          "status": "OPTIMAL",
+          "optimal": true,
+          "version": "9.15.6755",
+          "parameters": {
+            "workers": 1,
+            "seed": 0,
+            "time_limit_seconds": 5.0
+          }
+        },
+        "allocation": {
+          "task_id": "workshop_prep",
+          "worker_ids": [
+            "C05",
+            "C06",
+            "C07",
+            "C08"
+          ],
+          "projected_assignments": {
+            "civil_heavy": [
+              "C01",
+              "C02",
+              "C03",
+              "C04",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "civil_light": [
+              "C13",
+              "C14"
+            ],
+            "electrical_prep": [
+              "E01",
+              "E02",
+              "E03",
+              "E04",
+              "E05",
+              "E06",
+              "E07",
+              "E08",
+              "E09",
+              "E10"
+            ],
+            "yard_receive": [
+              "L03",
+              "L04"
+            ],
+            "workshop_prep": [
+              "C05",
+              "C06",
+              "C07",
+              "C08"
+            ]
+          },
+          "projected_occupancy": {
+            "workshop": [
+              "P07",
+              "P08",
+              "C05",
+              "C06",
+              "C07",
+              "C08"
+            ],
+            "shelter_a": [
+              "C02",
+              "C03",
+              "C04",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "shelter_b": [],
+            "welfare": []
+          },
+          "projected_task_status": {
+            "civil_heavy": "held",
+            "civil_light": "active",
+            "electrical_prep": "active",
+            "yard_receive": "active",
+            "workshop_prep": "active"
+          }
+        }
+      },
+      "check_request": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-canonical",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "workers": [
+          {
+            "person_id": "C02",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C03",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C04",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C05",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C06",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C07",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C08",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C09",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C10",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C11",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C12",
+            "readiness": "unknown",
+            "availability": "available"
+          }
+        ],
+        "workshop": {
+          "fixed_occupant_ids": [
+            "P07",
+            "P08"
+          ],
+          "staffing_demand": {
+            "minimum": 1,
+            "maximum": 4
+          },
+          "permit_status": "valid",
+          "resource_status": "available",
+          "supervision_status": "available"
+        },
+        "incidents": [],
+        "civil_measurement": null,
+        "proposed_worker_ids": [
+          "C05",
+          "C06",
+          "C07",
+          "C08"
+        ]
+      },
+      "check_response": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-canonical",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "input_fingerprint": "1cec2336607e3f6695985439698f68689763b5fa2ab0654f99ba9dbe8c43f13d",
+        "held_task_ids": [
+          "civil_heavy"
+        ],
+        "unavailable_worker_ids": [],
+        "responder_status": {},
+        "diagnostics": {
+          "blockers": [],
+          "free_workshop_places": 4,
+          "useful_staffing_limit": 4,
+          "missing_prerequisites": [],
+          "ineligible_workers": {
+            "C02": [
+              "qualification",
+              "readiness"
+            ],
+            "C03": [
+              "qualification",
+              "readiness"
+            ],
+            "C04": [
+              "qualification",
+              "readiness"
+            ],
+            "C09": [
+              "readiness"
+            ],
+            "C10": [
+              "readiness"
+            ],
+            "C11": [
+              "readiness"
+            ],
+            "C12": [
+              "readiness"
+            ]
+          }
+        },
+        "applied": false,
+        "accepted": true,
+        "violations": [],
+        "optimality": "not_evaluated",
+        "allocation": {
+          "task_id": "workshop_prep",
+          "worker_ids": [
+            "C05",
+            "C06",
+            "C07",
+            "C08"
+          ],
+          "projected_assignments": {
+            "civil_heavy": [
+              "C01",
+              "C02",
+              "C03",
+              "C04",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "civil_light": [
+              "C13",
+              "C14"
+            ],
+            "electrical_prep": [
+              "E01",
+              "E02",
+              "E03",
+              "E04",
+              "E05",
+              "E06",
+              "E07",
+              "E08",
+              "E09",
+              "E10"
+            ],
+            "yard_receive": [
+              "L03",
+              "L04"
+            ],
+            "workshop_prep": [
+              "C05",
+              "C06",
+              "C07",
+              "C08"
+            ]
+          },
+          "projected_occupancy": {
+            "workshop": [
+              "P07",
+              "P08",
+              "C05",
+              "C06",
+              "C07",
+              "C08"
+            ],
+            "shelter_a": [
+              "C02",
+              "C03",
+              "C04",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "shelter_b": [],
+            "welfare": []
+          },
+          "projected_task_status": {
+            "civil_heavy": "held",
+            "civil_light": "active",
+            "electrical_prep": "active",
+            "yard_receive": "active",
+            "workshop_prep": "active"
+          }
+        }
+      }
+    },
+    {
+      "id": "two_ready",
+      "label": "Only two workers ready",
+      "description": "Available seats do not establish readiness for the task.",
+      "solve_request": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-two_ready",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "workers": [
+          {
+            "person_id": "C02",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C03",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C04",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C05",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C06",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C07",
+            "readiness": "not_ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C08",
+            "readiness": "not_ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C09",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C10",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C11",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C12",
+            "readiness": "unknown",
+            "availability": "available"
+          }
+        ],
+        "workshop": {
+          "fixed_occupant_ids": [
+            "P07",
+            "P08"
+          ],
+          "staffing_demand": {
+            "minimum": 1,
+            "maximum": 4
+          },
+          "permit_status": "valid",
+          "resource_status": "available",
+          "supervision_status": "available"
+        },
+        "incidents": [],
+        "civil_measurement": null
+      },
+      "solve_response": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-two_ready",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "input_fingerprint": "9344d88393fa55926639509bd784fcee685ab7112506dd1ae4a31a909c0ee842",
+        "held_task_ids": [
+          "civil_heavy"
+        ],
+        "unavailable_worker_ids": [],
+        "responder_status": {},
+        "diagnostics": {
+          "blockers": [
+            "readiness"
+          ],
+          "free_workshop_places": 4,
+          "useful_staffing_limit": 4,
+          "missing_prerequisites": [],
+          "ineligible_workers": {
+            "C02": [
+              "qualification",
+              "readiness"
+            ],
+            "C03": [
+              "qualification",
+              "readiness"
+            ],
+            "C04": [
+              "qualification",
+              "readiness"
+            ],
+            "C07": [
+              "readiness"
+            ],
+            "C08": [
+              "readiness"
+            ],
+            "C09": [
+              "readiness"
+            ],
+            "C10": [
+              "readiness"
+            ],
+            "C11": [
+              "readiness"
+            ],
+            "C12": [
+              "readiness"
+            ]
+          }
+        },
+        "applied": false,
+        "solver": {
+          "status": "OPTIMAL",
+          "optimal": true,
+          "version": "9.15.6755",
+          "parameters": {
+            "workers": 1,
+            "seed": 0,
+            "time_limit_seconds": 5.0
+          }
+        },
+        "allocation": {
+          "task_id": "workshop_prep",
+          "worker_ids": [
+            "C05",
+            "C06"
+          ],
+          "projected_assignments": {
+            "civil_heavy": [
+              "C01",
+              "C02",
+              "C03",
+              "C04",
+              "C07",
+              "C08",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "civil_light": [
+              "C13",
+              "C14"
+            ],
+            "electrical_prep": [
+              "E01",
+              "E02",
+              "E03",
+              "E04",
+              "E05",
+              "E06",
+              "E07",
+              "E08",
+              "E09",
+              "E10"
+            ],
+            "yard_receive": [
+              "L03",
+              "L04"
+            ],
+            "workshop_prep": [
+              "C05",
+              "C06"
+            ]
+          },
+          "projected_occupancy": {
+            "workshop": [
+              "P07",
+              "P08",
+              "C05",
+              "C06"
+            ],
+            "shelter_a": [
+              "C02",
+              "C03",
+              "C04",
+              "C07",
+              "C08",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "shelter_b": [],
+            "welfare": []
+          },
+          "projected_task_status": {
+            "civil_heavy": "held",
+            "civil_light": "active",
+            "electrical_prep": "active",
+            "yard_receive": "active",
+            "workshop_prep": "active"
+          }
+        }
+      },
+      "check_request": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-two_ready",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "workers": [
+          {
+            "person_id": "C02",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C03",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C04",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C05",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C06",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C07",
+            "readiness": "not_ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C08",
+            "readiness": "not_ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C09",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C10",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C11",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C12",
+            "readiness": "unknown",
+            "availability": "available"
+          }
+        ],
+        "workshop": {
+          "fixed_occupant_ids": [
+            "P07",
+            "P08"
+          ],
+          "staffing_demand": {
+            "minimum": 1,
+            "maximum": 4
+          },
+          "permit_status": "valid",
+          "resource_status": "available",
+          "supervision_status": "available"
+        },
+        "incidents": [],
+        "civil_measurement": null,
+        "proposed_worker_ids": [
+          "C05",
+          "C06"
+        ]
+      },
+      "check_response": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-two_ready",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "input_fingerprint": "9344d88393fa55926639509bd784fcee685ab7112506dd1ae4a31a909c0ee842",
+        "held_task_ids": [
+          "civil_heavy"
+        ],
+        "unavailable_worker_ids": [],
+        "responder_status": {},
+        "diagnostics": {
+          "blockers": [
+            "readiness"
+          ],
+          "free_workshop_places": 4,
+          "useful_staffing_limit": 4,
+          "missing_prerequisites": [],
+          "ineligible_workers": {
+            "C02": [
+              "qualification",
+              "readiness"
+            ],
+            "C03": [
+              "qualification",
+              "readiness"
+            ],
+            "C04": [
+              "qualification",
+              "readiness"
+            ],
+            "C07": [
+              "readiness"
+            ],
+            "C08": [
+              "readiness"
+            ],
+            "C09": [
+              "readiness"
+            ],
+            "C10": [
+              "readiness"
+            ],
+            "C11": [
+              "readiness"
+            ],
+            "C12": [
+              "readiness"
+            ]
+          }
+        },
+        "applied": false,
+        "accepted": true,
+        "violations": [],
+        "optimality": "not_evaluated",
+        "allocation": {
+          "task_id": "workshop_prep",
+          "worker_ids": [
+            "C05",
+            "C06"
+          ],
+          "projected_assignments": {
+            "civil_heavy": [
+              "C01",
+              "C02",
+              "C03",
+              "C04",
+              "C07",
+              "C08",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "civil_light": [
+              "C13",
+              "C14"
+            ],
+            "electrical_prep": [
+              "E01",
+              "E02",
+              "E03",
+              "E04",
+              "E05",
+              "E06",
+              "E07",
+              "E08",
+              "E09",
+              "E10"
+            ],
+            "yard_receive": [
+              "L03",
+              "L04"
+            ],
+            "workshop_prep": [
+              "C05",
+              "C06"
+            ]
+          },
+          "projected_occupancy": {
+            "workshop": [
+              "P07",
+              "P08",
+              "C05",
+              "C06"
+            ],
+            "shelter_a": [
+              "C02",
+              "C03",
+              "C04",
+              "C07",
+              "C08",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "shelter_b": [],
+            "welfare": []
+          },
+          "projected_task_status": {
+            "civil_heavy": "held",
+            "civil_light": "active",
+            "electrical_prep": "active",
+            "yard_receive": "active",
+            "workshop_prep": "active"
+          }
+        }
+      }
+    },
+    {
+      "id": "eight_ready",
+      "label": "Eight ready, four places",
+      "description": "Capacity and useful staffing cap the allocation; worker ID breaks equivalent choices.",
+      "solve_request": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-eight_ready",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "workers": [
+          {
+            "person_id": "C02",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C03",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C04",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C05",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C06",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C07",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C08",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C09",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C10",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C11",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C12",
+            "readiness": "ready",
+            "availability": "available"
+          }
+        ],
+        "workshop": {
+          "fixed_occupant_ids": [
+            "P07",
+            "P08"
+          ],
+          "staffing_demand": {
+            "minimum": 1,
+            "maximum": 4
+          },
+          "permit_status": "valid",
+          "resource_status": "available",
+          "supervision_status": "available"
+        },
+        "incidents": [],
+        "civil_measurement": null
+      },
+      "solve_response": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-eight_ready",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "input_fingerprint": "7360946244f6339723cbd998bef3704f73164bcb1a2cce7c41b7d551f5c7648a",
+        "held_task_ids": [
+          "civil_heavy"
+        ],
+        "unavailable_worker_ids": [],
+        "responder_status": {},
+        "diagnostics": {
+          "blockers": [
+            "capacity",
+            "demand"
+          ],
+          "free_workshop_places": 4,
+          "useful_staffing_limit": 4,
+          "missing_prerequisites": [],
+          "ineligible_workers": {
+            "C02": [
+              "qualification",
+              "readiness"
+            ],
+            "C03": [
+              "qualification",
+              "readiness"
+            ],
+            "C04": [
+              "qualification",
+              "readiness"
+            ]
+          }
+        },
+        "applied": false,
+        "solver": {
+          "status": "OPTIMAL",
+          "optimal": true,
+          "version": "9.15.6755",
+          "parameters": {
+            "workers": 1,
+            "seed": 0,
+            "time_limit_seconds": 5.0
+          }
+        },
+        "allocation": {
+          "task_id": "workshop_prep",
+          "worker_ids": [
+            "C05",
+            "C06",
+            "C07",
+            "C08"
+          ],
+          "projected_assignments": {
+            "civil_heavy": [
+              "C01",
+              "C02",
+              "C03",
+              "C04",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "civil_light": [
+              "C13",
+              "C14"
+            ],
+            "electrical_prep": [
+              "E01",
+              "E02",
+              "E03",
+              "E04",
+              "E05",
+              "E06",
+              "E07",
+              "E08",
+              "E09",
+              "E10"
+            ],
+            "yard_receive": [
+              "L03",
+              "L04"
+            ],
+            "workshop_prep": [
+              "C05",
+              "C06",
+              "C07",
+              "C08"
+            ]
+          },
+          "projected_occupancy": {
+            "workshop": [
+              "P07",
+              "P08",
+              "C05",
+              "C06",
+              "C07",
+              "C08"
+            ],
+            "shelter_a": [
+              "C02",
+              "C03",
+              "C04",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "shelter_b": [],
+            "welfare": []
+          },
+          "projected_task_status": {
+            "civil_heavy": "held",
+            "civil_light": "active",
+            "electrical_prep": "active",
+            "yard_receive": "active",
+            "workshop_prep": "active"
+          }
+        }
+      },
+      "check_request": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-eight_ready",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "workers": [
+          {
+            "person_id": "C02",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C03",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C04",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C05",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C06",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C07",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C08",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C09",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C10",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C11",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C12",
+            "readiness": "ready",
+            "availability": "available"
+          }
+        ],
+        "workshop": {
+          "fixed_occupant_ids": [
+            "P07",
+            "P08"
+          ],
+          "staffing_demand": {
+            "minimum": 1,
+            "maximum": 4
+          },
+          "permit_status": "valid",
+          "resource_status": "available",
+          "supervision_status": "available"
+        },
+        "incidents": [],
+        "civil_measurement": null,
+        "proposed_worker_ids": [
+          "C05",
+          "C06",
+          "C07",
+          "C08"
+        ]
+      },
+      "check_response": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-eight_ready",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "input_fingerprint": "7360946244f6339723cbd998bef3704f73164bcb1a2cce7c41b7d551f5c7648a",
+        "held_task_ids": [
+          "civil_heavy"
+        ],
+        "unavailable_worker_ids": [],
+        "responder_status": {},
+        "diagnostics": {
+          "blockers": [
+            "capacity",
+            "demand"
+          ],
+          "free_workshop_places": 4,
+          "useful_staffing_limit": 4,
+          "missing_prerequisites": [],
+          "ineligible_workers": {
+            "C02": [
+              "qualification",
+              "readiness"
+            ],
+            "C03": [
+              "qualification",
+              "readiness"
+            ],
+            "C04": [
+              "qualification",
+              "readiness"
+            ]
+          }
+        },
+        "applied": false,
+        "accepted": true,
+        "violations": [],
+        "optimality": "not_evaluated",
+        "allocation": {
+          "task_id": "workshop_prep",
+          "worker_ids": [
+            "C05",
+            "C06",
+            "C07",
+            "C08"
+          ],
+          "projected_assignments": {
+            "civil_heavy": [
+              "C01",
+              "C02",
+              "C03",
+              "C04",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "civil_light": [
+              "C13",
+              "C14"
+            ],
+            "electrical_prep": [
+              "E01",
+              "E02",
+              "E03",
+              "E04",
+              "E05",
+              "E06",
+              "E07",
+              "E08",
+              "E09",
+              "E10"
+            ],
+            "yard_receive": [
+              "L03",
+              "L04"
+            ],
+            "workshop_prep": [
+              "C05",
+              "C06",
+              "C07",
+              "C08"
+            ]
+          },
+          "projected_occupancy": {
+            "workshop": [
+              "P07",
+              "P08",
+              "C05",
+              "C06",
+              "C07",
+              "C08"
+            ],
+            "shelter_a": [
+              "C02",
+              "C03",
+              "C04",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "shelter_b": [],
+            "welfare": []
+          },
+          "projected_task_status": {
+            "civil_heavy": "held",
+            "civil_light": "active",
+            "electrical_prep": "active",
+            "yard_receive": "active",
+            "workshop_prep": "active"
+          }
+        }
+      }
+    },
+    {
+      "id": "extra_occupant",
+      "label": "One more existing occupant",
+      "description": "P01 occupies a third fixed workshop place, leaving three places.",
+      "solve_request": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-extra_occupant",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "workers": [
+          {
+            "person_id": "C02",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C03",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C04",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C05",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C06",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C07",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C08",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C09",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C10",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C11",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C12",
+            "readiness": "unknown",
+            "availability": "available"
+          }
+        ],
+        "workshop": {
+          "fixed_occupant_ids": [
+            "P07",
+            "P08",
+            "P01"
+          ],
+          "staffing_demand": {
+            "minimum": 1,
+            "maximum": 4
+          },
+          "permit_status": "valid",
+          "resource_status": "available",
+          "supervision_status": "available"
+        },
+        "incidents": [],
+        "civil_measurement": null
+      },
+      "solve_response": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-extra_occupant",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "input_fingerprint": "e70b2ce4343b127e76e60f58de2b62deffc78f3e15a12286106dcef5812b98d8",
+        "held_task_ids": [
+          "civil_heavy"
+        ],
+        "unavailable_worker_ids": [],
+        "responder_status": {},
+        "diagnostics": {
+          "blockers": [
+            "capacity"
+          ],
+          "free_workshop_places": 3,
+          "useful_staffing_limit": 4,
+          "missing_prerequisites": [],
+          "ineligible_workers": {
+            "C02": [
+              "qualification",
+              "readiness"
+            ],
+            "C03": [
+              "qualification",
+              "readiness"
+            ],
+            "C04": [
+              "qualification",
+              "readiness"
+            ],
+            "C09": [
+              "readiness"
+            ],
+            "C10": [
+              "readiness"
+            ],
+            "C11": [
+              "readiness"
+            ],
+            "C12": [
+              "readiness"
+            ]
+          }
+        },
+        "applied": false,
+        "solver": {
+          "status": "OPTIMAL",
+          "optimal": true,
+          "version": "9.15.6755",
+          "parameters": {
+            "workers": 1,
+            "seed": 0,
+            "time_limit_seconds": 5.0
+          }
+        },
+        "allocation": {
+          "task_id": "workshop_prep",
+          "worker_ids": [
+            "C05",
+            "C06",
+            "C07"
+          ],
+          "projected_assignments": {
+            "civil_heavy": [
+              "C01",
+              "C02",
+              "C03",
+              "C04",
+              "C08",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "civil_light": [
+              "C13",
+              "C14"
+            ],
+            "electrical_prep": [
+              "E01",
+              "E02",
+              "E03",
+              "E04",
+              "E05",
+              "E06",
+              "E07",
+              "E08",
+              "E09",
+              "E10"
+            ],
+            "yard_receive": [
+              "L03",
+              "L04"
+            ],
+            "workshop_prep": [
+              "C05",
+              "C06",
+              "C07"
+            ]
+          },
+          "projected_occupancy": {
+            "workshop": [
+              "P07",
+              "P08",
+              "P01",
+              "C05",
+              "C06",
+              "C07"
+            ],
+            "shelter_a": [
+              "C02",
+              "C03",
+              "C04",
+              "C08",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "shelter_b": [],
+            "welfare": []
+          },
+          "projected_task_status": {
+            "civil_heavy": "held",
+            "civil_light": "active",
+            "electrical_prep": "active",
+            "yard_receive": "active",
+            "workshop_prep": "active"
+          }
+        }
+      },
+      "check_request": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-extra_occupant",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "workers": [
+          {
+            "person_id": "C02",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C03",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C04",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C05",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C06",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C07",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C08",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C09",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C10",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C11",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C12",
+            "readiness": "unknown",
+            "availability": "available"
+          }
+        ],
+        "workshop": {
+          "fixed_occupant_ids": [
+            "P07",
+            "P08",
+            "P01"
+          ],
+          "staffing_demand": {
+            "minimum": 1,
+            "maximum": 4
+          },
+          "permit_status": "valid",
+          "resource_status": "available",
+          "supervision_status": "available"
+        },
+        "incidents": [],
+        "civil_measurement": null,
+        "proposed_worker_ids": [
+          "C05",
+          "C06",
+          "C07"
+        ]
+      },
+      "check_response": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-extra_occupant",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "input_fingerprint": "e70b2ce4343b127e76e60f58de2b62deffc78f3e15a12286106dcef5812b98d8",
+        "held_task_ids": [
+          "civil_heavy"
+        ],
+        "unavailable_worker_ids": [],
+        "responder_status": {},
+        "diagnostics": {
+          "blockers": [
+            "capacity"
+          ],
+          "free_workshop_places": 3,
+          "useful_staffing_limit": 4,
+          "missing_prerequisites": [],
+          "ineligible_workers": {
+            "C02": [
+              "qualification",
+              "readiness"
+            ],
+            "C03": [
+              "qualification",
+              "readiness"
+            ],
+            "C04": [
+              "qualification",
+              "readiness"
+            ],
+            "C09": [
+              "readiness"
+            ],
+            "C10": [
+              "readiness"
+            ],
+            "C11": [
+              "readiness"
+            ],
+            "C12": [
+              "readiness"
+            ]
+          }
+        },
+        "applied": false,
+        "accepted": true,
+        "violations": [],
+        "optimality": "not_evaluated",
+        "allocation": {
+          "task_id": "workshop_prep",
+          "worker_ids": [
+            "C05",
+            "C06",
+            "C07"
+          ],
+          "projected_assignments": {
+            "civil_heavy": [
+              "C01",
+              "C02",
+              "C03",
+              "C04",
+              "C08",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "civil_light": [
+              "C13",
+              "C14"
+            ],
+            "electrical_prep": [
+              "E01",
+              "E02",
+              "E03",
+              "E04",
+              "E05",
+              "E06",
+              "E07",
+              "E08",
+              "E09",
+              "E10"
+            ],
+            "yard_receive": [
+              "L03",
+              "L04"
+            ],
+            "workshop_prep": [
+              "C05",
+              "C06",
+              "C07"
+            ]
+          },
+          "projected_occupancy": {
+            "workshop": [
+              "P07",
+              "P08",
+              "P01",
+              "C05",
+              "C06",
+              "C07"
+            ],
+            "shelter_a": [
+              "C02",
+              "C03",
+              "C04",
+              "C08",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "shelter_b": [],
+            "welfare": []
+          },
+          "projected_task_status": {
+            "civil_heavy": "held",
+            "civil_light": "active",
+            "electrical_prep": "active",
+            "yard_receive": "active",
+            "workshop_prep": "active"
+          }
+        }
+      }
+    },
+    {
+      "id": "demand_two",
+      "label": "Useful work for only two",
+      "description": "Free seats do not imply useful work for everyone.",
+      "solve_request": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-demand_two",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "workers": [
+          {
+            "person_id": "C02",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C03",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C04",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C05",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C06",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C07",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C08",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C09",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C10",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C11",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C12",
+            "readiness": "unknown",
+            "availability": "available"
+          }
+        ],
+        "workshop": {
+          "fixed_occupant_ids": [
+            "P07",
+            "P08"
+          ],
+          "staffing_demand": {
+            "minimum": 1,
+            "maximum": 2
+          },
+          "permit_status": "valid",
+          "resource_status": "available",
+          "supervision_status": "available"
+        },
+        "incidents": [],
+        "civil_measurement": null
+      },
+      "solve_response": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-demand_two",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "input_fingerprint": "fadce71e14162a6057fb08481c05f4c8d1efd2797da08bb6a6a470cfdc11a91f",
+        "held_task_ids": [
+          "civil_heavy"
+        ],
+        "unavailable_worker_ids": [],
+        "responder_status": {},
+        "diagnostics": {
+          "blockers": [
+            "demand"
+          ],
+          "free_workshop_places": 4,
+          "useful_staffing_limit": 2,
+          "missing_prerequisites": [],
+          "ineligible_workers": {
+            "C02": [
+              "qualification",
+              "readiness"
+            ],
+            "C03": [
+              "qualification",
+              "readiness"
+            ],
+            "C04": [
+              "qualification",
+              "readiness"
+            ],
+            "C09": [
+              "readiness"
+            ],
+            "C10": [
+              "readiness"
+            ],
+            "C11": [
+              "readiness"
+            ],
+            "C12": [
+              "readiness"
+            ]
+          }
+        },
+        "applied": false,
+        "solver": {
+          "status": "OPTIMAL",
+          "optimal": true,
+          "version": "9.15.6755",
+          "parameters": {
+            "workers": 1,
+            "seed": 0,
+            "time_limit_seconds": 5.0
+          }
+        },
+        "allocation": {
+          "task_id": "workshop_prep",
+          "worker_ids": [
+            "C05",
+            "C06"
+          ],
+          "projected_assignments": {
+            "civil_heavy": [
+              "C01",
+              "C02",
+              "C03",
+              "C04",
+              "C07",
+              "C08",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "civil_light": [
+              "C13",
+              "C14"
+            ],
+            "electrical_prep": [
+              "E01",
+              "E02",
+              "E03",
+              "E04",
+              "E05",
+              "E06",
+              "E07",
+              "E08",
+              "E09",
+              "E10"
+            ],
+            "yard_receive": [
+              "L03",
+              "L04"
+            ],
+            "workshop_prep": [
+              "C05",
+              "C06"
+            ]
+          },
+          "projected_occupancy": {
+            "workshop": [
+              "P07",
+              "P08",
+              "C05",
+              "C06"
+            ],
+            "shelter_a": [
+              "C02",
+              "C03",
+              "C04",
+              "C07",
+              "C08",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "shelter_b": [],
+            "welfare": []
+          },
+          "projected_task_status": {
+            "civil_heavy": "held",
+            "civil_light": "active",
+            "electrical_prep": "active",
+            "yard_receive": "active",
+            "workshop_prep": "active"
+          }
+        }
+      },
+      "check_request": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-demand_two",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "workers": [
+          {
+            "person_id": "C02",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C03",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C04",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C05",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C06",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C07",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C08",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C09",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C10",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C11",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C12",
+            "readiness": "unknown",
+            "availability": "available"
+          }
+        ],
+        "workshop": {
+          "fixed_occupant_ids": [
+            "P07",
+            "P08"
+          ],
+          "staffing_demand": {
+            "minimum": 1,
+            "maximum": 2
+          },
+          "permit_status": "valid",
+          "resource_status": "available",
+          "supervision_status": "available"
+        },
+        "incidents": [],
+        "civil_measurement": null,
+        "proposed_worker_ids": [
+          "C05",
+          "C06"
+        ]
+      },
+      "check_response": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-demand_two",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "input_fingerprint": "fadce71e14162a6057fb08481c05f4c8d1efd2797da08bb6a6a470cfdc11a91f",
+        "held_task_ids": [
+          "civil_heavy"
+        ],
+        "unavailable_worker_ids": [],
+        "responder_status": {},
+        "diagnostics": {
+          "blockers": [
+            "demand"
+          ],
+          "free_workshop_places": 4,
+          "useful_staffing_limit": 2,
+          "missing_prerequisites": [],
+          "ineligible_workers": {
+            "C02": [
+              "qualification",
+              "readiness"
+            ],
+            "C03": [
+              "qualification",
+              "readiness"
+            ],
+            "C04": [
+              "qualification",
+              "readiness"
+            ],
+            "C09": [
+              "readiness"
+            ],
+            "C10": [
+              "readiness"
+            ],
+            "C11": [
+              "readiness"
+            ],
+            "C12": [
+              "readiness"
+            ]
+          }
+        },
+        "applied": false,
+        "accepted": true,
+        "violations": [],
+        "optimality": "not_evaluated",
+        "allocation": {
+          "task_id": "workshop_prep",
+          "worker_ids": [
+            "C05",
+            "C06"
+          ],
+          "projected_assignments": {
+            "civil_heavy": [
+              "C01",
+              "C02",
+              "C03",
+              "C04",
+              "C07",
+              "C08",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "civil_light": [
+              "C13",
+              "C14"
+            ],
+            "electrical_prep": [
+              "E01",
+              "E02",
+              "E03",
+              "E04",
+              "E05",
+              "E06",
+              "E07",
+              "E08",
+              "E09",
+              "E10"
+            ],
+            "yard_receive": [
+              "L03",
+              "L04"
+            ],
+            "workshop_prep": [
+              "C05",
+              "C06"
+            ]
+          },
+          "projected_occupancy": {
+            "workshop": [
+              "P07",
+              "P08",
+              "C05",
+              "C06"
+            ],
+            "shelter_a": [
+              "C02",
+              "C03",
+              "C04",
+              "C07",
+              "C08",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "shelter_b": [],
+            "welfare": []
+          },
+          "projected_task_status": {
+            "civil_heavy": "held",
+            "civil_light": "active",
+            "electrical_prep": "active",
+            "yard_receive": "active",
+            "workshop_prep": "active"
+          }
+        }
+      }
+    },
+    {
+      "id": "permit_unavailable",
+      "label": "Workshop permit unavailable",
+      "description": "A mandatory prerequisite blocks productive assignment.",
+      "solve_request": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-permit_unavailable",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "workers": [
+          {
+            "person_id": "C02",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C03",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C04",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C05",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C06",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C07",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C08",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C09",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C10",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C11",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C12",
+            "readiness": "unknown",
+            "availability": "available"
+          }
+        ],
+        "workshop": {
+          "fixed_occupant_ids": [
+            "P07",
+            "P08"
+          ],
+          "staffing_demand": {
+            "minimum": 1,
+            "maximum": 4
+          },
+          "permit_status": "unavailable",
+          "resource_status": "available",
+          "supervision_status": "available"
+        },
+        "incidents": [],
+        "civil_measurement": null
+      },
+      "solve_response": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-permit_unavailable",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "input_fingerprint": "e1d9ef8cdefb4411f9cb89eb30e5972bbb6cced06e9107b421506490c421fb0f",
+        "held_task_ids": [
+          "civil_heavy"
+        ],
+        "unavailable_worker_ids": [],
+        "responder_status": {},
+        "diagnostics": {
+          "blockers": [
+            "permit"
+          ],
+          "free_workshop_places": 4,
+          "useful_staffing_limit": 4,
+          "missing_prerequisites": [
+            "permit"
+          ],
+          "ineligible_workers": {
+            "C02": [
+              "qualification",
+              "readiness"
+            ],
+            "C03": [
+              "qualification",
+              "readiness"
+            ],
+            "C04": [
+              "qualification",
+              "readiness"
+            ],
+            "C09": [
+              "readiness"
+            ],
+            "C10": [
+              "readiness"
+            ],
+            "C11": [
+              "readiness"
+            ],
+            "C12": [
+              "readiness"
+            ]
+          }
+        },
+        "applied": false,
+        "solver": {
+          "status": "OPTIMAL",
+          "optimal": true,
+          "version": "9.15.6755",
+          "parameters": {
+            "workers": 1,
+            "seed": 0,
+            "time_limit_seconds": 5.0
+          }
+        },
+        "allocation": {
+          "task_id": "workshop_prep",
+          "worker_ids": [],
+          "projected_assignments": {
+            "civil_heavy": [
+              "C01",
+              "C02",
+              "C03",
+              "C04",
+              "C05",
+              "C06",
+              "C07",
+              "C08",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "civil_light": [
+              "C13",
+              "C14"
+            ],
+            "electrical_prep": [
+              "E01",
+              "E02",
+              "E03",
+              "E04",
+              "E05",
+              "E06",
+              "E07",
+              "E08",
+              "E09",
+              "E10"
+            ],
+            "yard_receive": [
+              "L03",
+              "L04"
+            ],
+            "workshop_prep": []
+          },
+          "projected_occupancy": {
+            "workshop": [
+              "P07",
+              "P08"
+            ],
+            "shelter_a": [
+              "C02",
+              "C03",
+              "C04",
+              "C05",
+              "C06",
+              "C07",
+              "C08",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "shelter_b": [],
+            "welfare": []
+          },
+          "projected_task_status": {
+            "civil_heavy": "held",
+            "civil_light": "active",
+            "electrical_prep": "active",
+            "yard_receive": "active",
+            "workshop_prep": "idle"
+          }
+        }
+      },
+      "check_request": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-permit_unavailable",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "workers": [
+          {
+            "person_id": "C02",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C03",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C04",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C05",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C06",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C07",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C08",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C09",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C10",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C11",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C12",
+            "readiness": "unknown",
+            "availability": "available"
+          }
+        ],
+        "workshop": {
+          "fixed_occupant_ids": [
+            "P07",
+            "P08"
+          ],
+          "staffing_demand": {
+            "minimum": 1,
+            "maximum": 4
+          },
+          "permit_status": "unavailable",
+          "resource_status": "available",
+          "supervision_status": "available"
+        },
+        "incidents": [],
+        "civil_measurement": null,
+        "proposed_worker_ids": []
+      },
+      "check_response": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-permit_unavailable",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "input_fingerprint": "e1d9ef8cdefb4411f9cb89eb30e5972bbb6cced06e9107b421506490c421fb0f",
+        "held_task_ids": [
+          "civil_heavy"
+        ],
+        "unavailable_worker_ids": [],
+        "responder_status": {},
+        "diagnostics": {
+          "blockers": [
+            "permit"
+          ],
+          "free_workshop_places": 4,
+          "useful_staffing_limit": 4,
+          "missing_prerequisites": [
+            "permit"
+          ],
+          "ineligible_workers": {
+            "C02": [
+              "qualification",
+              "readiness"
+            ],
+            "C03": [
+              "qualification",
+              "readiness"
+            ],
+            "C04": [
+              "qualification",
+              "readiness"
+            ],
+            "C09": [
+              "readiness"
+            ],
+            "C10": [
+              "readiness"
+            ],
+            "C11": [
+              "readiness"
+            ],
+            "C12": [
+              "readiness"
+            ]
+          }
+        },
+        "applied": false,
+        "accepted": true,
+        "violations": [],
+        "optimality": "not_evaluated",
+        "allocation": {
+          "task_id": "workshop_prep",
+          "worker_ids": [],
+          "projected_assignments": {
+            "civil_heavy": [
+              "C01",
+              "C02",
+              "C03",
+              "C04",
+              "C05",
+              "C06",
+              "C07",
+              "C08",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "civil_light": [
+              "C13",
+              "C14"
+            ],
+            "electrical_prep": [
+              "E01",
+              "E02",
+              "E03",
+              "E04",
+              "E05",
+              "E06",
+              "E07",
+              "E08",
+              "E09",
+              "E10"
+            ],
+            "yard_receive": [
+              "L03",
+              "L04"
+            ],
+            "workshop_prep": []
+          },
+          "projected_occupancy": {
+            "workshop": [
+              "P07",
+              "P08"
+            ],
+            "shelter_a": [
+              "C02",
+              "C03",
+              "C04",
+              "C05",
+              "C06",
+              "C07",
+              "C08",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "shelter_b": [],
+            "welfare": []
+          },
+          "projected_task_status": {
+            "civil_heavy": "held",
+            "civil_light": "active",
+            "electrical_prep": "active",
+            "yard_receive": "active",
+            "workshop_prep": "idle"
+          }
+        }
+      }
+    },
+    {
+      "id": "supervision_unavailable",
+      "label": "Shared supervision unavailable",
+      "description": "The workshop cannot start; original new-starter supervision remains intact.",
+      "solve_request": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-supervision_unavailable",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "workers": [
+          {
+            "person_id": "C02",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C03",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C04",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C05",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C06",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C07",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C08",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C09",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C10",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C11",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C12",
+            "readiness": "unknown",
+            "availability": "available"
+          }
+        ],
+        "workshop": {
+          "fixed_occupant_ids": [
+            "P07",
+            "P08"
+          ],
+          "staffing_demand": {
+            "minimum": 1,
+            "maximum": 4
+          },
+          "permit_status": "valid",
+          "resource_status": "available",
+          "supervision_status": "unavailable"
+        },
+        "incidents": [],
+        "civil_measurement": null
+      },
+      "solve_response": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-supervision_unavailable",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "input_fingerprint": "3e43198947ebbb59fda6a3b6fc4706b1133a68c563f784934427acc2be21448a",
+        "held_task_ids": [
+          "civil_heavy"
+        ],
+        "unavailable_worker_ids": [],
+        "responder_status": {},
+        "diagnostics": {
+          "blockers": [
+            "supervision"
+          ],
+          "free_workshop_places": 4,
+          "useful_staffing_limit": 4,
+          "missing_prerequisites": [
+            "supervision"
+          ],
+          "ineligible_workers": {
+            "C02": [
+              "qualification",
+              "readiness"
+            ],
+            "C03": [
+              "qualification",
+              "readiness"
+            ],
+            "C04": [
+              "qualification",
+              "readiness"
+            ],
+            "C09": [
+              "readiness"
+            ],
+            "C10": [
+              "readiness"
+            ],
+            "C11": [
+              "readiness"
+            ],
+            "C12": [
+              "readiness"
+            ]
+          }
+        },
+        "applied": false,
+        "solver": {
+          "status": "OPTIMAL",
+          "optimal": true,
+          "version": "9.15.6755",
+          "parameters": {
+            "workers": 1,
+            "seed": 0,
+            "time_limit_seconds": 5.0
+          }
+        },
+        "allocation": {
+          "task_id": "workshop_prep",
+          "worker_ids": [],
+          "projected_assignments": {
+            "civil_heavy": [
+              "C01",
+              "C02",
+              "C03",
+              "C04",
+              "C05",
+              "C06",
+              "C07",
+              "C08",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "civil_light": [
+              "C13",
+              "C14"
+            ],
+            "electrical_prep": [
+              "E01",
+              "E02",
+              "E03",
+              "E04",
+              "E05",
+              "E06",
+              "E07",
+              "E08",
+              "E09",
+              "E10"
+            ],
+            "yard_receive": [
+              "L03",
+              "L04"
+            ],
+            "workshop_prep": []
+          },
+          "projected_occupancy": {
+            "workshop": [
+              "P07",
+              "P08"
+            ],
+            "shelter_a": [
+              "C02",
+              "C03",
+              "C04",
+              "C05",
+              "C06",
+              "C07",
+              "C08",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "shelter_b": [],
+            "welfare": []
+          },
+          "projected_task_status": {
+            "civil_heavy": "held",
+            "civil_light": "active",
+            "electrical_prep": "active",
+            "yard_receive": "active",
+            "workshop_prep": "idle"
+          }
+        }
+      },
+      "check_request": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-supervision_unavailable",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "workers": [
+          {
+            "person_id": "C02",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C03",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C04",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C05",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C06",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C07",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C08",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C09",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C10",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C11",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C12",
+            "readiness": "unknown",
+            "availability": "available"
+          }
+        ],
+        "workshop": {
+          "fixed_occupant_ids": [
+            "P07",
+            "P08"
+          ],
+          "staffing_demand": {
+            "minimum": 1,
+            "maximum": 4
+          },
+          "permit_status": "valid",
+          "resource_status": "available",
+          "supervision_status": "unavailable"
+        },
+        "incidents": [],
+        "civil_measurement": null,
+        "proposed_worker_ids": []
+      },
+      "check_response": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-supervision_unavailable",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "input_fingerprint": "3e43198947ebbb59fda6a3b6fc4706b1133a68c563f784934427acc2be21448a",
+        "held_task_ids": [
+          "civil_heavy"
+        ],
+        "unavailable_worker_ids": [],
+        "responder_status": {},
+        "diagnostics": {
+          "blockers": [
+            "supervision"
+          ],
+          "free_workshop_places": 4,
+          "useful_staffing_limit": 4,
+          "missing_prerequisites": [
+            "supervision"
+          ],
+          "ineligible_workers": {
+            "C02": [
+              "qualification",
+              "readiness"
+            ],
+            "C03": [
+              "qualification",
+              "readiness"
+            ],
+            "C04": [
+              "qualification",
+              "readiness"
+            ],
+            "C09": [
+              "readiness"
+            ],
+            "C10": [
+              "readiness"
+            ],
+            "C11": [
+              "readiness"
+            ],
+            "C12": [
+              "readiness"
+            ]
+          }
+        },
+        "applied": false,
+        "accepted": true,
+        "violations": [],
+        "optimality": "not_evaluated",
+        "allocation": {
+          "task_id": "workshop_prep",
+          "worker_ids": [],
+          "projected_assignments": {
+            "civil_heavy": [
+              "C01",
+              "C02",
+              "C03",
+              "C04",
+              "C05",
+              "C06",
+              "C07",
+              "C08",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "civil_light": [
+              "C13",
+              "C14"
+            ],
+            "electrical_prep": [
+              "E01",
+              "E02",
+              "E03",
+              "E04",
+              "E05",
+              "E06",
+              "E07",
+              "E08",
+              "E09",
+              "E10"
+            ],
+            "yard_receive": [
+              "L03",
+              "L04"
+            ],
+            "workshop_prep": []
+          },
+          "projected_occupancy": {
+            "workshop": [
+              "P07",
+              "P08"
+            ],
+            "shelter_a": [
+              "C02",
+              "C03",
+              "C04",
+              "C05",
+              "C06",
+              "C07",
+              "C08",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "shelter_b": [],
+            "welfare": []
+          },
+          "projected_task_status": {
+            "civil_heavy": "held",
+            "civil_light": "active",
+            "electrical_prep": "active",
+            "yard_receive": "active",
+            "workshop_prep": "idle"
+          }
+        }
+      }
+    },
+    {
+      "id": "symptom_no_substitute",
+      "label": "Worker removed, no ready substitute",
+      "description": "C08 moves to welfare with P06 contacted; no medical outcome is inferred.",
+      "solve_request": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-symptom_no_substitute",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "workers": [
+          {
+            "person_id": "C02",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C03",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C04",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C05",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C06",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C07",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C08",
+            "readiness": "ready",
+            "availability": "unavailable"
+          },
+          {
+            "person_id": "C09",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C10",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C11",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C12",
+            "readiness": "unknown",
+            "availability": "available"
+          }
+        ],
+        "workshop": {
+          "fixed_occupant_ids": [
+            "P07",
+            "P08"
+          ],
+          "staffing_demand": {
+            "minimum": 1,
+            "maximum": 4
+          },
+          "permit_status": "valid",
+          "resource_status": "available",
+          "supervision_status": "available"
+        },
+        "incidents": [
+          {
+            "person_id": "C08",
+            "location_id": "welfare",
+            "responder_id": "P06",
+            "responder_status": "contacted"
+          }
+        ],
+        "civil_measurement": null
+      },
+      "solve_response": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-symptom_no_substitute",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "input_fingerprint": "fdf2a5805dee4b4e932f1bd4e36a58313a3a19c31beb0013c14788cdb2c1edb8",
+        "held_task_ids": [
+          "civil_heavy"
+        ],
+        "unavailable_worker_ids": [
+          "C08"
+        ],
+        "responder_status": {
+          "C08": {
+            "responder_id": "P06",
+            "status": "contacted"
+          }
+        },
+        "diagnostics": {
+          "blockers": [
+            "readiness",
+            "unavailable"
+          ],
+          "free_workshop_places": 4,
+          "useful_staffing_limit": 4,
+          "missing_prerequisites": [],
+          "ineligible_workers": {
+            "C02": [
+              "qualification",
+              "readiness"
+            ],
+            "C03": [
+              "qualification",
+              "readiness"
+            ],
+            "C04": [
+              "qualification",
+              "readiness"
+            ],
+            "C08": [
+              "unavailable"
+            ],
+            "C09": [
+              "readiness"
+            ],
+            "C10": [
+              "readiness"
+            ],
+            "C11": [
+              "readiness"
+            ],
+            "C12": [
+              "readiness"
+            ]
+          }
+        },
+        "applied": false,
+        "solver": {
+          "status": "OPTIMAL",
+          "optimal": true,
+          "version": "9.15.6755",
+          "parameters": {
+            "workers": 1,
+            "seed": 0,
+            "time_limit_seconds": 5.0
+          }
+        },
+        "allocation": {
+          "task_id": "workshop_prep",
+          "worker_ids": [
+            "C05",
+            "C06",
+            "C07"
+          ],
+          "projected_assignments": {
+            "civil_heavy": [
+              "C01",
+              "C02",
+              "C03",
+              "C04",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "civil_light": [
+              "C13",
+              "C14"
+            ],
+            "electrical_prep": [
+              "E01",
+              "E02",
+              "E03",
+              "E04",
+              "E05",
+              "E06",
+              "E07",
+              "E08",
+              "E09",
+              "E10"
+            ],
+            "yard_receive": [
+              "L03",
+              "L04"
+            ],
+            "workshop_prep": [
+              "C05",
+              "C06",
+              "C07"
+            ]
+          },
+          "projected_occupancy": {
+            "workshop": [
+              "P07",
+              "P08",
+              "C05",
+              "C06",
+              "C07"
+            ],
+            "shelter_a": [
+              "C02",
+              "C03",
+              "C04",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "shelter_b": [],
+            "welfare": [
+              "C08"
+            ]
+          },
+          "projected_task_status": {
+            "civil_heavy": "held",
+            "civil_light": "active",
+            "electrical_prep": "active",
+            "yard_receive": "active",
+            "workshop_prep": "active"
+          }
+        }
+      },
+      "check_request": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-symptom_no_substitute",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "workers": [
+          {
+            "person_id": "C02",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C03",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C04",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C05",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C06",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C07",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C08",
+            "readiness": "ready",
+            "availability": "unavailable"
+          },
+          {
+            "person_id": "C09",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C10",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C11",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C12",
+            "readiness": "unknown",
+            "availability": "available"
+          }
+        ],
+        "workshop": {
+          "fixed_occupant_ids": [
+            "P07",
+            "P08"
+          ],
+          "staffing_demand": {
+            "minimum": 1,
+            "maximum": 4
+          },
+          "permit_status": "valid",
+          "resource_status": "available",
+          "supervision_status": "available"
+        },
+        "incidents": [
+          {
+            "person_id": "C08",
+            "location_id": "welfare",
+            "responder_id": "P06",
+            "responder_status": "contacted"
+          }
+        ],
+        "civil_measurement": null,
+        "proposed_worker_ids": [
+          "C05",
+          "C06",
+          "C07"
+        ]
+      },
+      "check_response": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-symptom_no_substitute",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "input_fingerprint": "fdf2a5805dee4b4e932f1bd4e36a58313a3a19c31beb0013c14788cdb2c1edb8",
+        "held_task_ids": [
+          "civil_heavy"
+        ],
+        "unavailable_worker_ids": [
+          "C08"
+        ],
+        "responder_status": {
+          "C08": {
+            "responder_id": "P06",
+            "status": "contacted"
+          }
+        },
+        "diagnostics": {
+          "blockers": [
+            "readiness",
+            "unavailable"
+          ],
+          "free_workshop_places": 4,
+          "useful_staffing_limit": 4,
+          "missing_prerequisites": [],
+          "ineligible_workers": {
+            "C02": [
+              "qualification",
+              "readiness"
+            ],
+            "C03": [
+              "qualification",
+              "readiness"
+            ],
+            "C04": [
+              "qualification",
+              "readiness"
+            ],
+            "C08": [
+              "unavailable"
+            ],
+            "C09": [
+              "readiness"
+            ],
+            "C10": [
+              "readiness"
+            ],
+            "C11": [
+              "readiness"
+            ],
+            "C12": [
+              "readiness"
+            ]
+          }
+        },
+        "applied": false,
+        "accepted": true,
+        "violations": [],
+        "optimality": "not_evaluated",
+        "allocation": {
+          "task_id": "workshop_prep",
+          "worker_ids": [
+            "C05",
+            "C06",
+            "C07"
+          ],
+          "projected_assignments": {
+            "civil_heavy": [
+              "C01",
+              "C02",
+              "C03",
+              "C04",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "civil_light": [
+              "C13",
+              "C14"
+            ],
+            "electrical_prep": [
+              "E01",
+              "E02",
+              "E03",
+              "E04",
+              "E05",
+              "E06",
+              "E07",
+              "E08",
+              "E09",
+              "E10"
+            ],
+            "yard_receive": [
+              "L03",
+              "L04"
+            ],
+            "workshop_prep": [
+              "C05",
+              "C06",
+              "C07"
+            ]
+          },
+          "projected_occupancy": {
+            "workshop": [
+              "P07",
+              "P08",
+              "C05",
+              "C06",
+              "C07"
+            ],
+            "shelter_a": [
+              "C02",
+              "C03",
+              "C04",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "shelter_b": [],
+            "welfare": [
+              "C08"
+            ]
+          },
+          "projected_task_status": {
+            "civil_heavy": "held",
+            "civil_light": "active",
+            "electrical_prep": "active",
+            "yard_receive": "active",
+            "workshop_prep": "active"
+          }
+        }
+      }
+    },
+    {
+      "id": "symptom_substitute",
+      "label": "Worker removed, substitute confirmed",
+      "description": "C09 has a separate readiness confirmation and can replace unavailable C08.",
+      "solve_request": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-symptom_substitute",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "workers": [
+          {
+            "person_id": "C02",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C03",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C04",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C05",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C06",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C07",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C08",
+            "readiness": "ready",
+            "availability": "unavailable"
+          },
+          {
+            "person_id": "C09",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C10",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C11",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C12",
+            "readiness": "unknown",
+            "availability": "available"
+          }
+        ],
+        "workshop": {
+          "fixed_occupant_ids": [
+            "P07",
+            "P08"
+          ],
+          "staffing_demand": {
+            "minimum": 1,
+            "maximum": 4
+          },
+          "permit_status": "valid",
+          "resource_status": "available",
+          "supervision_status": "available"
+        },
+        "incidents": [
+          {
+            "person_id": "C08",
+            "location_id": "welfare",
+            "responder_id": "P06",
+            "responder_status": "contacted"
+          }
+        ],
+        "civil_measurement": null
+      },
+      "solve_response": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-symptom_substitute",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "input_fingerprint": "0fa06a0d51e14763b6fdb8620e18fcf1eba2d6ad928adda6fefd30afcab56af5",
+        "held_task_ids": [
+          "civil_heavy"
+        ],
+        "unavailable_worker_ids": [
+          "C08"
+        ],
+        "responder_status": {
+          "C08": {
+            "responder_id": "P06",
+            "status": "contacted"
+          }
+        },
+        "diagnostics": {
+          "blockers": [
+            "unavailable"
+          ],
+          "free_workshop_places": 4,
+          "useful_staffing_limit": 4,
+          "missing_prerequisites": [],
+          "ineligible_workers": {
+            "C02": [
+              "qualification",
+              "readiness"
+            ],
+            "C03": [
+              "qualification",
+              "readiness"
+            ],
+            "C04": [
+              "qualification",
+              "readiness"
+            ],
+            "C08": [
+              "unavailable"
+            ],
+            "C10": [
+              "readiness"
+            ],
+            "C11": [
+              "readiness"
+            ],
+            "C12": [
+              "readiness"
+            ]
+          }
+        },
+        "applied": false,
+        "solver": {
+          "status": "OPTIMAL",
+          "optimal": true,
+          "version": "9.15.6755",
+          "parameters": {
+            "workers": 1,
+            "seed": 0,
+            "time_limit_seconds": 5.0
+          }
+        },
+        "allocation": {
+          "task_id": "workshop_prep",
+          "worker_ids": [
+            "C05",
+            "C06",
+            "C07",
+            "C09"
+          ],
+          "projected_assignments": {
+            "civil_heavy": [
+              "C01",
+              "C02",
+              "C03",
+              "C04",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "civil_light": [
+              "C13",
+              "C14"
+            ],
+            "electrical_prep": [
+              "E01",
+              "E02",
+              "E03",
+              "E04",
+              "E05",
+              "E06",
+              "E07",
+              "E08",
+              "E09",
+              "E10"
+            ],
+            "yard_receive": [
+              "L03",
+              "L04"
+            ],
+            "workshop_prep": [
+              "C05",
+              "C06",
+              "C07",
+              "C09"
+            ]
+          },
+          "projected_occupancy": {
+            "workshop": [
+              "P07",
+              "P08",
+              "C05",
+              "C06",
+              "C07",
+              "C09"
+            ],
+            "shelter_a": [
+              "C02",
+              "C03",
+              "C04",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "shelter_b": [],
+            "welfare": [
+              "C08"
+            ]
+          },
+          "projected_task_status": {
+            "civil_heavy": "held",
+            "civil_light": "active",
+            "electrical_prep": "active",
+            "yard_receive": "active",
+            "workshop_prep": "active"
+          }
+        }
+      },
+      "check_request": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-symptom_substitute",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "workers": [
+          {
+            "person_id": "C02",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C03",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C04",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C05",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C06",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C07",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C08",
+            "readiness": "ready",
+            "availability": "unavailable"
+          },
+          {
+            "person_id": "C09",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C10",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C11",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C12",
+            "readiness": "unknown",
+            "availability": "available"
+          }
+        ],
+        "workshop": {
+          "fixed_occupant_ids": [
+            "P07",
+            "P08"
+          ],
+          "staffing_demand": {
+            "minimum": 1,
+            "maximum": 4
+          },
+          "permit_status": "valid",
+          "resource_status": "available",
+          "supervision_status": "available"
+        },
+        "incidents": [
+          {
+            "person_id": "C08",
+            "location_id": "welfare",
+            "responder_id": "P06",
+            "responder_status": "contacted"
+          }
+        ],
+        "civil_measurement": null,
+        "proposed_worker_ids": [
+          "C05",
+          "C06",
+          "C07",
+          "C09"
+        ]
+      },
+      "check_response": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-symptom_substitute",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "input_fingerprint": "0fa06a0d51e14763b6fdb8620e18fcf1eba2d6ad928adda6fefd30afcab56af5",
+        "held_task_ids": [
+          "civil_heavy"
+        ],
+        "unavailable_worker_ids": [
+          "C08"
+        ],
+        "responder_status": {
+          "C08": {
+            "responder_id": "P06",
+            "status": "contacted"
+          }
+        },
+        "diagnostics": {
+          "blockers": [
+            "unavailable"
+          ],
+          "free_workshop_places": 4,
+          "useful_staffing_limit": 4,
+          "missing_prerequisites": [],
+          "ineligible_workers": {
+            "C02": [
+              "qualification",
+              "readiness"
+            ],
+            "C03": [
+              "qualification",
+              "readiness"
+            ],
+            "C04": [
+              "qualification",
+              "readiness"
+            ],
+            "C08": [
+              "unavailable"
+            ],
+            "C10": [
+              "readiness"
+            ],
+            "C11": [
+              "readiness"
+            ],
+            "C12": [
+              "readiness"
+            ]
+          }
+        },
+        "applied": false,
+        "accepted": true,
+        "violations": [],
+        "optimality": "not_evaluated",
+        "allocation": {
+          "task_id": "workshop_prep",
+          "worker_ids": [
+            "C05",
+            "C06",
+            "C07",
+            "C09"
+          ],
+          "projected_assignments": {
+            "civil_heavy": [
+              "C01",
+              "C02",
+              "C03",
+              "C04",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "civil_light": [
+              "C13",
+              "C14"
+            ],
+            "electrical_prep": [
+              "E01",
+              "E02",
+              "E03",
+              "E04",
+              "E05",
+              "E06",
+              "E07",
+              "E08",
+              "E09",
+              "E10"
+            ],
+            "yard_receive": [
+              "L03",
+              "L04"
+            ],
+            "workshop_prep": [
+              "C05",
+              "C06",
+              "C07",
+              "C09"
+            ]
+          },
+          "projected_occupancy": {
+            "workshop": [
+              "P07",
+              "P08",
+              "C05",
+              "C06",
+              "C07",
+              "C09"
+            ],
+            "shelter_a": [
+              "C02",
+              "C03",
+              "C04",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "shelter_b": [],
+            "welfare": [
+              "C08"
+            ]
+          },
+          "projected_task_status": {
+            "civil_heavy": "held",
+            "civil_light": "active",
+            "electrical_prep": "active",
+            "yard_receive": "active",
+            "workshop_prep": "active"
+          }
+        }
+      }
+    },
+    {
+      "id": "whole_crew",
+      "label": "Whole-crew proposal rejected",
+      "description": "Check rejects fourteen workers; a separate solve call proposes a four-worker replacement.",
+      "solve_request": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-whole_crew",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "workers": [
+          {
+            "person_id": "C02",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C03",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C04",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C05",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C06",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C07",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C08",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C09",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C10",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C11",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C12",
+            "readiness": "unknown",
+            "availability": "available"
+          }
+        ],
+        "workshop": {
+          "fixed_occupant_ids": [
+            "P07",
+            "P08"
+          ],
+          "staffing_demand": {
+            "minimum": 1,
+            "maximum": 4
+          },
+          "permit_status": "valid",
+          "resource_status": "available",
+          "supervision_status": "available"
+        },
+        "incidents": [],
+        "civil_measurement": null
+      },
+      "solve_response": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-whole_crew",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "input_fingerprint": "ef93b0be8606cf8508d25ac8747f49bab18af0bd660f11ceee0c9fc6bb07b4a5",
+        "held_task_ids": [
+          "civil_heavy"
+        ],
+        "unavailable_worker_ids": [],
+        "responder_status": {},
+        "diagnostics": {
+          "blockers": [],
+          "free_workshop_places": 4,
+          "useful_staffing_limit": 4,
+          "missing_prerequisites": [],
+          "ineligible_workers": {
+            "C02": [
+              "qualification",
+              "readiness"
+            ],
+            "C03": [
+              "qualification",
+              "readiness"
+            ],
+            "C04": [
+              "qualification",
+              "readiness"
+            ],
+            "C09": [
+              "readiness"
+            ],
+            "C10": [
+              "readiness"
+            ],
+            "C11": [
+              "readiness"
+            ],
+            "C12": [
+              "readiness"
+            ]
+          }
+        },
+        "applied": false,
+        "solver": {
+          "status": "OPTIMAL",
+          "optimal": true,
+          "version": "9.15.6755",
+          "parameters": {
+            "workers": 1,
+            "seed": 0,
+            "time_limit_seconds": 5.0
+          }
+        },
+        "allocation": {
+          "task_id": "workshop_prep",
+          "worker_ids": [
+            "C05",
+            "C06",
+            "C07",
+            "C08"
+          ],
+          "projected_assignments": {
+            "civil_heavy": [
+              "C01",
+              "C02",
+              "C03",
+              "C04",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "civil_light": [
+              "C13",
+              "C14"
+            ],
+            "electrical_prep": [
+              "E01",
+              "E02",
+              "E03",
+              "E04",
+              "E05",
+              "E06",
+              "E07",
+              "E08",
+              "E09",
+              "E10"
+            ],
+            "yard_receive": [
+              "L03",
+              "L04"
+            ],
+            "workshop_prep": [
+              "C05",
+              "C06",
+              "C07",
+              "C08"
+            ]
+          },
+          "projected_occupancy": {
+            "workshop": [
+              "P07",
+              "P08",
+              "C05",
+              "C06",
+              "C07",
+              "C08"
+            ],
+            "shelter_a": [
+              "C02",
+              "C03",
+              "C04",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "shelter_b": [],
+            "welfare": []
+          },
+          "projected_task_status": {
+            "civil_heavy": "held",
+            "civil_light": "active",
+            "electrical_prep": "active",
+            "yard_receive": "active",
+            "workshop_prep": "active"
+          }
+        }
+      },
+      "check_request": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-whole_crew",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "workers": [
+          {
+            "person_id": "C02",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C03",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C04",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C05",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C06",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C07",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C08",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C09",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C10",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C11",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C12",
+            "readiness": "unknown",
+            "availability": "available"
+          }
+        ],
+        "workshop": {
+          "fixed_occupant_ids": [
+            "P07",
+            "P08"
+          ],
+          "staffing_demand": {
+            "minimum": 1,
+            "maximum": 4
+          },
+          "permit_status": "valid",
+          "resource_status": "available",
+          "supervision_status": "available"
+        },
+        "incidents": [],
+        "civil_measurement": null,
+        "proposed_worker_ids": [
+          "C01",
+          "C02",
+          "C03",
+          "C04",
+          "C05",
+          "C06",
+          "C07",
+          "C08",
+          "C09",
+          "C10",
+          "C11",
+          "C12",
+          "C13",
+          "C14"
+        ]
+      },
+      "check_response": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-whole_crew",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "input_fingerprint": "ef93b0be8606cf8508d25ac8747f49bab18af0bd660f11ceee0c9fc6bb07b4a5",
+        "held_task_ids": [
+          "civil_heavy"
+        ],
+        "unavailable_worker_ids": [],
+        "responder_status": {},
+        "diagnostics": {
+          "blockers": [],
+          "free_workshop_places": 4,
+          "useful_staffing_limit": 4,
+          "missing_prerequisites": [],
+          "ineligible_workers": {
+            "C02": [
+              "qualification",
+              "readiness"
+            ],
+            "C03": [
+              "qualification",
+              "readiness"
+            ],
+            "C04": [
+              "qualification",
+              "readiness"
+            ],
+            "C09": [
+              "readiness"
+            ],
+            "C10": [
+              "readiness"
+            ],
+            "C11": [
+              "readiness"
+            ],
+            "C12": [
+              "readiness"
+            ]
+          }
+        },
+        "applied": false,
+        "accepted": false,
+        "violations": [
+          "capacity",
+          "demand",
+          "outside_candidate_pool",
+          "qualification",
+          "readiness"
+        ],
+        "optimality": "not_evaluated",
+        "allocation": {
+          "task_id": "workshop_prep",
+          "worker_ids": [],
+          "projected_assignments": {
+            "civil_heavy": [
+              "C01",
+              "C02",
+              "C03",
+              "C04",
+              "C05",
+              "C06",
+              "C07",
+              "C08",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "civil_light": [
+              "C13",
+              "C14"
+            ],
+            "electrical_prep": [
+              "E01",
+              "E02",
+              "E03",
+              "E04",
+              "E05",
+              "E06",
+              "E07",
+              "E08",
+              "E09",
+              "E10"
+            ],
+            "yard_receive": [
+              "L03",
+              "L04"
+            ],
+            "workshop_prep": []
+          },
+          "projected_occupancy": {
+            "workshop": [
+              "P07",
+              "P08"
+            ],
+            "shelter_a": [
+              "C02",
+              "C03",
+              "C04",
+              "C05",
+              "C06",
+              "C07",
+              "C08",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "shelter_b": [],
+            "welfare": []
+          },
+          "projected_task_status": {
+            "civil_heavy": "held",
+            "civil_light": "active",
+            "electrical_prep": "active",
+            "yard_receive": "active",
+            "workshop_prep": "idle"
+          }
+        }
+      }
+    },
+    {
+      "id": "improved_reading",
+      "label": "Reading improves, hold remains",
+      "description": "A new TWL reading does not authorise a restart.",
+      "solve_request": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-improved_reading",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "workers": [
+          {
+            "person_id": "C02",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C03",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C04",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C05",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C06",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C07",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C08",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C09",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C10",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C11",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C12",
+            "readiness": "unknown",
+            "availability": "available"
+          }
+        ],
+        "workshop": {
+          "fixed_occupant_ids": [
+            "P07",
+            "P08"
+          ],
+          "staffing_demand": {
+            "minimum": 1,
+            "maximum": 4
+          },
+          "permit_status": "valid",
+          "resource_status": "available",
+          "supervision_status": "available"
+        },
+        "incidents": [],
+        "civil_measurement": {
+          "sensor_id": "t1",
+          "zone_id": "civil_exposed",
+          "twl": 175,
+          "measured_at": "2025-08-04T08:10:40+04:00",
+          "unit": "W/m²",
+          "quality": "valid"
+        }
+      },
+      "solve_response": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-improved_reading",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "input_fingerprint": "6be023effbe9441c9901016d0cfc9efe93c71fe64782e559906f9f1f06d8896e",
+        "held_task_ids": [
+          "civil_heavy"
+        ],
+        "unavailable_worker_ids": [],
+        "responder_status": {},
+        "diagnostics": {
+          "blockers": [],
+          "free_workshop_places": 4,
+          "useful_staffing_limit": 4,
+          "missing_prerequisites": [],
+          "ineligible_workers": {
+            "C02": [
+              "qualification",
+              "readiness"
+            ],
+            "C03": [
+              "qualification",
+              "readiness"
+            ],
+            "C04": [
+              "qualification",
+              "readiness"
+            ],
+            "C09": [
+              "readiness"
+            ],
+            "C10": [
+              "readiness"
+            ],
+            "C11": [
+              "readiness"
+            ],
+            "C12": [
+              "readiness"
+            ]
+          }
+        },
+        "applied": false,
+        "solver": {
+          "status": "OPTIMAL",
+          "optimal": true,
+          "version": "9.15.6755",
+          "parameters": {
+            "workers": 1,
+            "seed": 0,
+            "time_limit_seconds": 5.0
+          }
+        },
+        "allocation": {
+          "task_id": "workshop_prep",
+          "worker_ids": [
+            "C05",
+            "C06",
+            "C07",
+            "C08"
+          ],
+          "projected_assignments": {
+            "civil_heavy": [
+              "C01",
+              "C02",
+              "C03",
+              "C04",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "civil_light": [
+              "C13",
+              "C14"
+            ],
+            "electrical_prep": [
+              "E01",
+              "E02",
+              "E03",
+              "E04",
+              "E05",
+              "E06",
+              "E07",
+              "E08",
+              "E09",
+              "E10"
+            ],
+            "yard_receive": [
+              "L03",
+              "L04"
+            ],
+            "workshop_prep": [
+              "C05",
+              "C06",
+              "C07",
+              "C08"
+            ]
+          },
+          "projected_occupancy": {
+            "workshop": [
+              "P07",
+              "P08",
+              "C05",
+              "C06",
+              "C07",
+              "C08"
+            ],
+            "shelter_a": [
+              "C02",
+              "C03",
+              "C04",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "shelter_b": [],
+            "welfare": []
+          },
+          "projected_task_status": {
+            "civil_heavy": "held",
+            "civil_light": "active",
+            "electrical_prep": "active",
+            "yard_receive": "active",
+            "workshop_prep": "active"
+          }
+        }
+      },
+      "check_request": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-improved_reading",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "workers": [
+          {
+            "person_id": "C02",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C03",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C04",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C05",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C06",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C07",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C08",
+            "readiness": "ready",
+            "availability": "available"
+          },
+          {
+            "person_id": "C09",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C10",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C11",
+            "readiness": "unknown",
+            "availability": "available"
+          },
+          {
+            "person_id": "C12",
+            "readiness": "unknown",
+            "availability": "available"
+          }
+        ],
+        "workshop": {
+          "fixed_occupant_ids": [
+            "P07",
+            "P08"
+          ],
+          "staffing_demand": {
+            "minimum": 1,
+            "maximum": 4
+          },
+          "permit_status": "valid",
+          "resource_status": "available",
+          "supervision_status": "available"
+        },
+        "incidents": [],
+        "civil_measurement": {
+          "sensor_id": "t1",
+          "zone_id": "civil_exposed",
+          "twl": 175,
+          "measured_at": "2025-08-04T08:10:40+04:00",
+          "unit": "W/m²",
+          "quality": "valid"
+        },
+        "proposed_worker_ids": [
+          "C05",
+          "C06",
+          "C07",
+          "C08"
+        ]
+      },
+      "check_response": {
+        "schema_version": "1.0",
+        "request_id": "walkthrough-improved_reading",
+        "profile_id": "sandline_demo_v1",
+        "decision_at": "2025-08-04T08:10:45+04:00",
+        "input_fingerprint": "6be023effbe9441c9901016d0cfc9efe93c71fe64782e559906f9f1f06d8896e",
+        "held_task_ids": [
+          "civil_heavy"
+        ],
+        "unavailable_worker_ids": [],
+        "responder_status": {},
+        "diagnostics": {
+          "blockers": [],
+          "free_workshop_places": 4,
+          "useful_staffing_limit": 4,
+          "missing_prerequisites": [],
+          "ineligible_workers": {
+            "C02": [
+              "qualification",
+              "readiness"
+            ],
+            "C03": [
+              "qualification",
+              "readiness"
+            ],
+            "C04": [
+              "qualification",
+              "readiness"
+            ],
+            "C09": [
+              "readiness"
+            ],
+            "C10": [
+              "readiness"
+            ],
+            "C11": [
+              "readiness"
+            ],
+            "C12": [
+              "readiness"
+            ]
+          }
+        },
+        "applied": false,
+        "accepted": true,
+        "violations": [],
+        "optimality": "not_evaluated",
+        "allocation": {
+          "task_id": "workshop_prep",
+          "worker_ids": [
+            "C05",
+            "C06",
+            "C07",
+            "C08"
+          ],
+          "projected_assignments": {
+            "civil_heavy": [
+              "C01",
+              "C02",
+              "C03",
+              "C04",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "civil_light": [
+              "C13",
+              "C14"
+            ],
+            "electrical_prep": [
+              "E01",
+              "E02",
+              "E03",
+              "E04",
+              "E05",
+              "E06",
+              "E07",
+              "E08",
+              "E09",
+              "E10"
+            ],
+            "yard_receive": [
+              "L03",
+              "L04"
+            ],
+            "workshop_prep": [
+              "C05",
+              "C06",
+              "C07",
+              "C08"
+            ]
+          },
+          "projected_occupancy": {
+            "workshop": [
+              "P07",
+              "P08",
+              "C05",
+              "C06",
+              "C07",
+              "C08"
+            ],
+            "shelter_a": [
+              "C02",
+              "C03",
+              "C04",
+              "C09",
+              "C10",
+              "C11",
+              "C12"
+            ],
+            "shelter_b": [],
+            "welfare": []
+          },
+          "projected_task_status": {
+            "civil_heavy": "held",
+            "civil_light": "active",
+            "electrical_prep": "active",
+            "yard_receive": "active",
+            "workshop_prep": "active"
+          }
+        }
+      }
+    }
+  ],
+  "schema": {
+    "solve_request": {
+      "$defs": {
+        "IncidentInput": {
+          "additionalProperties": false,
+          "properties": {
+            "person_id": {
+              "title": "Person Id",
+              "type": "string"
+            },
+            "location_id": {
+              "const": "welfare",
+              "title": "Location Id",
+              "type": "string"
+            },
+            "responder_id": {
+              "const": "P06",
+              "title": "Responder Id",
+              "type": "string"
+            },
+            "responder_status": {
+              "const": "contacted",
+              "title": "Responder Status",
+              "type": "string"
+            }
+          },
+          "required": [
+            "person_id",
+            "location_id",
+            "responder_id",
+            "responder_status"
+          ],
+          "title": "IncidentInput",
+          "type": "object"
+        },
+        "MeasurementInput": {
+          "additionalProperties": false,
+          "properties": {
+            "sensor_id": {
+              "const": "t1",
+              "title": "Sensor Id",
+              "type": "string"
+            },
+            "zone_id": {
+              "const": "civil_exposed",
+              "title": "Zone Id",
+              "type": "string"
+            },
+            "twl": {
+              "exclusiveMaximum": 500,
+              "exclusiveMinimum": 0,
+              "title": "Twl",
+              "type": "number"
+            },
+            "measured_at": {
+              "format": "date-time",
+              "title": "Measured At",
+              "type": "string"
+            },
+            "unit": {
+              "const": "W/m²",
+              "title": "Unit",
+              "type": "string"
+            },
+            "quality": {
+              "const": "valid",
+              "title": "Quality",
+              "type": "string"
+            }
+          },
+          "required": [
+            "sensor_id",
+            "zone_id",
+            "twl",
+            "measured_at",
+            "unit",
+            "quality"
+          ],
+          "title": "MeasurementInput",
+          "type": "object"
+        },
+        "StaffingDemand": {
+          "additionalProperties": false,
+          "properties": {
+            "minimum": {
+              "const": 1,
+              "title": "Minimum",
+              "type": "integer"
+            },
+            "maximum": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Null means the useful staffing limit is unknown.",
+              "title": "Maximum"
+            }
+          },
+          "required": [
+            "minimum",
+            "maximum"
+          ],
+          "title": "StaffingDemand",
+          "type": "object"
+        },
+        "WorkerInput": {
+          "additionalProperties": false,
+          "properties": {
+            "person_id": {
+              "description": "One member of the frozen recovery pool.",
+              "enum": [
+                "C02",
+                "C03",
+                "C04",
+                "C05",
+                "C06",
+                "C07",
+                "C08",
+                "C09",
+                "C10",
+                "C11",
+                "C12"
+              ],
+              "title": "Person Id",
+              "type": "string"
+            },
+            "readiness": {
+              "description": "Caller supplied immediate suitability for light supervised workshop work; not a medical diagnosis.",
+              "enum": [
+                "ready",
+                "not_ready",
+                "unknown"
+              ],
+              "title": "Readiness",
+              "type": "string"
+            },
+            "availability": {
+              "enum": [
+                "available",
+                "unavailable"
+              ],
+              "title": "Availability",
+              "type": "string"
+            }
+          },
+          "required": [
+            "person_id",
+            "readiness",
+            "availability"
+          ],
+          "title": "WorkerInput",
+          "type": "object"
+        },
+        "WorkshopInput": {
+          "additionalProperties": false,
+          "properties": {
+            "fixed_occupant_ids": {
+              "description": "People already in the six-seat workshop, including P07 and P08.",
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 6,
+              "minItems": 2,
+              "title": "Fixed Occupant Ids",
+              "type": "array"
+            },
+            "staffing_demand": {
+              "$ref": "#/$defs/StaffingDemand"
+            },
+            "permit_status": {
+              "description": "Caller claim about the frozen workshop permit; the server retains the permit definition.",
+              "enum": [
+                "valid",
+                "unavailable",
+                "unknown"
+              ],
+              "title": "Permit Status",
+              "type": "string"
+            },
+            "resource_status": {
+              "enum": [
+                "available",
+                "unavailable",
+                "unknown"
+              ],
+              "title": "Resource Status",
+              "type": "string"
+            },
+            "supervision_status": {
+              "description": "Shared external C01 supervision approved by P02 for workshop_prep and civil_light.",
+              "enum": [
+                "available",
+                "unavailable",
+                "unknown"
+              ],
+              "title": "Supervision Status",
+              "type": "string"
+            }
+          },
+          "required": [
+            "fixed_occupant_ids",
+            "staffing_demand",
+            "permit_status",
+            "resource_status",
+            "supervision_status"
+          ],
+          "title": "WorkshopInput",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "request_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Request Id",
+          "type": "string"
+        },
+        "profile_id": {
+          "const": "sandline_demo_v1",
+          "description": "Fixed fictional site profile with server-owned workers, qualifications, capacities and gates.",
+          "title": "Profile Id",
+          "type": "string"
+        },
+        "decision_at": {
+          "format": "date-time",
+          "title": "Decision At",
+          "type": "string"
+        },
+        "workers": {
+          "description": "Exactly the original eleven C02–C12 recovery workers.",
+          "items": {
+            "$ref": "#/$defs/WorkerInput"
+          },
+          "maxItems": 11,
+          "minItems": 11,
+          "title": "Workers",
+          "type": "array"
+        },
+        "workshop": {
+          "$ref": "#/$defs/WorkshopInput"
+        },
+        "incidents": {
+          "items": {
+            "$ref": "#/$defs/IncidentInput"
+          },
+          "title": "Incidents",
+          "type": "array"
+        },
+        "civil_measurement": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MeasurementInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "request_id",
+        "profile_id",
+        "decision_at",
+        "workers",
+        "workshop",
+        "incidents",
+        "civil_measurement"
+      ],
+      "title": "SolveRequest",
+      "type": "object"
+    },
+    "solve_response": {
+      "$defs": {
+        "AllocationProjection": {
+          "additionalProperties": false,
+          "properties": {
+            "task_id": {
+              "const": "workshop_prep",
+              "title": "Task Id",
+              "type": "string"
+            },
+            "worker_ids": {
+              "items": {
+                "type": "string"
+              },
+              "title": "Worker Ids",
+              "type": "array"
+            },
+            "projected_assignments": {
+              "additionalProperties": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "title": "Projected Assignments",
+              "type": "object"
+            },
+            "projected_occupancy": {
+              "additionalProperties": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "title": "Projected Occupancy",
+              "type": "object"
+            },
+            "projected_task_status": {
+              "additionalProperties": {
+                "enum": [
+                  "active",
+                  "held",
+                  "idle"
+                ],
+                "type": "string"
+              },
+              "title": "Projected Task Status",
+              "type": "object"
+            }
+          },
+          "required": [
+            "task_id",
+            "worker_ids",
+            "projected_assignments",
+            "projected_occupancy",
+            "projected_task_status"
+          ],
+          "title": "AllocationProjection",
+          "type": "object"
+        },
+        "Diagnostics": {
+          "additionalProperties": false,
+          "properties": {
+            "blockers": {
+              "items": {
+                "type": "string"
+              },
+              "title": "Blockers",
+              "type": "array"
+            },
+            "free_workshop_places": {
+              "title": "Free Workshop Places",
+              "type": "integer"
+            },
+            "useful_staffing_limit": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Useful Staffing Limit"
+            },
+            "missing_prerequisites": {
+              "items": {
+                "type": "string"
+              },
+              "title": "Missing Prerequisites",
+              "type": "array"
+            },
+            "ineligible_workers": {
+              "additionalProperties": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "title": "Ineligible Workers",
+              "type": "object"
+            }
+          },
+          "required": [
+            "blockers",
+            "free_workshop_places",
+            "useful_staffing_limit",
+            "missing_prerequisites",
+            "ineligible_workers"
+          ],
+          "title": "Diagnostics",
+          "type": "object"
+        },
+        "IncidentContact": {
+          "additionalProperties": false,
+          "properties": {
+            "responder_id": {
+              "const": "P06",
+              "title": "Responder Id",
+              "type": "string"
+            },
+            "status": {
+              "const": "contacted",
+              "title": "Status",
+              "type": "string"
+            }
+          },
+          "required": [
+            "responder_id",
+            "status"
+          ],
+          "title": "IncidentContact",
+          "type": "object"
+        },
+        "SolverInfo": {
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "enum": [
+                "OPTIMAL",
+                "FEASIBLE",
+                "INFEASIBLE",
+                "UNKNOWN",
+                "MODEL_INVALID"
+              ],
+              "title": "Status",
+              "type": "string"
+            },
+            "optimal": {
+              "title": "Optimal",
+              "type": "boolean"
+            },
+            "version": {
+              "title": "Version",
+              "type": "string"
+            },
+            "parameters": {
+              "$ref": "#/$defs/SolverParameters"
+            }
+          },
+          "required": [
+            "status",
+            "optimal",
+            "version",
+            "parameters"
+          ],
+          "title": "SolverInfo",
+          "type": "object"
+        },
+        "SolverParameters": {
+          "additionalProperties": false,
+          "properties": {
+            "workers": {
+              "title": "Workers",
+              "type": "integer"
+            },
+            "seed": {
+              "title": "Seed",
+              "type": "integer"
+            },
+            "time_limit_seconds": {
+              "title": "Time Limit Seconds",
+              "type": "number"
+            }
+          },
+          "required": [
+            "workers",
+            "seed",
+            "time_limit_seconds"
+          ],
+          "title": "SolverParameters",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "request_id": {
+          "title": "Request Id",
+          "type": "string"
+        },
+        "profile_id": {
+          "const": "sandline_demo_v1",
+          "title": "Profile Id",
+          "type": "string"
+        },
+        "decision_at": {
+          "format": "date-time",
+          "title": "Decision At",
+          "type": "string"
+        },
+        "input_fingerprint": {
+          "title": "Input Fingerprint",
+          "type": "string"
+        },
+        "held_task_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Held Task Ids",
+          "type": "array"
+        },
+        "unavailable_worker_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Unavailable Worker Ids",
+          "type": "array"
+        },
+        "responder_status": {
+          "additionalProperties": {
+            "$ref": "#/$defs/IncidentContact"
+          },
+          "title": "Responder Status",
+          "type": "object"
+        },
+        "diagnostics": {
+          "$ref": "#/$defs/Diagnostics"
+        },
+        "applied": {
+          "const": false,
+          "title": "Applied",
+          "type": "boolean"
+        },
+        "solver": {
+          "$ref": "#/$defs/SolverInfo"
+        },
+        "allocation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AllocationProjection"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "request_id",
+        "profile_id",
+        "decision_at",
+        "input_fingerprint",
+        "held_task_ids",
+        "unavailable_worker_ids",
+        "responder_status",
+        "diagnostics",
+        "applied",
+        "solver",
+        "allocation"
+      ],
+      "title": "SolveResponse",
+      "type": "object"
+    },
+    "check_request": {
+      "$defs": {
+        "IncidentInput": {
+          "additionalProperties": false,
+          "properties": {
+            "person_id": {
+              "title": "Person Id",
+              "type": "string"
+            },
+            "location_id": {
+              "const": "welfare",
+              "title": "Location Id",
+              "type": "string"
+            },
+            "responder_id": {
+              "const": "P06",
+              "title": "Responder Id",
+              "type": "string"
+            },
+            "responder_status": {
+              "const": "contacted",
+              "title": "Responder Status",
+              "type": "string"
+            }
+          },
+          "required": [
+            "person_id",
+            "location_id",
+            "responder_id",
+            "responder_status"
+          ],
+          "title": "IncidentInput",
+          "type": "object"
+        },
+        "MeasurementInput": {
+          "additionalProperties": false,
+          "properties": {
+            "sensor_id": {
+              "const": "t1",
+              "title": "Sensor Id",
+              "type": "string"
+            },
+            "zone_id": {
+              "const": "civil_exposed",
+              "title": "Zone Id",
+              "type": "string"
+            },
+            "twl": {
+              "exclusiveMaximum": 500,
+              "exclusiveMinimum": 0,
+              "title": "Twl",
+              "type": "number"
+            },
+            "measured_at": {
+              "format": "date-time",
+              "title": "Measured At",
+              "type": "string"
+            },
+            "unit": {
+              "const": "W/m²",
+              "title": "Unit",
+              "type": "string"
+            },
+            "quality": {
+              "const": "valid",
+              "title": "Quality",
+              "type": "string"
+            }
+          },
+          "required": [
+            "sensor_id",
+            "zone_id",
+            "twl",
+            "measured_at",
+            "unit",
+            "quality"
+          ],
+          "title": "MeasurementInput",
+          "type": "object"
+        },
+        "StaffingDemand": {
+          "additionalProperties": false,
+          "properties": {
+            "minimum": {
+              "const": 1,
+              "title": "Minimum",
+              "type": "integer"
+            },
+            "maximum": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Null means the useful staffing limit is unknown.",
+              "title": "Maximum"
+            }
+          },
+          "required": [
+            "minimum",
+            "maximum"
+          ],
+          "title": "StaffingDemand",
+          "type": "object"
+        },
+        "WorkerInput": {
+          "additionalProperties": false,
+          "properties": {
+            "person_id": {
+              "description": "One member of the frozen recovery pool.",
+              "enum": [
+                "C02",
+                "C03",
+                "C04",
+                "C05",
+                "C06",
+                "C07",
+                "C08",
+                "C09",
+                "C10",
+                "C11",
+                "C12"
+              ],
+              "title": "Person Id",
+              "type": "string"
+            },
+            "readiness": {
+              "description": "Caller supplied immediate suitability for light supervised workshop work; not a medical diagnosis.",
+              "enum": [
+                "ready",
+                "not_ready",
+                "unknown"
+              ],
+              "title": "Readiness",
+              "type": "string"
+            },
+            "availability": {
+              "enum": [
+                "available",
+                "unavailable"
+              ],
+              "title": "Availability",
+              "type": "string"
+            }
+          },
+          "required": [
+            "person_id",
+            "readiness",
+            "availability"
+          ],
+          "title": "WorkerInput",
+          "type": "object"
+        },
+        "WorkshopInput": {
+          "additionalProperties": false,
+          "properties": {
+            "fixed_occupant_ids": {
+              "description": "People already in the six-seat workshop, including P07 and P08.",
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 6,
+              "minItems": 2,
+              "title": "Fixed Occupant Ids",
+              "type": "array"
+            },
+            "staffing_demand": {
+              "$ref": "#/$defs/StaffingDemand"
+            },
+            "permit_status": {
+              "description": "Caller claim about the frozen workshop permit; the server retains the permit definition.",
+              "enum": [
+                "valid",
+                "unavailable",
+                "unknown"
+              ],
+              "title": "Permit Status",
+              "type": "string"
+            },
+            "resource_status": {
+              "enum": [
+                "available",
+                "unavailable",
+                "unknown"
+              ],
+              "title": "Resource Status",
+              "type": "string"
+            },
+            "supervision_status": {
+              "description": "Shared external C01 supervision approved by P02 for workshop_prep and civil_light.",
+              "enum": [
+                "available",
+                "unavailable",
+                "unknown"
+              ],
+              "title": "Supervision Status",
+              "type": "string"
+            }
+          },
+          "required": [
+            "fixed_occupant_ids",
+            "staffing_demand",
+            "permit_status",
+            "resource_status",
+            "supervision_status"
+          ],
+          "title": "WorkshopInput",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "request_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Request Id",
+          "type": "string"
+        },
+        "profile_id": {
+          "const": "sandline_demo_v1",
+          "description": "Fixed fictional site profile with server-owned workers, qualifications, capacities and gates.",
+          "title": "Profile Id",
+          "type": "string"
+        },
+        "decision_at": {
+          "format": "date-time",
+          "title": "Decision At",
+          "type": "string"
+        },
+        "workers": {
+          "description": "Exactly the original eleven C02–C12 recovery workers.",
+          "items": {
+            "$ref": "#/$defs/WorkerInput"
+          },
+          "maxItems": 11,
+          "minItems": 11,
+          "title": "Workers",
+          "type": "array"
+        },
+        "workshop": {
+          "$ref": "#/$defs/WorkshopInput"
+        },
+        "incidents": {
+          "items": {
+            "$ref": "#/$defs/IncidentInput"
+          },
+          "title": "Incidents",
+          "type": "array"
+        },
+        "civil_measurement": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MeasurementInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "proposed_worker_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Proposed Worker Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema_version",
+        "request_id",
+        "profile_id",
+        "decision_at",
+        "workers",
+        "workshop",
+        "incidents",
+        "civil_measurement",
+        "proposed_worker_ids"
+      ],
+      "title": "CheckRequest",
+      "type": "object"
+    },
+    "check_response": {
+      "$defs": {
+        "AllocationProjection": {
+          "additionalProperties": false,
+          "properties": {
+            "task_id": {
+              "const": "workshop_prep",
+              "title": "Task Id",
+              "type": "string"
+            },
+            "worker_ids": {
+              "items": {
+                "type": "string"
+              },
+              "title": "Worker Ids",
+              "type": "array"
+            },
+            "projected_assignments": {
+              "additionalProperties": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "title": "Projected Assignments",
+              "type": "object"
+            },
+            "projected_occupancy": {
+              "additionalProperties": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "title": "Projected Occupancy",
+              "type": "object"
+            },
+            "projected_task_status": {
+              "additionalProperties": {
+                "enum": [
+                  "active",
+                  "held",
+                  "idle"
+                ],
+                "type": "string"
+              },
+              "title": "Projected Task Status",
+              "type": "object"
+            }
+          },
+          "required": [
+            "task_id",
+            "worker_ids",
+            "projected_assignments",
+            "projected_occupancy",
+            "projected_task_status"
+          ],
+          "title": "AllocationProjection",
+          "type": "object"
+        },
+        "Diagnostics": {
+          "additionalProperties": false,
+          "properties": {
+            "blockers": {
+              "items": {
+                "type": "string"
+              },
+              "title": "Blockers",
+              "type": "array"
+            },
+            "free_workshop_places": {
+              "title": "Free Workshop Places",
+              "type": "integer"
+            },
+            "useful_staffing_limit": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Useful Staffing Limit"
+            },
+            "missing_prerequisites": {
+              "items": {
+                "type": "string"
+              },
+              "title": "Missing Prerequisites",
+              "type": "array"
+            },
+            "ineligible_workers": {
+              "additionalProperties": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "title": "Ineligible Workers",
+              "type": "object"
+            }
+          },
+          "required": [
+            "blockers",
+            "free_workshop_places",
+            "useful_staffing_limit",
+            "missing_prerequisites",
+            "ineligible_workers"
+          ],
+          "title": "Diagnostics",
+          "type": "object"
+        },
+        "IncidentContact": {
+          "additionalProperties": false,
+          "properties": {
+            "responder_id": {
+              "const": "P06",
+              "title": "Responder Id",
+              "type": "string"
+            },
+            "status": {
+              "const": "contacted",
+              "title": "Status",
+              "type": "string"
+            }
+          },
+          "required": [
+            "responder_id",
+            "status"
+          ],
+          "title": "IncidentContact",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "request_id": {
+          "title": "Request Id",
+          "type": "string"
+        },
+        "profile_id": {
+          "const": "sandline_demo_v1",
+          "title": "Profile Id",
+          "type": "string"
+        },
+        "decision_at": {
+          "format": "date-time",
+          "title": "Decision At",
+          "type": "string"
+        },
+        "input_fingerprint": {
+          "title": "Input Fingerprint",
+          "type": "string"
+        },
+        "held_task_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Held Task Ids",
+          "type": "array"
+        },
+        "unavailable_worker_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Unavailable Worker Ids",
+          "type": "array"
+        },
+        "responder_status": {
+          "additionalProperties": {
+            "$ref": "#/$defs/IncidentContact"
+          },
+          "title": "Responder Status",
+          "type": "object"
+        },
+        "diagnostics": {
+          "$ref": "#/$defs/Diagnostics"
+        },
+        "applied": {
+          "const": false,
+          "title": "Applied",
+          "type": "boolean"
+        },
+        "accepted": {
+          "title": "Accepted",
+          "type": "boolean"
+        },
+        "violations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Violations",
+          "type": "array"
+        },
+        "optimality": {
+          "const": "not_evaluated",
+          "title": "Optimality",
+          "type": "string"
+        },
+        "allocation": {
+          "$ref": "#/$defs/AllocationProjection"
+        }
+      },
+      "required": [
+        "schema_version",
+        "request_id",
+        "profile_id",
+        "decision_at",
+        "input_fingerprint",
+        "held_task_ids",
+        "unavailable_worker_ids",
+        "responder_status",
+        "diagnostics",
+        "applied",
+        "accepted",
+        "violations",
+        "optimality",
+        "allocation"
+      ],
+      "title": "CheckResponse",
+      "type": "object"
+    },
+    "error_response": {
+      "$defs": {
+        "ErrorDetail": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "enum": [
+                "INVALID_REQUEST",
+                "INTERNAL_ERROR"
+              ],
+              "title": "Code",
+              "type": "string"
+            },
+            "message": {
+              "title": "Message",
+              "type": "string"
+            },
+            "issues": {
+              "items": {
+                "$ref": "#/$defs/ErrorIssue"
+              },
+              "title": "Issues",
+              "type": "array"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "issues"
+          ],
+          "title": "ErrorDetail",
+          "type": "object"
+        },
+        "ErrorIssue": {
+          "additionalProperties": false,
+          "properties": {
+            "location": {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ]
+              },
+              "title": "Location",
+              "type": "array"
+            },
+            "message": {
+              "title": "Message",
+              "type": "string"
+            },
+            "type": {
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "location",
+            "message",
+            "type"
+          ],
+          "title": "ErrorIssue",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "error": {
+          "$ref": "#/$defs/ErrorDetail"
+        }
+      },
+      "required": [
+        "schema_version",
+        "error"
+      ],
+      "title": "ErrorResponse",
+      "type": "object"
+    }
+  },
+  "verification": {
+    "case_count": 12,
+    "transport": "HTTP",
+    "source": "Actual local solver responses, checked against synthetic fixtures"
+  }
+}

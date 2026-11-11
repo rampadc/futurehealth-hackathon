@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0",
+  "request_id": "canonical-example",
+  "profile_id": "sandline_demo_v1",
+  "decision_at": "2025-08-04T08:10:45+04:00",
+  "workers": [
+    {
+      "person_id": "C02",
+      "readiness": "unknown",
+      "availability": "available"
+    },
+    {
+      "person_id": "C03",
+      "readiness": "unknown",
+      "availability": "available"
+    },
+    {
+      "person_id": "C04",
+      "readiness": "unknown",
+      "availability": "available"
+    },
+    {
+      "person_id": "C05",
+      "readiness": "ready",
+      "availability": "available"
+    },
+    {
+      "person_id": "C06",
+      "readiness": "ready",
+      "availability": "available"
+    },
+    {
+      "person_id": "C07",
+      "readiness": "ready",
+      "availability": "available"
+    },
+    {
+      "person_id": "C08",
+      "readiness": "ready",
+      "availability": "available"
+    },
+    {
+      "person_id": "C09",
+      "readiness": "unknown",
+      "availability": "available"
+    },
+    {
+      "person_id": "C10",
+      "readiness": "unknown",
+      "availability": "available"
+    },
+    {
+      "person_id": "C11",
+      "readiness": "unknown",
+      "availability": "available"
+    },
+    {
+      "person_id": "C12",
+      "readiness": "unknown",
+      "availability": "available"
+    }
+  ],
+  "workshop": {
+    "fixed_occupant_ids": [
+      "P07",
+      "P08"
+    ],
+    "staffing_demand": {
+      "minimum": 1,
+      "maximum": 4
+    },
+    "permit_status": "valid",
+    "resource_status": "available",
+    "supervision_status": "available"
+  },
+  "incidents": [],
+  "civil_measurement": null
+}

@@ -1,0 +1,475 @@
+{
+  "type": "object",
+  "properties": {
+    "synthetic": {
+      "const": true
+    },
+    "classification": {
+      "const": "fictional_demo_assumption"
+    },
+    "assumptions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "description"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "snapshots": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "decision_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "facts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/fact"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "decision_at",
+          "facts"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 12,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "snapshot_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "decision_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "facts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/fact"
+            }
+          },
+          "proposal": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
+          },
+          "expected": {
+            "type": "object",
+            "properties": {
+              "accepted": {
+                "type": "boolean"
+              },
+              "assignees": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "uniqueItems": true
+              },
+              "recovery": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "uniqueItems": true
+              },
+              "workshop_occupants": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "uniqueItems": true
+              },
+              "blockers": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "uniqueItems": true
+              },
+              "unavailable": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "accepted",
+              "assignees",
+              "recovery",
+              "workshop_occupants",
+              "blockers",
+              "unavailable"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "snapshot_id",
+          "decision_at",
+          "facts",
+          "proposal",
+          "expected"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "synthetic",
+    "classification",
+    "assumptions",
+    "snapshots",
+    "cases"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Synthetic Sandline immediate allocation dataset",
+  "$defs": {
+    "fact": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "synthetic": {
+          "const": true
+        },
+        "classification": {
+          "const": "fictional_demo_assumption"
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "actor_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string"
+        },
+        "payload": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "synthetic",
+        "classification",
+        "occurred_at",
+        "recorded_at",
+        "actor_id",
+        "kind",
+        "payload"
+      ],
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "properties": {
+            "kind": {
+              "const": "readiness"
+            },
+            "payload": {
+              "type": "object",
+              "properties": {
+                "person_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true,
+                  "minItems": 1
+                },
+                "task_id": {
+                  "const": "workshop_prep"
+                },
+                "ready": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "person_ids",
+                "task_id",
+                "ready"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "permit"
+            },
+            "payload": {
+              "type": "object",
+              "properties": {
+                "permit_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "task_id": {
+                  "const": "workshop_prep"
+                },
+                "status": {
+                  "enum": [
+                    "valid",
+                    "unavailable"
+                  ]
+                }
+              },
+              "required": [
+                "permit_id",
+                "task_id",
+                "status"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "resources"
+            },
+            "payload": {
+              "type": "object",
+              "properties": {
+                "task_id": {
+                  "const": "workshop_prep"
+                },
+                "available": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "task_id",
+                "available"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "demand"
+            },
+            "payload": {
+              "type": "object",
+              "properties": {
+                "task_id": {
+                  "const": "workshop_prep"
+                },
+                "min_workers": {
+                  "const": 1
+                },
+                "max_workers": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "required": [
+                "task_id",
+                "min_workers",
+                "max_workers"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "supervision"
+            },
+            "payload": {
+              "type": "object",
+              "properties": {
+                "supervisor_id": {
+                  "const": "C01"
+                },
+                "task_ids": {
+                  "const": [
+                    "civil_light",
+                    "workshop_prep"
+                  ]
+                },
+                "approved_by": {
+                  "const": "P02"
+                },
+                "available": {
+                  "type": "boolean"
+                },
+                "occupies_workshop": {
+                  "const": false
+                },
+                "mode": {
+                  "const": "shared_external_oversight"
+                }
+              },
+              "required": [
+                "supervisor_id",
+                "task_ids",
+                "approved_by",
+                "available",
+                "occupies_workshop",
+                "mode"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "fixed_occupant"
+            },
+            "payload": {
+              "type": "object",
+              "properties": {
+                "person_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "zone_id": {
+                  "const": "workshop"
+                }
+              },
+              "required": [
+                "person_id",
+                "zone_id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "unavailability"
+            },
+            "payload": {
+              "type": "object",
+              "properties": {
+                "person_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "zone_id": {
+                  "const": "welfare"
+                },
+                "responder_id": {
+                  "const": "P06"
+                },
+                "responder_status": {
+                  "const": "contacted"
+                },
+                "reason": {
+                  "const": "symptom_report"
+                }
+              },
+              "required": [
+                "person_id",
+                "zone_id",
+                "responder_id",
+                "responder_status",
+                "reason"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "reading"
+            },
+            "payload": {
+              "type": "object",
+              "properties": {
+                "zone_id": {
+                  "const": "civil_exposed"
+                },
+                "sensor_id": {
+                  "const": "t1"
+                },
+                "twl": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "exclusiveMaximum": 500
+                },
+                "unit": {
+                  "const": "W/m\u00b2"
+                },
+                "quality": {
+                  "const": "valid"
+                }
+              },
+              "required": [
+                "zone_id",
+                "sensor_id",
+                "twl",
+                "unit",
+                "quality"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,542 @@
+{
+  "schema_version": "2.1",
+  "request_id": "canonical_timed",
+  "snapshot_id": "synthetic-canonical_timed",
+  "decision_at": "2025-08-04T08:11:00+04:00",
+  "profile_id": "sandline_operational_demo_v1",
+  "policy_versions": [
+    "sandline-heat-rules-v1",
+    "demo-work-rest-v1"
+  ],
+  "evidence_ids": [
+    "02_heat_alert_response_e01",
+    "02_heat_alert_response_e02",
+    "02_heat_alert_response_e04",
+    "02_heat_alert_response_e05",
+    "cooled-C02",
+    "cooled-C03",
+    "cooled-C04",
+    "cooled-C05",
+    "cooled-C06",
+    "cooled-C07",
+    "cooled-C08",
+    "cooled-C09",
+    "cooled-C10",
+    "cooled-C11",
+    "cooled-C12",
+    "readiness-C05",
+    "readiness-C06",
+    "readiness-C07",
+    "readiness-C08"
+  ],
+  "input_fingerprint": "53155d92e2f1debbe6e4b2ae25bb7cd7bd193cc644bedebf4dd0dda82c5a80c6",
+  "applied": false,
+  "heat": {
+    "schema_version": "2.1",
+    "request_id": "canonical_timed",
+    "snapshot_id": "synthetic-canonical_timed",
+    "decision_at": "2025-08-04T08:11:00+04:00",
+    "profile_id": "sandline_operational_demo_v1",
+    "policy_versions": [
+      "sandline-heat-rules-v1",
+      "demo-work-rest-v1"
+    ],
+    "evidence_ids": [
+      "02_heat_alert_response_e01",
+      "02_heat_alert_response_e02",
+      "02_heat_alert_response_e04",
+      "02_heat_alert_response_e05",
+      "cooled-C02",
+      "cooled-C03",
+      "cooled-C04",
+      "cooled-C05",
+      "cooled-C06",
+      "cooled-C07",
+      "cooled-C08",
+      "cooled-C09",
+      "cooled-C10",
+      "cooled-C11",
+      "cooled-C12",
+      "readiness-C05",
+      "readiness-C06",
+      "readiness-C07",
+      "readiness-C08"
+    ],
+    "input_fingerprint": "53155d92e2f1debbe6e4b2ae25bb7cd7bd193cc644bedebf4dd0dda82c5a80c6",
+    "applied": false,
+    "controls": [
+      {
+        "task_id": "civil_heavy",
+        "state": "held",
+        "reason_codes": [
+          "reading_stale"
+        ],
+        "policy_ids": [
+          "p_stale"
+        ],
+        "evidence_ids": []
+      },
+      {
+        "task_id": "civil_light",
+        "state": "clearance_blocked",
+        "reason_codes": [
+          "reading_stale"
+        ],
+        "policy_ids": [
+          "p_stale"
+        ],
+        "evidence_ids": []
+      },
+      {
+        "task_id": "workshop_prep",
+        "state": "no_new_hold",
+        "reason_codes": [],
+        "policy_ids": [],
+        "evidence_ids": []
+      }
+    ],
+    "held_task_ids": [
+      "civil_heavy"
+    ],
+    "clearance_blockers": [
+      "reading_stale"
+    ],
+    "actions": [
+      {
+        "code": "gather_fresh_local_reading",
+        "owner_id": "P03",
+        "status": "required",
+        "due_at": null,
+        "person_ids": [],
+        "evidence_ids": [],
+        "policy_ids": [
+          "p_stale"
+        ],
+        "message": "Obtain a valid, fresh TWL reading from the t1 monitor at the civil heavy work location."
+      }
+    ]
+  },
+  "protective_response": {
+    "schema_version": "2.1",
+    "request_id": "canonical_timed",
+    "snapshot_id": "synthetic-canonical_timed",
+    "decision_at": "2025-08-04T08:11:00+04:00",
+    "profile_id": "sandline_operational_demo_v1",
+    "policy_versions": [
+      "sandline-heat-rules-v1",
+      "demo-work-rest-v1"
+    ],
+    "evidence_ids": [
+      "02_heat_alert_response_e01",
+      "02_heat_alert_response_e02",
+      "02_heat_alert_response_e04",
+      "02_heat_alert_response_e05",
+      "cooled-C02",
+      "cooled-C03",
+      "cooled-C04",
+      "cooled-C05",
+      "cooled-C06",
+      "cooled-C07",
+      "cooled-C08",
+      "cooled-C09",
+      "cooled-C10",
+      "cooled-C11",
+      "cooled-C12",
+      "readiness-C05",
+      "readiness-C06",
+      "readiness-C07",
+      "readiness-C08"
+    ],
+    "input_fingerprint": "53155d92e2f1debbe6e4b2ae25bb7cd7bd193cc644bedebf4dd0dda82c5a80c6",
+    "applied": false,
+    "actions": [],
+    "excluded_worker_ids": [],
+    "planning_blockers": []
+  },
+  "crew_rest": {
+    "schema_version": "2.1",
+    "request_id": "canonical_timed",
+    "snapshot_id": "synthetic-canonical_timed",
+    "decision_at": "2025-08-04T08:11:00+04:00",
+    "profile_id": "sandline_operational_demo_v1",
+    "policy_versions": [
+      "sandline-heat-rules-v1",
+      "demo-work-rest-v1"
+    ],
+    "evidence_ids": [
+      "02_heat_alert_response_e01",
+      "02_heat_alert_response_e02",
+      "02_heat_alert_response_e04",
+      "02_heat_alert_response_e05",
+      "cooled-C02",
+      "cooled-C03",
+      "cooled-C04",
+      "cooled-C05",
+      "cooled-C06",
+      "cooled-C07",
+      "cooled-C08",
+      "cooled-C09",
+      "cooled-C10",
+      "cooled-C11",
+      "cooled-C12",
+      "readiness-C05",
+      "readiness-C06",
+      "readiness-C07",
+      "readiness-C08"
+    ],
+    "input_fingerprint": "53155d92e2f1debbe6e4b2ae25bb7cd7bd193cc644bedebf4dd0dda82c5a80c6",
+    "applied": false,
+    "planning_status": "planned",
+    "solver_status": "FEASIBLE",
+    "optimal": false,
+    "policy_id": "demo-work-rest-v1",
+    "timing_policy": {
+      "id": "demo-work-rest-v1",
+      "initial_recovery_minutes": 6,
+      "max_work_minutes": 15,
+      "between_work_recovery_minutes": 15
+    },
+    "policy_source": "supplied",
+    "horizon_end": "2025-08-04T09:11:00+04:00",
+    "recovery_reservation_end": "2025-08-04T09:11:00+04:00",
+    "intervals": [
+      {
+        "person_id": "C02",
+        "kind": "recovery",
+        "task_id": null,
+        "zone_id": "shelter_a",
+        "starts_at": "2025-08-04T08:11:00+04:00",
+        "ends_at": "2025-08-04T09:11:00+04:00",
+        "requires_revalidation": true
+      },
+      {
+        "person_id": "C03",
+        "kind": "recovery",
+        "task_id": null,
+        "zone_id": "shelter_a",
+        "starts_at": "2025-08-04T08:11:00+04:00",
+        "ends_at": "2025-08-04T09:11:00+04:00",
+        "requires_revalidation": true
+      },
+      {
+        "person_id": "C04",
+        "kind": "recovery",
+        "task_id": null,
+        "zone_id": "shelter_a",
+        "starts_at": "2025-08-04T08:11:00+04:00",
+        "ends_at": "2025-08-04T09:11:00+04:00",
+        "requires_revalidation": true
+      },
+      {
+        "person_id": "C05",
+        "kind": "work",
+        "task_id": "workshop_prep",
+        "zone_id": "workshop",
+        "starts_at": "2025-08-04T08:11:00+04:00",
+        "ends_at": "2025-08-04T08:26:00+04:00",
+        "requires_revalidation": true
+      },
+      {
+        "person_id": "C05",
+        "kind": "recovery",
+        "task_id": null,
+        "zone_id": "shelter_a",
+        "starts_at": "2025-08-04T08:26:00+04:00",
+        "ends_at": "2025-08-04T08:41:00+04:00",
+        "requires_revalidation": true
+      },
+      {
+        "person_id": "C05",
+        "kind": "work",
+        "task_id": "workshop_prep",
+        "zone_id": "workshop",
+        "starts_at": "2025-08-04T08:41:00+04:00",
+        "ends_at": "2025-08-04T08:56:00+04:00",
+        "requires_revalidation": true
+      },
+      {
+        "person_id": "C05",
+        "kind": "recovery",
+        "task_id": null,
+        "zone_id": "shelter_a",
+        "starts_at": "2025-08-04T08:56:00+04:00",
+        "ends_at": "2025-08-04T09:11:00+04:00",
+        "requires_revalidation": true
+      },
+      {
+        "person_id": "C06",
+        "kind": "work",
+        "task_id": "workshop_prep",
+        "zone_id": "workshop",
+        "starts_at": "2025-08-04T08:11:00+04:00",
+        "ends_at": "2025-08-04T08:26:00+04:00",
+        "requires_revalidation": true
+      },
+      {
+        "person_id": "C06",
+        "kind": "recovery",
+        "task_id": null,
+        "zone_id": "shelter_a",
+        "starts_at": "2025-08-04T08:26:00+04:00",
+        "ends_at": "2025-08-04T08:41:00+04:00",
+        "requires_revalidation": true
+      },
+      {
+        "person_id": "C06",
+        "kind": "work",
+        "task_id": "workshop_prep",
+        "zone_id": "workshop",
+        "starts_at": "2025-08-04T08:41:00+04:00",
+        "ends_at": "2025-08-04T08:56:00+04:00",
+        "requires_revalidation": true
+      },
+      {
+        "person_id": "C06",
+        "kind": "recovery",
+        "task_id": null,
+        "zone_id": "shelter_a",
+        "starts_at": "2025-08-04T08:56:00+04:00",
+        "ends_at": "2025-08-04T09:11:00+04:00",
+        "requires_revalidation": true
+      },
+      {
+        "person_id": "C07",
+        "kind": "work",
+        "task_id": "workshop_prep",
+        "zone_id": "workshop",
+        "starts_at": "2025-08-04T08:11:00+04:00",
+        "ends_at": "2025-08-04T08:26:00+04:00",
+        "requires_revalidation": true
+      },
+      {
+        "person_id": "C07",
+        "kind": "recovery",
+        "task_id": null,
+        "zone_id": "shelter_a",
+        "starts_at": "2025-08-04T08:26:00+04:00",
+        "ends_at": "2025-08-04T08:41:00+04:00",
+        "requires_revalidation": true
+      },
+      {
+        "person_id": "C07",
+        "kind": "work",
+        "task_id": "workshop_prep",
+        "zone_id": "workshop",
+        "starts_at": "2025-08-04T08:41:00+04:00",
+        "ends_at": "2025-08-04T08:56:00+04:00",
+        "requires_revalidation": true
+      },
+      {
+        "person_id": "C07",
+        "kind": "recovery",
+        "task_id": null,
+        "zone_id": "shelter_a",
+        "starts_at": "2025-08-04T08:56:00+04:00",
+        "ends_at": "2025-08-04T09:11:00+04:00",
+        "requires_revalidation": true
+      },
+      {
+        "person_id": "C08",
+        "kind": "work",
+        "task_id": "workshop_prep",
+        "zone_id": "workshop",
+        "starts_at": "2025-08-04T08:11:00+04:00",
+        "ends_at": "2025-08-04T08:26:00+04:00",
+        "requires_revalidation": true
+      },
+      {
+        "person_id": "C08",
+        "kind": "recovery",
+        "task_id": null,
+        "zone_id": "shelter_a",
+        "starts_at": "2025-08-04T08:26:00+04:00",
+        "ends_at": "2025-08-04T08:41:00+04:00",
+        "requires_revalidation": true
+      },
+      {
+        "person_id": "C08",
+        "kind": "work",
+        "task_id": "workshop_prep",
+        "zone_id": "workshop",
+        "starts_at": "2025-08-04T08:41:00+04:00",
+        "ends_at": "2025-08-04T08:56:00+04:00",
+        "requires_revalidation": true
+      },
+      {
+        "person_id": "C08",
+        "kind": "recovery",
+        "task_id": null,
+        "zone_id": "shelter_a",
+        "starts_at": "2025-08-04T08:56:00+04:00",
+        "ends_at": "2025-08-04T09:11:00+04:00",
+        "requires_revalidation": true
+      },
+      {
+        "person_id": "C09",
+        "kind": "recovery",
+        "task_id": null,
+        "zone_id": "shelter_a",
+        "starts_at": "2025-08-04T08:11:00+04:00",
+        "ends_at": "2025-08-04T09:11:00+04:00",
+        "requires_revalidation": true
+      },
+      {
+        "person_id": "C10",
+        "kind": "recovery",
+        "task_id": null,
+        "zone_id": "shelter_a",
+        "starts_at": "2025-08-04T08:11:00+04:00",
+        "ends_at": "2025-08-04T09:11:00+04:00",
+        "requires_revalidation": true
+      },
+      {
+        "person_id": "C11",
+        "kind": "recovery",
+        "task_id": null,
+        "zone_id": "shelter_a",
+        "starts_at": "2025-08-04T08:11:00+04:00",
+        "ends_at": "2025-08-04T09:11:00+04:00",
+        "requires_revalidation": true
+      },
+      {
+        "person_id": "C12",
+        "kind": "recovery",
+        "task_id": null,
+        "zone_id": "shelter_a",
+        "starts_at": "2025-08-04T08:11:00+04:00",
+        "ends_at": "2025-08-04T09:11:00+04:00",
+        "requires_revalidation": true
+      }
+    ],
+    "occupancy": [
+      {
+        "starts_at": "2025-08-04T08:11:00+04:00",
+        "ends_at": "2025-08-04T08:26:00+04:00",
+        "zone_id": "shelter_a",
+        "count": 7,
+        "capacity": 24
+      },
+      {
+        "starts_at": "2025-08-04T08:26:00+04:00",
+        "ends_at": "2025-08-04T08:41:00+04:00",
+        "zone_id": "shelter_a",
+        "count": 11,
+        "capacity": 24
+      },
+      {
+        "starts_at": "2025-08-04T08:41:00+04:00",
+        "ends_at": "2025-08-04T08:56:00+04:00",
+        "zone_id": "shelter_a",
+        "count": 7,
+        "capacity": 24
+      },
+      {
+        "starts_at": "2025-08-04T08:56:00+04:00",
+        "ends_at": "2025-08-04T09:11:00+04:00",
+        "zone_id": "shelter_a",
+        "count": 11,
+        "capacity": 24
+      },
+      {
+        "starts_at": "2025-08-04T08:11:00+04:00",
+        "ends_at": "2025-08-04T09:11:00+04:00",
+        "zone_id": "shelter_b",
+        "count": 0,
+        "capacity": 16
+      },
+      {
+        "starts_at": "2025-08-04T08:11:00+04:00",
+        "ends_at": "2025-08-04T09:11:00+04:00",
+        "zone_id": "welfare",
+        "count": 0,
+        "capacity": 8
+      },
+      {
+        "starts_at": "2025-08-04T08:11:00+04:00",
+        "ends_at": "2025-08-04T08:26:00+04:00",
+        "zone_id": "workshop",
+        "count": 6,
+        "capacity": 6
+      },
+      {
+        "starts_at": "2025-08-04T08:26:00+04:00",
+        "ends_at": "2025-08-04T08:41:00+04:00",
+        "zone_id": "workshop",
+        "count": 2,
+        "capacity": 6
+      },
+      {
+        "starts_at": "2025-08-04T08:41:00+04:00",
+        "ends_at": "2025-08-04T08:56:00+04:00",
+        "zone_id": "workshop",
+        "count": 6,
+        "capacity": 6
+      },
+      {
+        "starts_at": "2025-08-04T08:56:00+04:00",
+        "ends_at": "2025-08-04T09:11:00+04:00",
+        "zone_id": "workshop",
+        "count": 2,
+        "capacity": 6
+      }
+    ],
+    "carry_forward_rest": [],
+    "useful_worker_minutes": 120,
+    "unmet_worker_minutes": 120,
+    "blockers": [],
+    "assumptions": [
+      "fictional_demo_assumption",
+      "Location changes are instantaneous at minute boundaries.",
+      "Readiness is a separate caller assertion and is never inferred from elapsed recovery.",
+      "Future work requires rechecking worker suitability and task prerequisites.",
+      "Mandatory recovery beyond the requested horizon is reserved only for owed minutes, up to 15 additional minutes.",
+      "The timing policy applies only to the eleven affected workers and light workshop work.",
+      "P07/P08 remain fixed workshop occupants; C01 supervises externally under the supplied demo arrangement.",
+      "C01 and C13/C14 retain their existing commitments; this is not full-site scheduling."
+    ],
+    "held_task_ids": [
+      "civil_heavy"
+    ]
+  },
+  "restart": {
+    "schema_version": "2.1",
+    "request_id": "canonical_timed",
+    "snapshot_id": "synthetic-canonical_timed",
+    "decision_at": "2025-08-04T08:11:00+04:00",
+    "profile_id": "sandline_operational_demo_v1",
+    "policy_versions": [
+      "sandline-heat-rules-v1",
+      "demo-work-rest-v1"
+    ],
+    "evidence_ids": [
+      "02_heat_alert_response_e01",
+      "02_heat_alert_response_e02",
+      "02_heat_alert_response_e04",
+      "02_heat_alert_response_e05",
+      "cooled-C02",
+      "cooled-C03",
+      "cooled-C04",
+      "cooled-C05",
+      "cooled-C06",
+      "cooled-C07",
+      "cooled-C08",
+      "cooled-C09",
+      "cooled-C10",
+      "cooled-C11",
+      "cooled-C12",
+      "readiness-C05",
+      "readiness-C06",
+      "readiness-C07",
+      "readiness-C08"
+    ],
+    "input_fingerprint": "53155d92e2f1debbe6e4b2ae25bb7cd7bd193cc644bedebf4dd0dda82c5a80c6",
+    "applied": false,
+    "status": "not_requested",
+    "blockers": [],
+    "required_owner_id": "P02",
+    "held_task_ids": [
+      "civil_heavy"
+    ],
+    "actions": []
+  }
+}

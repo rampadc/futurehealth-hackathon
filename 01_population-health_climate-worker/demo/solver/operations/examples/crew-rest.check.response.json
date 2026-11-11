@@ -1,0 +1,37 @@
+{
+  "schema_version": "2.1",
+  "request_id": "canonical_timed",
+  "snapshot_id": "synthetic-canonical_timed",
+  "decision_at": "2025-08-04T08:11:00+04:00",
+  "profile_id": "sandline_operational_demo_v1",
+  "policy_versions": [
+    "sandline-heat-rules-v1",
+    "demo-work-rest-v1"
+  ],
+  "evidence_ids": [
+    "02_heat_alert_response_e01",
+    "02_heat_alert_response_e02",
+    "02_heat_alert_response_e04",
+    "02_heat_alert_response_e05",
+    "cooled-C02",
+    "cooled-C03",
+    "cooled-C04",
+    "cooled-C05",
+    "cooled-C06",
+    "cooled-C07",
+    "cooled-C08",
+    "cooled-C09",
+    "cooled-C10",
+    "cooled-C11",
+    "cooled-C12",
+    "readiness-C05",
+    "readiness-C06",
+    "readiness-C07",
+    "readiness-C08"
+  ],
+  "input_fingerprint": "2e62bcd1e611411d95555ce3c53c3e0a2fc4e51052ad01251834d5ed54d1595a",
+  "applied": false,
+  "accepted": true,
+  "violations": [],
+  "optimality": "not_evaluated"
+}
