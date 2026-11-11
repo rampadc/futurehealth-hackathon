@@ -1,7 +1,8 @@
 """Guidance search (RAG retrieval): embed the question, find the nearest chunks in BigQuery, rank by authority.
 
     search_guidance("what training must supervisors have for heat?")
-    -> [{"cite": "ADOSH-SF CoP 11.0, p. 5", "authority": "Binding regulation for an Abu Dhabi site (ADOSH-SF, MoHRE)", "text": ...}, ...]
+    -> [{"cite": "ADOSH-SF CoP 11.0, p. 5", "url": "https://www.adphc.gov.ae/...pdf#page=5",
+         "authority": "Binding regulation for an Abu Dhabi site (ADOSH-SF, MoHRE)", "text": ...}, ...]
 
 Index: tools/build_corpus.py writes `vectors.guidance_chunks` (one row per chunk from heat_safe.corpus).
 Embeddings and data stay in me-central1; only the model's generation call goes to the global endpoint.
@@ -107,6 +108,7 @@ def search_guidance(query: str, top_k: int = 5, max_tier: int | None = None,
     ranked = rerank(hits, AUTHORITY_BOOST if boost is None else boost, top_k)
     for h in ranked:
         doc = DOCS_BY_ID[h["doc_id"]]
-        h.update(cite=f"{doc.short}, p. {h['page']}", title=doc.title, authority=AUTHORITY[doc.tier])
+        h.update(cite=f"{doc.short}, p. {h['page']}", title=doc.title, authority=AUTHORITY[doc.tier],
+                 url=doc.link(h["page"]))
         h.pop("distance", None)
     return ranked

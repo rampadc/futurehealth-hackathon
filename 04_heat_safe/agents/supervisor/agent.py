@@ -19,7 +19,7 @@ from google.genai import types
 from heat_safe import rules
 from heat_safe.agent_tools import SUPERVISOR_TOOLS, today
 from heat_safe.gcp import check_credentials
-from heat_safe.grounding import check_citation_grounding, check_numeric_grounding
+from heat_safe.grounding import check_citation_grounding, check_link_grounding, check_numeric_grounding
 
 # Fail at import, before any model or BigQuery call, so every entry point (adk web, the CLI,
 # evals) gets one clear message instead of a 403 traceback from deep inside a library
@@ -79,7 +79,9 @@ Guidance documents (search_guidance):
   hydration, heat illness, legal duties or worker data. One or two focused queries are enough.
   A routine shift plan does not need it.
 - Cite a passage by copying its "cite" string exactly, e.g. (ADOSH-SF CoP 11.0, p. 5). Never write
-  a page number that no tool returned.
+  a page number that no tool returned. If the result has a "url", make the citation a link to it,
+  copied exactly: ([ADOSH-SF CoP 11.0, p. 5](<url>)). If "url" is null, give the citation without a
+  link. Never write a URL that no tool returned.
 - Abu Dhabi regulation comes first. When you use international guidance or the Sharjah code, say it
   is not Abu Dhabi law. If sources disagree, follow ADOSH-SF and say that they differ.
 - Plan with numbers from compute_heat_stress and optimise_schedule only, never from document text.
@@ -112,14 +114,18 @@ def check_grounding(callback_context: CallbackContext, llm_response: LlmResponse
     outputs = [o["response"] for o in callback_context.state.get("tool_outputs", [])]
     result = check_numeric_grounding(text, outputs)
     cites = check_citation_grounding(text, outputs)
+    links = check_link_grounding(text, outputs)
     callback_context.state["grounding"] = result
     callback_context.state["citations"] = cites
+    callback_context.state["links"] = links
     warnings = []
     if not result["passed"]:
         warnings.append("these values did not match any tool output and must not be relied on: "
                         + ", ".join(result["ungrounded"]))
     if not cites["passed"]:
         warnings.append("these page references were not returned by any tool: " + "; ".join(cites["ungrounded"]))
+    if not links["passed"]:
+        warnings.append("these links were not returned by any tool: " + "; ".join(links["ungrounded"]))
     if not warnings:
         return None
     warning = "".join(f"\n\n> ⚠ Grounding check: {w}" for w in warnings)

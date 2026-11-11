@@ -15,6 +15,14 @@ QUOTED = re.compile(
     re.IGNORECASE,
 )
 NUMBER = re.compile(r"-?\d+(?:\.\d+)?")
+# A link in an answer, bare or as a markdown target; stops at whitespace and closing brackets
+URL = re.compile(r"https?://[^\s<>()\[\]]+")
+
+
+def strip_urls(text: str) -> str:
+    """Links are checked on their own (check_link_grounding); digits inside them ("%20", "#page=5",
+    "2016-106") are not quoted values or page references."""
+    return URL.sub(" ", text)
 
 
 def tool_numbers(obj: Any) -> set[float]:
@@ -53,6 +61,7 @@ def _matches(written: str, numbers: set[float]) -> bool:
 
 def check_numeric_grounding(text: str, tool_outputs: list[Any]) -> dict:
     numbers = tool_numbers(tool_outputs)
+    text = strip_urls(text)
     ungrounded = [f"{n} {u}" for n, u in quoted_values(text) if not _matches(n, numbers)]
     return {"passed": not ungrounded, "ungrounded": sorted(set(ungrounded)),
             "checked": len(quoted_values(text))}
@@ -93,6 +102,7 @@ def tool_citations(tool_outputs: list[Any]) -> set[tuple[str, int]]:
 def check_citation_grounding(text: str, tool_outputs: list[Any]) -> dict:
     """Every "p. N" in the answer must sit just after the name of a document a tool cited at page N."""
     cites = tool_citations(tool_outputs)
+    text = strip_urls(text)
     ungrounded, checked = [], 0
     for m in PAGE_REF.finditer(text):
         window = text[max(0, m.start() - WINDOW):m.start()].lower()
@@ -102,3 +112,19 @@ def check_citation_grounding(text: str, tool_outputs: list[Any]) -> dict:
             if not any(page == p and source in window for source, p in cites):
                 ungrounded.append(f"{text[max(0, m.start() - 40):m.end()].strip()}")
     return {"passed": not ungrounded, "ungrounded": sorted(set(ungrounded)), "checked": checked}
+
+
+# --- Link grounding --------------------------------------------------------------------------------
+# A link looks even more authoritative than a page number, and an invented one may open nothing or the
+# wrong document. Every URL in an answer must be one a tool returned, character for character.
+
+def _clean_url(url: str) -> str:
+    return url.rstrip(".,;:!?'\"")
+
+
+def check_link_grounding(text: str, tool_outputs: list[Any]) -> dict:
+    """Every URL in the answer must appear exactly in some tool output string."""
+    returned = {_clean_url(u) for s in _strings(tool_outputs) for u in URL.findall(s)}
+    found = [_clean_url(u) for u in URL.findall(text)]
+    ungrounded = sorted({u for u in found if u not in returned})
+    return {"passed": not ungrounded, "ungrounded": ungrounded, "checked": len(found)}
