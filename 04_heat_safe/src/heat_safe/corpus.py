@@ -45,53 +45,82 @@ class Document:
     short: str  # what the agent writes in a citation: "<short>, p. N", a short version of the title
     issuer: str
     tier: int
+    # Where a reader can open the source. For a file tools/download_data.py fetched it is the manifest's
+    # "source" (a test checks they agree). For manual collections this list is the record (data/ is not
+    # in git). None when no public URL is known: the citation then has no link.
+    url: str | None
+
+    def link(self, page: int | None = None) -> str | None:
+        """URL to cite. A direct PDF link opens at the cited page with "#page=N" (the 1-based PDF page,
+        the same number as Chunk.page). Article and landing pages have no pages, so they get no anchor."""
+        if not self.url:
+            return None
+        is_pdf = self.url.split("?")[0].lower().endswith(".pdf")
+        return f"{self.url}#page={page}" if page and is_pdf else self.url
 
 ## initialize all Document instances
 DOCUMENTS = [
     Document("adosh_cop_11", "regulatory/adosh_sf_cop_11_safety_in_the_heat_v4_2024_en.pdf",
              "ADOSH-SF Code of Practice 11.0 Safety in the Heat, v4.0 (15 Jul 2024)",
-             "ADOSH-SF CoP 11.0", "Abu Dhabi Public Health Centre (ADOSH-SF)", 1),
+             "ADOSH-SF CoP 11.0", "Abu Dhabi Public Health Centre (ADOSH-SF)", 1,
+             "https://www.adphc.gov.ae/-/media/Project/ADPHC/ADPHC/PDF/OSHAD-SF/Codes-of-Practise/11---Safety-in-the-Heat-v31-English.pdf"),
     Document("adosh_tg_heat", "regulatory/adosh_sf_tg_safety_in_the_heat_v4_2024_en.pdf",
              "ADOSH-SF Technical Guideline Safety in the Heat, v4.0 (15 Jul 2024)",
-             "ADOSH-SF TG Safety in the Heat", "Abu Dhabi Public Health Centre (ADOSH-SF)", 1),
+             "ADOSH-SF TG Safety in the Heat", "Abu Dhabi Public Health Centre (ADOSH-SF)", 1,
+             "https://www.adphc.gov.ae/-/media/Project/ADPHC/ADPHC/PDF/OSHAD-SF/Technical-Guidelines/Safety-in-the-Heat--Eng.pdf"),
     Document("adosh_cop_53_1", "regulatory/adosh_sf_cop_53_1_osh_construction_en.pdf",
              "ADOSH-SF Code of Practice 53.1 OSH in Construction",
-             "ADOSH-SF CoP 53.1", "Abu Dhabi Public Health Centre (ADOSH-SF)", 1),
+             "ADOSH-SF CoP 53.1", "Abu Dhabi Public Health Centre (ADOSH-SF)", 1,
+             "https://www.adphc.gov.ae/-/media/Project/ADPHC/ADPHC/PDF/OSHAD-SF/Codes-of-Practise/53__1---OSH-Construction--Eng.pdf"),
     # MoHRE's midday break is federal and binds every UAE site. The announcements are WAM news
     # releases printed from the browser: the official public statement of the rule each year.
     Document("mohre_break_2024", "regulatory/middaybreakannouncements/WAM_Midday_Break_Announcement_2024.pdf",
              "MoHRE Midday Break 2024 announcement (WAM, 31 May 2024)",
-             "MoHRE Midday Break 2024 (WAM)", "UAE Ministry of Human Resources and Emiratisation", 1),
+             "MoHRE Midday Break 2024 (WAM)", "UAE Ministry of Human Resources and Emiratisation", 1,
+             # The WAM article whose headline and date match the PDF (manual_urls.md had b56ll46, a different article)
+             "https://www.wam.ae/en/article/b3fhmx5-mohre-implements-midday-break-from-june-september"),
     Document("mohre_break_2025", "regulatory/middaybreakannouncements/WAM_Midday_Break_Anouncement_2025.pdf",
              "MoHRE Midday Break 2025 announcement (WAM, 3 Jun 2025)",
-             "MoHRE Midday Break 2025 (WAM)", "UAE Ministry of Human Resources and Emiratisation", 1),
+             "MoHRE Midday Break 2025 (WAM)", "UAE Ministry of Human Resources and Emiratisation", 1,
+             "https://www.wam.ae/en/article/bk01z89-mohre-implement-midday-break-for-21st-consecutive"),
     Document("mohre_break_2026", "regulatory/middaybreakannouncements/WAM_Midday_Break_Anouncement_2026.pdf",
              "MoHRE Occupational Heat Stress Prevention Policy 2026 announcement (WAM, 8 Jun 2026)",
-             "MoHRE Heat Stress Policy 2026 (WAM)", "UAE Ministry of Human Resources and Emiratisation", 1),
+             "MoHRE Heat Stress Policy 2026 (WAM)", "UAE Ministry of Human Resources and Emiratisation", 1,
+             "https://www.wam.ae/en/article/c0memda-mohre-announces-return-occupational-heat-stress"),
     Document("mohre_break_2026_close", "regulatory/middaybreakannouncements/WAM_End_Of_Season_Release_2026.pdf",
              "MoHRE end-of-season release, Occupational Heat Stress Prevention Policy 2026 (WAM, 15 Sep 2026)",
-             "MoHRE 2026 season close (WAM)", "UAE Ministry of Human Resources and Emiratisation", 1),
+             "MoHRE 2026 season close (WAM)", "UAE Ministry of Human Resources and Emiratisation", 1,
+             # Not a duplicate of the 8 Jun release (it reports the season's results). No English WAM URL found
+             None),
     Document("uae_pdpl", "regulatory/manual/uae_pdpl_fdl_45_2021_en.pdf",
              "UAE Federal Decree-Law No. 45 of 2021 on the Protection of Personal Data (PDPL)",
-             "UAE PDPL (FDL 45/2021)", "UAE Government", 2),
+             "UAE PDPL (FDL 45/2021)", "UAE Government", 2,
+             "https://uaelegislation.gov.ae/en/legislations/1972"),
     Document("uae_health_ict", "regulatory/manual/uae_health_ict_law_2_2019_en.pdf",
              "UAE Federal Law No. 2 of 2019 on the Use of ICT in Health Fields",
-             "UAE Health ICT Law (2/2019)", "UAE Government", 2),
+             "UAE Health ICT Law (2/2019)", "UAE Government", 2,
+             "https://uaelegislation.gov.ae/en/legislations/1209"),
     Document("adhics_faq", "regulatory/manual/ADHICS-FAQ.pdf",
              "DoH Abu Dhabi Healthcare Information and Cyber Security Standard (ADHICS) FAQ",
-             "DoH ADHICS FAQ", "Department of Health Abu Dhabi", 2),
+             "DoH ADHICS FAQ", "Department of Health Abu Dhabi", 2,
+             "https://www.doh.gov.ae/-/media/Feature/Aamen/ADHICS-FAQ.ashx"),
     Document("ilo_2019", "guidance/ilo_working_on_a_warmer_planet_2019.pdf",
              "ILO, Working on a warmer planet: the impact of heat stress on labour productivity (2019)",
-             "ILO Warmer Planet 2019", "International Labour Organization", 3),
+             "ILO Warmer Planet 2019", "International Labour Organization", 3,
+             "https://www.ilo.org/wcmsp5/groups/public/---dgreports/---dcomm/---publ/documents/publication/wcms_711919.pdf"),
     Document("niosh_2016", "guidance/niosh_2016-106_heat_stress_criteria.pdf",
              "NIOSH 2016-106 Criteria for a Recommended Standard: Occupational Exposure to Heat and Hot Environments",
-             "NIOSH 2016-106", "US National Institute for Occupational Safety and Health", 3),
+             "NIOSH 2016-106", "US National Institute for Occupational Safety and Health", 3,
+             "https://www.cdc.gov/niosh/docs/2016-106/pdfs/2016-106.pdf"),
     Document("who_wmo_2015", "guidance/who_wmo_heatwaves_and_health_warning_systems_2015.pdf",
              "WHO/WMO Heatwaves and health: guidance on warning-system development (2015)",
-             "WHO/WMO Heatwaves 2015", "World Health Organization / World Meteorological Organization", 3),
+             "WHO/WMO Heatwaves 2015", "World Health Organization / World Meteorological Organization", 3,
+             # UN CC:Learn mirror; the file it serves is byte-identical to the indexed copy
+             "https://www.uncclearn.org/wp-content/uploads/library/who16102015.pdf"),
     Document("sharjah_cop33", "guidance/sharjah_oshj_cop33_safety_in_heat_2024.pdf",
              "Sharjah OSHJ-CoP-33 Safety in Heat (2024)",
-             "Sharjah OSHJ-CoP-33", "Sharjah Prevention and Safety Authority", 4),
+             "Sharjah OSHJ-CoP-33", "Sharjah Prevention and Safety Authority", 4,
+             "https://mc.spsa.shj.ae/Media/documents/j3comnEiUeCQ3emVuS2OQ_Safety%20in%20Heat%20OSHJ-COP-33.pdf"),
 ]
 
 

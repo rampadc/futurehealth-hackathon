@@ -1,11 +1,14 @@
 """RAG building blocks that need no cloud: chunking, header removal, re-ranking, citation grounding."""
+import json
+
 import pytest
 
 from evals.retrieval_metrics import score_query, summarise
 from heat_safe import rules
 from heat_safe.corpus import (DOCS_BY_ID, DOCUMENTS, MAX_CHARS, RAW, Chunk, pack, section_for,
                               strip_repeated_lines, twl_table_chunks)
-from heat_safe.grounding import check_citation_grounding, tool_citations
+from heat_safe.grounding import (check_citation_grounding, check_link_grounding, check_numeric_grounding,
+                                 tool_citations)
 from heat_safe.guidance import rerank
 
 # --- chunking --------------------------------------------------------------------------------------
@@ -65,6 +68,26 @@ def test_every_registered_document_exists_and_has_a_known_tier():
     assert len(DOCS_BY_ID) == len(DOCUMENTS)  # ids are unique
 
 
+def test_source_urls_agree_with_the_download_manifest():
+    """A downloaded file's citation link is the URL it was downloaded from, so the link opens the
+    document that was indexed."""
+    manifest = {e["path"]: e["source"] for e in json.loads((RAW.parent / "manifest.json").read_text())}
+    checked = 0
+    for d in DOCUMENTS:
+        assert d.url is None or d.url.startswith("https://"), d.doc_id
+        if f"raw/{d.path}" in manifest:
+            assert d.url == manifest[f"raw/{d.path}"], d.doc_id
+            checked += 1
+    assert checked == 7  # ADOSH-SF x3, ILO, NIOSH, WHO/WMO, Sharjah; the rest were collected by hand
+
+
+def test_pdf_links_open_at_the_cited_page_and_pages_do_not():
+    assert DOCS_BY_ID["niosh_2016"].link(42) == "https://www.cdc.gov/niosh/docs/2016-106/pdfs/2016-106.pdf#page=42"
+    assert DOCS_BY_ID["uae_pdpl"].link(3) == "https://uaelegislation.gov.ae/en/legislations/1972"  # landing page
+    assert DOCS_BY_ID["adhics_faq"].link(2) == DOCS_BY_ID["adhics_faq"].url  # .ashx: not known to be a PDF URL
+    assert DOCS_BY_ID["mohre_break_2026_close"].link(2) is None  # no URL known
+
+
 def test_twl_table_chunks_match_the_rules_module():
     """The transcribed table is retrievable text; its zone limits must equal the coded thresholds."""
     text = "\n".join(c.text for c in twl_table_chunks())
@@ -109,6 +132,31 @@ def test_tool_citations_parses_both_citation_styles():
     cites = tool_citations(OUTPUTS)
     assert ("adosh-sf cop 11.0", 5) in cites and ("adosh-sf technical guideline", 5) in cites
     assert not any(src.startswith("adosh-sf cop 11.0") and p != 5 for src, p in cites)  # undated CoP has no page
+
+
+# --- link grounding --------------------------------------------------------------------------------
+
+NIOSH_P42 = "https://www.cdc.gov/niosh/docs/2016-106/pdfs/2016-106.pdf#page=42"
+LINK_OUTPUTS = [{"results": [{"cite": "NIOSH 2016-106, p. 42", "url": NIOSH_P42}]}]
+
+
+@pytest.mark.parametrize("answer,passed", [
+    (f"Hydrate ([NIOSH 2016-106, p. 42]({NIOSH_P42})).", True),
+    (f"See {NIOSH_P42}.", True),                                                       # bare, trailing full stop
+    ("Hydrate ([NIOSH 2016-106, p. 42](https://www.cdc.gov/niosh/docs/2016-106/pdfs/2016-106.pdf#page=43)).", False),
+    ("More at https://www.osha.gov/heat.", False),                                     # invented link
+    ("Hydrate (NIOSH 2016-106, p. 42).", True),                                        # no links
+])
+def test_link_grounding(answer, passed):
+    assert check_link_grounding(answer, LINK_OUTPUTS)["passed"] is passed
+
+
+def test_numbers_and_pages_inside_links_are_not_checked_as_quoted_values():
+    answer = ("Rest 15 min ([Sharjah OSHJ-CoP-33, p. 4](https://mc.spsa.shj.ae/x/Safety%20in%20Heat.pdf#page=4)),"
+              " see also https://example.org/p.9/30%25")
+    outputs = [{"results": [{"cite": "Sharjah OSHJ-CoP-33, p. 4"}]}, {"rest_min": 15}]
+    assert check_numeric_grounding(answer, outputs)["passed"]   # "20" before "in", "25" before "%" ignored
+    assert check_citation_grounding(answer, outputs)["passed"]  # "p.9" inside a URL is not a page reference
 
 
 # --- retrieval metrics -----------------------------------------------------------------------------
