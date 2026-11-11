@@ -25,7 +25,7 @@ from heat_safe.guidance import EMBED_DIM, EMBED_MODEL, LOCATION, TABLE, embed  #
 
 SCHEMA = [
     ("chunk_id", "STRING"), ("doc_id", "STRING"), ("title", "STRING"), ("short", "STRING"),
-    ("issuer", "STRING"), ("tier", "INTEGER"), ("authority", "STRING"), ("source_path", "STRING"),
+    ("issuer", "STRING"), ("tier", "INTEGER"), ("authority", "STRING"), ("source_path", "STRING"), ("source_url", "STRING"),
     ("page", "INTEGER"), ("page_label", "STRING"), ("section", "STRING"), ("text", "STRING"),
     ("char_count", "INTEGER"), ("content_hash", "STRING"), ("embedding_model", "STRING"),
     ("embedding_dim", "INTEGER"), ("built_at", "TIMESTAMP"),
@@ -80,7 +80,7 @@ def main() -> int:
     for h, c in zip(hashes, chunks):
         d = DOCS_BY_ID[c.doc_id]
         rows.append({**c.to_dict(), "title": d.title, "short": d.short, "issuer": d.issuer, "tier": d.tier,
-                     "authority": AUTHORITY[d.tier], "source_path": f"data/raw/{d.path}",
+                     "authority": AUTHORITY[d.tier], "source_path": f"data/raw/{d.path}", "source_url": d.url,
                      "char_count": len(c.text), "content_hash": h, "embedding_model": EMBED_MODEL,
                      "embedding_dim": EMBED_DIM, "built_at": built_at, "embedding": cache[h]})
     schema = [bigquery.SchemaField(n, t) for n, t in SCHEMA] + [
