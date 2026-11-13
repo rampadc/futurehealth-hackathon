@@ -1,0 +1,8 @@
+html { min-width: 320px; }
+body { margin: 0; }
+* { box-sizing: border-box; }
+a, button, input { touch-action: manipulation; }
+:focus-visible { outline: 3px solid var(--mui-palette-primary-main); outline-offset: 3px; }
+pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: .8rem; }
+.skip-link { position: absolute; left: 12px; top: -70px; padding: 12px; background: var(--mui-palette-background-paper); z-index: 2000; }
+.skip-link:focus { top: 12px; }
