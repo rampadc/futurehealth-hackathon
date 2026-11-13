@@ -1,0 +1,169 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   HEAT-SAFE · "ISSUED SHEET" DESIGN TOKENS
+   Metaphor: every screen is a sheet on the site permit board. Line weight is
+   hierarchy, line style is certainty (solid = issued, dashed = draft/AI,
+   hatched = no work), ink fill is a stamp, and colour is a safety signal only.
+   Contrast ratios are WCAG 2.2 on the surface named in the comment.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root {
+  color-scheme: light;
+
+  /* ── Base: drafting ink on issued paper ─────────────────────────────── */
+  --color-base: #FFFFFF;          /* paper: content surface               */
+  --color-sheet: #F2EFE8;         /* sheet margin: app chrome, rails      */
+  --color-tracing: #ECEFF3;       /* tracing paper: drafts, AI, proposals */
+  --color-ink: #14120F;           /* 18.7:1 on base · 16.3 on sheet       */
+  --color-graphite: #4A453E;      /* secondary text · 9.5:1 on base       */
+  --color-pencil: #6B655D;        /* tertiary, disabled · 5.8 / 5.0 / 5.0 */
+  --color-on-ink: #FFFFFF;        /* text on ink stamps · 18.7:1          */
+
+  /* ── Signals: ISO 3864 safety colours (RAL-derived), meaning only ─── */
+  --color-signal-red: #A31F24;    /* prohibition / stop · 7.6 on base, white on fill 7.6 */
+  --color-signal-yellow: #F2A900; /* caution · FILL ONLY, ink text 9.3:1    */
+  --color-signal-green: #1E6E47;  /* safe condition · 6.2 on base, white on fill 6.2 */
+  --color-signal-blue: #1D4A86;   /* mandatory instruction (work slots) · 8.8 */
+  --color-on-signal: #FFFFFF;     /* text on red, green, blue fills          */
+  --color-on-caution: #14120F;    /* text on yellow fill                     */
+
+  /* The one emissive accent: the "needs action now" signal edge. */
+  --color-emissive: var(--color-signal-red);
+
+  /* ── Rules (line weight = hierarchy) ───────────────────────────────── */
+  --rule-hair: 1px solid var(--color-ink);           /* rows, cells          */
+  --rule-structure: 2px solid var(--color-ink);      /* sections, frames     */
+  --rule-signal: 4px solid var(--color-emissive);    /* state edge           */
+  --rule-draft: 2px dashed var(--color-ink);         /* AI, proposal, draft  */
+  --border-brutalist: var(--rule-structure);
+  --hatch-rest: repeating-linear-gradient(135deg, transparent 0 6px, var(--color-ink) 6px 7px);
+  --hatch-unknown: repeating-linear-gradient(45deg, transparent 0 3px, var(--color-pencil) 3px 4px);
+
+  /* ── Geometry ─────────────────────────────────────────────────────── */
+  --radius: 0;                    /* absolute: every corner is square      */
+  --spacing-unit: 0.5rem;         /* 8px                                   */
+  --space-half: calc(var(--spacing-unit) * .5);   /* 4  */
+  --space-1: var(--spacing-unit);                  /* 8  */
+  --space-2: calc(var(--spacing-unit) * 2);        /* 16 */
+  --space-3: calc(var(--spacing-unit) * 3);        /* 24 */
+  --space-4: calc(var(--spacing-unit) * 4);        /* 32 */
+  --space-6: calc(var(--spacing-unit) * 6);        /* 48 */
+  --space-8: calc(var(--spacing-unit) * 8);        /* 64 */
+  --gutter: clamp(var(--space-2), 2.5vw, var(--space-3));
+  --section-gap: clamp(var(--space-4), 4vw, var(--space-6));
+
+  /* Targets: pointer precision on desktop, gloved thumbs in the field. */
+  --target-pointer: 2rem;         /* 32px dense desktop                    */
+  --target-touch: 3rem;           /* 48dp floor for any touch target       */
+  --target-glove: 3.5rem;         /* 56dp: field actions, list rows        */
+  --target-cta: 4rem;             /* 64dp: the one primary action          */
+  --target: var(--target-pointer);
+  --gap-touch: 0.75rem;           /* 12px between adjacent touch targets   */
+  --edge-safe: 1.25rem;           /* keep critical targets off rugged-case bezels */
+
+  /* ── Type: DM Sans only, hierarchy by size and weight ─────────────── */
+  --font: 'DM Sans', 'Noto Sans Arabic', 'Noto Sans Devanagari', 'Noto Sans Malayalam', 'Noto Sans Bengali', system-ui, sans-serif;
+  --fs-label: 0.75rem;                                        /* 12 */
+  --fs-small: 0.875rem;                                       /* 14 */
+  --fs-body: 1rem;                                            /* 16 */
+  --fs-title: clamp(1.125rem, 1rem + 0.4vw, 1.25rem);         /* 18–20 */
+  --fs-heading: clamp(1.25rem, 1.05rem + 0.8vw, 1.5rem);      /* 20–24 */
+  --fs-readout: clamp(1.5rem, 1.15rem + 1.5vw, 2rem);         /* 24–32 */
+  --fs-focal: clamp(2.25rem, 1.4rem + 3.6vw, 3.5rem);         /* 36–56: one per screen */
+  --lh-tight: 1.1;
+  --lh-title: 1.25;
+  --lh-body: 1.45;
+  --track-label: 0.08em;          /* uppercase Latin labels only           */
+  --track-focal: -0.02em;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-bold: 700;
+
+  /* ── Motion: mechanical, vector-like, never floaty ────────────────── */
+  --easing-mechanical: cubic-bezier(0.2, 0, 0, 1);
+  --easing-step: steps(4, end);
+  --dur-instant: 0ms;             /* colour and state changes              */
+  --dur-snap: 90ms;               /* hover / press response                */
+  --dur-stamp: 140ms;             /* a record being made                   */
+  --dur-wipe: 180ms;              /* alert reveal, panel open              */
+  --dur-scan: 1.2s;               /* skeleton hatch travel                 */
+
+  /* ── Focus: ink ring + safety-yellow halo (visible in glare) ──────── */
+  --focus-ring: 0 0 0 2px var(--color-base), 0 0 0 4px var(--color-ink), 0 0 0 7px var(--color-signal-yellow);
+
+  /* ── Layers ───────────────────────────────────────────────────────── */
+  --z-menu: 40;
+  --z-overlay: 50;
+  --z-toast: 60;
+}
+
+/* Touch devices get glove-size targets automatically. */
+@media (pointer: coarse) {
+  :root { --target: var(--target-glove); }
+}
+
+/* ── Glare: direct sun, dirty screens, polarised glasses. Field default.
+   Pure black on white; every text pair ≥ 11:1 (AAA is 7:1). Tinted surfaces
+   become white so nothing relies on a subtle tint; rules thicken; type steps up. */
+:root[data-theme="glare"] {
+  color-scheme: light;
+  --color-base: #FFFFFF;
+  --color-sheet: #FFFFFF;
+  --color-tracing: #FFFFFF;
+  --color-ink: #000000;           /* 21:1   */
+  --color-graphite: #24211D;      /* 16.0:1 */
+  --color-pencil: #3B3732;        /* 11.8:1 */
+  --color-on-ink: #FFFFFF;
+  --color-signal-red: #7A0C10;    /* 11.1:1, white on fill 11.1 */
+  --color-signal-yellow: #FFC400; /* black on fill 13.2 */
+  --color-signal-green: #0A4429;  /* 11.2:1 */
+  --color-signal-blue: #0E2A55;   /* 14.2:1 */
+  --color-on-signal: #FFFFFF;
+  --color-on-caution: #000000;
+  --rule-hair: 2px solid var(--color-ink);
+  --rule-structure: 3px solid var(--color-ink);
+  --rule-signal: 6px solid var(--color-emissive);
+  --rule-draft: 3px dashed var(--color-ink);
+  --fs-label: 0.8125rem;          /* 13 */
+  --fs-small: 0.9375rem;          /* 15 */
+  --fs-body: 1.125rem;            /* 18 */
+  --weight-regular: 500;          /* thin strokes vanish in glare */
+}
+
+/* ── Night shift: same sheet, lights off. Signals lift to stay ≥ 6.6:1. ── */
+:root[data-theme="night"] {
+  color-scheme: dark;
+  --color-base: #12110F;
+  --color-sheet: #1C1A17;
+  --color-tracing: #1A1D22;
+  --color-ink: #F2EEE6;           /* 16.3:1 on base */
+  --color-graphite: #B8B0A4;      /* 8.8:1 */
+  --color-pencil: #8E877C;        /* 5.3:1 */
+  --color-on-ink: #12110F;
+  --color-signal-red: #FF7A6B;    /* 7.4:1; base-coloured text on fill 7.4 */
+  --color-signal-yellow: #FFC21A; /* base text on fill 11.7 */
+  --color-signal-green: #5CCB93;  /* 9.4 */
+  --color-signal-blue: #8DB4F0;   /* 8.9 */
+  --color-on-signal: #12110F;
+  --color-on-caution: #12110F;
+  --focus-ring: 0 0 0 2px var(--color-base), 0 0 0 4px var(--color-ink), 0 0 0 7px var(--color-signal-yellow);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --color-base: #12110F; --color-sheet: #1C1A17; --color-tracing: #1A1D22;
+    --color-ink: #F2EEE6; --color-graphite: #B8B0A4; --color-pencil: #8E877C; --color-on-ink: #12110F;
+    --color-signal-red: #FF7A6B; --color-signal-yellow: #FFC21A; --color-signal-green: #5CCB93; --color-signal-blue: #8DB4F0;
+    --color-on-signal: #12110F; --color-on-caution: #12110F;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-snap: 0ms; --dur-stamp: 0ms; --dur-wipe: 0ms; --dur-scan: 0s; }
+}
+
+/* ── Script-aware type (carried from the multilingual wireframes) ───── */
+:lang(ur) { --font: 'DM Sans', 'Noto Nastaliq Urdu', 'Noto Sans Arabic', sans-serif; }
+:is(:lang(hi), :lang(ml), :lang(bn), :lang(ne), :lang(ta)) { --lh-body: 1.6; --lh-title: 1.45; }
+:lang(ar) { --lh-body: 1.7; --lh-title: 1.5; }
+:lang(ur) { --lh-body: 2.1; --lh-title: 1.9; }
+:not(:lang(en)):not(:lang(tl)) { --track-label: 0; }
