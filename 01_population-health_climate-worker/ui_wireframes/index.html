@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="day">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,6 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Sans+Arabic:wght@400;500;700&family=Noto+Nastaliq+Urdu:wght@400;700&family=Noto+Sans+Devanagari:wght@400;500;700&family=Noto+Sans+Malayalam:wght@400;500;700&family=Noto+Sans+Bengali:wght@400;500;700&family=Noto+Sans+Tamil:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../ui_design_system/tokens.css">
+  <link rel="stylesheet" href="../ui_design_system/brand.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -14,11 +16,13 @@
     <aside class="panel" id="panel" aria-label="Prototype controls"></aside>
     <main class="stage" id="stage" aria-live="polite"></main>
   </div>
+  <script src="../ui_design_system/brand.js"></script>
   <script src="core.js"></script>
   <script src="i18n.js"></script>
   <script src="screens-web.js"></script>
   <script src="screens-site.js"></script>
   <script src="screens-worker.js"></script>
+  <script src="screens-admin.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

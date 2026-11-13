@@ -5,12 +5,16 @@ The visual and interaction language for every Heat-Safe surface: supervisor web,
 The living style guide shows every token and component in every state: open `index.html` over HTTP.
 
 ```bash
-python -m http.server 8766 --directory 01_population-health_climate-worker/ui_design_system
+python -m http.server 8766 --directory 01_population-health_climate-worker
 ```
+
+Then open http://localhost:8766/ui_design_system/ (the wireframes are at `/ui_wireframes/`).
 
 | File | Contents |
 |---|---|
-| `tokens.css` | All design tokens: colour (day, glare, night shift), rules, spacing, glove targets, type, motion, focus |
+| `tokens.css` | All design tokens: colour (day, glare, night shift), rules, spacing, glove targets, type, motion, focus. Themes apply to any element with `data-theme`, not just the page |
+| `brand.css` | Company brand slots: brand bar, logo mark, phone status bar (section 11) |
+| `brand.js` | `HSBrand`: checks a company palette against the signal colours, fits contrast per theme, emits brand tokens and the web app manifest (section 11) |
 | `components.css` | Components, each with default, hover, focus, active, disabled, loading and error states |
 | `field.css` | Field and system patterns: sync indicator and queue, agent task state, inline suggestion, guardrail record, media capture, zone plan, component empty states |
 | `icons.js` | The icon set (one drawing rule) and the `icon()` helper |
@@ -38,8 +42,8 @@ This metaphor is also a safety argument. Heat-Safe’s hardest design problem is
 
 | Constraint | Rule |
 |---|---|
-| Palette | Warm ink and paper, plus four signal colours. Nothing else. Grey is warm graphite and pencil, never slate or zinc. |
-| Colour use | Signals carry safety meaning only. They are never component identity, chart series, brand or hover. |
+| Palette | Warm ink and paper, plus four signal colours. Grey is warm graphite and pencil, never slate or zinc. The one addition is a company’s brand colour, and only in the identity slots of section 11. |
+| Colour use | Signals carry safety meaning only. They are never component identity, chart series, brand or hover. Brand colour never appears on a control, stamp, band, chart or statement. |
 | Geometry | Every corner is 0px, for buttons, inputs, avatars, dialogs and focus rings alike. |
 | Lines | 1px hair, 2px structure, 4px signal edge, 2px dashed draft. No other weights. |
 | Surfaces | Paper (content), sheet (chrome) and tracing (drafts). No nested cards: sections are a label on a 2px rule. |
@@ -103,6 +107,8 @@ Ratios are WCAG 2.2 against paper (day) or base (night). The style guide recompu
 - Body text goes up to 18px at weight 500.
 
 Night shift is not given a glare variant; glare is a daylight problem.
+
+Themes are **element-scoped**: `data-theme` works on any element, and every derived token (rules, hatches, focus ring, emissive) is redeclared there. That is what lets one page show a night-shift preview inside a day page, as the style guide and W9 do.
 
 Type sizes are fluid with `clamp()`: label 12, small 14, body 16, title 18–20, heading 20–24, readout 24–32, focal 36–56.
 
@@ -223,7 +229,7 @@ Each guideline was weighed against what Heat-Safe is: a heat-safety execution la
 
 ## 9. Adopting it
 
-1. **Wireframes.** Swap `ui_wireframes/styles.css` colour and rule values for `tokens.css`. Their structure already matches.
+1. **Wireframes. Done.** `ui_wireframes/` loads `tokens.css`, `brand.css` and `brand.js`. Its `styles.css` keeps its short names as aliases of the tokens. Markers are numbered ink squares. Bands and holds are drawn separately, so W1’s hourly strip shows a Low band and a heavy-work hold at 145 W/m². Proposals sit on dashed tracing paper. Site and worker phones open in glare. Company branding is applied by W9.
 2. **The `ui/` app.** Import `tokens.css` and `components.css` ahead of Tailwind. Map Tailwind theme colours to the tokens so utility classes can’t reintroduce zinc, then retire `ui/src/tokens.css`. Replace `lucide-react` icons with this set, or restyle them to the 2px square-cap rule.
 3. **Copy.** Status words, glyphs and the confirmation verbs in this guide are the canonical strings for `i18n.js`.
 
@@ -235,3 +241,62 @@ Each guideline was weighed against what Heat-Safe is: a heat-safety execution la
 - Photo capture: confirm with occupational health and legal that equipment photos never include faces, and how long they are kept.
 - Night shift: is it worth having on the worker app, or only for supervisors in the cabin?
 - Arabic UI for supervisors: the system is RTL-ready, but nobody has reviewed the copy.
+- Branding: confirm the signal-risk thresholds (section 11) with real client palettes. Should an orange brand that is also a company’s safety colour still be held to the logo mark? Which roles beyond the organisation admin may publish, and do sites within one organisation ever need different brands?
+
+---
+
+## 11. Company branding
+
+Heat-Safe is sold to contractors who want their own colours on it. Branding is allowed where it identifies **who issued the sheet**. It is never allowed where it could be read as a **safety signal**. `brand.js` enforces the line, so an admin can’t configure their way past it. Try it in the style guide (section 25) or in wireframe W9.
+
+### Slots
+
+| Slot | Platform (supervisor web) | Mobile web (site app, worker app, kiosk) |
+|---|---|---|
+| Brand bar (`--brand-bar`, `--brand-on-bar`) | Rail head: logo mark, company name, “Heat-Safe Crew” underneath | 32px strip above the title block (header style “strip”) |
+| Logo mark (`--brand-mark`) | Rail head, PDF export headers | Strip, install icon, launch screen |
+| Browser colour (`--brand-theme`, `theme_color`) | Not used | Status bar and browser toolbar |
+| Chrome tint (`--color-sheet`) | Optional faint wash on rail and sheet surfaces | Not offered: glare, the field default, forces white |
+| **Never** | Stamps, bands, holds, statements, buttons, links, focus, charts, timelines, AI drafts | The same, plus stop-work and emergency screens, which drop the strip and paint the browser colour ink |
+
+The product line “Heat-Safe Crew” always stays under the company name, so a worker knows which system issued the instruction.
+
+### Guardrails (`HSBrand.resolve`)
+
+1. **Signal risk.** A colour is kept to the logo mark if it reads as a signal: OKLCH chroma ≥ 0.06 with hue in the red family (≥ 345° or < 50°), the caution family (50–110°, lightness ≥ 0.45) or the green family (110–180°). It is also kept to the mark if it sits within OKLab ΔE 0.10 of any signal (0.06 for signal blue).
+2. **Bar source.** On “auto”, the bar uses the primary colour, then the secondary, then paper. An admin can force primary, secondary or off, but never a restricted colour.
+3. **Contrast.** Bar text is ink or paper, whichever passes: 4.5:1 for day and night, 7:1 for glare. If neither passes, only the bar’s lightness changes; the hue is kept.
+4. **Night.** The bar dims to lightness ≤ 0.40 and chroma ≤ 0.14, so it doesn’t glare in a dark cabin.
+5. **Tint.** Rail tint is OKLCH 0.955/0.014 (day) or 0.215/0.012 (night) at the brand hue. It is refused within 40° of the tracing-paper hue, so a tinted rail can’t pass for an AI draft.
+6. **Safety screens.** Any screen with a stop-work or emergency statement shows no brand, whatever the setting.
+
+Each guardrail produces a check (`pass`, `adjusted`, `restricted`, `off`, `enforced`) with a plain sentence. W9 lists them beside the publish button.
+
+### Platform and mobile web are configured separately
+
+```js
+{
+  org: 'Sandline Contracting', wordmark: 'Sandline', logo: 'data:image/svg+xml…',
+  primary: '#C2541B', secondary: '#2B2D42',
+  platform: { bar: 'auto', tint: true },                       // auto | primary | secondary | none
+  mobile:   { bar: 'auto', header: 'strip', tint: false,         // header: strip | browser | off
+              appName: 'Sandline Heat-Safe', shortName: 'Sandline' }
+}
+```
+
+The desk has room for a full bar and a tint. On a phone the screen is short and glare is the default, so the choice is a 32px strip, the browser colour only, or nothing.
+
+### Output
+
+- `HSBrand.css(res)` writes `[data-brand-surface="platform|mobile"]` rules for each theme. Shells put `data-brand-surface` on the frame next to `data-theme`.
+- `HSBrand.apply(res)` injects them into the page. Passing a suffix (`'-draft'`) scopes a draft for previewing without touching the live chrome.
+- `HSBrand.manifest(res)` writes the web app manifest for mobile web: `name`, `short_name`, and `theme_color` from the day bar.
+
+### Fictional presets used for testing
+
+| Preset | Palette | Outcome |
+|---|---|---|
+| Sandline Contracting | Orange `#C2541B`, charcoal `#2B2D42` | Orange reads as Stop, so it goes in the mark only; the charcoal fills the bar |
+| Dune Civil Works | Petrol `#0E4C5A`, sand `#D9B45A` | Petrol fills the bar and the mark; the sand reads as Caution and is not used |
+| Al Noor Facilities | Lilac `#B9A7E0`, plum `#5B2A86` | Lilac fills the bar with ink text; the phone uses the browser colour only |
+| Corniche Logistics | Navy `#1D4B8F` | Too close to signal blue (Mandatory). The bar stays paper; the mark carries the brand |

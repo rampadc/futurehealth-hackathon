@@ -17,6 +17,7 @@ const ROLES = {
   safety:   { who: 'maya',   label: 'Safety officer · Maya' },
   super:    { who: 'rashid', label: 'Superintendent · Rashid' },
   firstaid: { who: 'salim',  label: 'First aider · Salim' },
+  admin:    { who: 'noura',  label: 'Organisation admin · Noura' },
 };
 
 const PEOPLE = {
@@ -38,6 +39,7 @@ const PEOPLE = {
   lina:   { n: 'Lina',   id: 'P07', e: '🏷️', role: 'Workshop occupant' },
   omar:   { n: 'Omar',   id: 'P08', e: '🛠️', role: 'Workshop occupant' },
   amal:   { n: 'Amal',   id: '',    e: '💼', role: 'Cost review' },
+  noura:  { n: 'Noura',  id: 'P09', e: '🖥️', role: 'Sandline HSE systems admin' },
   planner:{ n: 'Planning Agent', id: '', e: '🗓️', role: 'AI agent', machine: true },
   aid:    { n: 'Worker Aid Agent', id: '', e: '💬', role: 'AI agent', machine: true },
   monitor:{ n: 'Risk Monitor', id: '', e: '⏱️', role: 'Deterministic job, every 15 minutes', machine: true },
@@ -46,7 +48,33 @@ const PEOPLE = {
 const AFFECTED = ['c02', 'c03', 'c04', 'rana', 'yusuf', 'dana', 'bilal', 'leila', 'zaid', 'mariam', 'samir'];
 
 /* ───────── state ───────── */
-const App = { route: 'map', variant: 'default', role: 'foreman', sel: {}, f: {}, scale: 1, lastR: null, mirror: false, pseudo: false, qa: false };
+const App = { route: 'map', variant: 'default', role: 'foreman', sel: {}, f: {}, scale: 1, lastR: null, mirror: false, pseudo: false, qa: false, theme: 'auto' };
+
+/* ───────── light setting and company brand ─────────
+   Auto follows the design system: the desk apps open in day, the site and worker apps in
+   glare (their outdoor default), the kiosk in day (it hangs in a cooled shelter). */
+function frameTheme(device) {
+  if (App.theme !== 'auto') return App.theme;
+  return device === 'site' || device === 'worker' ? 'glare' : 'day';
+}
+const BRAND_SURFACE = { web: 'platform', site: 'mobile', worker: 'mobile', kiosk: 'mobile' };
+function loadBrand() { try { return JSON.parse(localStorage.getItem('hs-brand') || 'null'); } catch (e) { return null; } }
+function publishBrand(cfg, meta) {
+  App.brand = HSBrand.normalise(cfg);
+  App.brandRes = HSBrand.resolve(App.brand);
+  App.brandMeta = meta || null;
+  try { localStorage.setItem('hs-brand', JSON.stringify(App.brand)); } catch (e) { /* private mode: keep in memory */ }
+  HSBrand.apply(App.brandRes, 'hs-brand');
+}
+publishBrand(loadBrand() || {});
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+/* Brand bar: company name over the Heat-Safe product line, so people always know which system issued the sheet. */
+function brandBar(res, product, strip) {
+  const branded = HSBrand.isBranded(res);
+  const name = branded ? res.cfg.org || res.cfg.wordmark : 'Heat-Safe Crew';
+  const line = branded ? product : 'Dune Civil Works · Abu Dhabi';
+  return `<div class="brandbar ${strip ? 'brandbar--strip' : ''}">${branded ? HSBrand.markHtml(res) : ''}<span class="brandbar__text"><span class="brandbar__name">${esc(name)}</span><span class="brandbar__product">${esc(line)}</span></span></div>`;
+}
 
 function go(id, v) { const h = '#/' + id + (v && v !== 'default' ? '/' + v : ''); if (location.hash === h) render(); else location.hash = h; }
 function parse() {
@@ -72,14 +100,19 @@ const B = {
   green:  (l = 'Green', a) => badge('● ' + l, 'b-green', a),
   emerg:  (l = 'Emergency', a) => badge('✚ ' + l, 'b-emerg', a),
   done:   (l = 'Done', a) => badge('✓ ' + l, '', a),
-  wait:   (l = 'Waiting', a) => badge('… ' + l, '', a),
-  over:   (l = 'Overdue', a) => badge('! ' + l, 'b-amber', a),
+  rec:    (l = 'Recorded', a) => badge('✓ ' + l, 'b-rec', a),
+  wait:   (l = 'Waiting', a) => badge('… ' + l, 'b-wait', a),
+  over:   (l = 'Overdue', a) => badge('! ' + l, 'b-over', a),
+  hold:   (l = 'Heavy-work hold', a) => badge('■ ' + l, 'b-red', a),
   ai:     (l = 'AI', a) => badge('◇ ' + l, 'b-ai', a),
   plain:  (l, a) => badge(l, '', a),
   muted:  (l, a) => badge(l, 'b-muted', a),
   plan:   (l, a) => badge(l, 'b-plan', a),
 };
 function badge(text, cls = '', aria) { return `<span class="badge ${cls}"${aria ? ` role="img" aria-label="${aria}"` : ''}>${text}</span>`; }
+/* Environmental band: a condition (swatch + word). Task holds are separate stamps. */
+const BAND_WORD = { low: 'Low band', caution: 'Caution band', high: 'High band', unknown: 'Unknown band' };
+function band(level, extra = '') { return `<span class="band band--${level}"><span class="band__swatch" aria-hidden="true"></span>${BAND_WORD[level]}${extra ? ' · ' + extra : ''}</span>`; }
 function marker(n) { return `<span class="marker m${n}" aria-hidden="true">${n}</span>`; }
 const COMP = { 1: 'Heat controls', 2: 'Protective response', 3: 'Work/rest plan', 4: 'Restart readiness' };
 function compname(n) { return `<span class="compname">${marker(n)}${n} ${COMP[n]}</span>`; }
@@ -139,7 +172,7 @@ function aiBlock(o) {
 }
 
 function emptyArt() {
-  return `<svg width="120" height="72" viewBox="0 0 120 72" aria-hidden="true" fill="none" stroke="#111" stroke-width="1.5">
+  return `<svg width="120" height="72" viewBox="0 0 120 72" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
     <rect x="12" y="8" width="40" height="40"/><circle cx="32" cy="24" r="7"/><path d="M20 46c2-8 22-8 24 0"/>
     <rect x="68" y="8" width="40" height="40"/><circle cx="88" cy="24" r="7"/><path d="M76 46c2-8 22-8 24 0"/>
     <path d="M0 64h120" /></svg>`;
@@ -199,8 +232,8 @@ function webShell(s, r) {
   }
   return `<div class="shell">
     <div class="side">
-      <div class="brand"><b>Heat-Safe Crew</b><span>Dune Civil Works · Abu Dhabi</span></div>
-      <nav aria-label="Main">${nav}<div class="sep"></div><button class="navi" data-act="toast" data-msg="Site setup · locations, roster and sensors (not in this prototype)"><span class="ph" aria-hidden="true">⋯</span><span>Site setup</span></button></nav>
+      ${brandBar(App.brandRes, 'Heat-Safe Crew · Mussafah')}
+      <nav aria-label="Main">${nav}<div class="sep"></div><button class="navi" data-act="toast" data-msg="Site setup · locations, roster and sensors (not in this prototype)"><span class="ph" aria-hidden="true">⋯</span><span>Site setup</span></button><button class="navi ${s.id === 'w9' ? 'on' : ''}" data-go="w9"><span class="ph" aria-hidden="true">◐</span><span>Organisation branding</span></button></nav>
       <div class="me">${av(ROLES[App.role].who)}<span><b>${user.n}</b>${user.role}</span></div>
     </div>
     <div class="content">
@@ -240,10 +273,21 @@ function mobileShell(s, r) {
   }
   const tabbar = r.noTabs ? '' : `<nav class="tabbar" style="grid-template-columns:${tabs.map(t => t.big ? '1.6fr' : '1fr').join(' ')}" aria-label="Tabs">${tabs.map(t => `<button class="${s.tab === t.k ? 'on' : ''} ${t.big ? 'big' : ''}"${attr('data-go', t.go)}${attr('data-act', t.act)}${s.tab === t.k ? ' aria-current="page"' : ''}><span class="ic" aria-hidden="true">${t.ic}</span>${t.key ? tr(t.key) : t.l}</button>`).join('')}</nav>`;
   const net = r.offline ? (worker ? tr('nonet') : 'No network') : '4G ▮▮▮';
-  return `<div class="statusbar"><span>${nv.clock || s.clock || '08:18'}</span><span>${worker ? tr('app') : 'Heat-Safe Site'}</span><span>${net}</span></div>${top}${bannerHtml(r.error)}${inner}${tabbar}`;
+  const app = worker ? tr('app') : 'Heat-Safe Site';
+  /* The status bar shows what the browser's theme-color paints. Stop-work and emergency
+     statements drop the brand entirely: no strip, ink browser colour. */
+  const safety = isSafetyScreen(r);
+  const strip = !safety && App.brandRes.cfg.mobile.header === 'strip' && HSBrand.isBranded(App.brandRes) ? brandBar(App.brandRes, worker ? 'Heat-Safe · ' + app : app, true) : '';
+  return `<div class="statusbar themebar ${safety ? 'is-safety' : ''}"><span>${nv.clock || s.clock || '08:18'}</span><span>${app}</span><span>${net}</span></div>${strip}${top}${bannerHtml(r.error)}${inner}${tabbar}`;
+}
+function isSafetyScreen(r) { return /class="statement (red|black)/.test(r.heroReplace || '') || /class="statement (red|black)/.test(r.full || ''); }
+
+function kioskShell(s, r) {
+  const strip = App.brandRes.cfg.mobile.header === 'strip' && HSBrand.isBranded(App.brandRes) && !isSafetyScreen(r) ? brandBar(App.brandRes, 'Heat-Safe · Shelter A check-in', true) : '';
+  return strip + r.full;
 }
 
-const SHELLS = { web: webShell, site: mobileShell, worker: mobileShell, kiosk: (s, r) => r.full };
+const SHELLS = { web: webShell, site: mobileShell, worker: mobileShell, kiosk: kioskShell };
 
 /* ───────── rendering ───────── */
 function variantsOf(s) {
@@ -286,7 +330,9 @@ function render() {
   stage.dataset.cur = App.route + '/' + App.variant;
   const loc = frameLocale(s);
   stage.classList.toggle('qa-fallback', App.qa);
-  stage.innerHTML = `<div class="stage-cap">${s.id.toUpperCase()} · ${s.name} · ${DEVICES[s.device].name}${loc.note}</div><div class="stage-inner" id="inner"><div class="frame ${s.device}" id="frame" lang="${loc.lang}" dir="${loc.dir}">${SHELLS[s.device](s, r)}</div></div>`;
+  const theme = frameTheme(s.device);
+  const themeNote = { day: 'Day', glare: 'Glare', night: 'Night shift' }[theme];
+  stage.innerHTML = `<div class="stage-cap">${s.id.toUpperCase()} · ${s.name} · ${DEVICES[s.device].name} · ${themeNote}${loc.note}</div><div class="stage-inner" id="inner"><div class="frame ${s.device}" id="frame" lang="${loc.lang}" dir="${loc.dir}" data-theme="${theme}" data-brand-surface="${BRAND_SURFACE[s.device]}">${SHELLS[s.device](s, r)}</div></div>`;
   postProcess($('#frame'));
   if (sameScreen) $$('[data-keep]', stage).forEach(el => { if (keep[el.dataset.keep]) el.scrollTop = keep[el.dataset.keep]; });
   fit();
@@ -497,7 +543,7 @@ document.addEventListener('keydown', e => {
   else if (e.key === '/') { const inp = $('#frame .composer input') || $('#frame [data-act=filter]'); if (inp) { inp.focus(); if (inp.tagName === 'BUTTON') inp.click(); e.preventDefault(); } }
   else if (k === 'g') { gPending = Date.now(); }
   else if (gPending && Date.now() - gPending < 1200) {
-    const map = { m: 'w1', h: 'w2', p: 'w3', c: 'w4', w: 'w5', r: 'w6', a: 'w7', s: 'w8' };
+    const map = { m: 'w1', h: 'w2', p: 'w3', c: 'w4', w: 'w5', r: 'w6', a: 'w7', s: 'w8', b: 'w9' };
     gPending = 0; if (map[k]) go(map[k]);
   } else if (s.keys && s.keys[k]) { s.keys[k](e); }
 });
@@ -507,7 +553,7 @@ function showShortcuts() {
     <tr><td><b>Enter</b></td><td>Open the focused row</td></tr>
     <tr><td><b>/</b></td><td>Search or filter</td></tr>
     <tr><td><b>G</b> then <b>M</b></td><td>Go to Squad Monitoring</td></tr>
-    <tr><td><b>G</b> then <b>H / P / C / W / R / A / S</b></td><td>Heat · Protective · Crew · Work/rest · Restart · Ask · System</td></tr>
+    <tr><td><b>G</b> then <b>H / P / C / W / R / A / S / B</b></td><td>Heat · Protective · Crew · Work/rest · Restart · Ask · System · Branding</td></tr>
     <tr><td><b>A</b></td><td>Crew & workshop: add focused worker to a seat</td></tr>
     <tr><td><b>← →</b></td><td>Work/rest plan: move the time cursor one minute</td></tr>
     <tr><td><b>?</b></td><td>This list</td></tr>
