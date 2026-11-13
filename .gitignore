@@ -35,11 +35,11 @@ coverage/
 playwright-report/
 test-results/
 
-# Heat-Safe agent local data
-04_heat_safe/data/
-
 # Terraform providers and state (state can contain secrets)
 .terraform/
 *.tfstate
 *.tfstate.*
 .adk/
+
+# Terraform plan files can contain secrets
+tfplan
