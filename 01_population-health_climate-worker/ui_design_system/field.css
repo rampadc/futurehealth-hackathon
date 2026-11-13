@@ -1,0 +1,100 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   HEAT-SAFE · FIELD AND SYSTEM PATTERNS
+   Offline sync, agent task state, ambient AI suggestions, guardrail records,
+   media capture, zone plan and component-level empty states.
+   Load after components.css.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Sync indicator: lives in every title block and always says how old ── */
+.sync { display: inline-flex; align-items: center; gap: var(--space-half); min-block-size: var(--target-pointer); padding: 0 var(--space-1); border: 2px solid var(--color-ink); background: var(--color-base); color: var(--color-ink); font-size: var(--fs-label); font-weight: var(--weight-bold); white-space: nowrap; }
+.sync[data-state="synced"] { border-color: transparent; color: var(--color-graphite); }
+.sync[data-state="pending"] { border-style: dashed; }
+.sync[data-state="sending"] { background-image: repeating-linear-gradient(90deg, transparent 0 6px, var(--color-sheet) 6px 12px); animation: scan var(--dur-scan) linear infinite; }
+.sync[data-state="failed"] { border-color: var(--color-signal-red); color: var(--color-signal-red); }
+.sync[data-state="offline"] { background: var(--color-ink); color: var(--color-on-ink); }
+button.sync { cursor: pointer; min-block-size: var(--target); }
+button.sync:hover { box-shadow: inset 0 -4px 0 var(--color-signal-yellow); }
+
+/* ── Sync queue: every unsent record, its state, and what to do next ── */
+.queue { list-style: none; margin: 0; padding: 0; border-block-start: var(--rule-structure); }
+.queue__item { display: grid; grid-template-columns: auto 1fr auto; gap: var(--space-2); align-items: center; padding-block: var(--space-1); border-block-end: var(--rule-hair); min-block-size: var(--target); }
+.queue__mark { inline-size: 1.75rem; block-size: 1.75rem; border: 2px solid var(--color-ink); display: grid; place-items: center; font-size: var(--fs-label); font-weight: var(--weight-bold); }
+.queue__item[data-state="saved"] .queue__mark { border-style: dashed; }
+.queue__item[data-state="sending"] .queue__mark { background: var(--hatch-unknown); background-size: 200% 100%; animation: scan var(--dur-scan) linear infinite; }
+.queue__item[data-state="sent"] .queue__mark { background: var(--color-ink); color: var(--color-on-ink); }
+.queue__item[data-state="failed"] .queue__mark { border-color: var(--color-signal-red); color: var(--color-signal-red); }
+.queue__item[data-state="conflict"] .queue__mark { background: var(--color-signal-yellow); color: var(--color-on-caution); }
+.queue__body { min-inline-size: 0; display: grid; }
+.queue__title { font-size: var(--fs-small); font-weight: var(--weight-bold); }
+.queue__meta { font-size: var(--fs-label); color: var(--color-graphite); }
+.queue__acts { display: flex; gap: var(--space-1); flex-wrap: wrap; justify-content: flex-end; }
+
+/* ── Agent task state: what the Planning Agent is doing, step by step ── */
+.agent { border-inline-start: var(--rule-draft); background: var(--color-tracing); padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3); display: grid; gap: var(--space-1); }
+.agent__head { display: flex; flex-wrap: wrap; gap: var(--space-1); align-items: center; justify-content: space-between; }
+.agent__steps { list-style: none; margin: 0; padding: 0; display: grid; }
+.agent__step { display: grid; grid-template-columns: 1.5rem 1fr; gap: var(--space-1); align-items: start; padding-block: var(--space-half); font-size: var(--fs-small); color: var(--color-graphite); }
+.agent__step::before { content: ""; inline-size: 1rem; block-size: 1rem; margin-block-start: 0.2rem; border: 2px dashed var(--color-pencil); }
+.agent__step[data-state="done"] { color: var(--color-ink); }
+.agent__step[data-state="done"]::before { border: 2px solid var(--color-ink); background: var(--color-ink); }
+.agent__step[data-state="active"] { color: var(--color-ink); font-weight: var(--weight-bold); }
+.agent__step[data-state="active"]::before { border: 2px solid var(--color-ink); background: var(--hatch-unknown); background-size: 200% 100%; animation: scan var(--dur-scan) linear infinite; }
+.agent__step[data-state="waiting"] { color: var(--color-ink); font-weight: var(--weight-bold); }
+.agent__step[data-state="waiting"]::before { border: 2px solid var(--color-ink); background: var(--color-signal-yellow); }
+.agent__step[data-state="failed"] { color: var(--color-signal-red); font-weight: var(--weight-bold); }
+.agent__step[data-state="failed"]::before { border: 2px solid var(--color-signal-red); }
+
+/* ── Inline suggestion: ambient AI inside a form, not a chat detour ── */
+.suggest { display: grid; grid-template-columns: auto 1fr; gap: var(--space-1) var(--space-2); align-items: start; padding: var(--space-1) var(--space-2); background: var(--color-tracing); border: 2px dashed var(--color-ink); }
+.suggest__text { font-size: var(--fs-small); margin: 0; }
+.suggest__acts { grid-column: 2; display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.suggest--accepted { background: var(--color-base); border-style: solid; }
+
+/* ── Guardrail record: a stamp that keeps its own rollback path ─────── */
+.record { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-2); padding-block: var(--space-1); border-block-end: var(--rule-hair); }
+.record__what { flex: 1 1 14rem; font-size: var(--fs-small); }
+.record--withdrawn .stamp { text-decoration: line-through; background: var(--color-base); color: var(--color-graphite); border-style: dashed; }
+
+/* ── Media capture: photo, voice and yes/no before any keyboard ────── */
+.capture { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); gap: var(--gap-touch); }
+.capture__tile { position: relative; display: grid; justify-items: center; align-content: center; gap: var(--space-1); min-block-size: 7rem; padding: var(--space-2); border: 2px dashed var(--color-ink); background: var(--color-base); color: var(--color-ink); font-weight: var(--weight-bold); font-size: var(--fs-small); text-align: center; cursor: pointer; }
+.capture__tile .icon { inline-size: 2rem; block-size: 2rem; }
+.capture__tile:hover { box-shadow: inset 0 -4px 0 var(--color-signal-yellow); }
+.capture__tile:focus-within, .capture__tile:focus-visible { box-shadow: var(--focus-ring); }
+.capture__tile input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; inline-size: 100%; }
+.capture__tile[data-state="recording"] { border-style: solid; border-color: var(--color-signal-red); background: var(--color-signal-red); color: var(--color-on-signal); }
+.capture__tile[data-state="captured"] { border-style: solid; }
+.capture__thumb { inline-size: 100%; aspect-ratio: 4 / 3; object-fit: cover; border: 2px solid var(--color-ink); background: var(--hatch-unknown); }
+.capture__meta { font-size: var(--fs-label); font-weight: var(--weight-medium); color: var(--color-graphite); }
+.capture__tile[data-state="recording"] .capture__meta { color: var(--color-on-signal); }
+.yesno { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap-touch); }
+.yesno__opt { min-block-size: var(--target-glove); border: 2px solid var(--color-ink); background: var(--color-base); color: var(--color-ink); font-size: var(--fs-body); font-weight: var(--weight-bold); }
+.yesno__opt[aria-pressed="true"] { background: var(--color-ink); color: var(--color-on-ink); }
+.yesno__opt:hover:not([aria-pressed="true"]) { box-shadow: inset 0 -4px 0 var(--color-signal-yellow); }
+
+/* ── Zone plan: actions anchored to places, never people tracked ──── */
+.plan { display: grid; grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr); border: var(--rule-structure); }
+.plan__map { border-inline-end: var(--rule-hair); background: var(--color-base); min-inline-size: 0; }
+.plan__map svg { display: block; inline-size: 100%; block-size: auto; }
+.plan__zone { cursor: pointer; }
+.plan__zone .zone { fill: var(--color-base); stroke: var(--color-ink); stroke-width: 2; }
+.plan__zone--hold .zone { fill: url(#hatch-hold); stroke: var(--color-signal-red); stroke-width: 4; }
+.plan__zone--rest .zone { fill: url(#hatch-rest); }
+.plan__zone text { fill: var(--color-ink); font: 700 13px var(--font); }
+.plan__zone .tag { fill: var(--color-base); stroke: var(--color-ink); stroke-width: 2; }
+.plan__zone--hold .tag { fill: var(--color-signal-red); stroke: var(--color-signal-red); }
+.plan__zone--hold .tagtext { fill: var(--color-on-signal); }
+.plan__zone:focus { outline: none; }
+.plan__zone[aria-pressed="true"] .zone { stroke-width: 6; }
+.plan__zone:focus-visible .zone { stroke: var(--color-signal-yellow); stroke-width: 6; }
+.plan__sensor circle { fill: var(--color-ink); }
+.plan__sensor text { fill: var(--color-ink); font: 700 12px var(--font); }
+.plan__hatch-line { stroke: var(--color-ink); stroke-width: 1; }
+.plan__hatch-hold { stroke: var(--color-signal-red); stroke-width: 2; }
+.plan__detail { padding: var(--space-2); display: grid; gap: var(--space-1); align-content: start; }
+@media (max-width: 48rem) { .plan { grid-template-columns: 1fr; } .plan__map { border-inline-end: 0; border-block-end: var(--rule-hair); } }
+
+/* ── Component-level empty states ──────────────────────────────────── */
+.ledger__empty { padding-block: var(--space-3); font-size: var(--fs-small); color: var(--color-graphite); border-block-end: var(--rule-hair); display: flex; gap: var(--space-1); align-items: center; }
+.select__empty { padding: var(--space-2); font-size: var(--fs-small); color: var(--color-graphite); }
+.plan__sensor .off { fill: none; stroke: var(--color-ink); stroke-width: 2; stroke-dasharray: 3 2; }

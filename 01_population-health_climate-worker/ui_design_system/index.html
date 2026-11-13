@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-theme="day">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Heat-Safe Design System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Noto+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="field.css">
+  <link rel="stylesheet" href="guide.css">
+</head>
+<body>
+<script src="icons.js"></script>
+<div class="guide">
+  <nav class="guide__nav" aria-label="Design system sections">
+    <div class="rail__brand"><div class="t-title">Heat-Safe</div><div class="t-meta">Design system · “Issued Sheet” · v0.1</div></div>
+    <ol>
+      <li><a href="#metaphor"><span>01</span>Metaphor</a></li>
+      <li><a href="#colour"><span>02</span>Colour</a></li>
+      <li><a href="#type"><span>03</span>Type</a></li>
+      <li><a href="#space"><span>04</span>Space and targets</a></li>
+      <li><a href="#motion"><span>05</span>Motion</a></li>
+      <li><a href="#icons"><span>06</span>Icons</a></li>
+      <li><a href="#signals"><span>07</span>Signal grammar</a></li>
+      <li><a href="#buttons"><span>08</span>Buttons</a></li>
+      <li><a href="#fields"><span>09</span>Fields and controls</a></li>
+      <li><a href="#status"><span>10</span>Stamps and readouts</a></li>
+      <li><a href="#rows"><span>11</span>Action rows</a></li>
+      <li><a href="#drafts"><span>12</span>AI and proposals</a></li>
+      <li><a href="#feedback"><span>13</span>Feedback states</a></li>
+      <li><a href="#confirm"><span>14</span>Confirmations</a></li>
+      <li><a href="#timeline"><span>15</span>Timeline and statements</a></li>
+      <li><a href="#compositions"><span>16</span>Compositions</a></li>
+      <li><a href="#platform"><span>17</span>Web ↔ mobile rules</a></li>
+      <li><a href="#glare"><span>18</span>Glare and gloves</a></li>
+      <li><a href="#sync"><span>19</span>Offline and sync</a></li>
+      <li><a href="#agent"><span>20</span>Agent task state</a></li>
+      <li><a href="#ambient"><span>21</span>Ambient AI</a></li>
+      <li><a href="#guardrails"><span>22</span>Guardrails and rollback</a></li>
+      <li><a href="#capture"><span>23</span>Field capture</a></li>
+      <li><a href="#zones"><span>24</span>Zone plan</a></li>
+    </ol>
+    <div class="controls">
+      <div class="field"><span class="field__label" id="themeL">Light</span>
+        <div class="seg" role="radiogroup" aria-labelledby="themeL" id="themeSeg">
+          <button class="seg__opt" role="radio" aria-checked="true" data-value="day">Day</button>
+          <button class="seg__opt" role="radio" aria-checked="false" data-value="glare">Glare</button>
+          <button class="seg__opt" role="radio" aria-checked="false" data-value="night">Night shift</button>
+        </div></div>
+      <div class="field"><span class="field__label" id="dirL">Reading direction</span>
+        <div class="seg" role="radiogroup" aria-labelledby="dirL" id="dirSeg">
+          <button class="seg__opt" role="radio" aria-checked="true" data-value="ltr">LTR</button>
+          <button class="seg__opt" role="radio" aria-checked="false" data-value="rtl">RTL</button>
+        </div></div>
+    </div>
+  </nav>
+
+  <main class="guide__main" id="main">
+
+  <!-- 01 ─────────────────────────────────────────────────────────── -->
+  <section class="gsec" id="metaphor" aria-labelledby="h-metaphor">
+    <header><span class="gsec__num">01 · Core metaphor</span>
+      <h1 class="hero-title" id="h-metaphor">The issued sheet.</h1>
+      <p>Heat-Safe is read in a site cabin and in 45 °C glare by people who already trust two things: engineering drawings and safety signs. Every screen is a <b>sheet on the site permit board</b>. Drawing conventions decide structure; safety-sign conventions decide colour. Nothing floats, glows or casts a shadow, because a sheet doesn’t.</p></header>
+    <ol class="rules-list">
+      <li><b>1 · Line weight is hierarchy.</b><span class="t-small muted">Hair 1px separates rows. Structure 2px frames a section. Signal 4px marks the one thing that needs action.</span></li>
+      <li><b>2 · Line style is certainty.</b><span class="t-small muted">Solid = issued fact. Dashed = draft, proposal or AI, not yet issued. Hatched = no work happens here.</span></li>
+      <li><b>3 · Ink fill is a stamp.</b><span class="t-small muted">A solid ink block means a human recorded it, or an emergency. Stamps are the heaviest mass on a sheet, so they are rare.</span></li>
+      <li><b>4 · Colour is a safety signal, never decoration.</b><span class="t-small muted">ISO 3864 meanings only: red prohibits, yellow cautions, green confirms a safe condition, blue instructs. Components are identified by number, not hue.</span></li>
+      <li><b>5 · A condition is not a permission.</b><span class="t-small muted">The environmental band (a swatch) and a task hold (a stamp) are drawn differently, so “145 W/m² · Low band · heavy work stopped” can never be misread.</span></li>
+      <li><b>6 · One focal point per sheet.</b><span class="t-small muted">The focal readout runs at 36–56px; everything else stays at 24px or below. That gap in scale is how the eye finds what to do next.</span></li>
+    </ol>
+    <div class="lineset" aria-label="Line vocabulary">
+      <div class="line-spec"><i style="border-block-start: var(--rule-hair)"></i><b>Hair · 1px</b>Rows, cells</div>
+      <div class="line-spec"><i style="border-block-start: var(--rule-structure)"></i><b>Structure · 2px</b>Sections, frames</div>
+      <div class="line-spec"><i style="border-block-start: var(--rule-signal)"></i><b>Signal · 4px</b>Needs action now</div>
+      <div class="line-spec"><i style="border-block-start: var(--rule-draft)"></i><b>Draft · 2px dashed</b>AI, proposal</div>
+      <div class="line-spec"><i style="background: var(--hatch-rest); border: var(--rule-hair)"></i><b>Hatch</b>Rest, break, excluded</div>
+      <div class="line-spec"><i style="background: var(--color-ink)"></i><b>Stamp</b>Recorded, emergency</div>
+    </div>
+  </section>
+
+  <!-- 02 ─────────────────────────────────────────────────────────── -->
+  <section class="gsec" id="colour" aria-labelledby="h-colour">
+    <header><span class="gsec__num">02 · Colour</span><h2 id="h-colour">Ink, paper and four signals</h2>
+      <p>The palette is taken from safety signage (RAL signal colours, tuned for WCAG), not a UI kit. Ratios below are computed live for the current light setting.</p></header>
+    <h3>Base</h3><div class="swatches" id="sw-base"></div>
+    <h3>Signals</h3><div class="swatches" id="sw-signal"></div>
+    <div class="do-dont">
+      <div><b>Do</b>Pair every signal with a glyph and a word: ■ Stop-work, ▲ Caution, ● Low band, ✚ Emergency, ◇ AI.</div>
+      <div class="dont"><b>Don’t</b>Use a signal colour for a component, a chart series, a hover, a brand moment or a “nice” accent. Yellow is never text.</div>
+      <div class="dont"><b>Don’t</b>Use Tailwind-default hues, zinc or slate greys, or shadows. Greys here are warm graphite, matching drafting paper.</div>
+    </div>
+  </section>
+
+  <!-- 03 ─────────────────────────────────────────────────────────── -->
+  <section class="gsec" id="type" aria-labelledby="h-type">
+    <header><span class="gsec__num">03 · Type</span><h2 id="h-type">One family, five roles</h2>
+      <p>DM Sans at 400, 500 and 700, with tabular figures everywhere so times and readings line up. Sizes use <code>clamp()</code> and scale with the viewport, never with breakpoints. Noto families take over per script; uppercase and tracking apply to Latin labels only.</p></header>
+    <div class="typescale">
+      <div><code>--fs-focal · 36–56 / 700 / −0.02em</code><span class="t-focal">145 W/m²</span></div>
+      <div><code>--fs-readout · 24–32 / 700</code><span class="t-readout">11 / 11 accounted</span></div>
+      <div><code>--fs-heading · 20–24 / 700</code><span class="t-heading">Bilal (C08) needs rest now</span></div>
+      <div><code>--fs-title · 18–20 / 700</code><span class="t-title">Squad Monitoring · Civil area</span></div>
+      <div><code>--fs-body · 16 / 400 / 1.45</code><span>Remove from heat and check on him within 10 minutes.</span></div>
+      <div><code>--fs-small · 14 / 400</code><span class="t-small">Recorded 08:03 by Huda · site app</span></div>
+      <div><code>--fs-label · 12 / 700 / +0.08em</code><span class="t-label">Needs action now</span></div>
+      <div><code>Arabic · line-height 1.7</code><span lang="ar" dir="rtl" class="t-heading">توقف العمل الثقيل. اذهب إلى الملجأ A الآن.</span></div>
+    </div>
+  </section>
+
+  <!-- 04 ─────────────────────────────────────────────────────────── -->
+  <section class="gsec" id="space" aria-labelledby="h-space">
+    <header><span class="gsec__num">04 · Space and targets</span><h2 id="h-space">An 8px grid, two target sizes</h2>
+      <p>Spacing steps are 4, 8, 16, 24, 32, 48 and 64. Gutters and section gaps are fluid. Pointer screens may use 32px targets for density; touch screens switch to 56dp glove targets automatically (<code>pointer: coarse</code>), and primary actions to 64dp.</p></header>
+    <div class="matrix" style="--cols:3">
+      <div class="mh">Token</div><div class="mh">Value</div><div class="mh">Use</div><div class="mh">Sample</div>
+      <div><code>--target-pointer</code></div><div>32px</div><div>Dense desktop rows, icon buttons</div><div><button class="ibtn" style="min-inline-size:2rem;min-block-size:2rem" aria-label="More">⋯</button></div>
+      <div><code>--target-touch</code></div><div>48dp</div><div>Absolute floor for any touch target</div><div><button class="ibtn" style="min-inline-size:3rem;min-block-size:3rem" aria-label="More">⋯</button></div>
+      <div><code>--target-glove</code></div><div>56dp</div><div>Field default: rows, buttons, tabs</div><div><button class="ibtn" style="min-inline-size:3.5rem;min-block-size:3.5rem" aria-label="More">⋯</button></div>
+      <div><code>--target-cta</code></div><div>64dp</div><div>One primary action per screen</div><div><span class="btn btn--primary" style="min-block-size:4rem">Primary</span></div>
+    </div>
+  </section>
+
+  <!-- 05 ─────────────────────────────────────────────────────────── -->
+  <section class="gsec" id="motion" aria-labelledby="h-motion">
+    <header><span class="gsec__num">05 · Motion</span><h2 id="h-motion">Mechanical, never floaty</h2>
+      <p>Colour and state change instantly. Things that are <i>recorded</i> stamp (140ms, stepped scale). Things that <i>arrive</i> wipe in from the reading edge (180ms, four steps, like a plotter pass). Loading is a hatch that travels. Nothing bounces, fades or eases out slowly. With reduced motion everything is instant.</p></header>
+    <div class="matrix" style="--cols:3">
+      <div class="mh">Token</div><div class="mh">Value</div><div class="mh">Used for</div><div class="mh">Try</div>
+      <div><code>--easing-mechanical</code></div><div>cubic-bezier(.2,0,0,1)</div><div>Press, hover rail</div><div><button class="btn" type="button">Press me</button></div>
+      <div><code>--dur-stamp</code></div><div>140ms · steps(4)</div><div>A record is made</div><div><button class="btn" type="button" id="demoStamp">Stamp</button>&nbsp;<span class="stamp stamp--recorded" data-glyph="■" id="demoStampTarget">Recorded 08:11</span></div>
+      <div><code>--dur-wipe</code></div><div>180ms · steps(4)</div><div>Alert or banner arrives</div><div><button class="btn" type="button" id="demoWipe">Wipe in</button></div>
+      <div><code>--dur-scan</code></div><div>1.2s linear</div><div>Loading hatch</div><div><span class="skel skel--title" style="inline-size:8rem"></span></div>
+    </div>
+    <div id="demoWipeTarget"></div>
+  </section>
+
+  <!-- 06 ─────────────────────────────────────────────────────────── -->
+  <section class="gsec" id="icons" aria-labelledby="h-icons">
+    <header><span class="gsec__num">06 · Icons</span><h2 id="h-icons">One drawing rule</h2>
+      <p>24×24 grid, 2px stroke, square caps, miter joins, no fill. Directional icons mirror in right-to-left; play, clock and safety glyphs never do. The AI diamond is the only dashed icon.</p></header>
+    <div class="icongrid" id="iconGrid"></div>
+  </section>
+
+  <!-- 07 ─────────────────────────────────────────────────────────── -->
+  <section class="gsec" id="signals" aria-labelledby="h-signals">
+    <header><span class="gsec__num">07 · Signal grammar</span><h2 id="h-signals">Condition, hold, decision, draft</h2>
+      <p>Four kinds of statement appear on every Heat-Safe screen. Each has its own visual form so they can sit side by side without being confused.</p></header>
+    <div class="matrix" style="--cols:3">
+      <div class="mh">Kind</div><div class="mh">Form</div><div class="mh">Example</div><div class="mh">Rule</div>
+      <div><b>Environmental band</b></div><div>Square swatch + word</div><div class="row-flex"><span class="band band--low"><span class="band__swatch"></span>Low band · 145 W/m²</span><span class="band band--unknown"><span class="band__swatch"></span>Unknown · 12 min old</span></div><div class="t-small">A condition. Stale or missing readings are Unknown (hatched), never green.</div>
+      <div><b>Task hold</b></div><div>Prohibition stamp</div><div class="row-flex"><span class="stamp stamp--stop" data-glyph="■">Heavy-work hold</span><span class="stamp stamp--safe" data-glyph="●">No new stop</span></div><div class="t-small">A rule result for a task. Can be active under a green band.</div>
+      <div><b>Human decision</b></div><div>Ink stamp + name + time</div><div class="row-flex"><span class="stamp stamp--recorded" data-glyph="✓">Recorded · Huda 08:11</span></div><div class="t-small">Only people stamp. Software never lifts a stop-work.</div>
+      <div><b>Draft</b></div><div>Tracing paper + dashed edge</div><div class="row-flex"><span class="stamp stamp--draft" data-glyph="◇">AI · Planning Agent</span><span class="stamp stamp--draft" data-glyph="◇">Proposal · not applied</span></div><div class="t-small">Never solid until a person records it.</div>
+    </div>
+  </section>
+
+  <!-- 08 ─────────────────────────────────────────────────────────── -->
+  <section class="gsec" id="buttons" aria-labelledby="h-buttons">
+    <header><span class="gsec__num">08 · Buttons</span><h2 id="h-buttons">Every state, every variant</h2>
+      <p>Hover adds a yellow rail; press sinks 1px (secondary inverts); focus is an ink ring with a yellow halo that survives glare; disabled is hatched pencil with <code>disabled</code> and a not-allowed cursor; loading keeps the width and sets <code>aria-busy</code>; error adds a red signal edge and a reason.</p></header>
+    <div class="matrix-scroll"><div class="matrix" style="--cols:6">
+      <div class="mh">Variant</div><div class="mh">Default</div><div class="mh">Hover</div><div class="mh">Focus</div><div class="mh">Active</div><div class="mh">Disabled</div><div class="mh">Loading</div>
+      <div><b>Primary</b></div>
+      <div><button class="btn btn--primary" type="button">Mark action done</button></div><div><button class="btn btn--primary is-hover" type="button" tabindex="-1">Mark action done</button></div><div><button class="btn btn--primary is-focus" type="button" tabindex="-1">Mark action done</button></div><div><button class="btn btn--primary is-active" type="button" tabindex="-1">Mark action done</button></div><div><button class="btn btn--primary" type="button" disabled><span>Mark action done</span></button></div><div><button class="btn btn--primary is-loading" type="button" aria-busy="true" tabindex="-1">Mark action done</button></div>
+      <div><b>Secondary</b></div>
+      <div><button class="btn" type="button">Open plan</button></div><div><button class="btn is-hover" type="button" tabindex="-1">Open plan</button></div><div><button class="btn is-focus" type="button" tabindex="-1">Open plan</button></div><div><button class="btn is-active" type="button" tabindex="-1">Open plan</button></div><div><button class="btn" type="button" disabled><span>Open plan</span></button></div><div><button class="btn is-loading" type="button" aria-busy="true" tabindex="-1">Open plan</button></div>
+      <div><b>Danger</b></div>
+      <div><button class="btn btn--danger" type="button">Withdraw</button></div><div><button class="btn btn--danger is-hover" type="button" tabindex="-1">Withdraw</button></div><div><button class="btn btn--danger is-focus" type="button" tabindex="-1">Withdraw</button></div><div><button class="btn btn--danger is-active" type="button" tabindex="-1">Withdraw</button></div><div><button class="btn btn--danger" type="button" disabled><span>Withdraw</span></button></div><div><button class="btn btn--danger is-loading" type="button" aria-busy="true" tabindex="-1">Withdraw</button></div>
+      <div><b>Quiet</b></div>
+      <div><button class="btn btn--quiet" type="button">View history</button></div><div><button class="btn btn--quiet is-hover" type="button" tabindex="-1">View history</button></div><div><button class="btn btn--quiet is-focus" type="button" tabindex="-1">View history</button></div><div><button class="btn btn--quiet is-active" type="button" tabindex="-1">View history</button></div><div><button class="btn btn--quiet" type="button" disabled><span>View history</span></button></div><div><button class="btn btn--quiet is-loading" type="button" aria-busy="true" tabindex="-1">View history</button></div>
+    </div></div>
+    <div class="cols">
+      <div class="stack"><h3>Live: success</h3><button class="btn btn--primary" type="button" data-load data-ok="08:19 · Action marked done">Mark action done</button><span class="caption">Click: aria-busy for 1.4s, then a toast.</span></div>
+      <div class="stack"><h3>Live: failure</h3><button class="btn btn--primary" type="button" data-load data-fail="1" aria-describedby="failMsg">Send plan to crew phones</button><span class="field__error" id="failMsg" hidden>■ Not sent. 0 of 4 delivered. Your plan is saved; retry when the network returns.</span></div>
+    </div>
+  </section>
+
+  <!-- 09 ─────────────────────────────────────────────────────────── -->
+  <section class="gsec" id="fields" aria-labelledby="h-fields">
+    <header><span class="gsec__num">09 · Fields and controls</span><h2 id="h-fields">Inputs with visible labels and real keyboards</h2>
+      <p>Labels are always visible; placeholders are examples, never labels. Errors sit under the field, start with ■ and are announced politely. The select is a real listbox: arrows, Home/End, type-ahead, Enter, Escape.</p></header>
+    <div class="cols">
+      <div class="field"><label class="field__label" for="f1">Evidence reference</label><input class="input" id="f1" placeholder="e.g. Shelter A · 08:18 · in person"><span class="field__hint">Default</span></div>
+      <div class="field"><label class="field__label" for="f2">Evidence reference</label><input class="input is-hover" id="f2" value="PTW-0412"><span class="field__hint">Hover</span></div>
+      <div class="field"><label class="field__label" for="f3">Evidence reference</label><input class="input is-focus" id="f3" value="PTW-04"><span class="field__hint">Focus</span></div>
+      <div class="field is-error"><label class="field__label" for="f4">Meter ID</label><input class="input" id="f4" aria-invalid="true" aria-describedby="f4e" value=""><span class="field__error" id="f4e" aria-live="polite">■ Meter ID is required for a manual reading.</span></div>
+      <div class="field"><label class="field__label" for="f5">Confirmer</label><input class="input" id="f5" value="Huda (C01) · recorded automatically" disabled><span class="field__hint">Disabled: set by sign-in</span></div>
+      <div class="field is-loading"><label class="field__label" for="f6">Latest reading</label><input class="input" id="f6" value="Requesting from sensor t1…" aria-busy="true" readonly><span class="field__hint">Loading</span></div>
+    </div>
+    <div class="cols">
+      <div class="field">
+        <span class="field__label" id="selL">Assessment basis</span>
+        <div class="select">
+          <button class="btn select__button" type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="selL selV"><span class="select__value" id="selV">Spoke with worker face to face</span><svg class="icon" aria-hidden="true"><use href="#i-chevron"/></svg></button>
+          <ul class="select__list" role="listbox" tabindex="-1" aria-labelledby="selL" hidden>
+            <li class="select__option" role="option" aria-selected="true" data-value="face">Spoke with worker face to face</li>
+            <li class="select__option" role="option" aria-selected="false" data-value="observed">Observed recovery and hydration</li>
+            <li class="select__option" role="option" aria-selected="false" data-value="oh">Occupational health advice</li>
+            <li class="select__option" role="option" aria-selected="false" aria-disabled="true" data-value="wear">Wearable data (not consented)</li>
+          </ul>
+        </div><span class="field__hint">Live: Tab to it, then ↓, type “o”, Enter.</span>
+      </div>
+      <div class="field"><span class="field__label" id="segL">Channel</span>
+        <div class="seg" role="radiogroup" aria-labelledby="segL">
+          <button class="seg__opt" role="radio" aria-checked="true" data-value="radio">Radio</button>
+          <button class="seg__opt" role="radio" aria-checked="false" data-value="person">In person</button>
+          <button class="seg__opt" role="radio" aria-checked="false" data-value="app">App</button>
+        </div><span class="field__hint">Arrow keys follow reading direction.</span></div>
+      <div class="field"><span class="field__label">Consent</span>
+        <button class="switch" role="switch" aria-checked="true" type="button"><span class="switch__track" aria-hidden="true"></span>Check-ins</button>
+        <button class="switch" role="switch" aria-checked="false" type="button"><span class="switch__track" aria-hidden="true"></span>Heart rate</button>
+        <button class="switch" role="switch" aria-checked="false" type="button" disabled><span class="switch__track" aria-hidden="true"></span>Skin temperature (no wearable)</button></div>
+      <div class="field"><span class="field__label">Overflow menu</span>
+        <div data-menu style="position:relative;display:inline-block">
+          <button class="ibtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="More actions for the shift log"><svg class="icon" aria-hidden="true"><use href="#i-more"/></svg></button>
+          <ul class="menu" role="menu" hidden style="inset-inline-end:auto;inset-inline-start:0">
+            <li role="none"><button class="menu__item" role="menuitem" type="button" onclick="toast('Shift log exported')">Export shift log</button></li>
+            <li role="none"><button class="menu__item" role="menuitem" type="button" onclick="toast('Owner menu would open')">Reassign action owner</button></li>
+            <li role="none"><button class="menu__item menu__item--danger" role="menuitem" type="button" onclick="document.getElementById('dlgWithdraw').showModal()">Withdraw confirmation…</button></li>
+          </ul>
+        </div><span class="field__hint">↓ opens, arrows move, Esc closes.</span></div>
+    </div>
+  </section>
+
+  <!-- 10 ─────────────────────────────────────────────────────────── -->
+  <section class="gsec" id="status" aria-labelledby="h-status">
+    <header><span class="gsec__num">10 · Stamps and readouts</span><h2 id="h-status">Status words and instrument readings</h2>
+      <p>Readouts sit in one ruled band, divided by hairlines, not floated in separate cards. The focal readout takes double width and the 4px signal edge.</p></header>
+    <div class="row-flex">
+      <span class="stamp stamp--stop" data-glyph="■">Stop-work</span>
+      <span class="stamp stamp--caution" data-glyph="▲">Caution</span>
+      <span class="stamp stamp--safe" data-glyph="●">No new stop</span>
+      <span class="stamp stamp--mandatory" data-glyph="▶">Work 08:11</span>
+      <span class="stamp stamp--emergency" data-glyph="✚">Emergency</span>
+      <span class="stamp stamp--recorded" data-glyph="✓">Recorded</span>
+      <span class="stamp" data-glyph="✓">Done</span>
+      <span class="stamp stamp--waiting" data-glyph="…">Waiting</span>
+      <span class="stamp stamp--overdue" data-glyph="!">Overdue</span>
+      <span class="stamp stamp--draft" data-glyph="◇">AI</span>
+      <span class="stamp stamp--unknown" data-glyph="?"><span>Unknown</span></span>
+    </div>
+    <h3>Readouts · default</h3>
+    <div class="readouts">
+      <div class="readout readout--focal"><span class="readout__label">Needs action now</span><span class="readout__value">1</span><span class="readout__note">Bilal (C08) needs rest now · due 08:28</span></div>
+      <div class="readout"><span class="readout__label">Heavy-work hold</span><span class="readout__value">Active</span><span class="readout__note">since 08:01 · Sandline rule ≤ 150</span></div>
+      <div class="readout"><span class="readout__label">Accounted for</span><span class="readout__value">11 / 11</span><span class="readout__note">Shelter A · 08:04</span></div>
+    </div>
+    <h3>Readouts · stale and loading</h3>
+    <div class="readouts" aria-busy="true">
+      <div class="readout is-stale"><span class="readout__label">TWL now</span><span class="readout__value">145 W/m²</span><span class="readout__note">sensor t1 · 12 min old</span></div>
+      <div class="readout"><span class="readout__label">Accounted for</span><span class="skel skel--readout"></span><span class="skel skel--line"></span></div>
+      <div class="readout"><span class="readout__label">Next work</span><span class="skel skel--readout"></span><span class="skel skel--line"></span></div>
+    </div>
+  </section>
+
+  <!-- 11 ─────────────────────────────────────────────────────────── -->
+  <section class="gsec" id="rows" aria-labelledby="h-rows">
+    <header><span class="gsec__num">11 · Action rows</span><h2 id="h-rows">The workhorse of every list</h2>
+      <p>One row is one touch target. The trailing stamp carries status; the inline-start edge carries selection (ink) or urgency (signal). On the worker app descriptions never truncate.</p></header>
+    <section class="ledger" aria-labelledby="ledgerH">
+      <div class="ledger__head"><span class="t-label" id="ledgerH">Needs action</span><span class="ledger__count">4 · sorted by urgency</span></div>
+      <ul class="ledger__list">
+        <li><button class="arow arow--urgent" type="button"><span class="arow__lead"><span class="rail__num">2</span></span><span class="arow__body"><span class="arow__title">Bilal (C08) · needs rest now</span><span class="arow__desc">Remove from heat and check on him within 10 minutes. Unplanned rest recorded 08:18.</span></span><span class="arow__trail"><span class="stamp stamp--stop" data-glyph="■">Red</span><span class="arow__time">due 08:28</span></span></button></li>
+        <li><button class="arow is-hover" type="button" tabindex="-1"><span class="arow__lead"><span class="rail__num">2</span></span><span class="arow__body"><span class="arow__title">Record first-aid contact · hover</span><span class="arow__desc">Salim (P06) notified 08:18.</span></span><span class="arow__trail"><span class="stamp stamp--waiting" data-glyph="…">Waiting</span></span></button></li>
+        <li><button class="arow is-focus is-selected" type="button" tabindex="-1" aria-current="true"><span class="arow__lead"><span class="rail__num">3</span></span><span class="arow__body"><span class="arow__title">Review replan 08:18–09:18 · focus + selected</span><span class="arow__desc">Bilal excluded from work. Leila unconfirmed: choose a branch before sending.</span></span><span class="arow__trail"><span class="stamp stamp--overdue" data-glyph="!">Overdue</span></span></button></li>
+        <li><button class="arow arow--done" type="button"><span class="arow__lead"><span class="rail__num">2</span></span><span class="arow__body"><span class="arow__title">Confirm a safe recovery location · done</span><span class="arow__desc">11 of 11 checked in at Shelter A, 08:04 · kiosk.</span></span><span class="arow__trail"><span class="stamp" data-glyph="✓">Done</span></span></button></li>
+        <li><button class="arow" type="button" disabled><span class="arow__lead"><span class="rail__num">4</span></span><span class="arow__body"><span class="arow__title">Record restart decision · disabled</span><span class="arow__desc">Only Rashid (superintendent) can record a restart.</span></span><span class="arow__trail"><span class="stamp" data-glyph="🔒" style="border-color:var(--color-pencil)">Locked</span></span></button></li>
+        <li aria-hidden="true"><div class="arow"><span class="arow__lead"><span class="skel" style="inline-size:1.5rem;block-size:1.5rem"></span></span><span class="arow__body"><span class="skel skel--title"></span><span class="skel skel--line"></span></span><span class="arow__trail"><span class="skel skel--stamp"></span></span></div></li>
+      </ul>
+    </section>
+  </section>
+
+  <!-- 12 ─────────────────────────────────────────────────────────── -->
+  <section class="gsec" id="drafts" aria-labelledby="h-drafts">
+    <header><span class="gsec__num">12 · AI and proposals</span><h2 id="h-drafts">Drafted on tracing paper</h2>
+      <p>AI output and planner proposals sit on cool tracing paper with a dashed edge: visibly <i>not issued</i>. “Why this?” is a real disclosure (not a hover-only tooltip) listing tools, inputs and exact citations. Discard is never destructive and always has Undo.</p></header>
+    <div class="cols">
+      <div class="draft">
+        <div class="draft__head"><span class="draft__source"><svg class="icon" aria-hidden="true"><use href="#i-ai"/></svg>AI · Planning Agent</span><span class="stamp" data-glyph="">Confidence: High</span></div>
+        <p class="draft__text">Four workers meet every requirement: Rana, Yusuf, Dana and Bilal. Leila is qualified but has no readiness confirmation yet.</p>
+        <div class="draft__actions"><button class="btn" type="button" data-why aria-expanded="false" aria-controls="why1">Why this?</button><button class="btn" type="button" onclick="toast('Opens the assignment form, prefilled')">Edit</button><button class="btn btn--quiet" type="button" data-discard>Discard</button></div>
+        <div class="draft__why" id="why1" hidden><dl><dt>Tools</dt><dd><code>optimise_schedule</code></dd><dt>Inputs</dt><dd>Readiness records (4 valid) · capacity 6 · fixed occupants 2 · demand 4</dd><dt>Means</dt><dd>High: every figure matched a tool output.</dd></dl></div>
+      </div>
+      <div class="draft">
+        <div class="draft__head"><span class="draft__source"><svg class="icon" aria-hidden="true"><use href="#i-ai"/></svg>AI · Planning Agent</span><span class="stamp stamp--overdue" data-glyph="!">Confidence: Low</span></div>
+        <div class="draft__warn" role="alert"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>Grounding check: 147 W/m² did not match any tool output.</div>
+        <p class="draft__text">The forecast TWL at 09:00 was 147 W/m², so heavy exposed work stays stopped.</p>
+        <div class="draft__actions"><button class="btn" type="button" data-why aria-expanded="false" aria-controls="why2">Why this?</button><button class="btn btn--quiet" type="button" data-discard>Discard</button></div>
+        <div class="draft__why" id="why2" hidden><dl><dt>Tools</dt><dd><code>compute_heat_stress</code></dd><dt>Means</dt><dd>Low: a value failed the grounding check.</dd></dl></div>
+      </div>
+      <div class="draft">
+        <div class="draft__head"><span class="draft__source"><svg class="icon" aria-hidden="true"><use href="#i-calc"/></svg>Proposal · not applied</span><span class="calc"><svg class="icon" aria-hidden="true"><use href="#i-calc"/></svg>Computed · rules v2026.11.07-1</span></div>
+        <p class="draft__text">Move <b>Rana, Yusuf, Dana and Bilal</b> to workshop preparation for 08:11–09:11, alternating work and cooled recovery.</p>
+        <div class="draft__actions"><button class="btn btn--primary" type="button" onclick="this.closest('.draft').insertAdjacentHTML('afterend','<span class=\'stamp stamp--recorded is-new\' data-glyph=\'✓\'>08:11 · Assignment recorded by Huda</span>');this.disabled=true">Record assignment</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 ─────────────────────────────────────────────────────────── -->
+  <section class="gsec" id="feedback" aria-labelledby="h-feedback">
+    <header><span class="gsec__num">13 · Feedback states</span><h2 id="h-feedback">Errors, offline, empty, loading</h2>
+      <p>No happy-path-only screens. Errors never clear a form; cached data stays visible with its age. Empty states say why the sheet is blank and offer one way forward.</p></header>
+    <div class="stack">
+      <div class="banner" role="alert"><span class="banner__text"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>Couldn’t reach Heat-Safe in 20 seconds. Showing the last update from 08:04. Your entries are saved on this device.</span><button class="btn" type="button" data-load data-ok="Updated 08:19">Retry</button></div>
+      <div class="banner banner--offline" role="status"><span class="banner__text"><svg class="icon" aria-hidden="true"><use href="#i-offline"/></svg>No network. Warnings come from the rules on this phone. 2 check-ins waiting to send.</span></div>
+      <div class="banner banner--caution" role="status"><span class="banner__text"><svg class="icon" aria-hidden="true"><use href="#i-caution"/></svg>Sensor t1 not reporting since 07:52. Band raised one level; forecast in use.</span><button class="btn" type="button" onclick="toast('Request sent to Maya')">Ask Maya for a reading</button></div>
+    </div>
+    <div class="cols">
+      <div class="empty"><div class="empty__mark"><svg class="icon icon--lg" aria-hidden="true"><use href="#i-person"/></svg></div><p class="empty__text"><b>No crew on this site yet.</b> Import the Dune Civil Works roster and the site’s locations to start monitoring.</p><button class="btn btn--primary" type="button" onclick="toast('Opens site setup')">Import crew roster</button></div>
+      <div class="empty"><div class="empty__mark"><svg class="icon icon--lg" aria-hidden="true"><use href="#i-safe"/></svg></div><p class="empty__text"><b>All clear.</b> Last reading 07:45 · TWL 152 W/m² · next check 08:00.</p><span class="caption">No call to action: nothing needs doing.</span></div>
+    </div>
+  </section>
+
+  <!-- 14 ─────────────────────────────────────────────────────────── -->
+  <section class="gsec" id="confirm" aria-labelledby="h-confirm">
+    <header><span class="gsec__num">14 · Confirmations</span><h2 id="h-confirm">Friction that matches the stakes</h2>
+      <p>Supervisors at a desk type the action word (CONFIRM, RESTART). Anyone on a phone in the field, and every worker, uses hold-to-confirm: no keyboard, no Latin script, and no reading needed under stress. Both use the native <code>&lt;dialog&gt;</code>, so focus is trapped and Escape closes it.</p></header>
+    <div class="cols">
+      <div class="stack"><h3>Typed (desk)</h3><button class="btn btn--danger" type="button" data-confirm="dlgWithdraw">Withdraw confirmation…</button></div>
+      <div class="stack"><h3>Hold (field and worker)</h3>
+        <button class="holdbtn" type="button" role="button" aria-describedby="holdHint" id="holdDemo"><span class="holdbtn__fill"></span><span class="holdbtn__label">Confirm Bilal is out of the heat</span></button>
+        <span class="caption" id="holdHint">Press and hold for 1.5 seconds (or hold Space).</span></div>
+    </div>
+    <dialog class="dialog" id="dlgWithdraw" data-word="CONFIRM" data-done="Confirmation withdrawn · crew planning locked" aria-labelledby="dlgWT">
+      <div class="dialog__body">
+        <h3 class="dialog__title" id="dlgWT">Withdraw “08:03 stop confirmed”?</h3>
+        <p class="t-small">Crew planning will lock again until it is re-recorded.</p>
+        <div class="field"><label class="field__label" for="dlgIn">Type CONFIRM to withdraw</label><input class="input" id="dlgIn" autocomplete="off" aria-describedby="dlgErr"><span class="field__error" id="dlgErr" hidden>■ Type exactly CONFIRM.</span></div>
+      </div>
+      <div class="dialog__acts"><button class="btn" type="button" data-cancel>Cancel</button><button class="btn btn--danger" type="button" data-ok disabled><span>Withdraw</span></button></div>
+    </dialog>
+  </section>
+
+  <!-- 15 ─────────────────────────────────────────────────────────── -->
+  <section class="gsec" id="timeline" aria-labelledby="h-tl">
+    <header><span class="gsec__num">15 · Timeline and statements</span><h2 id="h-tl">Work is an instruction; rest is hatched</h2>
+      <p>Work slots use signal blue (ISO “mandatory action”). Rest and exclusion are drawn, not coloured. The horizon is dashed because what lies past it is not yet planned. In right-to-left layouts time runs right to left.</p></header>
+    <div class="tl" role="img" aria-label="Work/rest plan 08:11 to 09:41">
+      <div class="tl__label"></div><div class="tl__axis"><span style="inset-inline-start:0%">08:11</span><span style="inset-inline-start:16.7%">08:26</span><span style="inset-inline-start:33.3%">08:41</span><span style="inset-inline-start:50%">08:56</span><span style="inset-inline-start:66.7%">09:11</span><span style="inset-inline-start:83.3%">09:26</span></div>
+      <div class="tl__label">Rana</div><div class="tl__track"><span class="tl__seg tl__seg--work" style="inset-inline-start:0;inline-size:16.7%">Work</span><span class="tl__seg tl__seg--rest" style="inset-inline-start:16.7%;inline-size:16.6%"></span><span class="tl__seg tl__seg--work" style="inset-inline-start:33.3%;inline-size:16.7%">Work</span><span class="tl__seg tl__seg--rest" style="inset-inline-start:50%;inline-size:16.7%"></span><span class="tl__horizon" style="inset-inline-start:66.7%"></span></div>
+      <div class="tl__label">Bilal</div><div class="tl__track"><span class="tl__seg tl__seg--excluded" style="inset-inline-start:7.8%;inline-size:83.4%">Excluded from work · recovery reserved to 09:33</span><span class="tl__horizon" style="inset-inline-start:66.7%"></span></div>
+      <div class="tl__label">7 others</div><div class="tl__track"><span class="tl__seg tl__seg--rest" style="inset-inline-start:0;inline-size:66.7%"></span><span class="tl__horizon" style="inset-inline-start:66.7%"></span></div>
+    </div>
+    <div class="cols">
+      <div class="statement statement--stop"><p class="statement__text">Stop heavy exposed civil work. Move the crew to Shelter A.</p><div class="pictos" aria-hidden="true"><span class="picto"><svg class="icon"><use href="#i-stop"/></svg>Stop</span><span class="picto"><svg class="icon"><use href="#i-shelter"/></svg>Shelter</span><span class="picto"><svg class="icon"><use href="#i-water"/></svg>Water</span></div><span class="statement__src">Sandline heat plan · TWL 145 ≤ 150 at 08:00 · Fixed template</span></div>
+      <div class="statement statement--emergency"><p class="statement__text">✚ Emergency · Call 998 · start cooling · keep someone with him</p><span class="statement__src">Escalation rule · not AI</span></div>
+    </div>
+  </section>
+
+  <!-- 16 ─────────────────────────────────────────────────────────── -->
+  <section class="gsec" id="compositions" aria-labelledby="h-comp">
+    <header><span class="gsec__num">16 · Compositions</span><h2 id="h-comp">The same system on three surfaces</h2>
+      <p>Squad Monitoring (web) uses container queries, so it re-flows by its own width: resize the window to watch the detail panel drop below and the rail turn into a strip. The phone screens put context at the top and every decision in the bottom third.</p></header>
+
+    <div class="device device--web" aria-label="Composition: Squad Monitoring, supervisor web">
+      <div class="w1">
+        <nav class="rail" aria-label="Supervisor sections">
+          <div class="rail__brand"><div class="t-title">Heat-Safe</div><div class="t-meta">Dune Civil Works · Abu Dhabi</div></div>
+          <a class="rail__item" href="#compositions" aria-current="page"><span class="rail__num">◫</span>Squad Monitoring</a>
+          <a class="rail__item" href="#compositions"><span class="rail__num">1</span>Heat controls</a>
+          <a class="rail__item" href="#compositions"><span class="rail__num">2</span>Protective response</a>
+          <a class="rail__item" href="#compositions"><span class="rail__num">3</span>Crew &amp; workshop</a>
+          <a class="rail__item" href="#compositions"><span class="rail__num">3</span>Work/rest plan</a>
+          <a class="rail__item" href="#compositions"><span class="rail__num">4</span>Restart review</a>
+          <a class="rail__item" href="#compositions"><span class="rail__num">◇</span>Ask the Planning Agent</a>
+        </nav>
+        <div style="display:flex;flex-direction:column;min-inline-size:0">
+          <header class="titleblock">
+            <button class="ibtn" type="button" aria-label="Back" disabled><svg class="icon icon--dir" aria-hidden="true"><use href="#i-back"/></svg></button>
+            <div class="titleblock__main"><div class="titleblock__title">Squad Monitoring · Civil area</div><div class="titleblock__meta"><span>4 Aug 2025</span><span>08:18</span><span>updated 08:18</span><span>rules v2026.11.07-1</span></div></div>
+            <div class="titleblock__actions"><button class="sync" type="button" data-sync data-state="synced">✓ Synced 08:19</button><button class="btn" type="button"><svg class="icon" aria-hidden="true"><use href="#i-filter"/></svg>Filter</button></div>
+          </header>
+          <div class="w1__main">
+            <div class="w1__col">
+              <div class="readouts">
+                <div class="readout readout--focal"><span class="readout__label">Needs action now</span><span class="readout__value">1</span><span class="readout__note">Bilal (C08) needs rest now · due 08:28</span></div>
+                <div class="readout"><span class="readout__label">Band · TWL 145</span><span class="readout__value"><span class="band band--low" style="font-size:inherit"><span class="band__swatch"></span>Low</span></span><span class="readout__note">sensor t1 · 08:00</span></div>
+                <div class="readout"><span class="readout__label">Heavy-work hold</span><span class="readout__value">Active</span><span class="readout__note">since 08:01</span></div>
+                <div class="readout"><span class="readout__label">Accounted for</span><span class="readout__value">11 / 11</span><span class="readout__note">Shelter A · 08:04</span></div>
+              </div>
+              <section class="ledger" aria-labelledby="c1h"><div class="ledger__head"><span class="t-label" id="c1h">Needs action</span><span class="ledger__count">3</span></div>
+                <ul class="ledger__list">
+                  <li><button class="arow arow--urgent" type="button" aria-current="true"><span class="arow__lead"><span class="rail__num">2</span></span><span class="arow__body"><span class="arow__title">Bilal (C08) · needs rest now</span><span class="arow__desc">Remove from heat and check on him within 10 minutes.</span></span><span class="arow__trail"><span class="stamp stamp--stop" data-glyph="■">Red</span><span class="arow__time">due 08:28</span></span></button></li>
+                  <li><button class="arow" type="button"><span class="arow__lead"><span class="rail__num">3</span></span><span class="arow__body"><span class="arow__title">Review replan 08:18–09:18</span><span class="arow__desc">Bilal excluded. Leila unconfirmed.</span></span><span class="arow__trail"><span class="stamp stamp--waiting" data-glyph="…">Waiting</span></span></button></li>
+                  <li><button class="arow" type="button"><span class="arow__lead"><span class="rail__num">4</span></span><span class="arow__body"><span class="arow__title">Restart decision open</span><span class="arow__desc">Owner: Rashid · 8 checks.</span></span><span class="arow__trail"><span class="stamp" data-glyph="">Info</span></span></button></li>
+                </ul></section>
+              <section class="ledger" aria-labelledby="c2h"><div class="ledger__head"><span class="t-label" id="c2h">Crew by location</span><span class="ledger__count">aggregates only</span></div>
+                <ul class="ledger__list">
+                  <li><div class="arow"><span class="arow__lead"><svg class="icon" aria-hidden="true"><use href="#i-shelter"/></svg></span><span class="arow__body"><span class="arow__title">Shelter A · 7</span><span class="arow__desc">Cooled recovery · last check-in 08:04</span></span><span class="arow__trail"><span class="stamp" data-glyph="">Recovery</span></span></div></li>
+                  <li><div class="arow"><span class="arow__lead"><svg class="icon" aria-hidden="true"><use href="#i-calc"/></svg></span><span class="arow__body"><span class="arow__title">Workshop · 4 of 6 places</span><span class="arow__desc">Covered work</span></span><span class="arow__trail"><span class="stamp stamp--mandatory" data-glyph="▶">Work</span></span></div></li>
+                </ul></section>
+            </div>
+            <aside class="w1__detail" aria-label="Selected action">
+              <div class="pad">
+                <span class="t-label">2 · Protective response</span>
+                <h3 class="t-heading" style="margin:0">Bilal (C08) needs rest now</h3>
+                <dl class="kv"><dt>Owner</dt><dd>Huda (C01)</dd><dt>Due</dt><dd><b>08:28</b></dd><dt>Source</dt><dd>Worker report → escalation rule</dd></dl>
+                <p class="t-small" style="margin:0;border-inline-start:var(--rule-structure);padding-inline-start:var(--space-1)">No health detail here. Details stay in Bilal’s own health record.</p>
+                <span class="calc"><svg class="icon" aria-hidden="true"><use href="#i-calc"/></svg>Computed · rules v2026.11.07-1</span>
+              </div>
+              <div class="foot"><button class="btn btn--primary btn--cta" type="button" data-load data-ok="08:19 · Marked done">Mark action done</button></div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="compositions">
+      <!-- M6 · site app -->
+      <div class="device device--phone" aria-label="Composition: worker action card, site app">
+        <div class="device__status"><span>08:18</span><span>Heat-Safe Site</span><span>4G</span></div>
+        <header class="titleblock"><button class="ibtn" type="button" aria-label="Back"><svg class="icon icon--dir" aria-hidden="true"><use href="#i-back"/></svg></button><div class="titleblock__main"><div class="titleblock__title">Bilal (C08)</div><div class="titleblock__meta"><span>Workshop</span><span>08:18</span></div></div><button class="sync" type="button" data-sync data-state="synced">✓ Synced</button></header>
+        <div class="device__body"><div class="device__scroll">
+          <div class="readouts">
+            <div class="readout readout--focal"><span class="readout__label">Needs rest now</span><span class="readout__value">9:42</span><span class="readout__note">minutes left to check on him</span></div>
+          </div>
+          <section class="ledger pad" aria-labelledby="m6h"><div class="ledger__head"><span class="t-label" id="m6h">Steps</span><span class="ledger__count">0 of 3</span></div>
+            <ul class="ledger__list">
+              <li><div class="arow arow--urgent"><span class="arow__lead t-title">1</span><span class="arow__body"><span class="arow__title">Remove Bilal from the heat</span><span class="arow__desc">Confirm where he is now.</span></span><span class="arow__trail"><span class="stamp stamp--waiting" data-glyph="…">Waiting</span></span></div></li>
+              <li><div class="arow"><span class="arow__lead t-title">2</span><span class="arow__body"><span class="arow__title">Record first-aid contact</span><span class="arow__desc">Salim (P06) notified 08:18.</span></span><span class="arow__trail"><span class="stamp stamp--waiting" data-glyph="…">Waiting</span></span></div></li>
+              <li><div class="arow"><span class="arow__lead t-title">3</span><span class="arow__body"><span class="arow__title">Check on Bilal</span><span class="arow__desc">Due by 08:28.</span></span><span class="arow__trail"><span class="stamp stamp--waiting" data-glyph="…">Waiting</span></span></div></li>
+            </ul></section>
+          <p class="pad t-small muted" style="margin:0">No health detail here. ⚙ Escalation rule · not AI.</p>
+        </div></div>
+        <div class="thumbzone"><button class="holdbtn" type="button" id="m6Hold"><span class="holdbtn__fill"></span><span class="holdbtn__label">Hold · Bilal is out of the heat</span></button></div>
+        <nav class="tabbar" aria-label="Site app"><button class="tabbar__item" aria-current="page" type="button"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>Today</button><button class="tabbar__item" type="button"><svg class="icon" aria-hidden="true"><use href="#i-person"/></svg>Crew</button><button class="tabbar__item" type="button"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Plan</button><button class="tabbar__item" type="button"><svg class="icon" aria-hidden="true"><use href="#i-ai"/></svg>Ask</button></nav>
+      </div>
+
+      <!-- P2 · worker app, EN/AR -->
+      <div class="device device--phone" id="p2" lang="en" dir="ltr" aria-label="Composition: worker home, Health Reporting">
+        <div class="device__status"><span>08:04</span><span data-t="app">Health Reporting</span><span>4G</span></div>
+        <header class="titleblock"><span></span><div class="titleblock__main"><div class="titleblock__title" data-t="now">Now</div><div class="titleblock__meta"><span>08:04</span><span data-t="online">Online</span></div></div>
+          <div class="seg" role="radiogroup" aria-label="Language" id="p2lang"><button class="seg__opt" role="radio" aria-checked="true" data-value="en">EN</button><button class="seg__opt" role="radio" aria-checked="false" data-value="ar" lang="ar">ع</button></div></header>
+        <div class="device__body"><div class="device__scroll">
+          <div class="readouts">
+            <div class="readout readout--focal"><span class="readout__label" data-t="status">Your status</span><span class="readout__value" data-t="inrec">In recovery</span><span class="readout__note" data-t="shelter">Shelter A</span></div>
+          </div>
+          <div class="pad row-flex"><span class="band band--low"><span class="band__swatch"></span><span data-t="band">Low band · 145 W/m²</span></span><span class="stamp stamp--stop" data-glyph="■" data-t="hold">Heavy work stopped</span></div>
+          <section class="ledger pad worker" aria-labelledby="p2h"><div class="ledger__head"><span class="t-label" id="p2h" data-t="msgs">Messages</span></div>
+            <ul class="ledger__list">
+              <li><button class="arow" type="button"><span class="arow__lead"><svg class="icon icon--lg" aria-hidden="true"><use href="#i-water"/></svg></span><span class="arow__body"><span class="arow__title" data-t="water">Drink water</span><span class="arow__desc" data-t="waterd">One cup now. Next reminder 08:19.</span></span><span class="arow__trail"><svg class="icon icon--dir" aria-hidden="true"><use href="#i-forward"/></svg></span></button></li>
+              <li><button class="arow" type="button"><span class="arow__lead"><svg class="icon icon--lg" aria-hidden="true"><use href="#i-clock"/></svg></span><span class="arow__body"><span class="arow__title" data-t="plan">Next: work 08:11</span><span class="arow__desc" data-t="pland">Workshop 08:11–08:26, then rest.</span></span><span class="arow__trail"><svg class="icon icon--dir" aria-hidden="true"><use href="#i-forward"/></svg></span></button></li>
+            </ul></section>
+        </div></div>
+        <div class="thumbzone"><button class="btn btn--primary btn--cta" type="button" data-t="unwell">I feel unwell</button></div>
+        <nav class="tabbar" aria-label="Worker app"><button class="tabbar__item" aria-current="page" type="button"><svg class="icon" aria-hidden="true"><use href="#i-safe"/></svg><span data-t="now">Now</span></button><button class="tabbar__item" type="button"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg><span data-t="myplan">My plan</span></button><button class="tabbar__item tabbar__item--primary" type="button"><svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg><span data-t="checkin">Check in</span></button><button class="tabbar__item" type="button"><svg class="icon" aria-hidden="true"><use href="#i-person"/></svg><span data-t="me">Me</span></button></nav>
+      </div>
+    </div>
+  </section>
+
+  <!-- 17 ─────────────────────────────────────────────────────────── -->
+  <section class="gsec" id="platform" aria-labelledby="h-platform">
+    <header><span class="gsec__num">17 · Web ↔ mobile</span><h2 id="h-platform">Translate, don’t stack</h2></header>
+    <div class="matrix" style="--cols:2">
+      <div class="mh">Concern</div><div class="mh">Desktop web</div><div class="mh">Phone (site and worker apps)</div>
+      <div><b>Context</b></div><div>Title block across the content column; rail on the inline-start edge.</div><div>Title block at top: who, where, when. Status and secondary actions only.</div>
+      <div><b>Decisions</b></div><div>Primary action at the foot of the detail panel, next to the evidence.</div><div>Primary action in the thumb zone above the tab bar, inset 16px from the screen edge; never full-bleed.</div>
+      <div><b>Targets</b></div><div>32px for dense rows and icon buttons.</div><div>56dp by default (48dp floor) for gloves; 64dp for the primary action; 12px between targets; 20px from screen edges.</div>
+      <div><b>Readouts</b></div><div>One ruled band, focal readout double width.</div><div>Focal readout alone at full width; others become rows, or a swipe strip that starts 16px from the edge so it never fights the system back gesture.</div>
+      <div><b>Density</b></div><div>Two-line clamped descriptions; keyboard J/K, / and ?.</div><div>Fewer rows per screen, higher contrast, no truncation on the worker app.</div>
+      <div><b>Confirmation</b></div><div>Typed word in a native dialog.</div><div>Hold-to-confirm (1.5s); no keyboard needed.</div>
+      <div><b>Explanations</b></div><div>“Why this?” disclosure inline.</div><div>Same disclosure; long content opens a bottom sheet.</div>
+    </div>
+  </section>
+  <!-- 18 ─────────────────────────────────────────────────────────── -->
+  <section class="gsec" id="glare" aria-labelledby="h-glare">
+    <header><span class="gsec__num">18 · Glare and gloves</span><h2 id="h-glare">Built for 45 °C sun and work gloves</h2>
+      <p><b>Glare</b> is the default for the site and worker apps outdoors. It is pure black on white, with every text pair at 11:1 or better (WCAG AAA asks for 7:1). Tinted surfaces turn white, rules thicken to 2/3/6px, body text goes up to 18px at weight 500, and drafts rely on their dashed edge alone. Switch the Light control to <b>Glare</b> to see the whole guide in it. Night shift keeps the warm palette; nobody needs glare protection at 04:00.</p></header>
+    <div class="matrix" style="--cols:3">
+      <div class="mh">Token</div><div class="mh">Value</div><div class="mh">Why</div><div class="mh">Applies to</div>
+      <div><code>--target-glove</code></div><div>56dp</div><div>Gloved fingertip is ~20mm; 48dp is the floor, not the goal</div><div>Every row, button and tab on touch</div>
+      <div><code>--target-cta</code></div><div>64dp</div><div>The one action that matters gets the biggest target</div><div>Thumb-zone primary action</div>
+      <div><code>--gap-touch</code></div><div>12px</div><div>Gloves press neighbours; spacing prevents mis-taps</div><div>Adjacent touch targets</div>
+      <div><code>--edge-safe</code></div><div>20px</div><div>Rugged cases cover the outer few millimetres of the screen</div><div>Primary action, swipe strips, capture tiles</div>
+    </div>
+    <div class="do-dont">
+      <div><b>Do</b>Put every decision in the bottom third: thumb zone above the tab bar, inset 20px from each edge.</div>
+      <div class="dont"><b>Don’t</b>Rely on swipe alone, long-press without a visible button, or anything smaller than 48dp. Gloves can’t do precision.</div>
+    </div>
+  </section>
+
+  <!-- 19 ─────────────────────────────────────────────────────────── -->
+  <section class="gsec" id="sync" aria-labelledby="h-sync">
+    <header><span class="gsec__num">19 · Offline and sync</span><h2 id="h-sync">Saved first, sent when possible</h2>
+      <p>Every record is written to the phone first; the network only decides when it leaves. The sync indicator sits in every title block (try the compositions above), and the queue shows each unsent record, its state, and what the person can do about it. Safety alerts never wait for sync: they come from the rules on the phone.</p></header>
+    <div class="cols">
+      <div class="stack">
+        <button class="switch" role="switch" aria-checked="true" type="button" id="netSwitch"><span class="switch__track" aria-hidden="true"></span>Network connected</button>
+        <button class="btn" type="button" id="addRecord">Record something</button>
+        <div class="row-flex"><span class="caption">Indicator:</span><button class="sync" type="button" data-sync data-state="synced">✓ Synced</button></div>
+        <p class="caption" style="margin:0">Turn the network off, record two things, then turn it back on. One record fails once (Retry) and one conflicts with the kiosk (choose how to resolve).</p>
+      </div>
+      <div class="stack"><span class="t-label">Sync queue</span><ul class="queue" id="queue" aria-describedby="queueLive"></ul><span class="visually-hidden" id="queueLive" role="status" aria-live="polite"></span></div>
+    </div>
+    <div class="matrix" style="--cols:2">
+      <div class="mh">State</div><div class="mh">Indicator</div><div class="mh">Meaning</div>
+      <div>Synced</div><div><span class="sync" data-state="synced">✓ Synced 08:19</span></div><div>Everything on this phone has reached Heat-Safe.</div>
+      <div>Pending</div><div><span class="sync" data-state="pending">… 2 waiting to send</span></div><div>Online, records not sent yet.</div>
+      <div>Sending</div><div><span class="sync" data-state="sending">↻ Sending 2…</span></div><div>In flight; the hatch travels.</div>
+      <div>Needs you</div><div><span class="sync" data-state="failed">! 1 needs you</span></div><div>A record failed or conflicts; it is still on the phone.</div>
+      <div>Offline</div><div><span class="sync" data-state="offline">⌀ No network · 3 saved on this phone</span></div><div>Warnings come from the rules on this phone.</div>
+    </div>
+  </section>
+
+  <!-- 20 ─────────────────────────────────────────────────────────── -->
+  <section class="gsec" id="agent" aria-labelledby="h-agent">
+    <header><span class="gsec__num">20 · Agent task state</span><h2 id="h-agent">Show the agent working, never acting</h2>
+      <p>The Planning Agent calls tools and waits on people and sensors. It never writes to a plan or the site. Its states are queued, calling a tool, waiting on a dependency, ready for review, failed and cancelled. Waiting on a dependency names <i>who or what</i> it is waiting for, and offers the action that unblocks it.</p></header>
+    <div class="agent" id="agentDemo">
+      <div class="agent__head"><span class="draft__source"><svg class="icon" aria-hidden="true"><use href="#i-ai"/></svg>AI · Planning Agent · “Can we restart the trench at 15:10?”</span>
+        <span class="row-flex"><button class="btn btn--primary" type="button" id="agentRun">Run</button><button class="btn" type="button" id="agentCancel" disabled><span>Cancel</span></button></span></div>
+      <ol class="agent__steps" id="agentSteps"></ol>
+      <p class="t-small" id="agentStatus" role="status" aria-live="polite" style="margin:0">Not started.</p>
+      <div class="draft" id="agentOut" hidden>
+        <div class="draft__head"><span class="draft__source"><svg class="icon" aria-hidden="true"><use href="#i-ai"/></svg>Ready for review</span><span class="stamp" data-glyph="">Confidence: High</span></div>
+        <p class="draft__text">15:10 is after the midday break and the fresh reading is 175 W/m², above the 150 hold. All eight restart checks can pass; the decision is Rashid’s.</p>
+        <div class="draft__actions"><button class="btn" type="button" data-why aria-expanded="false" aria-controls="whyAgent">Why this?</button><button class="btn" type="button" onclick="toast('Opens Restart review, prefilled')">Open Restart review</button><button class="btn btn--quiet" type="button" data-discard>Discard</button></div>
+        <div class="draft__why" id="whyAgent" hidden><dl><dt>Tools</dt><dd><code>compute_heat_stress</code>, <code>search_guidance</code></dd><dt>Inputs</dt><dd>Proposed 15:10 · reading 175 W/m², sensor t1, 15:06</dd><dt>Citations</dt><dd>Sandline heat plan · restart conditions · MoHRE midday break 12:30–15:00</dd></dl></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 21 ─────────────────────────────────────────────────────────── -->
+  <section class="gsec" id="ambient" aria-labelledby="h-ambient">
+    <header><span class="gsec__num">21 · Ambient AI</span><h2 id="h-ambient">Suggestions inside the form, reasons one tap away</h2>
+      <p>AI help appears where the work is: a dashed suggestion beside the field it would fill, with Use and Dismiss. The reasoning sits behind “Why this?”. Suggestions never cover health judgements (who is fit, who complains), only logistics.</p></header>
+    <div class="cols">
+      <div class="stack">
+        <div class="field"><label class="field__label" for="evRef">Evidence reference</label><input class="input" id="evRef" placeholder="e.g. Shelter A · 08:18 · in person"></div>
+        <div class="suggest" data-for="evRef" data-value="Shelter A · 08:18 · in person · kiosk check-in 08:04">
+          <svg class="icon" aria-hidden="true"><use href="#i-ai"/></svg>
+          <p class="suggest__text"><b>Suggested:</b> Shelter A · 08:18 · in person · kiosk check-in 08:04</p>
+          <div class="suggest__acts"><button class="btn" type="button" data-s="accept">Use</button><button class="btn btn--quiet" type="button" data-s="dismiss">Dismiss</button></div>
+        </div>
+      </div>
+      <div class="stack">
+        <div class="field"><label class="field__label" for="slot">Proposed restart time</label><input class="input" id="slot" placeholder="HH:MM" inputmode="numeric"></div>
+        <div class="suggest" data-for="slot" data-value="15:10">
+          <svg class="icon" aria-hidden="true"><use href="#i-ai"/></svg>
+          <p class="suggest__text"><b>Earliest allowed:</b> 15:10. The midday break ends at 15:00; a fresh reading takes about 6 minutes.</p>
+          <div class="suggest__acts"><button class="btn" type="button" data-s="accept">Use 15:10</button><button class="btn btn--quiet" type="button" data-s="dismiss">Dismiss</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 22 ─────────────────────────────────────────────────────────── -->
+  <section class="gsec" id="guardrails" aria-labelledby="h-guard">
+    <header><span class="gsec__num">22 · Guardrails and rollback</span><h2 id="h-guard">Friction by stakes; rollback by withdrawal, not erasure</h2>
+      <p>Every record keeps a visible way back. Safety records are never silently undone: they are <b>withdrawn</b>, which keeps them in the audit log and re-raises whatever they had cleared. A stop-work notice that has already reached phones can’t be unsent; withdrawing it sends a follow-up.</p></header>
+    <div class="matrix" style="--cols:3">
+      <div class="mh">Tier</div><div class="mh">Examples</div><div class="mh">Gate</div><div class="mh">Way back</div>
+      <div><b>0 · Reversible</b></div><div>Mark action done, use a suggestion, dismiss, filter</div><div>None</div><div>Undo in the toast for 8 seconds</div>
+      <div><b>1 · Records a fact</b></div><div>Headcount, readiness, removal from heat</div><div>Hold to confirm (field); single click (desk)</div><div>Withdraw, with audit</div>
+      <div><b>2 · Destructive</b></div><div>Delete a draft, remove from allocation, clear a kiosk buffer</div><div>Typed word (desk) or hold (field)</div><div>Withdraw within the shift; then audit only</div>
+      <div><b>3 · Human-only decision</b></div><div>Lift a stop-work, restart heavy work</div><div>Role gate + typed action word (RESTART)</div><div>Withdraw re-raises the stop on every board</div>
+      <div><b>AI</b></div><div>Any Planning Agent output</div><div>Cannot act; drafts only</div><div>Discard with Undo</div>
+    </div>
+    <div class="stack">
+      <div class="record" data-effect="Readiness withdrawn · Rana removed from the 08:11 proposal"><span class="stamp stamp--recorded" data-glyph="✓">Recorded</span><span class="record__what">Rana (C05) ready for workshop preparation · Huda 08:10</span><button class="btn" type="button" data-withdraw="click">Withdraw</button></div>
+      <div class="record" data-effect="Removal withdrawn · Bilal’s action is open again"><span class="stamp stamp--recorded" data-glyph="✓">Recorded</span><span class="record__what">Bilal (C08) removed from heat · Shelter A · Huda 08:21</span><button class="btn" type="button" data-withdraw="hold">Withdraw…</button></div>
+    </div>
+    <dialog class="dialog" id="dlgHold" aria-labelledby="dlgHT">
+      <div class="dialog__body"><h3 class="dialog__title" id="dlgHT">Withdraw “Bilal removed from heat”?</h3><p class="t-small">His needs-rest action opens again on every board and Huda is asked to confirm where he is.</p>
+        <button class="holdbtn" type="button"><span class="holdbtn__fill"></span><span class="holdbtn__label">Hold to withdraw</span></button></div>
+      <div class="dialog__acts"><button class="btn" type="button" data-cancel>Cancel</button></div>
+    </dialog>
+  </section>
+
+  <!-- 23 ─────────────────────────────────────────────────────────── -->
+  <section class="gsec" id="capture" aria-labelledby="h-capture">
+    <header><span class="gsec__num">23 · Field capture</span><h2 id="h-capture">Photo, voice, yes/no before any keyboard</h2>
+      <p>Evidence in the field is captured, not typed. Photos are for <b>equipment and conditions</b> (meters, coolers, shade), never people. Voice is transcribed and the audio discarded. Binary questions are two big buttons. Everything lands in the sync queue first.</p></header>
+    <div class="capture" style="max-inline-size:40rem">
+      <label class="capture__tile"><input type="file" accept="image/*" capture="environment" aria-label="Take a photo of the meter"><span class="capture__body" style="display:grid;justify-items:center;gap:var(--space-1)"><svg class="icon" aria-hidden="true"><use href="#i-camera"/></svg><span>Photo of meter</span><span class="capture__meta">Required for a manual reading</span></span></label>
+      <button class="capture__tile" type="button" aria-pressed="false" data-voice="voiceT"><svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg><span>Voice note</span><span class="capture__meta">Tap to record</span></button>
+    </div>
+    <div class="field" id="voiceT" hidden style="max-inline-size:40rem"><label class="field__label" for="voiceIn">Transcript (edit before saving)</label><input class="input" id="voiceIn" dir="auto"></div>
+    <div class="field" style="max-inline-size:40rem"><span class="field__label" id="ynL">Is the water cooler at Shelter A full?</span><div class="yesno" role="group" aria-labelledby="ynL"><button class="yesno__opt" type="button" aria-pressed="false">Yes</button><button class="yesno__opt" type="button" aria-pressed="false">No</button></div></div>
+  </section>
+
+  <!-- 24 ─────────────────────────────────────────────────────────── -->
+  <section class="gsec" id="zones" aria-labelledby="h-zones">
+    <header><span class="gsec__num">24 · Zone plan</span><h2 id="h-zones">Anchor actions to places, not people</h2>
+      <p>A 2D site plan anchors bands, holds, sensors and actions to zones, so a supervisor sees <i>where</i> the problem is. It deliberately shows counts, never a dot for each worker: Heat-Safe is not a location tracker. Zones are keyboard buttons; the detail follows selection.</p></header>
+    <div class="plan">
+      <div class="plan__map">
+        <svg id="planMap" viewBox="0 0 600 340" role="group" aria-label="Dune Civil Works site plan">
+          <defs>
+            <pattern id="hatch-hold" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="10" class="plan__hatch-hold"/></pattern>
+            <pattern id="hatch-rest" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(135)"><line x1="0" y1="0" x2="0" y2="8" class="plan__hatch-line"/></pattern>
+          </defs>
+          <g class="plan__zone plan__zone--hold" data-zone="trench" role="button" tabindex="0" aria-pressed="false" aria-label="Civil trench: heavy-work hold"><rect class="zone" x="20" y="20" width="330" height="120"/><rect class="tag" x="30" y="30" width="170" height="26"/><text class="tagtext" x="40" y="48">■ HOLD · Civil trench</text></g>
+          <g class="plan__zone" data-zone="workshop" role="button" tabindex="0" aria-pressed="false" aria-label="Workshop: one action"><rect class="zone" x="370" y="20" width="210" height="120"/><rect class="tag" x="380" y="30" width="150" height="26"/><text x="390" y="48">Workshop · 4/6</text><text x="390" y="120">! 1 action</text></g>
+          <g class="plan__zone plan__zone--rest" data-zone="shelter" role="button" tabindex="0" aria-pressed="false" aria-label="Shelter A: 7 in recovery"><rect class="zone" x="20" y="160" width="230" height="160"/><rect class="tag" x="30" y="170" width="150" height="26"/><text x="40" y="188">Shelter A · 7</text></g>
+          <g class="plan__zone" data-zone="yard" role="button" tabindex="0" aria-pressed="false" aria-label="Laydown yard: band unknown"><rect class="zone" x="270" y="160" width="310" height="160" stroke-dasharray="8 6"/><rect class="tag" x="280" y="170" width="170" height="26"/><text x="290" y="188">Laydown yard · ? band</text></g>
+          <g class="plan__sensor" aria-hidden="true"><circle cx="300" cy="110" r="6"/><text x="312" y="114">t1</text><circle class="off" cx="520" cy="290" r="6"/><text x="532" y="294">bs2 offline</text></g>
+        </svg>
+      </div>
+      <div class="plan__detail" id="planDetail" aria-live="polite"></div>
+    </div>
+  </section>
+  </main>
+</div>
+
+<script src="system.js"></script>
+<script src="field.js"></script>
+<script>
+/* Style-guide wiring only. */
+(() => {
+  const $ = (s, r = document) => r.querySelector(s);
+  const root = document.documentElement;
+  const css = n => getComputedStyle(root).getPropertyValue(n).trim();
+  const lum = hex => { const h = hex.replace('#', ''); const c = [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16) / 255).map(x => x <= .04045 ? x / 12.92 : ((x + .055) / 1.055) ** 2.4); return .2126 * c[0] + .7152 * c[1] + .0722 * c[2]; };
+  const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return ((x + .05) / (y + .05)).toFixed(1); };
+
+  function swatches() {
+    const base = [['--color-base', 'Paper', 'Content surface'], ['--color-sheet', 'Sheet', 'App chrome, rails'], ['--color-tracing', 'Tracing', 'Drafts, AI, proposals'], ['--color-ink', 'Ink', 'Text, rules, stamps'], ['--color-graphite', 'Graphite', 'Secondary text'], ['--color-pencil', 'Pencil', 'Tertiary, disabled']];
+    const sig = [['--color-signal-red', 'Signal red', 'Prohibition · stop-work · needs action', '--color-on-signal'], ['--color-signal-yellow', 'Signal yellow', 'Caution · fill only · focus halo', '--color-on-caution'], ['--color-signal-green', 'Signal green', 'Safe condition · Low band', '--color-on-signal'], ['--color-signal-blue', 'Signal blue', 'Mandatory instruction · work slots', '--color-on-signal']];
+    const b = css('--color-base');
+    $('#sw-base').innerHTML = base.map(([v, n, u]) => { const c = css(v); const fg = lum(c) > .4 ? css('--color-ink') : css('--color-base'); return `<div class="swatch"><div class="swatch__chip" style="background:${c};color:${fg}">${n}</div><div class="swatch__meta"><code>${v}</code><span>${c}</span><span>${u}</span>${v === '--color-base' || v === '--color-sheet' || v === '--color-tracing' ? '' : `<span>${ratio(c, b)}:1 on paper</span>`}</div></div>`; }).join('');
+    $('#sw-signal').innerHTML = sig.map(([v, n, u, on]) => { const c = css(v), o = css(on); return `<div class="swatch"><div class="swatch__chip" style="background:${c};color:${o}">${n}</div><div class="swatch__meta"><code>${v}</code><span>${c}</span><span>${u}</span><span>text on fill ${ratio(o, c)}:1${v.includes('yellow') ? '' : ` · as text ${ratio(c, b)}:1`}</span></div></div>`; }).join('');
+  }
+  $('#iconGrid').innerHTML = Object.keys(ICONS).map(n => `<div>${icon(n)}<span>${n}${ICONS[n].dir ? ' · mirrors' : ''}</span></div>`).join('');
+
+  initSystem();
+  swatches();
+  $('#themeSeg').addEventListener('change', e => { root.dataset.theme = e.detail; swatches(); });
+  $('#dirSeg').addEventListener('change', e => { root.dir = e.detail; });
+  $('#demoStamp').addEventListener('click', () => { const s = $('#demoStampTarget'); s.classList.remove('is-new'); void s.offsetWidth; s.classList.add('is-new'); });
+  $('#demoWipe').addEventListener('click', () => { $('#demoWipeTarget').innerHTML = `<div class="banner" role="alert"><span class="banner__text">${icon('alert')}Stop-work issued 08:01 · heavy exposed civil work</span></div>`; });
+  document.addEventListener('confirmed', e => { if (e.target.closest('dialog')) return; toast(e.target.id === 'm6Hold' ? '08:21 · Removal recorded by Huda · saved on this phone' : 'Confirmed'); });
+  initField();
+
+  const AR = { app: 'الإبلاغ الصحي', now: 'الآن', online: 'متصل', status: 'حالتك', inrec: 'في الاستراحة', shelter: 'الملجأ A', band: 'نطاق منخفض · 145 W/m²', hold: 'توقف العمل الثقيل', msgs: 'الرسائل', water: 'اشرب الماء', waterd: 'كوب واحد الآن. التذكير التالي 08:19.', plan: 'التالي: عمل 08:11', pland: 'الورشة 08:11–08:26، ثم راحة.', unwell: 'أشعر بتوعك', myplan: 'خطتي', checkin: 'تسجيل الحالة', me: 'أنا' };
+  const p2 = $('#p2'); const EN = {};
+  p2.querySelectorAll('[data-t]').forEach(el => EN[el.dataset.t] ??= el.textContent);
+  $('#p2lang').addEventListener('change', e => { const ar = e.detail === 'ar'; p2.lang = ar ? 'ar' : 'en'; p2.dir = ar ? 'rtl' : 'ltr'; p2.querySelectorAll('[data-t]').forEach(el => el.textContent = (ar ? AR : EN)[el.dataset.t]); });
+
+  /* Highlight the section in view. */
+  const links = [...document.querySelectorAll('.guide__nav a')];
+  const io = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) links.forEach(a => a.setAttribute('aria-current', String(a.hash === '#' + en.target.id))); }), { rootMargin: '-40% 0px -55% 0px' });
+  document.querySelectorAll('.gsec').forEach(s => io.observe(s));
+})();
+</script>
+</body>
+</html>
