@@ -61,13 +61,25 @@ function renderPanel(s) {
       <dl class="notes"><dt>Persona</dt><dd>${s.persona || '—'}</dd><dt>Device context</dt><dd>${s.context || '—'}</dd><dt>Job to be done</dt><dd>${s.job || '—'}</dd></dl>
       ${Object.keys(vars).length > 1 ? `<h2 style="margin-top:16px">States</h2><div class="variants">${Object.entries(vars).map(([k, l]) => `<button class="chip ${App.variant === k ? 'on' : ''}" data-variant="${k}">${l}</button>`).join('')}</div>` : ''}
     </section>` : ''}
+    ${s && (s.device === 'worker' || s.device === 'kiosk') ? `<section><h2>Worker language</h2><div class="variants">${LANGS.map(([c, n, e, d, st]) => `<button class="chip ${curLang() === c ? 'on' : ''}" data-act="plang" data-id="${c}" title="${e}${st !== 'ready' ? ' · not translated yet' : ''}"${st !== 'ready' ? ' style="border-style:dashed"' : ''}><span lang="${c}" dir="${d}">${n}</span></button>`).join('')}</div><div class="hint">Sets lang and dir on the worker frame. Dashed = not translated yet (falls back to English).</div></section>` : ''}
+    <section><h2>Language and layout tests</h2><div class="variants">
+      <button class="chip ${App.mirror ? 'on' : ''}" data-act="tmirror" aria-pressed="${App.mirror}">RTL mirror (web / site)</button>
+      <button class="chip ${App.pseudo ? 'on' : ''}" data-act="tpseudo" aria-pressed="${App.pseudo}">Pseudo-locale +40%</button>
+      <button class="chip ${App.qa ? 'on' : ''}" data-act="tqa" aria-pressed="${App.qa}">Highlight untranslated</button>
+      <button class="chip ${App.timeLtr ? 'on' : ''}" data-act="ttime" aria-pressed="${!!App.timeLtr}">Time axis: keep left → right</button></div>
+      <div class="hint">Mirror flips supervisor screens right to left as an Arabic UI would; by default time charts flip with it. “Keep left → right” holds the Gantt, scrubber, hourly strip and hourly table left to right inside the mirrored page, for comparing both with users. Pseudo-locale pads text by 40% to find clipping.</div></section>
     <section><h2>Signed in as</h2><div class="variants">${roleChips}</div><div class="hint">Changes which actions appear (e.g. only Rashid can record a restart; Maya issues, Huda acknowledges).</div></section>
     <section><button class="scr-link ${s ? '' : 'on'}" data-go="map"><b>◫</b>Screen map</button>${groups}</section>
     <section><h2>Reset</h2><button class="chip" data-act="reset">Reset prototype state</button><div class="hint">Web: press ? for keyboard shortcuts. Every frame scales to fit; resize the window for a larger view.</div></section>`;
 }
 ACT.prevstep = () => { const i = stepIndex(); goStep(i < 0 ? 0 : i - 1); };
 ACT.nextstep = () => { const i = stepIndex(); goStep(i < 0 ? 0 : i + 1); };
-ACT.reset = () => { App.f = {}; App.sel = {}; App.role = 'foreman'; refresh(); };
+ACT.reset = () => { App.f = {}; App.sel = {}; App.role = 'foreman'; App.mirror = App.pseudo = App.qa = false; refresh(); };
+ACT.plang = el => { App.f.lang = el.dataset.id; refresh(); };
+ACT.tmirror = () => { App.mirror = !App.mirror; refresh(); };
+ACT.tpseudo = () => { App.pseudo = !App.pseudo; refresh(); };
+ACT.tqa = () => { App.qa = !App.qa; refresh(); };
+ACT.ttime = () => { App.timeLtr = !App.timeLtr; refresh(); };
 
 function mapHtml() {
   const dev = Object.entries(DEVICES).map(([d, info]) => `<div class="devcard"><h3>${info.name}<small>${info.sub}</small></h3>${ORDER.filter(id => SCREENS[id].device === d).map(id => `<button data-go="${id}"><b>${id.toUpperCase()}</b>${SCREENS[id].name}</button>`).join('')}</div>`).join('');
