@@ -33,6 +33,25 @@ screen('m1', {
   },
 });
 
+/* Template preview per crew language, with SMS size: Arabic and Indic scripts switch SMS to
+   Unicode, which fits 70 characters per message instead of 160. */
+function m2Preview() {
+  const counts = {};
+  AFFECTED.forEach(k => { const l = PREF_LANG[k]; counts[l] = (counts[l] || 0) + 1; });
+  const langs = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+  const sel = App.sel.m2l && counts[App.sel.m2l] ? App.sel.m2l : langs[0];
+  const L = LANG[sel], use = L.st === 'ready' ? sel : 'en';
+  const sms = `${tt('stopwork', use)} 08:01: ${tt('alert.stop', use)}`;
+  const si = smsInfo(sms);
+  const fallback = langs.filter(l => LANG[l].st !== 'ready');
+  const tabs = langs.map(l => `<button role="tab" aria-selected="${l === sel}" class="${l === sel ? 'on' : ''}" data-act="m2l" data-id="${l}" style="min-height:48px;text-transform:none"><span lang="${l}" dir="${LANG[l].d}">${LANG[l].n}</span> · ${counts[l]}</button>`).join('');
+  return `<div class="seg" role="tablist" aria-label="Crew languages" style="flex-wrap:wrap">${tabs}</div>
+    <div class="sms" style="margin-top:8px"><div class="smsbody" lang="${use}" dir="${LANG[use].d}">${sms}</div>
+    <div class="smsmeta"><span>SMS · ${si.enc}</span><span><b>${si.n}</b> / ${si.one} chars · <b>${si.parts}</b> part${si.parts > 1 ? 's' : ''}</span></div></div>
+    ${L.st !== 'ready' ? `<div class="note" style="margin-top:8px">▲ ${L.e} is not translated yet. ${counts[sel]} worker${counts[sel] > 1 ? 's get' : ' gets'} English plus a voice call; Huda confirms in person.</div>` : ''}
+    <div class="computed" style="margin-top:8px">11 workers · ${langs.length} languages${fallback.length ? ` · ${fallback.map(l => LANG[l].e).join(', ')} fall back to English` : ''}</div>`;
+}
+
 /* ───────── M2 · Stop-work instruction ───────── */
 screen('m2', {
   device: 'site', tab: 'today', name: 'Stop-work instruction', short: 'Stop-work', clock: '08:01',
@@ -51,14 +70,14 @@ screen('m2', {
       nav: { title: 'Stop-work · 08:01', back: 'm1', clock: '08:01' },
       overflow: safety ? [{ label: 'Withdraw instruction…', danger: true, fn: () => confirmModal({ title: 'Withdraw the 08:01 stop-work instruction?', body: 'Huda and the crew phones will be told the instruction was withdrawn. The record stays in the audit log.', btn: 'Withdraw', verb: 'to withdraw', onOk: () => { App.f.m2 = 0; refresh(); toast('Instruction withdrawn'); } }) }] : [{ label: 'View in audit log' }],
       heroReplace: `<div class="statement red"><div class="big">Stop heavy exposed civil work. Move the crew to Shelter A.</div><div class="src">Sandline heat plan · TWL 145 ≤ 150 at 08:00 · ${COMPUTED}</div></div>
-        ${step < 2 ? `<div class="banner info" style="box-shadow:inset 4px 0 0 var(--band-amber)"><span>▲ Escalates to Rashid at 08:03 if not acknowledged</span><b id="cd">1:12</b></div>` : ''}`,
+        ${step < 2 ? `<div class="banner amber"><span>▲ Escalates to Rashid at 08:03 if not acknowledged</span><b id="cd">1:12</b></div>` : ''}`,
       body: [
         section('Recipients', list([
           row({ lead: av('huda'), t: 'Huda (C01) · Dune foreman', d: 'Instruction to stop and account for 11 affected workers.', b: hb, static: true }),
           row({ t: 'C13, C14', d: 'Not affected · separate light task.', b: B.muted('Not affected'), static: true }),
         ])),
         section('Channel', `<div class="seg" role="radiogroup" aria-label="Channel">${['radio', 'in person', 'app'].map(c => `<button role="radio" aria-checked="${ch === c}" class="${ch === c ? 'on' : ''}" data-act="ch" data-id="${c}" style="min-height:48px">${c}</button>`).join('')}</div><div class="computed" style="margin-top:8px">Recorded with each step for the audit.</div>`),
-        section('What worker phones receive', `<div style="border:1px solid var(--ink);padding:16px"><div class="h3" style="margin-bottom:8px">Fixed safety instruction · reviewed translation</div><p class="p" style="font-size:16px">Heavy work has stopped. Go to Shelter A now. Drink water. Tell your supervisor if you feel unwell.</p><div class="computed" style="margin-top:8px">Read-only template · 7 languages</div></div>`),
+        section('What worker phones receive', m2Preview(), 'Fixed template · reviewed translation'),
       ],
       cta,
       mount() {
@@ -69,6 +88,7 @@ screen('m2', {
   },
   actions: {
     ch: el => { App.f.m2ch = el.dataset.id; refresh(); },
+    m2l: el => { App.sel.m2l = el.dataset.id; refresh(); },
     issue: () => { App.f.m2 = 1; App.f.stopIssued = true; refresh(); toast('Instruction issued · 08:01 · ' + (App.f.m2ch || 'radio')); },
     ack: () => { App.f.m2 = 2; refresh(); toast('Acknowledged · 08:02'); },
     stopped: () => { App.f.m2 = 3; refresh(); toast('Heavy work stop confirmed · 08:03'); },

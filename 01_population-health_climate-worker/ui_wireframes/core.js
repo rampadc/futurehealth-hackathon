@@ -46,7 +46,7 @@ const PEOPLE = {
 const AFFECTED = ['c02', 'c03', 'c04', 'rana', 'yusuf', 'dana', 'bilal', 'leila', 'zaid', 'mariam', 'samir'];
 
 /* ───────── state ───────── */
-const App = { route: 'map', variant: 'default', role: 'foreman', sel: {}, f: {}, scale: 1, lastR: null };
+const App = { route: 'map', variant: 'default', role: 'foreman', sel: {}, f: {}, scale: 1, lastR: null, mirror: false, pseudo: false, qa: false };
 
 function go(id, v) { const h = '#/' + id + (v && v !== 'default' ? '/' + v : ''); if (location.hash === h) render(); else location.hash = h; }
 function parse() {
@@ -86,7 +86,7 @@ function compname(n) { return `<span class="compname">${marker(n)}${n} ${COMP[n]
 
 function metric(lbl, val, q = '', crit) {
   const c = crit === 'red' ? 'crit-red' : crit ? 'critical' : '';
-  return `<div class="metric ${c}"><div class="lbl">${lbl}</div><div class="val">${val}</div><div class="q">${q}</div></div>`;
+  return `<div class="metric ${c}"><div class="lbl">${lbl}</div><div class="val"><bdi>${val}</bdi></div><div class="q">${q}</div></div>`;
 }
 
 function row(o) {
@@ -127,12 +127,14 @@ function aiBlock(o) {
   }
   const acts = (o.acts || [{ l: 'Edit', go: o.editGo }, { l: 'Discard', act: 'discard' }])
     .map(a => `<button class="btn"${attr('data-go', a.go)}${attr('data-v', a.v)}${attr('data-act', a.act)} data-key="${key}">${a.l}</button>`).join('');
+  const confL = o.i18n ? `${t('ai.conf')}: ${t('ai.' + o.conf)}` : 'Confidence: ' + o.conf;
+  const whyL = o.i18n ? t('ai.why') : 'Why this?';
   return `<div class="ai" data-ai="${key}">
-    <div class="ai-h"><span>◇ AI · ${o.agent || 'Planning Agent'}</span>${o.title ? `<span style="color:var(--ink)">· ${o.title}</span>` : ''}${o.badge || badge('Confidence: ' + o.conf, '', 'Confidence ' + o.conf)}</div>
+    <div class="ai-h"><span>◇ AI · ${o.agent || 'Planning Agent'}</span>${o.title ? `<span style="color:var(--ink)">· ${o.title}</span>` : ''}${o.badge || badge(confL, '', 'Confidence ' + o.conf)}</div>
     ${o.warn ? `<div class="warn">▲ ${o.warn}</div>` : ''}
     <p>${o.text}</p>
     ${o.after || ''}
-    <div class="ai-actions"><span class="why"><button class="btn" data-act="why" data-key="${key}" aria-label="Why this? Show tools, inputs and citations">ⓘ Why this?</button><span class="tip" role="tooltip">${whyHtml(WHY[key])}</span></span>${acts}</div>
+    <div class="ai-actions"><span class="why"><button class="btn" data-act="why" data-key="${key}" aria-label="Why this? Show tools, inputs and citations">ⓘ ${whyL}</button><span class="tip" role="tooltip" lang="en" dir="ltr">${whyHtml(WHY[key])}</span></span>${acts}</div>
   </div>`;
 }
 
@@ -217,17 +219,17 @@ const SITE_TABS = [
   { k: 'me', l: 'Me', ic: '□', act: 'me-sheet' },
 ];
 const WORKER_TABS = [
-  { k: 'now', l: 'Now', ic: '●', go: 'p2' },
-  { k: 'plan', l: 'My plan', ic: '▤', go: 'p5' },
-  { k: 'check', l: 'Check in', ic: '🎙', go: 'p4', big: true },
-  { k: 'me', l: 'Me', ic: '□', go: 'p8' },
+  { k: 'now', key: 'tab.now', ic: '●', go: 'p2' },
+  { k: 'plan', key: 'tab.plan', ic: '▤', go: 'p5' },
+  { k: 'check', key: 'tab.check', ic: '🎙', go: 'p4', big: true },
+  { k: 'me', key: 'tab.me', ic: '□', go: 'p8' },
 ];
 
 function mobileShell(s, r) {
   const worker = s.device === 'worker';
   const tabs = worker ? WORKER_TABS : SITE_TABS;
   const nv = r.nav || {};
-  const left = nv.leftHtml || (nv.back ? `<button class="iconbtn" data-go="${nv.back}"${attr('data-v', nv.backV)} aria-label="Back">←</button>` : '');
+  const left = nv.leftHtml || (nv.back ? `<button class="iconbtn" data-go="${nv.back}"${attr('data-v', nv.backV)} aria-label="Back" style="${worker ? 'width:56px;height:56px' : ''}">←</button>` : '');
   const top = r.noTop ? '' : `<header class="topnav"><div class="l">${left}</div><div class="ttl">${nv.title || s.name}${nv.sub ? `<small>${nv.sub}</small>` : ''}</div><div class="r">${topRight(r, true)}</div></header>`;
   let inner;
   if (r.empty) inner = `<div class="scroll">${emptyHtml(r.empty)}</div>`;
@@ -236,9 +238,9 @@ function mobileShell(s, r) {
     const hero = r.hero ? `<div class="mhero ${st}" role="region" aria-label="Key figures">${r.hero.join('')}</div>` : (r.heroReplace || '');
     inner = `<div class="scroll" data-keep="scroll">${hero}<div class="mpad ${st}">${(r.body || []).join('')}</div></div>${r.cta ? `<div class="mcta">${ctaHtml(r.cta)}</div>` : ''}`;
   }
-  const tabbar = r.noTabs ? '' : `<nav class="tabbar" style="grid-template-columns:${tabs.map(t => t.big ? '1.6fr' : '1fr').join(' ')}" aria-label="Tabs">${tabs.map(t => `<button class="${s.tab === t.k ? 'on' : ''} ${t.big ? 'big' : ''}"${attr('data-go', t.go)}${attr('data-act', t.act)}${s.tab === t.k ? ' aria-current="page"' : ''}><span class="ic" aria-hidden="true">${t.ic}</span>${t.l}</button>`).join('')}</nav>`;
-  const net = r.offline ? 'No network' : '4G ▮▮▮';
-  return `<div class="statusbar"><span>${nv.clock || s.clock || '08:18'}</span><span>${worker ? 'Health Reporting' : 'Heat-Safe Site'}</span><span>${net}</span></div>${top}${bannerHtml(r.error)}${inner}${tabbar}`;
+  const tabbar = r.noTabs ? '' : `<nav class="tabbar" style="grid-template-columns:${tabs.map(t => t.big ? '1.6fr' : '1fr').join(' ')}" aria-label="Tabs">${tabs.map(t => `<button class="${s.tab === t.k ? 'on' : ''} ${t.big ? 'big' : ''}"${attr('data-go', t.go)}${attr('data-act', t.act)}${s.tab === t.k ? ' aria-current="page"' : ''}><span class="ic" aria-hidden="true">${t.ic}</span>${t.key ? tr(t.key) : t.l}</button>`).join('')}</nav>`;
+  const net = r.offline ? (worker ? tr('nonet') : 'No network') : '4G ▮▮▮';
+  return `<div class="statusbar"><span>${nv.clock || s.clock || '08:18'}</span><span>${worker ? tr('app') : 'Heat-Safe Site'}</span><span>${net}</span></div>${top}${bannerHtml(r.error)}${inner}${tabbar}`;
 }
 
 const SHELLS = { web: webShell, site: mobileShell, worker: mobileShell, kiosk: (s, r) => r.full };
@@ -255,9 +257,10 @@ function variantsOf(s) {
 function buildR(s) {
   const v = App.variant;
   if (s.selfVariants) return s.render({ v });
-  if (v === 'empty' && s.empty) { const r = s.render({ v: 'default' }); return { nav: r.nav, empty: s.empty, noTabs: r.noTabs }; }
+  const val = x => typeof x === 'function' ? x() : x;
+  if (v === 'empty' && s.empty) { const r = s.render({ v: 'default' }); return { nav: r.nav, navRight: r.navRight, empty: val(s.empty), noTabs: r.noTabs }; }
   const r = s.render({ v: v === 'error' ? 'default' : v });
-  if (v === 'error') r.error = Object.assign({ text: "■ Couldn't reach Heat-Safe in 20 seconds. Showing the last update from 08:04. Your entries are saved on this device." }, s.error || {});
+  if (v === 'error') r.error = Object.assign({ text: "■ Couldn't reach Heat-Safe in 20 seconds. Showing the last update from 08:04. Your entries are saved on this device." }, val(s.error) || {});
   return r;
 }
 
@@ -281,7 +284,10 @@ function render() {
   App.lastR = r;
   stage.className = 'stage';
   stage.dataset.cur = App.route + '/' + App.variant;
-  stage.innerHTML = `<div class="stage-cap">${s.id.toUpperCase()} · ${s.name} · ${DEVICES[s.device].name}</div><div class="stage-inner" id="inner"><div class="frame ${s.device}" id="frame"${s.lang ? ` lang="${s.lang}"` : ''}>${SHELLS[s.device](s, r)}</div></div>`;
+  const loc = frameLocale(s);
+  stage.classList.toggle('qa-fallback', App.qa);
+  stage.innerHTML = `<div class="stage-cap">${s.id.toUpperCase()} · ${s.name} · ${DEVICES[s.device].name}${loc.note}</div><div class="stage-inner" id="inner"><div class="frame ${s.device}" id="frame" lang="${loc.lang}" dir="${loc.dir}">${SHELLS[s.device](s, r)}</div></div>`;
+  postProcess($('#frame'));
   if (sameScreen) $$('[data-keep]', stage).forEach(el => { if (keep[el.dataset.keep]) el.scrollTop = keep[el.dataset.keep]; });
   fit();
   renderPanel(s);
@@ -289,6 +295,58 @@ function render() {
   if (s.mount) s.mount();
 }
 function refresh() { render(); }
+
+/* ───────── languages and direction ───────── */
+function tr(key) { return typeof t === 'function' ? t(key) : key; }
+function frameLocale(s) {
+  if (s.device === 'worker') {
+    const L = LANG[curLang()] || LANG.en;
+    const lang = L.st === 'ready' ? L.c : 'en';
+    return { lang, dir: LANG[lang].d, note: ` · ${L.e}${L.st !== 'ready' ? ' (not ready, English shown)' : ''}` };
+  }
+  if (App.mirror) return { lang: 'en', dir: 'rtl', note: ' · RTL mirror test' };
+  return { lang: 'en', dir: 'ltr', note: '' };
+}
+/* After render: mirror directional arrows in right-to-left frames (media ▶ is left alone),
+   and optionally pseudo-localize text to test expansion. */
+function postProcess(frame) {
+  if (!frame) return;
+  const walk = fn => { const w = document.createTreeWalker(frame, NodeFilter.SHOW_TEXT); const ns = []; while (w.nextNode()) ns.push(w.currentNode); ns.forEach(fn); };
+  walk(n => {
+    const el = n.parentElement; if (!el || el.closest('[data-noloc]')) return;
+    const rtl = el.closest('[dir]').getAttribute('dir') === 'rtl';
+    if (rtl && /[←→]/.test(n.nodeValue)) n.nodeValue = n.nodeValue.replace(/[←→]/g, c => c === '←' ? '→' : '←');
+  });
+  if (App.pseudo) {
+    const map = { a: 'á', e: 'é', i: 'í', o: 'ö', u: 'ü', c: 'ç', n: 'ñ', s: 'š', y: 'ý', A: 'Å', E: 'É', I: 'Î', O: 'Ø', U: 'Ü', S: 'Š', C: 'Ç' };
+    walk(n => {
+      const el = n.parentElement; if (!el || el.closest('[data-noloc]') || !/[A-Za-z]{2,}/.test(n.nodeValue)) return;
+      const v = n.nodeValue.trim(); if (!v) return;
+      const pad = '~'.repeat(Math.ceil(v.length * 0.4));
+      n.nodeValue = n.nodeValue.replace(v, '[' + v.replace(/[A-Za-z]/g, c => map[c] || c) + pad + ']');
+    });
+  }
+}
+function frameDir() { const f = frameEl(); return f ? f.getAttribute('dir') : 'ltr'; }
+
+/* Hold-to-confirm: a destructive step for the worker app and kiosk that needs no typing,
+   no Latin keyboard and no reading of a confirmation word. Hold 1.5 s (finger, Space or Enter). */
+function holdConfirm({ title, body, btn, onOk }) {
+  const o = overlay(`<div class="modal" role="dialog" aria-modal="true" aria-labelledby="hct"><h3 id="hct">${title}</h3><p>${body}</p>
+    <button class="holdbtn" data-x="hold" aria-describedby="hh"><span class="fill"></span><span>${btn}</span></button>
+    <div id="hh" class="age" style="margin-top:8px;text-align:center">${tr('hold')}</div>
+    <div class="acts"><button class="btn" data-x="cancel">${tr('cancel')}</button></div></div>`);
+  const b = $('[data-x=hold]', o), fill = $('.fill', b);
+  let t0 = 0, raf = 0;
+  const step = ts => { if (!t0) t0 = ts; const p = Math.min(1, (ts - t0) / 1500); fill.style.width = (p * 100) + '%'; b.classList.toggle('full', p > .5); if (p >= 1) { raf = 0; closeOverlay(); onOk && onOk(); return; } raf = requestAnimationFrame(step); };
+  const start = e => { e.preventDefault(); if (raf) return; t0 = 0; raf = requestAnimationFrame(step); };
+  const stop = () => { cancelAnimationFrame(raf); raf = 0; fill.style.width = '0'; b.classList.remove('full'); };
+  b.addEventListener('pointerdown', start); ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => b.addEventListener(ev, stop));
+  b.addEventListener('keydown', e => { if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) start(e); });
+  b.addEventListener('keyup', e => { if (e.key === ' ' || e.key === 'Enter') stop(); });
+  $('[data-x=cancel]', o).onclick = closeOverlay;
+  $('[data-x=cancel]', o).focus();
+}
 
 function fit() {
   const stage = $('#stage'), inner = $('#inner'), frame = $('#frame');
@@ -461,8 +519,13 @@ function enableSwipe(onDone) {
   $$('#frame [data-swipe]').forEach(el => {
     let x0 = null;
     el.addEventListener('pointerdown', e => { if (e.target.closest('button')) return; x0 = e.clientX; el.setPointerCapture(e.pointerId); });
-    el.addEventListener('pointermove', e => { if (x0 === null) return; const dx = Math.max(0, (e.clientX - x0) / App.scale); el.style.transform = `translateX(${Math.min(dx, 160)}px)`; });
-    const end = e => { if (x0 === null) return; const dx = (e.clientX - x0) / App.scale; x0 = null; el.style.transform = ''; if (dx > 110) onDone(el.dataset.swipe); };
+    el.addEventListener('pointermove', e => { if (x0 === null) return; const sgn = frameDir() === 'rtl' ? -1 : 1; const dx = Math.max(0, sgn * (e.clientX - x0) / App.scale); el.style.transform = `translateX(${sgn * Math.min(dx, 160)}px)`; });
+    const end = e => { if (x0 === null) return; const dx = (frameDir() === 'rtl' ? -1 : 1) * (e.clientX - x0) / App.scale; x0 = null; el.style.transform = ''; if (dx > 110) onDone(el.dataset.swipe); };
     el.addEventListener('pointerup', end); el.addEventListener('pointercancel', () => { x0 = null; el.style.transform = ''; });
   });
 }
+
+/* Time-axis direction in RTL layouts. Default: time follows the layout (right to left),
+   as Datawrapper, Wikimedia and PatternFly do for Arabic, Persian and Hebrew. Practice is
+   split (much Arabic news media keeps left to right), so the panel can force LTR for testing. */
+function timeDir() { return App.timeLtr ? ' dir="ltr"' : ''; }

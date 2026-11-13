@@ -1,40 +1,57 @@
-/* Worker app · Health Reporting · P1–P8 (spec §5) and Shelter kiosk K1 (spec §6) */
+/* Worker app · Health Reporting · P1–P8 (spec §5) and Shelter kiosk K1 (spec §6).
+   Every worker-facing string goes through t() (i18n.js); the frame carries lang and dir. */
 
-const LANGS = [['en', 'English', 'ltr'], ['ar', 'العربية', 'rtl'], ['ml', 'മലയാളം', 'ltr'], ['bn', 'বাংলা', 'ltr'], ['hi', 'हिन्दी', 'ltr'], ['ur', 'اردو', 'rtl'], ['tl', 'Tagalog', 'ltr']];
-function langBtn() { const l = LANGS.find(x => x[0] === (App.f.lang || 'en')); return `<button class="iconbtn" style="width:auto;padding:0 8px;font-size:12px" data-act="lang" aria-label="Language: ${l[1]}">${l[0].toUpperCase()} ▾</button>`; }
+/* A globe icon, not a two-letter code or a flag: it reads the same in every script. */
+function langBtn() { const L = LANG[curLang()]; return `<button class="iconbtn" style="width:56px;height:56px;font-size:22px" data-act="lang" aria-label="Language: ${L.n} (${L.e})">🌐</button>`; }
+function setLang(c) { App.f.lang = c; refresh(); }
 const LANG_ACT = {
-  lang: el => menu(el, LANGS.map(([c, n, d]) => ({ label: n, checked: (App.f.lang || 'en') === c, fn: () => { App.f.lang = c; refresh(); toast(`${n}${d === 'rtl' ? ' · right to left' : ''} · fixed templates use reviewed translations`); } })), 'Language'),
+  lang: el => menu(el, LANGS.map(([c, n, e, d, st]) => ({ label: `<span lang="${c}" dir="${d}">${n}</span> <span class="age">· ${e}${st !== 'ready' ? ' · coming soon' : ''}</span>`, checked: curLang() === c, fn: () => setLang(c) })), '🌐'),
 };
 
-/* ───────── P1 · Welcome and consent ───────── */
-const CONSENT = [
-  ['checkins', 'Check-ins', 'Tell us how you feel', 'Your answers go to you and occupational health only.'],
-  ['hr', 'Heart rate', 'From the wearable', 'Used on this phone to warn you early. Not sent to your supervisor.'],
-  ['skin', 'Skin temperature', 'From the wearable', 'Used on this phone to warn you early. Not sent to your supervisor.'],
-];
+/* ───────── P1 · Welcome: language first, then consent ───────── */
+const CONSENT = [['checkins', 'c.checkins', 'c.checkins.s', 'c.checkins.d'], ['hr', 'c.hr', 'c.wear', 'c.wear.d'], ['skin', 'c.skin', 'c.wear', 'c.wear.d']];
 screen('p1', {
-  device: 'worker', name: 'Welcome and consent', short: 'Welcome', clock: '07:30',
+  device: 'worker', name: 'Welcome: language, then consent', short: 'Welcome', clock: '07:30',
   persona: 'Leila (C09), first day on the app.', context: 'Own phone, in the site induction room or shelter.',
   job: 'Choose a language and decide what to share, without pressure.',
-  error: { text: "Couldn't save. Your choices are kept on this phone.", nostale: true },
-  render() {
+  defaultLabel: 'Language step', alt: { consent: 'Consent step' },
+  error: () => ({ text: "Couldn't save. Your choices are kept on this phone.", nostale: true }),
+  render({ v }) {
+    if (v !== 'consent') {
+      const cur = curLang();
+      const btns = LANGS.map(([c, n, e, d, st]) => `<div class="langrow"><button class="langbtn ${cur === c ? 'on' : ''}" data-act="pick" data-id="${c}" ${st !== 'ready' ? 'disabled' : ''} aria-pressed="${cur === c}">
+          <span><b lang="${c}" dir="${d}">${n}</b><small>${e}${st !== 'ready' ? ' · ' + t('lang.soon') : ''}</small></span></button>
+          ${st === 'ready' ? `<button class="iconbtn" style="width:64px;height:auto" data-act="toast" data-msg="▶ ${n}" aria-label="Hear ${e}">▶</button>` : '<span></span>'}</div>`).join('');
+      return {
+        noTabs: true,
+        nav: { title: t('p1.title'), clock: '07:30', leftHtml: `<span></span>` },
+        heroReplace: `<div style="padding:16px;border-bottom:1px solid var(--ink)"><div style="font-size:24px;font-weight:700">${t('lang.choose')}</div><p class="p" style="margin-top:4px">${t('lang.hint')}</p></div>`,
+        body: [`<div class="langgrid" role="group" aria-label="Languages">${btns}</div>`, `<div class="computed" lang="en" dir="ltr">Each language is written in its own script so people can find it without reading English. Detected from the phone’s setting; never guessed from name or nationality.</div>`],
+        cta: { label: t('next') + ' →', go: 'p1', v: 'consent' },
+      };
+    }
     const c = App.f.consent || (App.f.consent = {});
-    const cards = CONSENT.map(([k, t, s]) => `<div class="ccard"><div class="top"><b>${t}</b><button class="toggle ${c[k] ? 'on' : ''}" role="switch" aria-checked="${!!c[k]}" aria-label="${t}" data-act="tog" data-id="${k}"></button></div><span>${s}</span></div>`).join('');
+    const cards = CONSENT.map(([k, tk, sk]) => `<div class="ccard"><div class="top"><b>${t(tk)}</b><button class="toggle ${c[k] ? 'on' : ''}" role="switch" aria-checked="${!!c[k]}" aria-label="${tt(tk)}" data-act="tog" data-id="${k}"></button></div><span>${t(sk)}</span></div>`).join('');
     return {
       noTabs: true,
-      nav: { title: 'Welcome', clock: '07:30', leftHtml: `<button class="iconbtn" disabled aria-label="Back">←</button>`, },
+      nav: { title: t('p1.title'), clock: '07:30', back: 'p1' },
       navRight: langBtn(),
-      heroReplace: `<div class="mhero" role="group" aria-label="Choose what to share">${cards}</div>`,
+      heroReplace: `<div class="mhero" role="group" aria-label="${tt('p1.choices')}">${cards}</div>`,
       body: [
-        `<div style="border:1px solid var(--ink);padding:16px;font-size:18px;line-height:1.4"><b>What your supervisor sees:</b> only “needs rest now”. Never your answers or body data.<div style="margin-top:8px"><button class="audio" data-act="toast" data-msg="▶ Reading aloud in your language">▶ Read aloud</button></div></div>`,
-        section('Your choices', list(CONSENT.map(([k, t, , d]) => row({ t, d, b: c[k] ? B.plain('On') : B.muted('Off'), act: 'tog', id: k })))),
-        `<div class="note">Alerts and the stop-work notice work even if everything is off.</div>`,
-        `<div class="computed">You can change these any time in Me → My data.</div>`,
+        `<div style="border:1px solid var(--ink);padding:16px;font-size:18px">${t('p1.sees')}<div style="margin-top:8px"><button class="audio" data-act="toast" data-msg="▶">▶ ${t('readaloud')}</button></div></div>`,
+        section(t('p1.choices'), list(CONSENT.map(([k, tk, , dk]) => row({ t: t(tk), d: t(dk), b: c[k] ? B.plain(t('on')) : B.muted(t('off')), act: 'tog', id: k })))),
+        `<div class="note">${t('p1.alerts')}</div>`,
+        `<div class="computed">${t('p1.later')}</div>`,
       ],
-      cta: { label: 'Save my choices', act: 'save' },
+      cta: { label: t('p1.save'), act: 'save' },
     };
   },
-  actions: { ...LANG_ACT, tog: el => { const c = App.f.consent; c[el.dataset.id] = !c[el.dataset.id]; refresh(); }, save: () => { go('p2'); setTimeout(() => toast('Choices saved'), 50); } },
+  actions: {
+    ...LANG_ACT,
+    pick: el => setLang(el.dataset.id),
+    tog: el => { const c = App.f.consent; c[el.dataset.id] = !c[el.dataset.id]; refresh(); },
+    save: () => { go('p2'); setTimeout(() => toast('✓'), 50); },
+  },
 });
 
 /* ───────── P2 · Now ───────── */
@@ -42,64 +59,64 @@ screen('p2', {
   device: 'worker', tab: 'now', name: 'Now (home)', short: 'Now', clock: '08:04',
   persona: 'Rana (C05).', context: 'Phone glanced at in the trench or the shelter, one-handed.',
   job: 'Know in 3 seconds whether to keep working, rest or act.',
-  empty: { text: 'You’re not on a shift today. When your supervisor adds you to a crew, your plan appears here.' },
+  empty: () => ({ text: t('p2.empty') }),
   errorLabel: 'Offline (P7)',
-  error: { text: 'No network · warnings come from the rules on this phone. Check-ins will send later.', info: true, nostale: true, noretry: true },
+  error: () => ({ text: t('p2.offline'), info: true, nostale: true, noretry: true }),
   render() {
     const off = App.variant === 'error';
-    const age = off ? ' <span class="age">· 12 min old</span>' : '';
+    const age = off ? ' <span class="age">· 12 min</span>' : '';
+    const L = curLang();
+    const huda = `<div class="msg-orig"><div class="between"><b>${t('p2.huda')}</b><span class="age">08:06</span></div>
+        <p class="p" lang="ar" dir="rtl" style="font-size:17px;margin-top:4px">الماء البارد متوفر في الملجأ A. لا تستعجلوا.</p>
+        ${L !== 'ar' ? `<div class="msg-mt"><div class="ai-h"><span>◇ AI · ${t('p2.mt')}</span></div><p class="p" style="margin-top:4px">${t('p2.hudaT')}</p></div>` : ''}</div>`;
     return {
       offline: off,
-      nav: { title: 'Now · 08:04', clock: '08:04' },
-      navRight: `<span class="age" style="font-weight:700">${off ? 'No network' : '● Online'}</span>`,
-      hero: [metric('Your status', 'In recovery', 'Shelter A' + age, true), metric('Heat now', '145 W/m²', 'Low zone · heavy work stopped' + age), metric('Next', 'Work 08:11', 'workshop')],
+      nav: { title: t('p2.title') + ' · 08:04', clock: '08:04' },
+      navRight: `<span class="age" style="font-weight:700">${off ? t('nonet') : '● ' + t('online')}</span>`,
+      hero: [metric(t('p2.status'), t('p2.inrec'), t('shelterA') + age, true), metric(t('p2.heat'), '145 W/m²', t('p2.heatq') + age), metric(t('p2.next'), t('p2.nextv'), t('workshop'))],
       body: [
-        off ? `<div class="statusline">2 check-ins waiting to send <span class="age" style="margin-left:auto">SMS fallback offered after 10 min</span></div>` : '',
-        section('Messages', list([
-          row({ t: '💧 Drink water', d: 'One cup now. Next reminder 08:19.', b: B.plain('Reminder') }),
-          row({ t: 'Stop-work · 08:01', d: 'Heavy work has stopped. Go to Shelter A.', b: B.stop(), go: 'p3' }),
-          row({ t: 'Shelter A check-in', d: 'Checked in 08:04 · recovery clock started.', b: B.done(), go: 'p6' }),
-          row({ t: 'Your plan for this hour', d: 'Workshop 08:11–08:26, then rest.', b: B.plan('Plan'), go: 'p5' }),
+        off ? `<div class="statusline">${t('p2.waiting')}</div>` : '',
+        section(t('p2.msgs'), list([
+          row({ t: '💧 ' + t('p2.water'), d: t('p2.water.d'), b: B.plain(t('reminder')) }),
+          row({ t: t('stopwork') + ' · 08:01', d: t('p2.stop.d'), b: B.stop(t('stopwork')), go: 'p3' }),
+          row({ t: t('p2.ci'), d: t('p2.ci.d'), b: B.done(''), go: 'p6' }),
+          row({ t: t('p2.plan'), d: t('p2.plan.d'), b: B.plan(t('work')), go: 'p5' }),
         ])),
-        `<div class="computed">⚙ Computed · status and heat come from the site rules</div>`,
+        huda,
+        `<div class="computed">⚙ ${t('p2.computed')}</div>`,
       ],
-      cta: { label: 'I feel unwell', go: 'p4', red: false },
+      cta: { label: t('unwell'), go: 'p4' },
     };
   },
 });
 
 /* ───────── P3 · Alert ───────── */
-const ALERT_TXT = {
-  en: ['Heavy work has stopped. Go to Shelter A now. Drink water. Tell your supervisor if you feel unwell.', 'ltr'],
-  ar: ['توقف العمل الثقيل. اذهب إلى الملجأ A الآن. اشرب الماء. أخبر مشرفك إذا شعرت بتوعك.', 'rtl'],
-  ur: ['بھاری کام بند ہو گیا ہے۔ ابھی شیلٹر A جائیں۔ پانی پئیں۔ طبیعت خراب ہو تو اپنے سپروائزر کو بتائیں۔', 'rtl'],
-};
 screen('p3', {
   device: 'worker', name: 'Alert (full screen)', short: 'Alert', clock: '08:01',
   persona: 'Any affected worker.', context: 'Phone buzzing in a pocket, in heat.', job: 'Understand the instruction instantly and act.',
-  alt: { emergency: 'Emergency', arabic: 'Arabic (RTL)' },
+  alt: { emergency: 'Emergency' },
   errorLabel: 'Offline',
-  error: { text: 'From the rules on this phone · no network', info: true, nostale: true, noretry: true },
+  error: () => ({ text: t('alert.local'), info: true, nostale: true, noretry: true }),
   render({ v }) {
     const em = v === 'emergency';
-    const lang = v === 'arabic' ? 'ar' : (App.f.alertEn ? 'en' : (ALERT_TXT[App.f.lang] ? App.f.lang : 'en'));
-    const [txt, dir] = ALERT_TXT[lang];
+    const en = App.f.alertEn;
+    const txt = en ? inLang(em ? 'alert.em' : 'alert.stop', 'en') : t(em ? 'alert.em' : 'alert.stop');
+    const pic = (ic, k) => `<span>${ic}<small>${t(k)}</small></span>`;
     return {
       noTabs: true,
-      nav: { title: em ? 'Emergency · 08:18' : 'Stop-work · 08:01', clock: em ? '08:18' : '08:01', leftHtml: `<button class="iconbtn" style="width:56px;height:56px" data-go="p2" aria-label="Dismiss">✕</button>` },
-      overflow: [{ label: App.f.alertEn ? 'Show in my language' : 'Show in English', fn: () => { App.f.alertEn = !App.f.alertEn; refresh(); } }],
-      heroReplace: em
-        ? `<div class="statement black" style="min-height:360px"><div class="big" style="font-size:28px">✚ Help is coming. Stay with someone and do not walk alone. Your supervisor has been told to call 998.</div><div class="pictos"><span>✚<small>Help</small></span><span>👥<small>Stay</small></span><span>✆<small>998</small></span></div></div>`
-        : `<div class="statement red" style="min-height:360px"><div class="big" lang="${lang}" dir="${dir}" style="font-size:28px;${dir === 'rtl' ? "font-family:'Noto Sans Arabic','DM Sans',sans-serif;line-height:1.6" : ''}">${txt}</div><div class="pictos" aria-hidden="true"><span>■<small>Stop</small></span><span>⌂<small>Shelter</small></span><span>💧<small>Water</small></span></div></div>`,
+      nav: { title: (em ? '✚ ' : '■ ') + t('stopwork') + ' · ' + (em ? '08:18' : '08:01'), clock: em ? '08:18' : '08:01', leftHtml: `<button class="iconbtn" style="width:56px;height:56px" data-go="p2" aria-label="Dismiss">✕</button>` },
+      overflow: [{ label: en ? `<span lang="${curLang()}">${LANG[curLang()].n}</span>` : 'English', fn: () => { App.f.alertEn = !App.f.alertEn; refresh(); } }],
+      heroReplace: `<div class="statement ${em ? 'black' : 'red'}" style="min-height:360px"><div class="big" style="font-size:28px">${em ? '✚ ' : ''}${txt}</div>
+        <div class="pictos" aria-hidden="true">${em ? pic('✚', 'pic.help') + pic('👥', 'pic.stay') + pic('✆', 'pic.help').replace(t('pic.help'), '998') : pic('■', 'pic.stop') + pic('⌂', 'pic.shelter') + pic('💧', 'pic.water')}</div></div>`,
       body: [
-        `<div class="note">${App.variant === 'error' ? 'From the rules on this phone' : 'Fixed safety instruction · reviewed translation'}</div>`,
-        `<div class="p">${em ? 'Source: red-flag answer · ⚙ Escalation rule' : 'Source: Sandline heat plan · TWL 145 at 08:00'}</div>`,
-        `<button class="audio" data-act="toast" data-msg="▶ Playing spoken alert">▶ Play aloud</button>`,
+        `<div class="note">${App.variant === 'error' ? t('alert.local') : t('alert.fixed')}</div>`,
+        `<div class="p" lang="en" dir="ltr">${em ? 'Source: red-flag answer · ⚙ Escalation rule' : 'Source: Sandline heat plan · TWL 145 at 08:00'}</div>`,
+        `<button class="audio" data-act="toast" data-msg="▶">▶ ${t('play')}</button>`,
       ],
-      cta: em ? { label: 'I’m with someone', act: 'ackem' } : { label: 'I’m going to Shelter A', act: 'ack' },
+      cta: em ? { label: t('alert.with'), act: 'ackem' } : { label: t('alert.go'), act: 'ack' },
     };
   },
-  actions: { ack: () => { go('p2'); setTimeout(() => toast('Acknowledged · 08:01'), 50); }, ackem: () => toast('Your supervisor has been told you are with someone') },
+  actions: { ack: () => { go('p2'); setTimeout(() => toast('✓ 08:01'), 50); }, ackem: () => toast('✓') },
 });
 
 /* ───────── P4 · Check in ───────── */
@@ -108,34 +125,34 @@ screen('p4', {
   persona: 'Bilal (C08), feeling unwell at 08:18.', context: 'Phone, standing in the workshop, possibly dizzy.',
   job: 'Report how he feels in his own language in under 15 seconds.',
   alt: { typed: 'Typed fallback' },
-  empty: { text: 'Tell us how you feel any time. Only you and occupational health can read your answers.', cta: 'Start check-in', go: 'p4' },
-  error: { text: 'No network. Your check-in is saved and will send when the network returns. If you feel very unwell, tell your supervisor now.', nostale: true },
+  empty: () => ({ text: t('c.checkins.d'), cta: t('p4.title'), go: 'p4' }),
+  error: () => ({ text: t('p4.offline'), nostale: true }),
   render({ v }) {
     const st = App.f.p4 || 0;
     const typed = v === 'typed';
     const turns = [];
     if (st >= 1) {
-      turns.push(App.f.p4tap ? `<div class="turn me"><small>You · 08:18 · tap</small>I feel unwell</div>` : `<div class="turn me"><small>You · voice note</small>🎙 0:09 · “I’m feeling unwell.”<div class="age">transcribed and translated · audio not kept</div></div>`);
-      turns.push(`<div class="turn sys"><small>Heat-Safe · ⚙ Rule</small>Your supervisor has been asked to help you rest now. They see the action, not your words.</div>`);
-      turns.push(`<div class="turn sys"><small>Fixed question · reviewed translation</small><b>Are you confused, have you vomited, or have you stopped sweating?</b></div>`);
+      turns.push(App.f.p4tap ? `<div class="turn me"><small>${t('p4.you')} · 08:18</small>${t('unwell')}</div>` : `<div class="turn me"><small>${t('p4.you')} · 🎙 0:09</small>“${t('unwell')}”<div class="age">${t('p4.vn')}</div></div>`);
+      turns.push(`<div class="turn sys"><small>⚙</small>${t('p4.sys')}</div>`);
+      turns.push(`<div class="turn sys"><small>${t('p4.fixedq')}</small><b>${t('p4.q')}</b></div>`);
     }
-    if (st >= 2) turns.push(`<div class="turn me"><small>You</small>No</div>`);
-    let hero;
+    if (st >= 2) turns.push(`<div class="turn me"><small>${t('p4.you')}</small>${t('no')}</div>`);
+    let hero = '';
     if (st === 0) hero = `<div style="padding:24px 16px;border-bottom:1px solid var(--ink);display:flex;flex-direction:column;gap:16px">
-        ${typed ? `<form class="composer" onsubmit="event.preventDefault();runAct('typed')"><input aria-label="How do you feel?" placeholder="How do you feel?" autocomplete="off"><button class="btn solid" style="min-height:56px">Send</button></form>`
-        : `<button class="ptt" id="ptt" aria-label="Hold and speak"><span class="ic" aria-hidden="true">🎙</span>Hold and speak</button>`}
-        <div class="taps"><button class="btn" data-act="tap">🤒 I feel unwell</button><button class="btn" data-act="water">💧 I need water</button><button class="btn" data-act="ok">✓ I’m OK</button></div>
-        ${typed ? '' : `<button class="link" data-variant="typed" style="align-self:center">Type instead</button>`}</div>`;
-    const body = [section('Conversation', `<div style="display:flex;flex-direction:column;gap:8px">${turns.join('') || '<p class="p muted">Hold the button and say how you feel, or tap an answer.</p>'}</div>`)];
-    if (st === 1) body.push(`<div class="taps"><button class="btn" data-act="no" style="justify-content:center">No</button><button class="btn" data-act="yes" style="justify-content:center">Yes, one of these</button></div>`);
-    if (st >= 2) body.push(aiBlock({ key: 'p4', agent: 'Worker Aid Agent', title: 'What we understood', conf: 'Medium', text: '<b>Feeling unwell · 08:18</b><br>No red flags.', tools: ['transcribe_and_translate', 'extract_symptoms'], inputs: ['Transcript: “I’m feeling unwell.” (Malayalam → English)', 'Fields: symptom = feeling unwell; time = 08:18; red flags = none', 'Medium: voice in a noisy workshop'], acts: [{ l: 'Fix this', act: 'fix' }, { l: 'Discard and try again', act: 'restart' }] }), `<div class="computed">⚙ Rule · the escalation itself is not AI</div>`);
+        ${typed ? `<form class="composer" onsubmit="event.preventDefault();runAct('typed')"><input dir="auto" aria-label="${tt('p4.typeph')}" placeholder="${tt('p4.typeph')}" autocomplete="off"><button class="btn solid" style="min-height:56px">${t('send')}</button></form>`
+        : `<button class="ptt" id="ptt" style="width:112px;height:112px"><span class="ic" aria-hidden="true">🎙</span><span id="pttl">${t('p4.hold')}</span></button>`}
+        <div class="taps"><button class="btn" data-act="tap">🤒 ${t('unwell')}</button><button class="btn" data-act="water">💧 ${t('p4.water')}</button><button class="btn" data-act="ok">✓ ${t('p4.ok')}</button></div>
+        ${typed ? '' : `<button class="link" data-variant="typed" style="align-self:center">⌨ ${t('p4.type')}</button>`}</div>`;
+    const body = [section(t('p4.conv'), `<div style="display:flex;flex-direction:column;gap:8px">${turns.join('') || `<p class="p muted">${t('p4.hint')}</p>`}</div>`)];
+    if (st === 1) body.push(`<div class="taps"><button class="btn" data-act="no" style="justify-content:center">${t('no')}</button><button class="btn" data-act="yes" style="justify-content:center">${t('p4.yes')}</button></div>`);
+    if (st >= 2) body.push(aiBlock({ key: 'p4', i18n: true, agent: t('ai.agent'), title: t('p4.understood'), conf: 'Medium', text: `<b>${t('p4.unwell')}</b><br>${t('p4.noflags')}`, tools: ['transcribe_and_translate', 'extract_symptoms'], inputs: [`Transcript (${LANG[curLang()].e}): “${tt('unwell')}”`, 'Fields: symptom = feeling unwell; time = 08:18; red flags = none', 'Medium: voice in a noisy workshop'], acts: [{ l: t('p4.fix'), act: 'fix' }, { l: t('p4.retry'), act: 'restart' }] }), `<div class="computed">${t('p4.rule')}</div>`);
     return {
-      nav: { title: 'Check in · 08:18', back: 'p2', clock: '08:18' }, navRight: langBtn(),
-      heroReplace: hero || '', body,
-      cta: st >= 2 ? (App.f.p4sent ? { label: '✓ Sent 08:18', disabled: true, note: 'Huda sees “needs rest now” only.' } : { label: 'Send to my supervisor', act: 'send' }) : null,
+      nav: { title: t('p4.title'), back: 'p2', clock: '08:18' }, navRight: langBtn(),
+      heroReplace: hero, body,
+      cta: st >= 2 ? (App.f.p4sent ? { label: '✓ ' + t('p4.sent'), disabled: true } : { label: t('p4.send'), act: 'send' }) : null,
       mount() {
         const b = $('#ptt'); if (!b) return;
-        b.addEventListener('pointerdown', () => { b.classList.add('rec'); b.lastChild.textContent = 'Listening… release to send'; });
+        b.addEventListener('pointerdown', () => { b.classList.add('rec'); $('#pttl').innerHTML = t('p4.listen'); });
         const up = () => { if (!b.classList.contains('rec')) return; App.f.p4 = 1; App.f.p4tap = false; refresh(); };
         b.addEventListener('pointerup', up); b.addEventListener('pointerleave', up);
         b.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); App.f.p4 = 1; refresh(); } });
@@ -146,13 +163,13 @@ screen('p4', {
     ...LANG_ACT,
     tap: () => { App.f.p4 = 1; App.f.p4tap = true; refresh(); },
     typed: () => { App.f.p4 = 1; App.f.p4tap = true; go('p4'); },
-    water: () => toast('Water request sent · Huda will bring water'),
-    ok: () => toast('Thanks · next check-in reminder 09:00'),
+    water: () => toast('💧 ✓'),
+    ok: () => toast('✓'),
     no: () => { App.f.p4 = 2; refresh(); },
     yes: () => { App.f.p4 = 0; go('p3', 'emergency'); },
-    send: () => { App.f.p4sent = true; refresh(); toast('Sent · Huda sees “needs rest now” only'); },
-    fix: () => sheet('Fix what we understood', `<form class="form"><div class="fl"><label for="sy">How you feel</label><select id="sy"><option>Feeling unwell</option><option>Dizzy</option><option>Headache</option><option>Cramps</option></select></div><div class="fl"><label for="tm">Time</label><input id="tm" value="08:18"></div><button type="button" class="cta" onclick="closeOverlay();toast('Updated')">Save</button></form>`),
-    restart: () => { App.f.p4 = 0; App.f.p4sent = false; refresh(); toast('Discarded · try again'); },
+    send: () => { App.f.p4sent = true; refresh(); toast('✓ ' + tt('p4.sent')); },
+    fix: () => sheet(tt('p4.fix'), `<form class="form"><div class="fl"><label for="sy">${t('p4.understood')}</label><input id="sy" dir="auto" value="${tt('unwell')}"></div><div class="fl"><label for="tm">08:18</label><input id="tm" value="08:18" dir="ltr"></div><button type="button" class="cta" onclick="closeOverlay();toast('✓')">✓</button></form>`),
+    restart: () => { App.f.p4 = 0; App.f.p4sent = false; refresh(); },
   },
 });
 
@@ -161,45 +178,45 @@ screen('p5', {
   device: 'worker', tab: 'plan', name: 'My plan', short: 'My plan', clock: '08:12',
   persona: 'Rana.', context: 'Phone.', job: 'Know when she works and when she rests.',
   alt: { updated: 'Updated after replan' },
-  empty: { text: 'No plan yet. Your supervisor sends it when the shift is planned.' },
-  error: { text: 'No network · showing your plan from 08:11 (7 min old).' },
+  empty: () => ({ text: 'No plan yet. Your supervisor sends it when the shift is planned.' }),
+  error: () => ({ text: t('p2.offline') }),
   render({ v }) {
-    const iv = [['Workshop preparation', '08:11–08:26 · 15 min.', 'w'], ['Cooled recovery', '08:26–08:41 · Shelter A.', 'r'], ['Workshop preparation', '08:41–08:56 · 15 min.', 'w'], ['Cooled recovery', '08:56–09:11 · Shelter A.', 'r']];
+    const iv = [['p5.prep', '08:11–08:26 · 15', 'w'], ['p5.rec', '08:26–08:41 · ' + t('shelterA'), 'r'], ['p5.prep', '08:41–08:56 · 15', 'w'], ['p5.rec', '08:56–09:11 · ' + t('shelterA'), 'r']];
     return {
-      nav: { title: 'My plan · today', back: 'p2', clock: '08:12' },
+      nav: { title: t('p5.title'), back: 'p2', clock: '08:12' },
       filters: ['Today', 'Tomorrow'],
-      hero: [metric('Now', 'Workshop', 'until 08:26', true), metric('Next rest', '08:26–08:41', 'Shelter A'), metric('Work today', '30 min', 'planned this hour')],
+      hero: [metric(t('p5.now'), t('workshop'), t('p5.until'), true), metric(t('p5.nextrest'), '08:26–08:41', t('shelterA')), metric(t('p5.worktoday'), t('p5.30'))],
       body: [
-        v === 'updated' ? `<div class="statusline">Updated 08:18 by Huda</div>` : '',
-        section('This hour', list(iv.map(([t, d, k]) => row({ t, d, b: k === 'w' ? B.plan('Work') : B.plain('Rest'), static: true })))),
-        section('Later today', `<div class="hatch" style="border:1px solid var(--ink);padding:16px"><span style="font-weight:700;font-size:16px">🔒 12:30–15:00 · no outdoor work (MoHRE)</span></div>`),
-        `<div class="computed">Only your own times are shown.</div>`,
+        v === 'updated' ? `<div class="statusline">${t('p5.upd')}</div>` : '',
+        section(t('p5.hour'), list(iv.map(([k, d, w]) => row({ t: t(k), d, b: w === 'w' ? B.plan(t('work')) : B.plain(t('rest')), static: true })))),
+        section(t('p5.later'), `<div class="hatch" style="border:1px solid var(--ink);padding:16px"><span style="font-weight:700;font-size:16px">🔒 ${t('p5.midday')}</span></div>`),
+        `<div class="computed">${t('p5.own')}</div>`,
       ],
-      cta: App.f.p5rest ? { label: '✓ Resting since 08:26', disabled: true } : { label: 'Start my rest', act: 'rest', note: 'Appears 2 minutes before each rest and checks you in.' },
+      cta: App.f.p5rest ? { label: '✓ ' + t('p5.resting'), disabled: true } : { label: t('p5.start'), act: 'rest', note: t('p5.startnote') },
     };
   },
-  actions: { rest: () => { App.f.p5rest = true; refresh(); toast('Checked in at Shelter A · rest started 08:26'); } },
+  actions: { rest: () => { App.f.p5rest = true; refresh(); toast('✓ ' + tt('p6.done')); } },
 });
 
 /* ───────── P6 · Shelter check-in ───────── */
 screen('p6', {
   device: 'worker', tab: 'now', name: 'Shelter check-in', short: 'Shelter check-in', clock: '08:04',
   persona: 'Any worker arriving at Shelter A.', context: 'Phone near the kiosk’s NFC tag or QR code.', job: 'Check in with one tap.',
-  empty: { text: 'Hold your phone near the Shelter A sign.' },
-  error: { text: 'Saved on this phone · will send', nostale: true },
+  empty: () => ({ text: t('p6.hold') }),
+  error: () => ({ text: t('p2.offline'), nostale: true }),
   render() {
     const done = App.f.p6;
     return {
-      nav: { title: 'Check in · Shelter A', back: 'p2', clock: '08:04' },
-      heroReplace: `<div style="padding:24px 16px;border-bottom:1px solid var(--ink)"><div class="nfc ${done ? 'ok' : ''}" style="height:280px;font-size:20px"><div class="ring" style="width:120px;height:120px;font-size:48px">${done ? '✓' : '⌁'}</div>${done ? 'Checked in · 08:04' : 'Hold near the Shelter A sign<small>or scan the QR code</small>'}</div></div>`,
-      body: [section('Your last check-ins', list([
-        ...(done ? [row({ t: 'Shelter A · 08:04', d: 'Recovery clock started. Counts toward the headcount.', b: B.done(), static: true })] : []),
-        row({ t: 'Shelter A · 3 Aug 10:40', d: 'Recovery 20 min.', b: B.done(), static: true }),
+      nav: { title: t('p6.title'), back: 'p2', clock: '08:04' },
+      heroReplace: `<div style="padding:24px 16px;border-bottom:1px solid var(--ink)"><div class="nfc ${done ? 'ok' : ''}" style="height:280px;font-size:20px"><div class="ring" style="width:120px;height:120px;font-size:48px">${done ? '✓' : '⌁'}</div>${done ? t('p6.done') : `${t('p6.hold')}<small>${t('p6.qr')}</small>`}</div></div>`,
+      body: [section(t('p6.last'), list([
+        ...(done ? [row({ t: t('shelterA') + ' · 08:04', d: t('p2.ci.d'), b: B.done(''), static: true })] : []),
+        row({ t: t('shelterA') + ' · ' + fmtDate(new Date(2025, 7, 3, 10, 40)), d: '20 min', b: B.done(''), static: true }),
       ]))],
-      cta: done ? { label: 'Back to Now', go: 'p2' } : { label: 'Check in at Shelter A', act: 'ci' },
+      cta: done ? { label: t('p6.back'), go: 'p2' } : { label: t('p6.cta'), act: 'ci' },
     };
   },
-  actions: { ci: () => { App.f.p6 = true; refresh(); toast('Checked in · 08:04'); } },
+  actions: { ci: () => { App.f.p6 = true; refresh(); toast('✓ ' + tt('p6.done')); } },
 });
 
 /* ───────── P7 · Offline state (alias to P2 offline) ───────── */
@@ -209,32 +226,39 @@ screen('p7', { device: 'worker', name: 'Offline state (across P2–P6)', alias: 
 screen('p8', {
   device: 'worker', tab: 'me', name: 'Me: privacy and my data', short: 'My data', clock: '17:10',
   persona: 'Leila.', context: 'Phone, at rest.', job: 'See and control what is shared.',
-  empty: { text: 'You haven’t shared anything yet.' },
+  empty: () => ({ text: t('p8.none') }),
   render() {
     const c = App.f.consent || (App.f.consent = { checkins: true });
     const withdrawn = App.f.p8withdrawn;
+    const agreed = fmtDate(new Date(2025, 7, 4, 7, 30));
     return {
-      nav: { title: 'My data', back: 'p2', clock: '17:10' },
-      filters: ['All', 'Check-ins', 'Wearable', 'Audit'],
-      overflow: [{ label: 'Withdraw consent and delete my check-ins…', danger: true, fn: () => confirmModal({ title: 'Withdraw consent and delete my check-ins?', body: 'Your supervisor will still get heat alerts for your crew.', btn: 'Withdraw and delete', verb: 'to delete', onOk: () => { App.f.p8withdrawn = true; App.f.consent = {}; refresh(); toast('Consent withdrawn · 3 check-ins deleted'); } }) }],
-      hero: [metric('Shared with supervisor', 'Actions only', 'never answers or body data', true), metric('Check-ins stored', withdrawn ? '0' : '3', 'kept 30 days'), metric('Wearable', c.hr ? 'On' : 'Off', 'not paired')],
+      nav: { title: t('p8.title'), back: 'p2', clock: '17:10' }, navRight: langBtn(),
+      overflow: [{ label: tt('p8.delete'), danger: true, fn: () => holdConfirm({ title: t('p8.delete') + '?', body: t('p8.deletebody'), btn: t('p8.delete'), onOk: () => { App.f.p8withdrawn = true; App.f.consent = {}; refresh(); toast('✓'); } }) }],
+      hero: [metric(t('p8.shared'), t('p8.actions'), '', true), metric(t('p8.stored'), withdrawn ? '0' : '3', t('p8.kept')), metric(t('p8.wear'), c.hr ? t('on') : t('off'), t('p8.notpaired'))],
       body: [
-        section('Consent', list(CONSENT.map(([k, t]) => `<div class="row static nolead"><span><span class="t" style="display:block">${t}</span><span class="d">${c[k] ? 'You agreed 4 Aug 07:30. Withdraw any time.' : 'Off.'}</span></span><span class="rt"><button class="toggle ${c[k] ? 'on' : ''}" role="switch" aria-checked="${!!c[k]}" aria-label="${t}" data-act="tog" data-id="${k}"></button></span></div>`))),
-        section('Stored check-ins', withdrawn ? '<p class="p muted">None.</p>' : list([
-          row({ t: '4 Aug · 08:18', d: 'Feeling unwell · no red flags.', b: B.ai('AI summary'), static: true }),
-          row({ t: '3 Aug · 10:40', d: 'I’m OK.', b: B.plain('Tap'), static: true }),
-          row({ t: '2 Aug · 09:05', d: 'I need water.', b: B.plain('Tap'), static: true }),
+        section(t('p8.consent'), list(CONSENT.map(([k, tk]) => `<div class="row static nolead"><span><span class="t" style="display:block">${t(tk)}</span><span class="d">${c[k] ? t('p8.agreed', { date: agreed }) : t('off')}</span></span><span class="rt"><button class="toggle ${c[k] ? 'on' : ''}" role="switch" aria-checked="${!!c[k]}" aria-label="${tt(tk)}" data-act="tog" data-id="${k}"></button></span></div>`))),
+        section(t('p8.stored'), withdrawn ? `<p class="p muted">${t('p8.none')}</p>` : list([
+          row({ t: fmtDate(new Date(2025, 7, 4, 8, 18)), d: t('p4.unwell') + ' · ' + t('p4.noflags'), b: B.ai('AI'), static: true }),
+          row({ t: fmtDate(new Date(2025, 7, 3, 10, 40)), d: t('p4.ok'), b: B.plain('✓'), static: true }),
+          row({ t: fmtDate(new Date(2025, 7, 2, 9, 5)), d: t('p4.water'), b: B.plain('💧'), static: true }),
         ])),
-        section('Who opened my records', list([row({ t: 'Occupational health nurse', d: '4 Aug · 08:25', b: B.plain('Viewed'), static: true })])),
-        section('Wearable', list([row({ t: 'Not paired', d: 'Pair a wearable to get early warnings on this phone.', b: B.muted('Off'), act: 'toast' })])),
+        section(t('p8.who'), list([row({ t: t('p8.nurse'), d: fmtDate(new Date(2025, 7, 4, 8, 25)), b: B.plain('👁'), static: true })])),
+        section(t('p8.wear'), list([row({ t: t('p8.notpaired'), d: t('p8.pair'), b: B.muted(t('off')), act: 'toast' })])),
+        `<button class="holdbtn" data-act="del" style="margin-top:8px"><span>${t('p8.delete')}</span></button>`,
       ],
-      cta: { label: 'Download my data', act: 'toast', msg: 'Your data is ready · heat-safe-leila.zip' },
+      cta: { label: t('p8.download'), act: 'toast', msg: '✓ heat-safe-data.zip' },
     };
   },
-  actions: { tog: el => { const c = App.f.consent; c[el.dataset.id] = !c[el.dataset.id]; refresh(); toast(c[el.dataset.id] ? 'Turned on' : 'Withdrawn · takes effect now'); } },
+  actions: {
+    ...LANG_ACT,
+    tog: el => { const c = App.f.consent; c[el.dataset.id] = !c[el.dataset.id]; refresh(); },
+    del: () => holdConfirm({ title: t('p8.delete') + '?', body: t('p8.deletebody'), btn: t('p8.delete'), onOk: () => { App.f.p8withdrawn = true; App.f.consent = {}; refresh(); toast('✓'); } }),
+  },
 });
 
-/* ───────── K1 · Shelter A kiosk ───────── */
+/* ───────── K1 · Shelter A kiosk ─────────
+   A shared device: no single language fits, so idle copy is stacked in every ready language
+   and pictograms carry the meaning. After a badge tap it greets the worker in their own language. */
 screen('k1', {
   device: 'kiosk', name: 'Shelter A check-in', short: 'Kiosk', clock: '08:04',
   persona: 'Every affected worker, arriving hot.', context: 'Landscape tablet at chest height with an NFC reader, in shade. Used standing, often gloved.',
@@ -245,32 +269,33 @@ screen('k1', {
   render({ v }) {
     const empty = v === 'empty', err = v === 'error';
     const ok = v === 'success' || App.f.k1ok;
+    const who = App.f.k1who || 'leila';
+    const pl = PREF_LANG[who], plOk = LANG[pl] && LANG[pl].st === 'ready' ? pl : 'en';
     const arrived = empty ? [] : AFFECTED;
-    const hero = `<div class="hero">${metric('In shelter', String(arrived.length), 'Shelter A', true)}${metric('Water', 'Cooler full', 'checked 07:55')}${metric('Next work', '08:11', 'workshop (4)')}</div>`;
-    const arr = arrived.length ? arrived.map((k, i) => `<div class="arr">${av(k)}<span><b>${PEOPLE[k].n}</b>08:0${i < 4 ? 3 : 4}</span></div>`).join('') : `<div class="arr" style="grid-column:1/-1;justify-content:center;padding:24px;font-size:16px">No one checked in yet. Tap your badge here.</div>`;
+    const ready = LANGS.filter(l => l[4] === 'ready');
+    const hero = `<div class="hero">${metric('In shelter · <span lang="ar">في الملجأ</span>', String(arrived.length), 'Shelter A', true)}${metric('Water · <span lang="ar">ماء</span>', '💧 Cooler full', 'checked 07:55')}${metric('Next work · <span lang="ar">العمل التالي</span>', '08:11', 'workshop (4)')}</div>`;
+    const arr = arrived.length ? arrived.map((k, i) => `<div class="arr">${av(k)}<span><b><bdi>${PEOPLE[k].n}</bdi></b>08:0${i < 4 ? 3 : 4}</span></div>`).join('') : `<div class="arr" style="grid-column:1/-1;justify-content:center;padding:24px;font-size:16px">⌁</div>`;
     const nfc = ok
-      ? `<div class="nfc ok" role="status" aria-live="assertive">${av(App.f.k1who || 'leila')}<div class="ring">✓</div>${PEOPLE[App.f.k1who || 'leila'].n}<small>Checked in · 08:04</small></div>`
-      : `<button class="nfc" data-act="tap" aria-label="Tap your badge"><div class="ring">⌁</div>Tap your badge<small>Hold your badge on the reader</small></button>`;
-    const full = `<div class="kh"><span>Shelter A · 08:04</span><span style="display:flex;gap:16px;align-items:center"><small>Dune Civil Works · kiosk locked</small><button class="iconbtn" data-act="admin" aria-label="Supervisor menu">⋯</button></span></div>
+      ? `<div class="nfc ok" role="status" aria-live="assertive">${av(who)}<div class="ring">✓</div><bdi>${PEOPLE[who].n}</bdi><small lang="${plOk}" dir="${LANG[plOk].d}" style="font-size:24px">${t('kiosk.checked', null, plOk)} · 08:04</small></div>`
+      : `<button class="nfc" data-act="tap" aria-label="Tap your badge"><div class="ring">⌁</div><div class="kiosk-langs">${ready.map(([c, , , d]) => `<span lang="${c}" dir="${d}">${t('kiosk.tap', null, c)}</span>`).join('')}</div></button>`;
+    const full = `<div class="kh"><span>Shelter A · <span lang="ar">الملجأ A</span> · 08:04</span><span style="display:flex;gap:16px;align-items:center"><small>Dune Civil Works · kiosk locked</small><button class="iconbtn" data-act="admin" aria-label="Supervisor menu">⋯</button></span></div>
       ${err ? bannerHtml({ text: 'Network down · check-ins saved on this kiosk (3 waiting)', retry: 'Retry sync (supervisor PIN)' }) : ''}
       <div class="khero">${hero}</div>
       <div class="kbody">${nfc}<div style="display:flex;flex-direction:column;gap:8px;min-height:0"><div class="h3">Arrivals</div><div class="arrivals">${arr}</div></div></div>
-      <div class="kfoot"><button class="cta" data-act="nobadge">Check in without badge</button></div>`;
-    return {
-      full,
-      mount() { if (v === 'nobadge') setTimeout(() => runAct('nobadge'), 0); },
-    };
+      <div class="kfoot"><button class="cta" data-act="nobadge">👤 Check in without badge · <span lang="ar" style="margin-inline-start:8px">بدون بطاقة</span></button></div>`;
+    return { full, mount() { if (v === 'nobadge') setTimeout(() => runAct('nobadge'), 0); } };
   },
   actions: {
-    tap: () => { App.f.k1ok = true; App.f.k1who = 'leila'; refresh(); toast('✓ Sound + haptic'); setTimeout(() => { App.f.k1ok = false; if (App.route === 'k1') refresh(); }, 2000); },
+    tap: () => { App.f.k1ok = true; App.f.k1who = 'leila'; refresh(); toast('✓ Sound + haptic'); setTimeout(() => { App.f.k1ok = false; if (App.route === 'k1') refresh(); }, 2500); },
     retry: () => {
       const o = dialog('Supervisor PIN', `<form class="form" id="pin"><div class="fl"><label for="pn">PIN</label><input id="pn" type="password" inputmode="numeric" autocomplete="off"></div><button class="cta">Retry sync</button></form>`);
       $('#pin', o).onsubmit = e => { e.preventDefault(); closeOverlay(); go('k1'); setTimeout(() => toast('Synced 3 check-ins'), 50); };
     },
     nobadge: () => {
-      const o = dialog('Check in without badge', `<p class="p" style="margin-bottom:16px">Tap your name.</p><div class="picker">${AFFECTED.map(k => `<button data-k="${k}">${PEOPLE[k].n}</button>`).join('')}</div>`);
-      o.querySelector('.modal').style.width = '820px';
-      $$('[data-k]', o).forEach(b => b.onclick = () => { closeOverlay(); App.f.k1ok = true; App.f.k1who = b.dataset.k; refresh(); setTimeout(() => { App.f.k1ok = false; if (App.route === 'k1') refresh(); }, 2000); });
+      /* Names shown with their photo frame so workers can find themselves without reading Latin script. */
+      const o = dialog('Check in without badge', `<div class="picker">${AFFECTED.map(k => `<button data-k="${k}" style="display:flex;gap:8px;align-items:center;justify-content:flex-start;padding:0 12px">${av(k)}<bdi>${PEOPLE[k].n}</bdi></button>`).join('')}</div>`);
+      o.querySelector('.modal').style.width = '860px';
+      $$('[data-k]', o).forEach(b => b.onclick = () => { closeOverlay(); App.f.k1ok = true; App.f.k1who = b.dataset.k; refresh(); setTimeout(() => { App.f.k1ok = false; if (App.route === 'k1') refresh(); }, 2500); });
     },
     admin: el => menu(el, [{ label: 'Clear kiosk buffer…', danger: true, fn: () => confirmModal({ title: 'Clear the kiosk buffer?', body: 'Supervisor PIN accepted. 3 unsynced check-ins will be deleted from this kiosk and will not reach the headcount.', btn: 'Clear', verb: 'to clear', onOk: () => toast('Buffer cleared') }) }], 'Supervisor'),
   },

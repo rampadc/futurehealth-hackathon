@@ -13,7 +13,7 @@ function bandStrip() {
   const cell = c => c === 'r' ? `<div class="c-red" aria-label="Stop-work">■</div>` : c === 'a' ? `<div class="c-amber" aria-label="Amber">▲</div>` : `<div class="c-green" aria-label="Green">●</div>`;
   const mid = `<div class="hatch mid"><span>MoHRE midday break · no outdoor work</span></div>`;
   const r = (name, cells, cells2) => `<div class="lab">${name}</div>${cells.map(cell).join('')}${mid}${cells2.map(cell).join('')}`;
-  return `<div class="strip" role="img" aria-label="Hourly TWL band by crew">${head}${r('Civil crew', ['g', 'r', 'r', 'r', 'r'], ['r', 'a', 'g', 'g'])}${r('Light task', ['g', 'g', 'a', 'a', 'a'], ['a', 'g', 'g', 'g'])}${r('Workshop', ['g', 'g', 'g', 'g', 'g'], ['g', 'g', 'g', 'g'])}</div>`;
+  return `<div class="strip" role="img" aria-label="Hourly TWL band by crew"${timeDir()}>${head}${r('Civil crew', ['g', 'r', 'r', 'r', 'r'], ['r', 'a', 'g', 'g'])}${r('Light task', ['g', 'g', 'a', 'a', 'a'], ['a', 'g', 'g', 'g'])}${r('Workshop', ['g', 'g', 'g', 'g', 'g'], ['g', 'g', 'g', 'g'])}</div>`;
 }
 screen('w1', {
   device: 'web', name: 'Squad Monitoring', short: 'Squad Monitoring', clock: '08:18',
@@ -118,14 +118,14 @@ screen('w2', {
       <tr><td>Midday break</td><td>MoHRE · 12:30–15:00, no outdoor work (15 Jun–15 Sep)</td><td>Not active</td></tr>
       </tbody><tfoot><tr><td colspan="3">${COMPUTED}</td></tr></tfoot></table>`;
     const source = drop
-      ? `<div class="statusline" style="box-shadow:inset 4px 0 0 var(--band-red)">■ Sensor t1 not reporting since 07:52 · band raised one level · forecast used: 145 W/m² (Estimated from forecast)</div>`
+      ? `<div class="statusline" style="border-inline-start:4px solid var(--band-red)">■ Sensor t1 not reporting since 07:52 · band raised one level · forecast used: 145 W/m² (Estimated from forecast)</div>`
       : `<div class="statusline">Localised sensor t1 → base station · overrides forecast <span class="age" style="margin-left:auto">Forecast at 08:00: 149 W/m² · Estimated from forecast</span></div>`;
     const evidence = list([
       row({ t: 'Fresh local reading above 150 W/m²', d: 'From sensor t1 or a calibrated meter, no older than 5 minutes.', b: B.wait('Needed'), go: 'm7' }),
       row({ t: 'Restart review recorded by Rashid', d: 'Eight checks, then a human decision. Software never lifts the stop-work.', b: B.wait('Needed'), go: 'w6' }),
     ]);
     const tbl = `<div class="between" style="margin-bottom:8px"><div class="seg" role="group" aria-label="Sun or shade"><button class="${shade ? '' : 'on'}" data-act="sun" aria-pressed="${!shade}">Sun</button><button class="${shade ? 'on' : ''}" data-act="shade" aria-pressed="${!!shade}">Shade</button></div><span class="age">Higher TWL = more cooling capacity</span></div>
-      <table class="t"><thead><tr><th>Hour</th>${HOURS.map(h => `<th>${h[0]}</th>`).join('')}</tr></thead><tbody>
+      <table class="t"${timeDir()}><thead><tr><th>Hour</th>${HOURS.map(h => `<th>${h[0]}</th>`).join('')}</tr></thead><tbody>
       <tr><td><b>TWL W/m²</b></td>${HOURS.map(h => `<td>${h[1] + (shade ? 20 : 0)}</td>`).join('')}</tr>
       <tr><td><b>Heavy work</b></td>${HOURS.map(h => h[0] === '12:00' ? '<td class="hatch"><span>break</span></td>' : (h[1] + (shade ? 20 : 0)) <= 150 ? '<td>■ Stop</td>' : '<td>● Allowed</td>').join('')}</tr>
       </tbody><tfoot><tr><td colspan="11">${COMPUTED} · forecast for Mussafah, sensor-corrected</td></tr></tfoot></table>`;
@@ -309,14 +309,14 @@ function w5Plan(v) {
 }
 function gantt(pl) {
   const span = pl.end - pl.start, pct = t => ((t - pl.start) / span * 100).toFixed(2) + '%';
-  const ticks = []; for (let t = pl.start; t <= pl.end; t += 15) ticks.push(`<span style="left:${pct(t)}">${tstr(t)}</span>`);
+  const ticks = []; for (let t = pl.start; t <= pl.end; t += 15) ticks.push(`<span style="inset-inline-start:${pct(t)}">${tstr(t)}</span>`);
   const clip = iv => iv.map(([k, a, b, l]) => [k, Math.max(a, pl.start), Math.min(b, pl.end), l]).filter(([, a, b]) => b > a);
   const rows = Object.entries(pl.p).map(([n, iv]) => `<div class="g-row"><div class="g-lab">${n}</div><div class="g-track">${clip(iv).map(([k, a, b, l]) =>
-    `<div class="g-bar ${k === 'w' ? 'g-work' : k === 'r' ? 'g-rest' : 'g-excl'}" style="left:${pct(a)};width:calc(${pct(b)} - ${pct(a)})" title="${n} ${tstr(a)}–${tstr(b)}">${k === 'w' ? 'Work' : k === 'x' ? l : ''}</div>`).join('')}</div></div>`).join('');
+    `<div class="g-bar ${k === 'w' ? 'g-work' : k === 'r' ? 'g-rest' : 'g-excl'}" style="inset-inline-start:${pct(a)};width:calc(${pct(b)} - ${pct(a)})" title="${n} ${tstr(a)}–${tstr(b)}">${k === 'w' ? 'Work' : k === 'x' ? l : ''}</div>`).join('')}</div></div>`).join('');
   const cur = App.sel.w5t !== undefined ? App.sel.w5t : tmin('08:35') - pl.start;
-  return `<div class="gantt" id="gantt"><div class="g-ticks"><div style="border-right:1px solid var(--ink)"></div><div class="tk">${ticks.join('')}</div></div>${rows}
-    <div class="g-overlay"><div class="g-horizon" style="left:${pct(pl.horizon)}" title="Planning horizon"></div><div class="g-cursor" id="gcur" style="left:${pct(pl.start + cur)}"></div></div></div>
-    <div class="scrub"><label for="scr"><b>Time cursor</b></label><input id="scr" type="range" min="0" max="${span}" value="${cur}" aria-describedby="scrout"><span id="scrout" aria-live="polite"></span></div>
+  return `<div class="gantt" id="gantt"${timeDir()}><div class="g-ticks"><div style="border-inline-end:1px solid var(--ink)"></div><div class="tk">${ticks.join('')}</div></div>${rows}
+    <div class="g-overlay"><div class="g-horizon" style="inset-inline-start:${pct(pl.horizon)}" title="Planning horizon"></div><div class="g-cursor" id="gcur" style="inset-inline-start:${pct(pl.start + cur)}"></div></div></div>
+    <div class="scrub"${timeDir()}><label for="scr"><b>Time cursor</b></label><input id="scr" type="range" min="0" max="${span}" value="${cur}" aria-describedby="scrout"><span id="scrout" aria-live="polite"></span></div>
     <div class="flex" style="margin-top:8px;font-size:12px"><span class="badge" style="background:var(--plan);color:#fff;border-color:var(--plan)">Work</span><span class="badge g-rest" style="position:static">&nbsp;&nbsp;&nbsp;&nbsp;</span> Cooled recovery <span>┆ Planning horizon</span></div>`;
 }
 function w5Readout(pl, t) {
@@ -339,7 +339,7 @@ screen('w5', {
     if (v === 'infeasible') {
       return { nav: { title: 'Work/rest plan · 08:11–09:11', back: 'w1', clock: '08:11' }, overflow, filters,
         hero: [metric('Useful work', '0 worker-min', '—'), metric('Unmet', '240 worker-min', 'demand 240'), metric('Status', 'Infeasible', 'rule result, not an error', 'red')],
-        body: [`<div class="statusline" style="box-shadow:inset 4px 0 0 var(--band-red)">■ No schedule satisfies the work and recovery limits: recovery shelters are unavailable.</div>${computed('optimise_schedule')}`],
+        body: [`<div class="statusline" style="border-inline-start:4px solid var(--band-red)">■ No schedule satisfies the work and recovery limits: recovery shelters are unavailable.</div>${computed('optimise_schedule')}`],
         cta: { label: 'Send plan to crew phones', disabled: true, note: 'Nothing to send. Restore a recovery location to replan.' } };
     }
     const replan = v === 'replan';
@@ -366,7 +366,7 @@ screen('w5', {
       mount() {
         const inp = $('#scr'), out = $('#scrout'), cur = $('#gcur'); if (!inp) return;
         const span = pl.end - pl.start;
-        const upd = () => { const t = +inp.value; App.sel.w5t = t; cur.style.left = (t / span * 100) + '%'; out.innerHTML = w5Readout(pl, t); };
+        const upd = () => { const t = +inp.value; App.sel.w5t = t; cur.style.insetInlineStart = (t / span * 100) + '%'; out.innerHTML = w5Readout(pl, t); };
         inp.addEventListener('input', upd); upd();
       },
     };
