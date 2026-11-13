@@ -25,7 +25,7 @@ screen('m1', {
     return {
       nav: { title: 'Today · 08:00', clock: '08:00' },
       filters: ['Mine', 'All'],
-      hero: [metric('■ Stop-work', 'Heavy work', 'Heavy exposed civil work · since 08:00', 'red'), metric('Accounted', App.f.m3done ? '11 / 11' : '0 / 11', 'Shelter A'), metric('TWL', '145 W/m²', 'sensor t1 · 08:00')],
+      hero: [metric('■ Stop-work', 'Heavy work', 'Heavy exposed civil work · since 08:00', 'red'), metric('Accounted', App.f.m3done ? '11 / 11' : '0 / 11', 'Shelter A'), metric('TWL', '145 W/m²', `${band('low')} · sensor t1 · 08:00`)],
       body: [section('Actions', `<div class="list">${rows.join('')}</div>`, 'Swipe right to complete'), computed()],
       cta: safety ? (step >= 1 ? null : { label: 'Issue stop-work instruction', go: 'm2' }) : (step >= 2 ? { label: 'Go to headcount', go: 'm3' } : { label: 'Acknowledge instruction', go: 'm2' }),
       mount() { enableSwipe(id => { App.f['m1.' + id] = true; refresh(); toast('Marked done', () => { delete App.f['m1.' + id]; refresh(); }); }); },
@@ -267,7 +267,7 @@ screen('m7', {
       hero: [fresh ? metric('Latest', fresh + ' W/m²', '15:06 · <b>fresh</b>', true) : metric('Latest', '145 W/m²', '08:00 · <b>stale</b>', 'red'), metric('Freshness limit', '5 min'), metric('Sensor', 't1', 'serviceable')],
       body: [
         section('Sensors', list([
-          row({ t: 'Sensor t1 · civil trench', d: 'Via base station · last heartbeat 30 s ago.', b: B.green('Online'), static: true }),
+          row({ t: 'Sensor t1 · civil trench', d: 'Via base station · last heartbeat 30 s ago.', b: B.plain('● Online'), static: true }),
           row({ t: 'Sensor t2 · laydown yard', d: 'Other zone · cannot be used.', b: B.muted('Other zone'), static: true }),
           row({ t: 'Forecast · Mussafah', d: 'Estimated from forecast · cannot be used for a restart.', b: B.muted('Forecast'), static: true }),
         ])),

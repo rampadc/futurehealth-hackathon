@@ -1,0 +1,46 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   HEAT-SAFE · BRAND LAYER
+   A company's colours live in identity slots only: the brand bar, the logo
+   mark, the browser theme colour and (optionally) a faint rail tint. brand.js
+   writes the values per surface (data-brand-surface="platform" | "mobile")
+   and per theme. With no brand configured, every slot falls back to paper
+   and ink, so an unbranded sheet looks exactly as before.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root, [data-theme] {
+  --brand-bar: var(--color-base);        /* brand bar fill                       */
+  --brand-on-bar: var(--color-ink);      /* name and product line on the bar     */
+  --brand-mark: var(--color-ink);        /* logo tile when there is no image     */
+  --brand-on-mark: var(--color-on-ink);  /* initials on the logo tile            */
+  --brand-theme: var(--color-base);      /* browser chrome: <meta name="theme-color"> */
+  --brand-on-theme: var(--color-ink);
+}
+
+/* ── Brand bar: platform rail head, mobile identity strip, kiosk header ── */
+.brandbar {
+  display: flex; align-items: center; gap: var(--space-1); min-inline-size: 0;
+  padding: var(--space-1) var(--space-2); background: var(--brand-bar); color: var(--brand-on-bar);
+  border-block-end: var(--rule-structure);
+}
+.brandbar__text { display: grid; min-inline-size: 0; line-height: var(--lh-title); }
+.brandbar__name { font-size: var(--fs-small); font-weight: var(--weight-bold); overflow-wrap: anywhere; }
+.brandbar__product { font-size: var(--fs-label); font-weight: var(--weight-medium); }
+/* Mobile: one compact line above the title block, so it costs ~32px of screen. */
+.brandbar--strip { padding-block: var(--space-half); min-block-size: 2rem; border-block-end: var(--rule-hair); }
+.brandbar--strip .brandbar__text { display: flex; gap: var(--space-1); align-items: baseline; flex-wrap: wrap; }
+
+/* ── Logo mark: the one slot a restricted colour may fill ──────────── */
+.brandmark {
+  inline-size: 1.75rem; block-size: 1.75rem; flex: none; display: inline-grid; place-items: center; overflow: hidden;
+  background: var(--brand-mark); color: var(--brand-on-mark); border: 2px solid currentColor;
+  font-size: var(--fs-label); font-weight: var(--weight-bold); letter-spacing: 0; line-height: 1;
+}
+.brandbar .brandmark { border-color: var(--brand-on-bar); }
+.brandmark img { inline-size: 100%; block-size: 100%; object-fit: contain; background: #FFFFFF; display: block; }
+.brandmark--lg { inline-size: 4rem; block-size: 4rem; font-size: var(--fs-heading); }
+
+/* ── Browser chrome preview (what theme-color paints on Android / installed PWAs) ── */
+.themebar { background: var(--brand-theme); color: var(--brand-on-theme); }
+
+/* Stop-work and emergency screens: no brand. The shell drops the strip and adds this class. */
+.themebar.is-safety { background: var(--color-ink); color: var(--color-on-ink); }

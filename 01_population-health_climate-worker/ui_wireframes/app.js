@@ -68,13 +68,19 @@ function renderPanel(s) {
       <button class="chip ${App.qa ? 'on' : ''}" data-act="tqa" aria-pressed="${App.qa}">Highlight untranslated</button>
       <button class="chip ${App.timeLtr ? 'on' : ''}" data-act="ttime" aria-pressed="${!!App.timeLtr}">Time axis: keep left → right</button></div>
       <div class="hint">Mirror flips supervisor screens right to left as an Arabic UI would; by default time charts flip with it. “Keep left → right” holds the Gantt, scrubber, hourly strip and hourly table left to right inside the mirrored page, for comparing both with users. Pseudo-locale pads text by 40% to find clipping.</div></section>
-    <section><h2>Signed in as</h2><div class="variants">${roleChips}</div><div class="hint">Changes which actions appear (e.g. only Rashid can record a restart; Maya issues, Huda acknowledges).</div></section>
+    <section><h2>Signed in as</h2><div class="variants">${roleChips}</div><div class="hint">Changes which actions appear (e.g. only Rashid can record a restart; Maya issues, Huda acknowledges; only Noura can publish branding).</div></section>
+    <section><h2>Light</h2><div class="variants">${[['auto', 'Auto'], ['day', 'Day'], ['glare', 'Glare'], ['night', 'Night shift']].map(([k, l]) => `<button class="chip ${App.theme === k ? 'on' : ''}" data-act="ptheme" data-id="${k}" aria-pressed="${App.theme === k}">${l}</button>`).join('')}</div>
+      <div class="hint">Auto follows the design system: site and worker phones open in glare (outdoor sun), supervisor web and the shelter kiosk in day.</div></section>
+    <section><h2>Company brand · published</h2><div class="variants">${Object.entries(HSBrand.PRESETS).map(([k, p]) => `<button class="chip ${JSON.stringify(App.brand) === JSON.stringify(HSBrand.normalise(p.cfg)) ? 'on' : ''}" data-act="pbrand" data-id="${k}">${p.label}</button>`).join('')}</div>
+      <div class="hint">${HSBrand.isBranded(App.brandRes) ? `${esc(App.brand.org || App.brand.wordmark)} · platform bar ${App.brandRes.surfaces.platform.source || 'paper'}, mobile ${App.brand.mobile.header} header. ` : 'Heat-Safe paper and ink. '}Publishes straight away for a quick look; <button class="linkbtn" data-go="w9">W9 Organisation branding</button> is where an admin edits, previews and checks a palette.</div></section>
     <section><button class="scr-link ${s ? '' : 'on'}" data-go="map"><b>◫</b>Screen map</button>${groups}</section>
     <section><h2>Reset</h2><button class="chip" data-act="reset">Reset prototype state</button><div class="hint">Web: press ? for keyboard shortcuts. Every frame scales to fit; resize the window for a larger view.</div></section>`;
 }
 ACT.prevstep = () => { const i = stepIndex(); goStep(i < 0 ? 0 : i - 1); };
 ACT.nextstep = () => { const i = stepIndex(); goStep(i < 0 ? 0 : i + 1); };
-ACT.reset = () => { App.f = {}; App.sel = {}; App.role = 'foreman'; App.mirror = App.pseudo = App.qa = false; refresh(); };
+ACT.reset = () => { App.f = {}; App.sel = {}; App.role = 'foreman'; App.mirror = App.pseudo = App.qa = false; App.theme = 'auto'; App.brandDraft = null; refresh(); };
+ACT.ptheme = el => { App.theme = el.dataset.id; refresh(); };
+ACT.pbrand = el => { const p = HSBrand.PRESETS[el.dataset.id]; publishBrand(p.cfg); App.brandDraft = null; refresh(); toast(`Published: ${p.label}`); };
 ACT.plang = el => { App.f.lang = el.dataset.id; refresh(); };
 ACT.tmirror = () => { App.mirror = !App.mirror; refresh(); };
 ACT.tpseudo = () => { App.pseudo = !App.pseudo; refresh(); };
@@ -88,16 +94,17 @@ function mapHtml() {
     ['08:04 headcount', ['w3', 'm3', 'k1']], ['08:10 workshop eligibility', ['w4', 'm4']], ['08:11 work/rest plan', ['w5', 'm5', 'p5']],
     ['08:18 Bilal’s report', ['p4', 'm6', 'w1']], ['08:18 replan', ['w3/incident', 'w5/replan']], ['Any time · ask the Planning Agent', ['w7', 'm8']],
     ['Later · restart', ['w6/blocked', 'm7', 'w6']], ['Recap', ['w1/summary']], ['Not in the tutorial', ['p1', 'p6', 'p7', 'p8']],
+    ['Onboarding · admin sets company branding', ['w9', 'w9/mobile']],
   ];
   const chip = c => { const [id, v] = c.split('/'); return `<button data-go="${id}"${attr('data-v', v)}>${id.toUpperCase()}${v ? ' · ' + v : ''}</button>`; };
   return `<div class="mapwrap">
     <h1>Heat-Safe Crew · screens and devices</h1>
     <p class="lead">Navigable wireframes for every screen in the spec, grouped by device. Click a screen to open it in its device frame, then use the left panel to switch states (default, empty, error and alternates), change the signed-in role, or step through the 4 August scenario.</p>
-    <div class="legend">${[1, 2, 3, 4].map(n => compname(n)).join('')}<span class="compname"><span class="badge b-ai">◇ AI</span> AI-generated</span><span class="compname"><span class="computed">⚙ Computed</span> Rule result</span></div>
+    <div class="legend">${[1, 2, 3, 4].map(n => compname(n)).join('')}<span class="compname"><span class="badge b-ai">◇ AI</span> AI-generated</span><span class="compname"><span class="computed">⚙ Computed</span> Rule result</span><span class="compname">${band('low')} Environment</span><span class="compname">${B.hold()} Task stamp</span><span class="compname"><span class="badge b-wait">◇ Proposal</span> Not yet recorded</span></div>
     <div class="devgrid">${dev}</div>
     <h2>Tutorial step → screens</h2>
     <table class="t flow"><thead><tr><th style="width:320px">Step</th><th>Screens</th></tr></thead><tbody>${flow.map(([s, c]) => `<tr><td>${s}</td><td>${c.map(chip).join('')}</td></tr>`).join('')}</tbody></table>
-    <p class="lead" style="margin-top:32px">Visual rules follow spec §1: square corners, 1px #111 rules, DM Sans 400/500/700, 8px spacing, tabular figures, colour never used alone.</p>
+    <p class="lead" style="margin-top:32px">Visual rules come from the Heat-Safe design system, Issued Sheet (<a href="../ui_design_system/index.html">style guide</a>, <code>DESIGN_SYSTEM.md</code>): tokens from <code>tokens.css</code>, colour only as an ISO 3864 safety signal, ink stamps for recorded decisions, dashed tracing paper for AI drafts and proposals, glare theme on site and worker phones, and company branding confined to identity slots by <code>brand.js</code>.</p>
   </div>`;
 }
 

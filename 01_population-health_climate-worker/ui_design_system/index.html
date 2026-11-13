@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="components.css">
   <link rel="stylesheet" href="field.css">
+  <link rel="stylesheet" href="brand.css">
   <link rel="stylesheet" href="guide.css">
 </head>
 <body>
@@ -42,6 +43,7 @@
       <li><a href="#guardrails"><span>22</span>Guardrails and rollback</a></li>
       <li><a href="#capture"><span>23</span>Field capture</a></li>
       <li><a href="#zones"><span>24</span>Zone plan</a></li>
+      <li><a href="#brand"><span>25</span>Company branding</a></li>
     </ol>
     <div class="controls">
       <div class="field"><span class="field__label" id="themeL">Light</span>
@@ -605,11 +607,60 @@
       <div class="plan__detail" id="planDetail" aria-live="polite"></div>
     </div>
   </section>
+
+  <!-- 25 ─────────────────────────────────────────────────────────── -->
+  <section class="gsec" id="brand" aria-labelledby="h-brand">
+    <header><span class="gsec__num">25 · Company branding</span><h2 id="h-brand">The company signs the sheet; it doesn’t colour the signals</h2>
+      <p>Each company can bring its palette to two surfaces, set separately: the <b>platform</b> (supervisor web) and <b>mobile web</b> (site app, worker app and shelter kiosk). Brand colour goes in identity slots only: the brand bar, the logo mark, the browser theme colour and an optional faint tint on the rail. <code>brand.js</code> checks every colour against the four signals and the contrast floor of each light setting. When it has to adjust a colour, it changes lightness and keeps the hue.</p></header>
+    <ol class="rules-list">
+      <li><b>1 · Identity slots only.</b><span class="t-small muted">Brand bar, logo mark, browser theme colour and rail tint. Nothing in the content column: stamps, bands, statements, buttons, links, focus and charts never take a brand colour.</span></li>
+      <li><b>2 · Signal-like colours stay in the mark.</b><span class="t-small muted">Red, orange, yellow and green brand colours, and anything almost identical to a signal, never fill a bar. They stay in the small logo mark beside the company name. “Auto” falls back to the secondary colour, then to paper.</span></li>
+      <li><b>3 · Contrast is fitted per light setting.</b><span class="t-small muted">Bar text reaches 4.5:1 in day and night shift and 7:1 in glare. Night shift dims bright bars to 40% lightness so nothing glows in a dark cabin.</span></li>
+      <li><b>4 · Safety screens drop the brand.</b><span class="t-small muted">A stop-work or emergency statement removes the strip and turns the browser colour to ink. Not configurable.</span></li>
+      <li><b>5 · Heat-Safe stays named.</b><span class="t-small muted">The bar always carries the product line under the company name, so people know which system issued the sheet.</span></li>
+      <li><b>6 · Platform and mobile web are set separately.</b><span class="t-small muted">The desk can carry a full bar and a rail tint. The phone gets a 32px strip, or the browser colour only, because screen height is scarce and glare is the default outdoors.</span></li>
+    </ol>
+    <div class="brandlab">
+      <div class="stack brandlab__form">
+        <div class="field"><span class="field__label" id="bPresetL">Example palettes (fictional)</span>
+          <div class="seg" role="radiogroup" aria-labelledby="bPresetL" id="bPreset">
+            <button class="seg__opt" role="radio" aria-checked="true" data-value="default" type="button">Heat-Safe</button>
+            <button class="seg__opt" role="radio" aria-checked="false" data-value="sandline" type="button">Sandline</button>
+            <button class="seg__opt" role="radio" aria-checked="false" data-value="dune" type="button">Dune</button>
+            <button class="seg__opt" role="radio" aria-checked="false" data-value="alnoor" type="button">Al Noor</button>
+            <button class="seg__opt" role="radio" aria-checked="false" data-value="corniche" type="button">Corniche</button>
+          </div></div>
+        <div class="field"><label class="field__label" for="bOrg">Company name</label><input class="input" id="bOrg" autocomplete="organization"></div>
+        <div class="brandlab__colours">
+          <div class="field"><label class="field__label" for="bPrimary">Primary</label><div class="colourpick"><input type="color" id="bPrimaryC" aria-label="Pick the primary colour"><input class="input" id="bPrimary" placeholder="#RRGGBB" spellcheck="false" autocomplete="off"></div></div>
+          <div class="field"><label class="field__label" for="bSecondary">Secondary</label><div class="colourpick"><input type="color" id="bSecondaryC" aria-label="Pick the secondary colour"><input class="input" id="bSecondary" placeholder="#RRGGBB" spellcheck="false" autocomplete="off"></div></div>
+        </div>
+        <div class="field"><span class="field__label" id="bPlatL">Platform · brand bar</span>
+          <div class="seg" role="radiogroup" aria-labelledby="bPlatL" id="bPlat">
+            <button class="seg__opt" role="radio" aria-checked="true" data-value="auto" type="button">Auto</button>
+            <button class="seg__opt" role="radio" aria-checked="false" data-value="primary" type="button">Primary</button>
+            <button class="seg__opt" role="radio" aria-checked="false" data-value="secondary" type="button">Secondary</button>
+            <button class="seg__opt" role="radio" aria-checked="false" data-value="none" type="button">Off</button>
+          </div></div>
+        <button class="switch" role="switch" aria-checked="false" id="bTint" type="button"><span class="switch__track"></span>Tint the platform rail</button>
+        <div class="field"><span class="field__label" id="bMobL">Mobile web · header</span>
+          <div class="seg" role="radiogroup" aria-labelledby="bMobL" id="bMob">
+            <button class="seg__opt" role="radio" aria-checked="true" data-value="strip" type="button">Strip</button>
+            <button class="seg__opt" role="radio" aria-checked="false" data-value="browser" type="button">Browser colour only</button>
+            <button class="seg__opt" role="radio" aria-checked="false" data-value="off" type="button">Off</button>
+          </div></div>
+      </div>
+      <div class="brandlab__previews" id="bPreviews" aria-label="Previews"></div>
+    </div>
+    <section class="ledger" aria-labelledby="bChecksH"><div class="ledger__head"><span class="t-label" id="bChecksH">Checks</span><span class="ledger__count" id="bChecksN" aria-live="polite"></span></div><ul class="ledger__list" id="bChecks"></ul></section>
+    <details class="brandlab__out"><summary class="t-small"><b>Generated brand tokens and web app manifest</b></summary><pre id="bCss"></pre><pre id="bManifest"></pre></details>
+  </section>
   </main>
 </div>
 
 <script src="system.js"></script>
 <script src="field.js"></script>
+<script src="brand.js"></script>
 <script>
 /* Style-guide wiring only. */
 (() => {
@@ -641,6 +692,65 @@
   const p2 = $('#p2'); const EN = {};
   p2.querySelectorAll('[data-t]').forEach(el => EN[el.dataset.t] ??= el.textContent);
   $('#p2lang').addEventListener('change', e => { const ar = e.detail === 'ar'; p2.lang = ar ? 'ar' : 'en'; p2.dir = ar ? 'rtl' : 'ltr'; p2.querySelectorAll('[data-t]').forEach(el => el.textContent = (ar ? AR : EN)[el.dataset.t]); });
+
+  /* 25 · Company branding: a live configurator built on brand.js. */
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  let bcfg = HSBrand.normalise({});
+  const segVal = (id, v) => document.querySelectorAll(`#${id} .seg__opt`).forEach(o => { const on = o.dataset.value === v; o.setAttribute('aria-checked', String(on)); o.tabIndex = on ? 0 : -1; });
+  function loadBrand(cfg) {
+    bcfg = HSBrand.normalise(cfg);
+    $('#bOrg').value = bcfg.org; $('#bPrimary').value = bcfg.primary; $('#bSecondary').value = bcfg.secondary;
+    $('#bPrimaryC').value = bcfg.primary || '#14120F'; $('#bSecondaryC').value = bcfg.secondary || '#14120F';
+    segVal('bPlat', bcfg.platform.bar); segVal('bMob', bcfg.mobile.header);
+    $('#bTint').setAttribute('aria-checked', String(!!bcfg.platform.tint));
+    renderBrand();
+  }
+  const STAMP = { pass: ['stamp--safe', '✓', 'Pass'], adjusted: ['', '↕', 'Adjusted'], restricted: ['stamp--overdue', '■', 'Mark only'], off: ['stamp--waiting', '–', 'Off'], enforced: ['stamp--recorded', '■', 'Enforced'] };
+  function renderBrand() {
+    const res = HSBrand.resolve(bcfg);
+    HSBrand.apply(res, 'hs-brand');
+    const org = esc(bcfg.org || 'Heat-Safe'), mark = HSBrand.markHtml(res);
+    const bar = (product, strip) => `<div class="brandbar ${strip ? 'brandbar--strip' : ''}">${mark}<span class="brandbar__text"><span class="brandbar__name">${org}</span><span class="brandbar__product">${product}</span></span></div>`;
+    const web = t => `<figure class="bprev bprev--wide"><figcaption class="caption">Platform · ${t === 'night' ? 'Night shift' : 'Day'}</figcaption>
+      <div class="bprev__frame bprev__frame--web" data-brand-surface="platform" data-theme="${t}" inert>
+        <nav class="rail">${bar('Heat-Safe Crew')}<a class="rail__item" aria-current="page"><span class="rail__num">◫</span>Squad Monitoring</a><a class="rail__item"><span class="rail__num">1</span>Heat controls</a><a class="rail__item"><span class="rail__num">2</span>Protective response</a></nav>
+        <div class="bprev__main"><header class="titleblock"><span></span><div class="titleblock__main"><div class="titleblock__title">Squad Monitoring</div><div class="titleblock__meta"><span>08:18</span><span>rules v2026.11.07-1</span></div></div><span></span></header>
+          <div class="bprev__pad row-flex"><span class="band band--low"><span class="band__swatch"></span>Low band · 145</span><span class="stamp stamp--stop" data-glyph="■">Heavy-work hold</span></div>
+          <div class="bprev__pad"><button class="btn btn--primary" type="button">Mark action done</button></div></div>
+      </div></figure>`;
+    const head = bcfg.mobile.header;
+    const phone = (t, safety) => `<figure class="bprev"><figcaption class="caption">Mobile web · ${safety ? 'Stop-work alert' : t === 'night' ? 'Night shift' : t === 'glare' ? 'Glare (field default)' : 'Day'}</figcaption>
+      <div class="bprev__frame bprev__frame--phone" data-brand-surface="mobile" data-theme="${t}" inert>
+        <div class="device__status themebar ${safety ? 'is-safety' : ''}"><span>08:0${safety ? 1 : 4}</span><span>${esc(bcfg.mobile.shortName || 'Heat-Safe')}</span><span>4G</span></div>
+        ${!safety && head === 'strip' ? bar('Heat-Safe · Health Reporting', true) : ''}
+        ${safety ? `<div class="statement statement--stop"><p class="statement__text">■ Stop heavy work. Go to Shelter A now.</p><span class="statement__src">Sandline heat plan · TWL 145</span></div>`
+          : `<header class="titleblock"><span></span><div class="titleblock__main"><div class="titleblock__title">Now</div><div class="titleblock__meta"><span>08:04</span><span>Online</span></div></div><span></span></header>
+             <div class="bprev__pad row-flex"><span class="band band--low"><span class="band__swatch"></span>Low band</span><span class="stamp stamp--stop" data-glyph="■">Heavy work stopped</span></div>`}
+        <div class="thumbzone"><button class="btn btn--primary btn--cta" type="button">${safety ? 'Going to Shelter A' : 'I feel unwell'}</button></div>
+      </div></figure>`;
+    const m = res.surfaces.mobile.themes;
+    const install = `<figure class="bprev"><figcaption class="caption">Mobile web · install and launch</figcaption>
+      <div class="bprev__frame bprev__install" data-brand-surface="mobile" data-theme="day" inert>${HSBrand.markHtml(res, 'brandmark--lg')}<b>${esc(bcfg.mobile.appName || 'Heat-Safe')}</b>
+        <span class="t-small">theme-color <code>${m.day.theme}</code> · glare <code>${m.glare.theme}</code> · dark <code>${m.night.theme}</code></span></div></figure>`;
+    $('#bPreviews').innerHTML = web('day') + web('night') + phone('glare') + phone('day') + phone('night') + phone('glare', true) + install;
+    $('#bChecks').innerHTML = res.checks.map(c => { const [cls, g, w] = STAMP[c.status]; return `<li><div class="arow ${c.status === 'restricted' ? 'arow--urgent' : ''}"><span class="arow__lead"><span class="rail__num">${c.surface === 'platform' ? 'P' : c.surface === 'mobile' ? 'M' : '·'}</span></span><span class="arow__body"><span class="arow__title">${esc(c.label)}</span><span class="arow__desc">${esc(c.detail)}</span></span><span class="arow__trail"><span class="stamp ${cls}" data-glyph="${g}">${w}</span></span></div></li>`; }).join('');
+    const n = s => res.checks.filter(c => c.status === s).length;
+    $('#bChecksN').textContent = `${n('pass')} pass · ${n('adjusted')} adjusted · ${n('restricted')} mark only`;
+    $('#bCss').textContent = HSBrand.css(res);
+    $('#bManifest').textContent = JSON.stringify(HSBrand.manifest(res), null, 2);
+  }
+  const syncColour = (txt, pick, key) => {
+    $(txt).addEventListener('input', () => { bcfg[key] = HSBrand.parse($(txt).value) ? HSBrand.toHex(HSBrand.parse($(txt).value)) : ''; if (bcfg[key]) $(pick).value = bcfg[key]; renderBrand(); });
+    $(pick).addEventListener('input', () => { bcfg[key] = $(pick).value.toUpperCase(); $(txt).value = bcfg[key]; renderBrand(); });
+  };
+  syncColour('#bPrimary', '#bPrimaryC', 'primary');
+  syncColour('#bSecondary', '#bSecondaryC', 'secondary');
+  $('#bOrg').addEventListener('input', e => { bcfg.org = e.target.value; bcfg.wordmark = ''; renderBrand(); });
+  $('#bPreset').addEventListener('change', e => loadBrand(HSBrand.PRESETS[e.detail].cfg));
+  $('#bPlat').addEventListener('change', e => { bcfg.platform.bar = e.detail; renderBrand(); });
+  $('#bMob').addEventListener('change', e => { bcfg.mobile.header = e.detail; renderBrand(); });
+  $('#bTint').addEventListener('click', () => { bcfg.platform.tint = $('#bTint').getAttribute('aria-checked') === 'true'; renderBrand(); });
+  loadBrand(HSBrand.PRESETS.default.cfg);
 
   /* Highlight the section in view. */
   const links = [...document.querySelectorAll('.guide__nav a')];

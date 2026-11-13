@@ -7,13 +7,21 @@ const W1_ACTIONS = [
   { id: 'a3', t: 'Review replan for 08:18–09:18', d: 'Bilal excluded from work. Leila unconfirmed: choose a branch before sending.', b: () => B.wait(), owner: 'huda', due: '08:25', comp: 3, src: 'Work/rest planner', open: { go: 'w5', v: 'replan', l: 'Open Work/rest plan' } },
   { id: 'a4', t: 'Restart decision open · heavy exposed civil work', d: 'Stop-work active since 08:01. Rashid decides once the eight checks pass.', b: () => B.plain('Info'), owner: 'rashid', due: '—', comp: 4, src: 'Restart readiness', open: { go: 'w6', l: 'Open Restart review' } },
 ];
+/* The band row is the environmental condition (legal TWL zone). The rows below are task
+   holds from the stricter site rule. At 145 W/m² the band is Low and heavy work still
+   stops: the two are drawn differently so neither can be read as the other. */
+const TWL_AM = [160, 145, 138, 132, 128], TWL_PM = [130, 140, 152, 165];
 function bandStrip() {
-  const hrs = ['07', '08', '09', '10', '11', '12–15', '15', '16', '17', '18'];
-  const head = `<div class="lab hd">Crew · hour</div>` + ['07', '08', '09', '10', '11'].map(h => `<div class="hd">${h}:00</div>`).join('') + `<div class="hd mid">12:30–15:00</div>` + ['15', '16', '17', '18'].map(h => `<div class="hd">${h}:00</div>`).join('');
-  const cell = c => c === 'r' ? `<div class="c-red" aria-label="Stop-work">■</div>` : c === 'a' ? `<div class="c-amber" aria-label="Amber">▲</div>` : `<div class="c-green" aria-label="Green">●</div>`;
+  const head = `<div class="lab hd">Hour</div>` + ['07', '08', '09', '10', '11'].map(h => `<div class="hd">${h}:00</div>`).join('') + `<div class="hd mid">12:30–15:00</div>` + ['15', '16', '17', '18'].map(h => `<div class="hd">${h}:00</div>`).join('');
+  const lv = v => v >= 140 ? 'low' : 'caution';
+  const bandCell = v => `<div class="bandrow" role="img" aria-label="${BAND_WORD[lv(v)]}, TWL ${v}"><span class="band band--${lv(v)}"><span class="band__swatch"></span>${v}</span></div>`;
+  const holdCell = v => v <= 150 ? `<div class="c-hold" role="img" aria-label="Heavy-work hold">■ Hold</div>` : `<div class="c-ok" role="img" aria-label="No hold">—</div>`;
+  const ctrlCell = v => lv(v) === 'caution' ? `<div class="c-ctrl" role="img" aria-label="Caution controls: extra water and rest">▲</div>` : `<div class="c-ok" role="img" aria-label="No extra controls">—</div>`;
+  const okCell = () => `<div class="c-ok" role="img" aria-label="No hold">—</div>`;
   const mid = `<div class="hatch mid"><span>MoHRE midday break · no outdoor work</span></div>`;
-  const r = (name, cells, cells2) => `<div class="lab">${name}</div>${cells.map(cell).join('')}${mid}${cells2.map(cell).join('')}`;
-  return `<div class="strip" role="img" aria-label="Hourly TWL band by crew"${timeDir()}>${head}${r('Civil crew', ['g', 'r', 'r', 'r', 'r'], ['r', 'a', 'g', 'g'])}${r('Light task', ['g', 'g', 'a', 'a', 'a'], ['a', 'g', 'g', 'g'])}${r('Workshop', ['g', 'g', 'g', 'g', 'g'], ['g', 'g', 'g', 'g'])}</div>`;
+  const r = (name, cell, cls = '') => `<div class="lab ${cls}">${name}</div>${TWL_AM.map(cell).join('')}${mid}${TWL_PM.map(cell).join('')}`;
+  const legend = `<div class="flex" style="margin-top:8px;font-size:12px;gap:16px">${band('low', 'TWL ≥ 140')}${band('caution', 'below 140')}<span class="flex">${badge('■ Hold', 'b-red')} Sandline rule: heavy exposed work stops at TWL ≤ 150</span><span class="flex">${badge('▲', 'b-amber')} extra water and rest</span></div>`;
+  return `<div class="strip" role="group" aria-label="Hourly band and task holds"${timeDir()}>${head}${r('Band · TWL W/m²', bandCell, 'bandrow')}${r('Heavy exposed · civil crew', holdCell)}${r('Light task', ctrlCell)}${r('Workshop · covered', okCell)}</div>${legend}`;
 }
 screen('w1', {
   device: 'web', name: 'Squad Monitoring', short: 'Squad Monitoring', clock: '08:18',
@@ -25,12 +33,12 @@ screen('w1', {
   error: { text: "■ Couldn't reach Heat-Safe in 20 seconds. Showing the last update from 08:04." },
   render({ v }) {
     const nav = { title: 'Squad Monitoring · Civil area · 08:18', back: null, updated: '08:18' };
-    const filters = ['All crews', 'Civil crew', 'Light task', 'Band: Red only', 'Task: heavy exposed', { label: 'Shift summary view', v: 'summary', checked: v === 'summary' }];
+    const filters = ['All crews', 'Civil crew', 'Light task', 'Holds only', 'Task: heavy exposed', { label: 'Shift summary view', v: 'summary', checked: v === 'summary' }];
     const overflow = [{ label: 'Export shift log' }, { label: 'Reassign action owner' }, { label: 'View audit history' }];
     if (v === 'noevents') {
       return { nav: { ...nav, title: 'Squad Monitoring · Civil area · 07:50' }, filters, overflow,
         hero: [metric('Needs action now', '0', 'Nothing waiting', true), metric('Stop-work', 'None', 'No heat controls active'), metric('Accounted for', '—', 'No headcount needed')],
-        body: [`<div class="statusline">● All clear · last reading 07:45 · TWL 152 W/m²</div>${computed()}`, section('Hourly band · today', bandStrip())] };
+        body: [`<div class="statusline">${band('low', 'TWL 152 W/m²')} · no holds · last reading 07:45</div>${computed()}`, section('Hourly band · today', bandStrip())] };
     }
     const hero = [
       metric('Needs action now', '1', 'Bilal (C08) needs rest now', 'red'),
@@ -54,7 +62,7 @@ screen('w1', {
     const locs = [
       row({ t: 'Workshop · 4 of 6 places in use', d: 'Workshop preparation (covered). 2 fixed occupants, 2 from the civil crew.', b: B.plain('Work'), static: true }),
       row({ t: 'Shelter A · 7 workers', d: 'Cooled recovery. Last check-in 08:04.', b: B.plain('Recovery'), static: true }),
-      row({ t: 'Light task · C13, C14', d: 'Separate supervised light task. Not affected by the stop-work.', b: B.green('No new stop'), static: true }),
+      row({ t: 'Light task · C13, C14', d: 'Separate supervised light task. Not affected by the stop-work.', b: B.plain('— No hold'), static: true }),
     ];
     const a = W1_ACTIONS.find(x => x.id === sel);
     const done = App.f['w1.' + a.id];
@@ -102,15 +110,15 @@ screen('w2', {
     const shade = App.f.w2shade;
     const drop = v === 'dropout';
     const hero = [
-      drop ? metric('TWL now', '145 W/m²', '<b>Band raised one level</b> · sensor t1 not reporting since 07:52', 'red')
-           : metric('TWL now', '145 W/m²', 'sensor t1 · measured 08:00', 'red'),
+      drop ? metric('TWL now', '145 W/m²', `${band('caution')} · <b>raised one level</b> · sensor t1 not reporting since 07:52 · ${B.hold()}`, 'red')
+           : metric('TWL now', '145 W/m²', `${band('low')} · sensor t1 · measured 08:00 · ${B.hold()}`, 'red'),
       metric('Site rule', '≤ 150', 'Stop heavy work · Sandline heat plan'),
       metric('Legal zone', 'Low (≥ 140)', 'ADOSH-SF CoP 11.0'),
     ];
     const tasks = list([
       row({ lead: marker(1), t: 'Heavy exposed civil work', d: 'TWL reached the heavy-work limit.', b: B.stop('Stop-work', 'Stop-work required, heavy exposed civil work'), static: true }),
-      row({ lead: marker(1), t: 'Light civil work', d: 'Below heavy-work scope.', b: B.green('No new stop'), static: true }),
-      row({ lead: marker(1), t: 'Workshop preparation', d: 'Covered task.', b: B.green('No new stop'), static: true }),
+      row({ lead: marker(1), t: 'Light civil work', d: 'Below heavy-work scope.', b: B.plain('— No hold'), static: true }),
+      row({ lead: marker(1), t: 'Workshop preparation', d: 'Covered task.', b: B.plain('— No hold'), static: true }),
     ]);
     const policy = `<table class="t"><thead><tr><th>Layer</th><th>Rule</th><th>Result at 08:00</th></tr></thead><tbody>
       <tr><td>Legal floor</td><td>ADOSH-SF CoP 11.0 · Low zone at TWL ≥ 140: work with controls</td><td>No stop</td></tr>
@@ -241,11 +249,11 @@ screen('w4', {
     const rows = crew.map(c => `<div class="row static" tabindex="0" data-id="${c.k}"><span class="lead">${av(c.k)}</span><span style="min-width:0"><span class="t" style="display:block">${who(c.k)}</span><span class="d">${c.q ? 'Qualified. ' : ''}${c.r}</span></span><span class="rt" style="flex-direction:row;align-items:center;gap:8px">${bdg(c.s)}<button class="iconbtn" data-act="rowmenu" data-id="${c.k}" aria-label="More for ${who(c.k)}">⋯</button></span></div>`);
     const assigned = App.f.assigned;
     const seats = ['lina', 'omar'].map(k => `<div class="seat fixed">${av(k)}${PEOPLE[k].n} · fixed</div>`).join('') +
-      (noone ? '<div class="seat free">Free</div>'.repeat(4) : ['rana', 'yusuf', 'dana', 'bilal'].map(k => `<div class="seat prop">${av(k)}${PEOPLE[k].n} · ${assigned ? 'assigned' : 'proposed'}</div>`).join(''));
+      (noone ? '<div class="seat free">Free</div>'.repeat(4) : ['rana', 'yusuf', 'dana', 'bilal'].map(k => `<div class="seat ${assigned ? '' : 'prop'}">${av(k)}${PEOPLE[k].n} · ${assigned ? 'assigned' : 'proposed'}</div>`).join(''));
     const proposal = noone
       ? `<div class="statusline" style="flex-direction:column;align-items:flex-start">Nobody is confirmed ready for workshop preparation. Readiness is a separate confirmation. Time in shelter doesn’t count.<button class="btn solid" data-go="m4" style="margin-top:8px">Confirm readiness →</button></div>`
-      : `<div style="border:1px solid var(--ink);padding:16px" class="rule3">
-          <div class="between"><b>Proposal · not applied</b>${B.plain('Proposal')}</div>
+      : `<div class="proposal">
+          <div class="between"><b>Proposal · not applied</b>${badge('◇ Proposal', 'b-wait')}</div>
           <p class="p" style="margin-top:8px">Move <b>Rana, Yusuf, Dana and Bilal</b> to workshop preparation for 08:11–09:11, alternating work and cooled recovery.</p>
           ${computed('work/rest planner')}
         </div>
@@ -317,7 +325,7 @@ function gantt(pl) {
   return `<div class="gantt" id="gantt"${timeDir()}><div class="g-ticks"><div style="border-inline-end:1px solid var(--ink)"></div><div class="tk">${ticks.join('')}</div></div>${rows}
     <div class="g-overlay"><div class="g-horizon" style="inset-inline-start:${pct(pl.horizon)}" title="Planning horizon"></div><div class="g-cursor" id="gcur" style="inset-inline-start:${pct(pl.start + cur)}"></div></div></div>
     <div class="scrub"${timeDir()}><label for="scr"><b>Time cursor</b></label><input id="scr" type="range" min="0" max="${span}" value="${cur}" aria-describedby="scrout"><span id="scrout" aria-live="polite"></span></div>
-    <div class="flex" style="margin-top:8px;font-size:12px"><span class="badge" style="background:var(--plan);color:#fff;border-color:var(--plan)">Work</span><span class="badge g-rest" style="position:static">&nbsp;&nbsp;&nbsp;&nbsp;</span> Cooled recovery <span>┆ Planning horizon</span></div>`;
+    <div class="flex" style="margin-top:8px;font-size:12px"><span class="badge b-plan">▶ Work</span><span class="badge g-rest" style="position:static">&nbsp;&nbsp;&nbsp;&nbsp;</span> Cooled recovery <span>┆ Planning horizon</span></div>`;
 }
 function w5Readout(pl, t) {
   const at = pl.start + t, working = [], resting = [], excl = [];
@@ -349,7 +357,7 @@ screen('w5', {
     const ivs = [];
     Object.entries(pl.p).forEach(([n, iv]) => iv.forEach(([k, a, b, l]) => { if (n !== '7 others') ivs.push({ n, k, a, b, l }); }));
     ivs.sort((x, y) => x.a - y.a || x.n.localeCompare(y.n));
-    const rows = ivs.slice(0, 10).map(i => row({ t: `${i.n} · ${i.k === 'w' ? 'Workshop preparation' : i.k === 'x' ? 'Excluded from work' : 'Cooled recovery'}`, d: `${tstr(i.a)}–${tstr(i.b)} · ${i.b - i.a} min${i.k === 'r' ? ' · Shelter A' : ''}`, b: i.k === 'w' ? B.plan('Work') : i.k === 'x' ? B.red('Excluded') : B.plain('Rest'), static: true }));
+    const rows = ivs.slice(0, 10).map(i => row({ t: `${i.n} · ${i.k === 'w' ? 'Workshop preparation' : i.k === 'x' ? 'Excluded from work' : 'Cooled recovery'}`, d: `${tstr(i.a)}–${tstr(i.b)} · ${i.b - i.a} min${i.k === 'r' ? ' · Shelter A' : ''}`, b: i.k === 'w' ? B.plan('▶ Work') : i.k === 'x' ? B.red('Excluded') : B.plain('Rest'), static: true }));
     const sent = App.f['w5sent' + (replan ? 'r' : '')];
     return {
       nav: { title: 'Work/rest plan · ' + (replan ? '08:18–09:18' : '08:11–09:11'), back: 'w1', clock: replan ? '08:18' : '08:11' }, overflow, filters,

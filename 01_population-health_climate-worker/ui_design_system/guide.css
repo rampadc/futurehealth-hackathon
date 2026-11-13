@@ -81,5 +81,26 @@
   .guide__nav ol { display: flex; overflow-x: auto; padding: 0; }
   .guide__nav a { white-space: nowrap; }
 }
+/* 25 · Company branding lab */
+.brandlab { display: grid; grid-template-columns: minmax(min(100%, 20rem), 24rem) 1fr; gap: var(--space-4); align-items: start; }
+.brandlab__colours { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: var(--space-2); }
+.colourpick { display: grid; grid-template-columns: var(--target-touch) 1fr; }
+.colourpick input[type="color"] { inline-size: 100%; block-size: 100%; min-block-size: var(--target-touch); border: 2px solid var(--color-ink); border-inline-end: 0; padding: 2px; background: var(--color-base); cursor: pointer; }
+.brandlab__previews { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: var(--space-3); align-items: start; }
+.bprev { margin: 0; display: grid; gap: var(--space-half); }
+.bprev__frame { border: 0.375rem solid var(--color-ink); background: var(--color-base); color: var(--color-ink); display: flex; flex-direction: column; overflow: hidden; font-size: var(--fs-small); }
+.bprev--wide { grid-column: 1 / -1; }
+.bprev__frame--web { flex-direction: row; }
+.bprev__frame--web .rail { inline-size: 11rem; flex: none; }
+.bprev__frame--web .rail__item { font-size: var(--fs-label); }
+.bprev__main { flex: 1; min-inline-size: 0; display: grid; align-content: start; }
+.bprev__pad { padding: var(--space-1) var(--space-2); }
+.bprev__frame .thumbzone { margin-block-start: auto; }
+.bprev__frame .statement__text { font-size: var(--fs-title); }
+.bprev__install { align-items: center; text-align: center; gap: var(--space-1); padding: var(--space-3) var(--space-2); }
+.brandlab__out pre { white-space: pre-wrap; word-break: break-all; font-size: var(--fs-label); background: var(--color-sheet); border: var(--rule-hair); padding: var(--space-2); margin: var(--space-1) 0 0; }
+@media (max-width: 70rem) { .brandlab { grid-template-columns: 1fr; } }
+@media (max-width: 40rem) { .bprev__frame--web { flex-direction: column; } .bprev__frame--web .rail { inline-size: auto; } }
+
 .stack > .btn, .stack > .holdbtn { justify-self: start; }
 .stack > .holdbtn { inline-size: min(100%, 24rem); }
