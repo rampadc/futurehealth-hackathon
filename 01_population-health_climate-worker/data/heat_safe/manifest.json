@@ -1,0 +1,338 @@
+[
+  {
+    "path": "raw/weather/forecast_snapshot_2026-10-30.csv",
+    "source": "https://api.open-meteo.com/v1/forecast",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/weather/era5_replay_2025-08-01.csv",
+    "source": "https://archive-api.open-meteo.com/v1/archive",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/weather/era5_replay_2024-08-04.csv",
+    "source": "https://archive-api.open-meteo.com/v1/archive",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/weather/era5_summer_2023.csv",
+    "source": "https://archive-api.open-meteo.com/v1/archive",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/weather/era5_summer_2024.csv",
+    "source": "https://archive-api.open-meteo.com/v1/archive",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/weather/era5_summer_2025.csv",
+    "source": "https://archive-api.open-meteo.com/v1/archive",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/air_quality/cams_forecast_snapshot_2026-10-30.csv",
+    "source": "https://air-quality-api.open-meteo.com/v1/air-quality",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/air_quality/cams_replay_2024-08-04.csv",
+    "source": "https://air-quality-api.open-meteo.com/v1/air-quality",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/air_quality/cams_replay_2025-08-01.csv",
+    "source": "https://air-quality-api.open-meteo.com/v1/air-quality",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/air_quality/cams_summer_2023.csv",
+    "source": "https://air-quality-api.open-meteo.com/v1/air-quality",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/air_quality/cams_summer_2024.csv",
+    "source": "https://air-quality-api.open-meteo.com/v1/air-quality",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/air_quality/cams_summer_2025.csv",
+    "source": "https://air-quality-api.open-meteo.com/v1/air-quality",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/noaa_gsod/abu_dhabi_intl_41217099999_2020.csv",
+    "source": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2020/41217099999.csv",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/noaa_gsod/abu_dhabi_intl_41217099999_2021.csv",
+    "source": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2021/41217099999.csv",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/noaa_gsod/abu_dhabi_intl_41217099999_2022.csv",
+    "source": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2022/41217099999.csv",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/noaa_gsod/abu_dhabi_intl_41217099999_2023.csv",
+    "source": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2023/41217099999.csv",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/noaa_gsod/abu_dhabi_intl_41217099999_2024.csv",
+    "source": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2024/41217099999.csv",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/noaa_gsod/abu_dhabi_intl_41217099999_2025.csv",
+    "source": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2025/41217099999.csv",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/noaa_gsod/al_bateen_41216099999_2020.csv",
+    "source": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2020/41216099999.csv",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/noaa_gsod/al_bateen_41216099999_2021.csv",
+    "source": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2021/41216099999.csv",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/noaa_gsod/al_bateen_41216099999_2022.csv",
+    "source": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2022/41216099999.csv",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/noaa_gsod/al_bateen_41216099999_2023.csv",
+    "source": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2023/41216099999.csv",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/noaa_gsod/al_bateen_41216099999_2024.csv",
+    "source": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2024/41216099999.csv",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/noaa_gsod/al_bateen_41216099999_2025.csv",
+    "source": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2025/41216099999.csv",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/noaa_gsod/al_ain_intl_41218099999_2020.csv",
+    "source": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2020/41218099999.csv",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/noaa_gsod/al_ain_intl_41218099999_2021.csv",
+    "source": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2021/41218099999.csv",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/noaa_gsod/al_ain_intl_41218099999_2022.csv",
+    "source": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2022/41218099999.csv",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/noaa_gsod/al_ain_intl_41218099999_2023.csv",
+    "source": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2023/41218099999.csv",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/noaa_gsod/al_ain_intl_41218099999_2024.csv",
+    "source": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2024/41218099999.csv",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/noaa_gsod/al_ain_intl_41218099999_2025.csv",
+    "source": "https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/2025/41218099999.csv",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/nasa_power/mussafah_hourly_2025-08-01.csv",
+    "source": "https://power.larc.nasa.gov/api/temporal/hourly/point?parameters=T2M,RH2M,T2MWET,WS2M,ALLSKY_SFC_SW_DWN,PS&community=AG&latitude=24.3486&longitude=54.5012&start=20250801&end=20250801&time-standard=LST&format=CSV",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/nasa_power/mussafah_hourly_2024-08-04.csv",
+    "source": "https://power.larc.nasa.gov/api/temporal/hourly/point?parameters=T2M,RH2M,T2MWET,WS2M,ALLSKY_SFC_SW_DWN,PS&community=AG&latitude=24.3486&longitude=54.5012&start=20240804&end=20240804&time-standard=LST&format=CSV",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/nasa_power/mussafah_daily_2023_summer.csv",
+    "source": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M,RH2M,T2MWET,WS2M,ALLSKY_SFC_SW_DWN,PS&community=AG&latitude=24.3486&longitude=54.5012&start=20230601&end=20230930&time-standard=LST&format=CSV",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/nasa_power/mussafah_daily_2024_summer.csv",
+    "source": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M,RH2M,T2MWET,WS2M,ALLSKY_SFC_SW_DWN,PS&community=AG&latitude=24.3486&longitude=54.5012&start=20240601&end=20240930&time-standard=LST&format=CSV",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/nasa_power/mussafah_daily_2025_summer.csv",
+    "source": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M,RH2M,T2MWET,WS2M,ALLSKY_SFC_SW_DWN,PS&community=AG&latitude=24.3486&longitude=54.5012&start=20250601&end=20250930&time-standard=LST&format=CSV",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/onet/Work_Context.txt",
+    "source": "https://www.onetcenter.org/dl_files/database/db_30_1_text/Work%20Context.txt",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/onet/Work_Context_Categories.txt",
+    "source": "https://www.onetcenter.org/dl_files/database/db_30_1_text/Work%20Context%20Categories.txt",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/onet/Occupation_Data.txt",
+    "source": "https://www.onetcenter.org/dl_files/database/db_30_1_text/Occupation%20Data.txt",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "processed/onet_work_context_plan_roles.csv",
+    "source": "/Users/wzhang3/Documents/my_projects/future_health_hackathon/data/raw/onet/Work_Context.txt",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/guidance/ilo_working_on_a_warmer_planet_2019.pdf",
+    "source": "https://www.ilo.org/wcmsp5/groups/public/---dgreports/---dcomm/---publ/documents/publication/wcms_711919.pdf",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/guidance/niosh_2016-106_heat_stress_criteria.pdf",
+    "source": "https://www.cdc.gov/niosh/docs/2016-106/pdfs/2016-106.pdf",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/guidance/who_wmo_heatwaves_and_health_warning_systems_2015.pdf",
+    "source": "https://www.uncclearn.org/wp-content/uploads/library/who16102015.pdf",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/guidance/sharjah_oshj_cop33_safety_in_heat_2024.pdf",
+    "source": "https://mc.spsa.shj.ae/Media/documents/j3comnEiUeCQ3emVuS2OQ_Safety%20in%20Heat%20OSHJ-COP-33.pdf",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/guidance/who_factsheet_climate_change_heat_and_health.html",
+    "source": "https://www.who.int/news-room/fact-sheets/detail/climate-change-heat-and-health",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/regulatory/adosh_sf_cop_11_safety_in_the_heat_v4_2024_en.pdf",
+    "source": "https://www.adphc.gov.ae/-/media/Project/ADPHC/ADPHC/PDF/OSHAD-SF/Codes-of-Practise/11---Safety-in-the-Heat-v31-English.pdf",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/regulatory/adosh_sf_tg_safety_in_the_heat_v4_2024_en.pdf",
+    "source": "https://www.adphc.gov.ae/-/media/Project/ADPHC/ADPHC/PDF/OSHAD-SF/Technical-Guidelines/Safety-in-the-Heat--Eng.pdf",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/regulatory/adosh_sf_cop_53_1_osh_construction_en.pdf",
+    "source": "https://www.adphc.gov.ae/-/media/Project/ADPHC/ADPHC/PDF/OSHAD-SF/Codes-of-Practise/53__1---OSH-Construction--Eng.pdf",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  },
+  {
+    "path": "raw/regulatory/adphc_codes_of_practice_index.html",
+    "source": "https://www.adphc.gov.ae/en/Legislation/Code-of-Practices",
+    "status": "cached",
+    "note": "",
+    "retrieved_utc": "2026-10-30T00:55:29+00:00"
+  }
+]
