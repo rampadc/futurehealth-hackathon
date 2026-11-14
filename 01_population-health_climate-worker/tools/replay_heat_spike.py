@@ -2,6 +2,7 @@
 
     uv run python tools/replay_heat_spike.py                 # steel fixers in shade, Mussafah, 1 Aug 2025
     uv run python tools/replay_heat_spike.py --replan-at 09:00 --save
+    uv run python tools/replay_heat_spike.py --alert-mode production   # or HEAT_SAFE_ALERT_MODE=production
 
 1. Morning plan from the forecast (optimise_schedule, shade TWL).
 2. Fast loop over the SYNTHETIC sensor feed (spike 08:15-09:15, faulty reading 09:40): every decision
@@ -21,7 +22,7 @@ from heat_safe.forecast import get_replay
 from heat_safe.heat_stress import compute_heat_stress
 from heat_safe.job_profile import lookup_job_profile
 from heat_safe.paths import PROCESSED
-from heat_safe.schedule import optimise_schedule
+from heat_safe.schedule import minutes_scheduled_before, optimise_schedule
 from heat_safe.sensor import apply_measurements, measured_twl, replay_fast_loop, synthetic_feed
 
 
@@ -42,6 +43,8 @@ def main() -> None:
     ap.add_argument("--hours", type=float, default=5)
     ap.add_argument("--replan-at", default="09:00", help="local HH:MM when the supervisor re-plans")
     ap.add_argument("--save", action="store_true")
+    ap.add_argument("--alert-mode", choices=("demo", "production"), default=None,
+                    help="how unreviewed translations are sent (default: HEAT_SAFE_ALERT_MODE, else demo)")
     args = ap.parse_args()
 
     weather = get_replay(args.date, sites=[args.site])
@@ -58,13 +61,27 @@ def main() -> None:
         feed.to_csv(out, index=False)
         print(f"\nfeed saved: {out}")
 
+    # The supervisor re-plans at --replan-at on measured heat; from the re-plan's first hour the monitor
+    # follows the NEW plan, so its alerts and the re-plan describe the same day.
     h, m = map(int, args.replan_at.split(":"))
-    print(f"\n2. Fast loop, 08:00-10:00 (SYNTHETIC sensor feed): what each person received ({mode()} mode)")
-    log = replay_fast_loop(measured, plan, start="08:00", end="10:00")
+    now = datetime.fromisoformat(f"{args.date}T{args.replan_at}")
+    from_hour = h + (m > 0)
+    worked = minutes_scheduled_before(plan, from_hour)
+    replanned = optimise_schedule(apply_measurements(hs, measured, now, shade=True), profile,
+                                  work_hours_needed=args.hours, shade=True, from_hour=from_hour,
+                                  already_worked_minutes=worked)
+
+    print(f"\n2. Fast loop, 08:00-10:00 (SYNTHETIC sensor feed): what each person received ({args.alert_mode or mode()} mode)")
+    print(f"   The monitor follows the morning plan, then the re-plan from {replanned['replanned_from']}.")
+    log = replay_fast_loop(measured, plan, start="08:00", end="10:00", replans=(replanned,))
     langs = load_templates()["languages"]
-    sent = alerts_for(log, crew=f"{args.role.capitalize()} crew")
+    sent = alerts_for(log, crew=f"{args.role.capitalize()} crew", alert_mode=args.alert_mode)
+    switch_shown = False
     for a in sent:
         if a.recipient == "supervisor":
+            if not switch_shown and a.time >= replanned["replanned_from"]:
+                print(f"\n  {replanned['replanned_from']}  -- re-plan accepted: the monitor now follows it --")
+                switch_shown = True
             print(f"\n  {a.time}  SUPERVISOR  {a.text}")
         else:
             note = a.marker or (f"[{a.fallback}]" if a.fallback else "")
@@ -76,13 +93,7 @@ def main() -> None:
         pd.DataFrame([a.to_dict() for a in sent]).to_csv(out, index=False)
         print(f"  alert log saved: {out}")
 
-    now = datetime.fromisoformat(f"{args.date}T{args.replan_at}")
-    worked = sum(b["scheduled_work_minutes"] for b in plan["hours"] if int(b["start"][:2]) < h)
-    replanned = optimise_schedule(apply_measurements(hs, measured, now, shade=True), profile,
-                                  work_hours_needed=args.hours, shade=True, from_hour=h + (m > 0),
-                                  already_worked_minutes=worked)
     show(replanned, f"3. Re-plan at {args.replan_at} on measured heat ({worked} min already worked)")
-
 
 if __name__ == "__main__":
     main()

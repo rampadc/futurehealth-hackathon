@@ -22,8 +22,8 @@ from heat_safe import rules
 
 # Actions, from mildest to most severe
 CONTINUE = "continue"          # conditions are no worse than the plan assumed: follow the plan
-TIGHTEN = "tighten"            # a stricter zone is in force: fewer work minutes left this hour
-REST_NOW = "rest_now"          # the worker has already used this hour's minutes for the stricter zone
+TIGHTEN = "tighten"            # a stricter zone is in force: fewer work minutes left in the last 60 minutes
+REST_NOW = "rest_now"          # the last 60 minutes already used the stricter zone's work minutes
 SENSOR_FAULT = "sensor_fault"  # reading missing or implausible: one zone stricter, check the sensor
 WITHDRAW = "withdraw"          # withdrawal limit reached: everyone stops outdoor work
 
@@ -63,7 +63,7 @@ class Decision:
     """
     action: str
     zone: str                      # zone in force now
-    work_minutes_left: int         # work minutes still allowed in this hour; never more than the plan allowed
+    work_minutes_left: int         # work minutes still allowed in the rolling 60 minutes; never more than the plan allowed
     alert: bool                    # push to worker and supervisor now
     reason: str                    # one line for the supervisor and the logs
     state: LoopState               # pass to the next call
@@ -110,7 +110,8 @@ def reading_fault(obs: Observation, last_good: Observation | None) -> str:
 def adjust_for_observation(
     obs: Observation,
     planned_zone: str,
-    worked_minutes: int,
+    worked_minutes: int,  # minutes of the hourly allowance already used (sensor.replay_fast_loop passes the
+                          # zone's limit minus what the crew can still work in one stretch, rolling 60 minutes)
     work_intensity: str,
     acclimatised: bool,
     state: LoopState,
