@@ -1,0 +1,20 @@
+rules:
+  - id: heat-safe-python-dynamic-code
+    languages: [python]
+    severity: ERROR
+    message: Avoid executing dynamically supplied Python code.
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: exec(...)
+  - id: heat-safe-python-shell
+    languages: [python]
+    severity: ERROR
+    message: Avoid invoking a shell with interpolated application data.
+    pattern: subprocess.$METHOD(..., shell=True, ...)
+  - id: heat-safe-javascript-dynamic-code
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: Avoid executing dynamically supplied JavaScript code.
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: new Function(...)
