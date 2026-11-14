@@ -136,6 +136,23 @@ What connecting it taught us:
 - **The first eval failure was the eval.** `within_acclimatisation_share` only applies to a
   reduced-share worker; the scenario's crew was acclimatised.
 
+**Rolling 60-minute work limit (15 Nov).** The fast loop first reset "minutes worked" at each clock
+hour, so a crew could work 08:00-08:30, rest 30 minutes and work again from 09:00: 50 minutes in 80
+under a "20 min work / 40 min rest" cycle. Now work counts over the last 60 minutes, and the alert gives
+how long the crew can work **in one stretch** from now (`sensor.available_work_minutes`): earlier
+minutes drop out of the window as the stretch goes on, so after 08:00-08:30 the answer is 0 until 09:10
+and then a full 20. A first version reported "20 minus what is in the window" (5 minutes at 09:15), which
+was correct for that instant but told a crew to stop after 5 minutes they did not need to stop.
+A supervisor's question about one alert found this.
+
+**The monitor follows the plan in force (15 Nov).** The demo's monitor kept following the morning plan
+after the 09:00 re-plan, so at 09:10 it told the crew "work 20 minutes" while the re-plan had moved
+that work to the afternoon. Now `replay_fast_loop(replans=...)` switches to a re-plan from its first
+hour, an alert never offers more minutes than the plan in force still schedules, and "tighten" /
+"rest now" are held back while the plan has the crew resting (sent when work resumes, if they still
+apply). Sensor faults and withdrawals always alert. Two loops that act on the same crew must read the
+same plan.
+
 ### 4. Alert text is reviewed data, not generated text (14 Nov)
 
 `alert_templates.yaml` holds what a worker receives for each fast-loop action, in English, Mandarin,

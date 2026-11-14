@@ -75,7 +75,7 @@ languages:
 
 actions:
   tighten:
-    supervisor: "{crew}: tighten at {time}. Heat above plan. {zone} zone rules: {minutes} work minutes left this hour."
+    supervisor: "{crew}: tighten at {time}. Heat above plan. {zone} zone rules: {minutes} work minutes before the next rest."
     worker:
       en: "Heat is higher than planned. Work only {minutes} more minutes this hour. Then rest in the shade. Drink water."
       zh: "高温超出计划。本小时只能再工作{minutes}分钟。然后到阴凉处休息。请喝水。"
