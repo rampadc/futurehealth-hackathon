@@ -21,7 +21,7 @@ import pandas as pd
 
 from heat_safe import rules
 from heat_safe.heat_stress import rezone
-from heat_safe.spike import Observation
+from heat_safe.spike import ZONES, Observation, reading_fault
 from heat_safe.thermal import KMH_TO_MS
 from heat_safe.twl import DEFAULT_ICL, DEFAULT_ICL_PERM, sat_vapour_pressure, thermal_work_limit, wind_10m_to_body
 
@@ -74,6 +74,20 @@ def to_observations(measured: pd.DataFrame) -> list[Observation]:
                         bool(r.sensor_ok)) for r in measured.itertuples()]
 
 
+def flag_faults(measured: pd.DataFrame) -> pd.DataFrame:
+    """Add a `fault` column ("" = usable), using the fast loop's own check (spike.reading_fault) in time order.
+    A faulty reading is never the reference for the next jump check, exactly as in the fast loop."""
+    out = measured.sort_values("time").copy()
+    faults, last_good = [], None
+    for o in to_observations(out):
+        f = reading_fault(o, last_good)
+        faults.append(f)
+        if not f:
+            last_good = o
+    out["fault"] = faults
+    return out
+
+
 def apply_measurements(hs: pd.DataFrame, measured: pd.DataFrame, now: datetime, shade: bool = False) -> pd.DataFrame:
     """Heat stress for re-planning at `now`: measured TWL where the sensor has data, a corrected forecast after.
 
@@ -83,8 +97,8 @@ def apply_measurements(hs: pd.DataFrame, measured: pd.DataFrame, now: datetime, 
       applied in full to the next hour and fades linearly over rules.SENSOR_BIAS_FADE_HOURS. A cooler
       measurement never raises a forecast.
     The sensor measures where it stands, so only one column changes: the shade TWL for a sensor in the
-    shaded work area (`shade=True`), else the sun TWL. Faulty readings (sensor_ok False, missing TWL) are
-    ignored here; the fast loop has already handled them. `twl_basis` records where each value came from.
+    shaded work area (`shade=True`), else the sun TWL. Faulty readings (flag_faults: self-reported,
+    incomplete or implausible) are ignored here; the fast loop has already handled them. `twl_basis` records where each value came from.
     """
     col = "twl_shade_wm2" if shade else "twl_wm2"
     out = hs.copy()
@@ -95,8 +109,8 @@ def apply_measurements(hs: pd.DataFrame, measured: pd.DataFrame, now: datetime, 
     now_ts = pd.Timestamp(now)
     now_ts = now_ts.tz_localize(tz) if now_ts.tz is None and tz is not None else now_ts
 
-    good = measured.assign(time=times)
-    good = good[(good["time"] <= now_ts) & good["sensor_ok"] & good["twl_wm2"].notna()]
+    good = flag_faults(measured.assign(time=times))
+    good = good[(good["time"] <= now_ts) & (good["fault"] == "")]
     if good.empty:
         return out
     worst = good.groupby(good["time"].dt.floor("h"))["twl_wm2"].min()
@@ -114,7 +128,8 @@ def apply_measurements(hs: pd.DataFrame, measured: pd.DataFrame, now: datetime, 
             factor = 1 - (k - 1) / rules.SENSOR_BIAS_FADE_HOURS
             rows = hour_start == last_hour + pd.Timedelta(hours=k)
             out.loc[rows, col] = out.loc[rows, col] + bias * factor
-            out.loc[rows, "twl_basis"] = f"forecast {bias * factor:+.0f} W/m² (sensor)"
+            # A magnitude in words, not a signed number: people say "18 worse", and grounding checks what they say
+            out.loc[rows, "twl_basis"] = f"forecast, {round(-bias * factor)} W/m² worse (sensor)"
     return rezone(out)
 
 
@@ -131,8 +146,11 @@ def synthetic_feed(
 ) -> pd.DataFrame:
     """SYNTHETIC sensor readings for one site and day, built from real hourly weather (get_replay).
 
-    Between the hourly values: linear interpolation of air temperature and vapour pressure. A sensor in
-    shade reads a globe 0.5 °C above air (no direct sun). The spike adds `spike_c` to air and globe
+    The feed matches the forecast's own assumptions, so that the spike is the ONLY difference between the
+    sensor and the plan: each hour's values are held through that hour (with small noise), and a sensor in
+    shade reads globe = air temperature, as the forecast's shade TWL assumes (mean radiant = air). An
+    interpolated feed drifted into the next hour's heat and fired alerts at 06:xx, before any spike (14 Nov).
+    The spike adds `spike_c` to air and globe
     temperature (ramp up, hold, ramp down), with the same moisture, so RH falls as it would in real air.
     At `fault_at` the sensor reports a sun-struck 70 °C: implausible, for the fast loop's fault check.
     """
@@ -145,10 +163,11 @@ def synthetic_feed(
     t = pd.date_range(hourly[0], hourly[-1], freq=f"{interval_min}min")
     x, xp = t.asi8, hourly.asi8
 
-    ta = np.interp(x, xp, w["temperature_2m"].to_numpy(float))
-    pa = np.interp(x, xp, (w["relative_humidity_2m"] / 100 * sat_vapour_pressure(w["temperature_2m"])).to_numpy(float))
-    wind = np.interp(x, xp, wind_10m_to_body(w["wind_speed_10m"].to_numpy(float) * KMH_TO_MS))
-    p_hpa = np.interp(x, xp, w["surface_pressure"].to_numpy(float))
+    hour = np.searchsorted(xp, x, side="right") - 1  # each reading takes the values of the hour it is in
+    ta = w["temperature_2m"].to_numpy(float)[hour]
+    pa = (w["relative_humidity_2m"] / 100 * sat_vapour_pressure(w["temperature_2m"])).to_numpy(float)[hour]
+    wind = wind_10m_to_body(w["wind_speed_10m"].to_numpy(float) * KMH_TO_MS)[hour]
+    p_hpa = w["surface_pressure"].to_numpy(float)[hour]
 
     minutes = (t - t.normalize()).total_seconds().to_numpy() / 60
     h, m = map(int, spike_start.split(":"))
@@ -157,7 +176,7 @@ def synthetic_feed(
     rng = np.random.default_rng(seed)
     ta = ta + spike_c * shape + rng.normal(0, 0.15, len(t))
     rh = np.clip(100 * pa / sat_vapour_pressure(ta), 1, 100)
-    globe = ta + 0.5 + rng.normal(0, 0.15, len(t))
+    globe = ta + rng.normal(0, 0.15, len(t))
 
     feed = pd.DataFrame(dict(time=t, dry_bulb_c=ta.round(2), rh_pct=rh.round(1), globe_temp_c=globe.round(2),
                              wind_ms=wind.round(2), pressure_hpa=p_hpa.round(1), sensor_ok=True))
@@ -181,7 +200,7 @@ def replay_fast_loop(measured: pd.DataFrame, plan: dict, acclimatised: bool = Tr
     TWL work/rest limits are per hour. Returns one row per reading: the decision, the zone in force, and
     the minutes worked so far that hour. This is what the risk-monitor job will do on live readings.
     """
-    from heat_safe.spike import REST_NOW, WITHDRAW, LoopState, adjust_for_observation
+    from heat_safe.spike import REST_NOW, SENSOR_FAULT, WITHDRAW, LoopState, adjust_for_observation
 
     blocks = {int(b["start"][:2]): b for b in plan["hours"]}
     intensity = plan["work_intensity"]
@@ -195,10 +214,136 @@ def replay_fast_loop(measured: pd.DataFrame, plan: dict, acclimatised: bool = Tr
             state = LoopState(zone=b["twl_zone"]) if state is None else state
         d = adjust_for_observation(o, b["twl_zone"], worked, intensity, acclimatised, state)
         state = d.state
+        measured_zone = "" if d.action == SENSOR_FAULT else rules.twl_zone(o.twl_wm2)
         rows.append(dict(time=o.time, twl_wm2=o.twl_wm2, dry_bulb_c=o.dry_bulb_c, planned_zone=b["twl_zone"],
+                         measured_zone=measured_zone,
                          action=d.action, zone=d.zone, worked_minutes=worked, work_minutes_left=d.work_minutes_left,
                          alert=d.alert, reason=d.reason))
         step = 5  # minutes to the next reading (the synthetic feed's interval)
         if d.action not in (REST_NOW, WITHDRAW) and b["scheduled_work_minutes"] > 0:
             worked += min(step, d.work_minutes_left, max(0, b["scheduled_work_minutes"] - worked))
     return pd.DataFrame(rows)
+
+
+def replan_recommendation(log: pd.DataFrame) -> tuple[bool, str]:
+    """Should the supervisor re-plan the rest of the day? The fast loop only RECOMMENDS; a person decides.
+
+    Yes after a withdrawal, or once the MEASURED zone has stayed stricter than the plan's zone for
+    rules.REPLAN_RECOMMEND_AFTER_MINUTES of consecutive usable readings: the plan's assumption no longer
+    holds. Faulty readings are skipped (they mean "check the sensor", not "re-plan"). `log` is
+    replay_fast_loop output.
+    """
+    from heat_safe.spike import SENSOR_FAULT, WITHDRAW
+
+    withdrawn = log[log["action"] == WITHDRAW]
+    if len(withdrawn):
+        return True, f"withdrawal limit reached at {withdrawn['time'].iloc[0]:%H:%M}"
+    since = None
+    for r in log[log["action"] != SENSOR_FAULT].itertuples():
+        if ZONES.index(r.measured_zone) > ZONES.index(r.planned_zone):
+            since = since or r.time
+            if (r.time - since).total_seconds() >= rules.REPLAN_RECOMMEND_AFTER_MINUTES * 60:
+                return True, (f"measured conditions worse than the plan assumed ({r.measured_zone} zone, plan "
+                              f"{r.planned_zone}) from {since:%H:%M} to {r.time:%H:%M}")
+        else:
+            since = None
+    return False, ""
+
+
+# --- The site sensor as the agent sees it ---------------------------------------------------------------
+
+# Only the replay day has a (synthetic) sensor. Anywhere else the tool says so instead of inventing readings.
+DEMO_SENSORS = {("mussafah", "2025-08-01"): {"location": "shade"}}
+
+
+def parse_clock(hhmm: str) -> tuple[int, int]:
+    """ "09:20" -> (9, 20). Raises ValueError for anything else."""
+    h, m = (int(x) for x in hhmm.split(":"))
+    if not (0 <= h < 24 and 0 <= m < 60):
+        raise ValueError(f"time must be HH:MM, got {hhmm!r}")
+    return h, m
+
+
+def sensor_measurements(site: str, day: str, weather: pd.DataFrame) -> pd.DataFrame | None:
+    """Measured readings (with `fault`) for a site and day that has a sensor, else None."""
+    if (site, day) not in DEMO_SENSORS:
+        return None
+    return flag_faults(measured_twl(synthetic_feed(weather)))
+
+
+def get_site_sensor(site: str, day: str, until: str, weather: pd.DataFrame, hs: pd.DataFrame,
+                    plan: dict | None = None) -> dict:
+    """What the site sensor measured up to `until`, compared with the forecast; with a `plan`, also what the
+    fast loop (the risk monitor) already did and whether it recommends a re-plan. Numbers rounded as the
+    agent should quote them."""
+    measured = sensor_measurements(site, day, weather)
+    if measured is None:
+        return {"status": "no_sensor", "site": site, "date": day,
+                "note": "No site sensor on this site and day. Plans use the forecast only."}
+    location = DEMO_SENSORS[(site, day)]["location"]
+    h, m = parse_clock(until)
+    times = pd.DatetimeIndex(measured["time"])
+    upto = measured[(times.hour * 60 + times.minute) <= h * 60 + m]
+    good = upto[upto["fault"] == ""]
+
+    col = "twl_shade_wm2" if location == "shade" else "twl_wm2"
+    forecast = hs.set_index(pd.DatetimeIndex(hs["time"]).hour)[col]
+    hourly = []
+    for hour, g in good.groupby(pd.DatetimeIndex(good["time"]).hour):
+        worst, fc = float(g["twl_wm2"].min()), float(forecast[hour])
+        hourly.append(dict(hour=f"{hour:02d}:00", readings=len(g), worst_twl_wm2=rules.display_twl(worst),
+                           measured_zone=rules.twl_zone(worst), forecast_twl_wm2=rules.display_twl(fc),
+                           forecast_zone=rules.twl_zone(fc),
+                           # Positive = measured hotter (lower TWL) than forecast; 0 if not worse
+                           worse_than_forecast_wm2=max(0, rules.display_twl(fc) - rules.display_twl(worst)),
+                           max_dry_bulb_c=round(float(g["dry_bulb_c"].max()), 1),
+                           withdrawal_limit=bool(g["withdrawal_limit"].any())))
+    faults = [dict(time=f"{r.time:%H:%M}", dry_bulb_c=round(float(r.dry_bulb_c), 1), reason=r.fault)
+              for r in upto[upto["fault"] != ""].itertuples()]
+    out = {
+        "status": "ok", "site": site, "date": day, "until": until, "synthetic": True, "location": location,
+        "note": ("SYNTHETIC demo sensor: built from the real ERA5 replay day with an added heat spike and one "
+                 f"faulty reading. Sensor in the {location} work area, reading every 5 minutes."),
+        "readings": len(upto), "hourly": hourly, "faults": faults,
+        "fault_note": ("Faulty readings are excluded from every number above and from re-planning. "
+                       "Have the sensor checked.") if faults else "",
+    }
+    if plan is not None:
+        nxt = h * 60 + m + 1  # replay_fast_loop's end is exclusive; one minute later includes `until`
+        log = replay_fast_loop(upto, plan, end=f"{nxt // 60:02d}:{nxt % 60:02d}")
+        alerts = log[log["alert"]]
+        recommended, why = replan_recommendation(log)
+        out |= {
+            "crew": dict(role=plan["role"], shade=plan["shade"], assumption=(
+                "acclimatised crew working the original plan until a monitor decision cut it")),
+            "fast_loop_alerts": [dict(time=f"{r.time:%H:%M}", action=r.action, zone=r.zone,
+                                      work_minutes_left=int(r.work_minutes_left), reason=r.reason)
+                                 for r in alerts.itertuples()],
+            "fast_loop_note": "Sent automatically by the risk monitor to the crew and supervisor, not by the assistant.",
+            "replan_recommended": recommended, "replan_reason": why,
+        }
+    return out
+
+
+def replan_from_hour(now: str) -> int:
+    """The first whole hour still open at `now`: "09:00" -> 9, "09:20" -> 10. The part-gone hour belongs to
+    the fast loop, not to a new plan."""
+    h, m = parse_clock(now)
+    return h + (1 if m else 0)
+
+
+def heat_stress_with_sensor(hs: pd.DataFrame, site: str, day: str, weather: pd.DataFrame,
+                            now: str) -> tuple[pd.DataFrame, dict]:
+    """Heat stress for a re-plan at `now`: sensor-corrected if this site and day has a sensor, else unchanged.
+    Returns it with a short description for the tool output."""
+    measured = sensor_measurements(site, day, weather)
+    if measured is None:
+        return hs, {"used": False, "note": "No site sensor on this site and day: re-planned on the forecast only."}
+    location = DEMO_SENSORS[(site, day)]["location"]
+    h, m = parse_clock(now)
+    tz = pd.DatetimeIndex(hs["time"]).tz
+    at = pd.Timestamp(f"{day} {h:02d}:{m:02d}").tz_localize(tz)
+    info = {"used": True, "synthetic": True, "location": location,
+            "note": f"Hours before {now} use measured TWL; the next hours a sensor-corrected forecast (twl_basis)."}
+    return apply_measurements(hs, measured, at.to_pydatetime(), shade=location == "shade"), info
+

@@ -114,6 +114,7 @@ Status as of 30 Oct 2026.
 | `extract_symptoms` | Gemini structured extraction of symptoms, hours worked and water intake | Worker agent | LLM, schema-checked | Must | Week 3 |
 | `log_checkin` | Writes extracted check-in fields to BigQuery (worker-scoped table) | Worker agent | Yes | Must | Week 3 |
 | `send_alert` | Sends a pre-translated template alert to an allowlisted worker or supervisor; rate-limited; level-gated | Monitor; worker agent for red-flag escalation only | Yes, side effect | Must | Week 3 |
+| `get_site_sensor` | What the site sensor measured per hour against the forecast (worst TWL, how much worse), faulty readings excluded; with the crew, the risk monitor's alerts and whether it recommends a re-plan. `optimise_schedule(replan_from, use_site_sensor)` then re-plans from the next whole hour. SYNTHETIC sensor for the 1 Aug 2025 replay only | Supervisor agent | Yes | Must | Built 14 Nov: `sensor.py`, `spike.py`, `agent_tools.py`; evals `spike_replan`, `sensor_fault_not_heat` |
 | `query_insights` | Read-only SQL over **aggregated** analytics views only (crew/site, never per-worker health) | Supervisor agent | Yes, SQL-guarded | Should | Week 3 |
 
 ### Code layout
