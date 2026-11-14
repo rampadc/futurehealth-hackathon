@@ -208,3 +208,32 @@ def test_never_more_minutes_than_the_plan_allowed(planned):
         plan_left = max(0, allowed_minutes(planned, intensity, acclimatised) - worked)
         assert d.work_minutes_left <= plan_left, (o, worked, intensity, acclimatised, d)
         assert ZONES.index(d.zone) >= ZONES.index(planned)
+
+
+# --- 8. Withdrawal is lifted slowly too (15 Nov) ------------------------------------------------------
+
+def test_a_withdrawal_holds_until_the_step_down_time_below_the_limits():
+    ds = run([obs(0, HIGH_TWL, dry=44.5), obs(5, HIGH_TWL, dry=43.8), obs(5 + STEP - 1, HIGH_TWL, dry=43.8),
+              obs(5 + STEP, HIGH_TWL, dry=43.8)])
+    assert [d.action for d in ds[:3]] == [WITHDRAW] * 3 and all(d.work_minutes_left == 0 for d in ds[:3])
+    assert ds[3].action != WITHDRAW and ds[3].zone == "high"  # withdrawal lifted; High still in force
+
+
+def test_readings_hovering_at_the_limit_give_one_withdraw_alert():
+    """The replay day's 16:00 hour: 44 °C plus sensor noise crossed the limit 5 times in an hour."""
+    temps = [44.2, 43.9, 44.1, 43.8, 44.3, 43.9, 44.0, 44.2]
+    ds = run([obs(5 * i, HIGH_TWL, dry=t) for i, t in enumerate(temps)])
+    assert all(d.action == WITHDRAW for d in ds) and sum(d.alert for d in ds) == 1
+
+
+def test_a_sensor_fault_does_not_end_a_withdrawal():
+    ds = run([obs(0, HIGH_TWL, dry=44.5), obs(5, twl=None), obs(10, HIGH_TWL, dry=43.5)])
+    assert [d.action for d in ds] == [WITHDRAW, SENSOR_FAULT, WITHDRAW]
+    assert ds[1].work_minutes_left == 0  # still withdrawn during the fault
+
+
+def test_after_a_withdrawal_the_zone_steps_down_without_a_second_wait():
+    """Below the limits AND in a better zone for the step-down time: both lift together, not one after the other."""
+    ds = run([obs(0, HIGH_TWL, dry=44.5)] + [obs(5 + i, LOW_TWL, dry=40.0) for i in range(0, STEP + 1, 5)])
+    assert ds[-1].action != WITHDRAW and ds[-1].zone == "medium"  # the plan's zone: never below it
+

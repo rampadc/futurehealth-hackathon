@@ -175,3 +175,23 @@ and never writes or translates alert text.
   translation fills the same values as the English. A translation that drops `{minutes}` fails at start-up.
 - **Short, literal sentences** ("Stop work now. Rest in the shade. Drink water.") translate more reliably
   and suit workers with limited literacy.
+
+### 5. Measuring it on the replay day (15 Nov)
+
+`metrics.py` and `tools/replay_metrics.py` compare one crew under no plan, the morning plan, and
+Heat-Safe, judged against measured heat (`doc/metrics_replay_2025-08-01.md`). Headline: minutes worked
+over the ADOSH-SF work limit, A 280, B 20, C 0, with C's shortfall reported as the cost of protection.
+
+Building the measure found three real problems, each now fixed and tested:
+- **Our own planner broke the limit.** It placed a full Low-zone hour (60 min) straight before a Medium hour
+  (45 per 60). Even with no spike, following the plan gave 45 minutes over. `optimise_schedule` now caps
+  the earlier hour when the next one has work (`within_rolling_work_limit` invariant).
+- **The withdrawal limit flapped.** At 44 °C plus sensor noise the crew got 5 "withdraw" alerts in an
+  hour. A withdrawal now holds until the readings are below the limits for 30 minutes, and the zone's
+  step-down clock runs during it, so the two waits do not stack.
+- **The re-plan assumed the morning plan was followed.** The fast loop had cut 15 minutes, so the
+  assumption hid a 15-minute shortfall. The replay now re-plans with the minutes actually worked
+  (`replay_fast_loop`'s `worked_now`).
+- And one in the metric itself: its window was one 5-minute block too wide (65 minutes), so even
+  continuous Low-zone work looked "over". A wrong number that favours you is still wrong; check the
+  measure before you believe it.

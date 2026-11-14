@@ -79,6 +79,8 @@ def optimise_schedule(
             fluid_l_per_hr=controls.fluid_l_per_hr,
             midday_break_minutes=int(r["midday_break_minutes"]),
             allowed_work_minutes=int(minutes),
+            _hour=int(r["hour"]),
+            _limit=0 if (not acclimatised and not controls.unacclimatised_may_work) else per_hour,
             scheduled_work_minutes=0,
             blocked_reason=blocked,
             twl_basis=r.get("twl_basis", "forecast"),  # "measured" or a sensor-corrected forecast after a re-plan
@@ -86,12 +88,27 @@ def optimise_schedule(
 
     need = round(work_hours_needed * 60)
     cap = round(need * acclimatisation.workload_share)  # TG section 3: share of a full work assignment
-    remaining = max(0, min(cap, need) - already_worked_minutes)
-    for b in sorted(blocks, key=lambda b: (-b["allowed_work_minutes"], b["start"])):
-        if remaining <= 0 or b["allowed_work_minutes"] == 0:
+    to_place = max(0, min(cap, need) - already_worked_minutes)
+    # The work/rest limits hold over ANY 60 minutes, not just within a clock hour (15 Nov). The crew works
+    # from the start of each hour, so an hour that follows a worked hour sees that hour's minutes in its
+    # window: e.g. 60 Low-zone minutes at 05:00 then Medium work at 06:00 is 60+ minutes in a 45-minute
+    # window. So if an hour has work, the hour before it may hold at most this hour's limit; cap it, place
+    # the freed minutes elsewhere, and repeat until no neighbouring pair breaks the limit.
+    caps = [b["allowed_work_minutes"] for b in blocks]
+    for _ in range(len(blocks) + 1):
+        for b in blocks:
+            b["scheduled_work_minutes"] = 0
+        remaining = to_place
+        for i in sorted(range(len(blocks)), key=lambda i: (-caps[i], blocks[i]["start"])):
+            if remaining <= 0 or caps[i] == 0:
+                break
+            blocks[i]["scheduled_work_minutes"] = min(caps[i], remaining)
+            remaining -= blocks[i]["scheduled_work_minutes"]
+        clashes = _back_to_back(blocks)
+        if not clashes:
             break
-        b["scheduled_work_minutes"] = min(b["allowed_work_minutes"], remaining)
-        remaining -= b["scheduled_work_minutes"]
+        for i in clashes:
+            caps[i - 1] = min(caps[i - 1], blocks[i]["_limit"])
 
     scheduled = already_worked_minutes + sum(b["scheduled_work_minutes"] for b in blocks)
     in_break = sum(b["scheduled_work_minutes"] for b in blocks
@@ -115,14 +132,15 @@ def optimise_schedule(
         shortfall_minutes=max(0, need - scheduled),
         # Totals in hours and minutes, so the model quotes them instead of doing the arithmetic
         work_needed_hm=_hm(need), work_scheduled_hm=_hm(scheduled), shortfall_hm=_hm(max(0, need - scheduled)),
-        hours=blocks,
+        hours=[{k: v for k, v in b.items() if not k.startswith("_")} for b in blocks],
         zone_controls={z: dict(interventions=list(c.interventions), lone_work_allowed=c.lone_work_allowed,
                                unacclimatised_may_work=c.unacclimatised_may_work)
                        for z, c in rules.ZONE_CONTROLS.items() if any(b["twl_zone"] == z for b in blocks)},
         invariants=dict(no_work_in_midday_break=in_break == 0,
                         within_acclimatisation_share=scheduled <= cap,
                         no_unacclimatised_outside_low_zone=acclimatised or all(
-                            b["scheduled_work_minutes"] == 0 or b["twl_zone"] == rules.ZONE_LOW for b in blocks)),
+                            b["scheduled_work_minutes"] == 0 or b["twl_zone"] == rules.ZONE_LOW for b in blocks),
+                        within_rolling_work_limit=not _back_to_back(blocks)),
         rules_version=rules.RULES_VERSION,
     )
 
@@ -143,4 +161,11 @@ def _must_end_by(hour: int, break_minutes: int) -> str:
 def minutes_scheduled_before(plan: dict, hour: int) -> int:
     """Work minutes a plan scheduled before `hour`: what the crew has done if they followed it until then."""
     return sum(b["scheduled_work_minutes"] for b in plan["hours"] if int(b["start"].split(":")[0]) < hour)
+
+
+def _back_to_back(blocks: list[dict]) -> list[int]:
+    """Indexes of hours with work whose previous (adjacent) hour scheduled more than this hour's limit."""
+    return [i for i in range(1, len(blocks))
+            if blocks[i]["scheduled_work_minutes"] > 0 and blocks[i]["_hour"] == blocks[i - 1]["_hour"] + 1
+            and blocks[i - 1]["scheduled_work_minutes"] > blocks[i]["_limit"]]
 

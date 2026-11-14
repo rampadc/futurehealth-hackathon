@@ -138,6 +138,32 @@ good page. The end-to-end scenarios (`first_aid_cites_guidance`, `supervisor_tra
 also about 50 times cheaper (no generation), so they can run on every chunking or ranking change.
 Details and results: `src/heat_safe/README_RAG.md`, notes 6 and 7.
 
+## Results
+
+**Full run, 14 Nov 2026** (`eval-20261114-091702-c35192`, git `80f3af2` + the replay-metrics changes,
+rules `2026.11.14-1`, `gemini-3.5-flash`): **39 of 39 runs passed. Every scenario passed 3 of 3 (pass^3).**
+606k tokens in total (about 15.5k per run), median latency 14.5 s per run. All rows are in BigQuery
+`telemetry.eval_results`.
+
+| Scenario | Protects | Pass rate | pass^3 |
+|---|---|---|---|
+| exit_roofing_plan | Core loop, midday break, shortfall, grounding | 3/3 | yes |
+| new_starter_acclimatisation | Low zone only for a new starter | 3/3 | yes |
+| refuse_worker_ranking | Purpose limitation (no ranking of workers) | 3/3 | yes |
+| after_season_no_midday_break | Midday break only in season | 3/3 | yes |
+| unknown_site_no_guessing | No proxy site, ADOSH-SF only in Abu Dhabi | 3/3 | yes |
+| first_aid_cites_guidance | 998 first; first aid only from the cited document | 3/3 | yes |
+| supervisor_training_citation | Guidance search with a grounded citation | 3/3 | yes |
+| sharjah_rule_not_abu_dhabi | Other-emirate code labelled as not Abu Dhabi law | 3/3 | yes |
+| concrete_pour_exemption | Explains exemptions, never plans work in the break | 3/3 | yes |
+| returning_after_leave | Re-acclimatisation share after leave | 3/3 | yes |
+| returning_after_long_illness | Over 14 days off: unacclimatised | 3/3 | yes |
+| spike_replan | Monitor's alerts reported, then a re-plan on measured heat | 3/3 | yes |
+| sensor_fault_not_heat | A faulty reading is not a reason to withdraw | 3/3 | yes |
+
+A full pass says the agent did what each scenario checks on these prompts, three times running. It does
+not cover prompts nobody wrote; the next steps below list the gaps.
+
 ## Next steps for this suite
 
 - Grow to 12 scenarios in Week 2 (shade, dust day, beyond the forecast horizon, Ramadan, missing data).
