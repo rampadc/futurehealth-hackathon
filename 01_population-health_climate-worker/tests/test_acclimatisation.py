@@ -106,8 +106,10 @@ def test_outputs_carry_the_forms_people_say():
     back = agent_tools.optimise_schedule("mussafah", "2025-08-01", "labourer", 6,
                                          returned_since="2025-08-01", days_away=10)
     assert back["acclimatisation"]["workload_percent"] == 80
-    assert back["work_needed_hm"] == "6 h 0 min" and back["work_minutes_scheduled"] == 288
-    assert back["work_scheduled_hm"] == "4 h 48 min"
+    assert back["work_minutes_allowed_by_acclimatisation"] == 288  # 80 % of 6 h
+    # 280, not 288, since 15 Nov: the rolling 60-minute limit keeps neighbouring hours from running together
+    assert back["work_needed_hm"] == "6 h 0 min" and back["work_minutes_scheduled"] == 280
+    assert back["work_scheduled_hm"] == "4 h 40 min"
 
 
 @pytest.mark.parametrize("days_away,illness,day_back,low_only", [

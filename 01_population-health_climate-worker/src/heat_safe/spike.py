@@ -15,7 +15,7 @@ rule below unit-testable (tests/test_spike.py is the executable spec).
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime
 
 from heat_safe import rules
@@ -53,6 +53,8 @@ class LoopState:
     better_since: datetime | None = None  # first reading of the current run of better-zone readings
     last_action: str = CONTINUE
     last_good: Observation | None = None  # last plausible reading: the reference for the next jump check
+    withdrawn: bool = False               # a withdrawal is in force (lifted only after STEP_DOWN_AFTER_MINUTES clear)
+    clear_since: datetime | None = None   # first reading of the current run below both withdrawal limits
 
 
 @dataclass(frozen=True)
@@ -129,6 +131,9 @@ def adjust_for_observation(
 
     2. Withdrawal limit: dry bulb > rules.WITHDRAWAL_DRY_BULB_C or wet bulb > rules.WITHDRAWAL_WET_BULB_C
        (strictly greater, as in heat_stress.py). -> WITHDRAW. Zone high, 0 minutes left.
+       Once withdrawn, the crew stays withdrawn until the readings have been below both limits for
+       rules.STEP_DOWN_AFTER_MINUTES (a sensor fault does not end a withdrawal); then the High zone steps
+       down slowly as in step 3.
 
     3. Zone with hysteresis. observed = rules.twl_zone(obs.twl_wm2). Compared with state.zone:
        - stricter: it applies at once; better_since = None.          (raise fast)
@@ -158,9 +163,9 @@ def adjust_for_observation(
     withdraw: high zone  and 0 minutes. 
     """
     def decide(action: str | None, zone: str, better_since: datetime | None, reason: str,
-               keep_reading: bool = True) -> Decision:
+               keep_reading: bool = True, withdrawn: bool = False, clear_since: datetime | None = None) -> Decision:
         """Build the Decision. Shared by every branch, so minutes, action and alert follow one rule."""
-        if action == WITHDRAW:
+        if action == WITHDRAW or withdrawn:
             left = 0
         else:
             left = max(0, allowed_minutes(zone, work_intensity, acclimatised) - worked_minutes)
@@ -178,6 +183,8 @@ def adjust_for_observation(
             last_action=action,
             # A faulty reading must never become the reference for the next jump check
             last_good=obs if keep_reading else state.last_good,
+            withdrawn=withdrawn,
+            clear_since=clear_since,
         )
         return Decision(action, zone, left, alert, reason, new_state)
 
@@ -187,13 +194,25 @@ def adjust_for_observation(
         zone = stricter(one_stricter(planned_zone), state.zone)
         return decide(SENSOR_FAULT, zone, None,
                       f"Sensor fault ({fault}): {zone} zone controls until the sensor is checked",
-                      keep_reading=False)
+                      keep_reading=False, withdrawn=state.withdrawn, clear_since=state.clear_since)
 
     # 2. Withdrawal limit: everyone stops, whatever the TWL says
     if obs.dry_bulb_c > rules.WITHDRAWAL_DRY_BULB_C or obs.wet_bulb_c > rules.WITHDRAWAL_WET_BULB_C:
         return decide(WITHDRAW, rules.ZONE_HIGH, None,
                       f"Withdrawal limit: dry bulb {obs.dry_bulb_c:.1f} °C, wet bulb {obs.wet_bulb_c:.1f} °C. "
-                      "Stop outdoor work")
+                      "Stop outdoor work", withdrawn=True)
+    if state.withdrawn:
+        # Lower slowly applies to withdrawal too: readings hovering around 44 °C must not flip the crew
+        # between "withdraw" and work every few minutes (5 withdraw alerts in one hour on the replay day).
+        clear_since = state.clear_since or obs.time
+        # The zone's own step-down clock runs during the withdrawal too, so the two waits do not stack
+        observed = rules.twl_zone(obs.twl_wm2)
+        better = (state.better_since or obs.time) if ZONES.index(observed) < ZONES.index(rules.ZONE_HIGH) else None
+        if (obs.time - clear_since).total_seconds() < rules.STEP_DOWN_AFTER_MINUTES * 60:
+            return decide(WITHDRAW, rules.ZONE_HIGH, better,
+                          f"Withdrawal continues: below the limits since {clear_since:%H:%M}, "
+                          f"{rules.STEP_DOWN_AFTER_MINUTES} min needed", withdrawn=True, clear_since=clear_since)
+        state = replace(state, zone=rules.ZONE_HIGH, better_since=better)  # step 3 continues that clock
 
     # 3. Zone with hysteresis: raise fast, lower slowly
     observed = rules.twl_zone(obs.twl_wm2)
