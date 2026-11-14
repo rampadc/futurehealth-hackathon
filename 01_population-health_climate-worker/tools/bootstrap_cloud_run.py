@@ -162,19 +162,38 @@ def github_vars(repository, outputs):
         command("gh", "variable", "set", name, "--repo", repository, "--body", value)
 
 
+def repository_name():
+    repository = os.environ.get("GITHUB_REPOSITORY", "")
+    if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository):
+        raise RuntimeError("set GITHUB_REPOSITORY=owner/repo")
+    return repository
+
+
+def terraform_outputs():
+    # Reconfigure avoids migrating any local state into the existing private backend.
+    command("terraform", "init", "-input=false", "-reconfigure",
+            f"-backend-config=bucket={BUCKET}", "-backend-config=prefix=heat-safe/cloud", cwd=MODULE)
+    return json.loads(command("terraform", "output", "-json", cwd=MODULE))
+
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--check", action="store_true", help="check bootstrap permissions without changing cloud resources")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--check", action="store_true", help="check bootstrap permissions without changing cloud resources")
+    mode.add_argument("--cloud-only", action="store_true", help="set up GCP resources without GitHub administration")
+    mode.add_argument("--github-only", action="store_true", help="read existing private Terraform state and set GitHub variables")
     parser.add_argument("--presenter-member", help="explicit user:email IAM member allowed to retrieve raw access codes")
     args = parser.parse_args()
+    if args.github_only:
+        github_vars(repository_name(), terraform_outputs())
+        print("GitHub deployment variables configured from existing private Terraform state")
+        return
     preflight()
     if args.check:
         return
     if not args.presenter_member or not re.fullmatch(r"user:[^@\s]+@[^@\s]+", args.presenter_member):
         raise RuntimeError("bootstrap requires --presenter-member=user:email@example.com")
-    repository = os.environ.get("GITHUB_REPOSITORY", "")
-    if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository):
-        raise RuntimeError("set GITHUB_REPOSITORY=owner/repo")
+    repository = repository_name()
     apis = ["artifactregistry.googleapis.com", "aiplatform.googleapis.com",
             "bigquery.googleapis.com", "iam.googleapis.com", "iamcredentials.googleapis.com",
             "run.googleapis.com", "secretmanager.googleapis.com", "sqladmin.googleapis.com",
@@ -194,8 +213,8 @@ def main():
     bucket = json.loads(command("gcloud", "storage", "buckets", "describe", f"gs://{BUCKET}",
                                 "--project", PROJECT, "--format=json"))
     verify_state_bucket(bucket)
-    command("terraform", "init", "-input=false", f"-backend-config=bucket={BUCKET}",
-            "-backend-config=prefix=heat-safe/cloud", cwd=MODULE)
+    command("terraform", "init", "-input=false", "-reconfigure",
+            f"-backend-config=bucket={BUCKET}", "-backend-config=prefix=heat-safe/cloud", cwd=MODULE)
     command("terraform", "apply", "-input=false", "-auto-approve",
             f"-var=github_repository={repository}", f"-var=project={PROJECT}",
             f"-var=region={REGION}", f"-var=presenter_member={args.presenter_member}", cwd=MODULE)
@@ -224,7 +243,8 @@ def main():
                       "--image", "us-docker.pkg.dev/cloudrun/container/hello",
                       "--region", REGION, "--service-account", deploy.MAIN_RUNTIME,
                       "--no-allow-unauthenticated", "--quiet")
-    github_vars(repository, outputs)
+    if not args.cloud_only:
+        github_vars(repository, outputs)
     print("Cloud Run bootstrap complete; main placeholder is private until first app deployment")
 
 

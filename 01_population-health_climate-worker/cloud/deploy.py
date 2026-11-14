@@ -146,6 +146,9 @@ def preview_database(pr, password, revoke_sessions=False):
             sql(port, f"CREATE ROLE {name} LOGIN PASSWORD '{password}';")
         else:
             sql(port, f"ALTER ROLE {name} LOGIN PASSWORD '{password}';")
+        # PG16 grants CREATEROLE creators ADMIN but no inherited privileges.
+        # Inheriting only this role lets DROP DATABASE FORCE signal its sessions.
+        sql(port, f"GRANT {name} TO heat_preview_provisioner WITH INHERIT TRUE, SET FALSE;")
         if sql(port, f"SELECT 1 FROM pg_database WHERE datname = '{name}';") != "1":
             sql(port, f"CREATE DATABASE {name};")
         sql(port, f"REVOKE ALL ON DATABASE {name} FROM PUBLIC; GRANT CONNECT, CREATE, TEMP ON DATABASE {name} TO {name};")
@@ -171,6 +174,9 @@ def delete_preview_database(pr):
     name = f"heat_pr_{pr}"
     with sql_proxy() as port:
         if sql(port, f"SELECT 1 FROM pg_database WHERE datname = '{name}';") == "1":
+            if sql(port, f"SELECT 1 FROM pg_roles WHERE rolname = '{name}';") == "1":
+                # Repair pre-existing previews created before the membership fix.
+                sql(port, f"GRANT {name} TO heat_preview_provisioner WITH INHERIT TRUE, SET FALSE;")
             sql(port, f"DROP DATABASE {name} WITH (FORCE);")
         if sql(port, f"SELECT 1 FROM pg_roles WHERE rolname = '{name}';") == "1":
             sql(port, f"DROP ROLE {name};")

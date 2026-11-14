@@ -2,6 +2,7 @@ import hashlib
 import json
 import subprocess
 import unittest
+from contextlib import nullcontext
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -9,6 +10,27 @@ import deploy
 
 
 class DeploymentTests(unittest.TestCase):
+    def test_preview_role_membership_is_scoped_for_force_cleanup(self):
+        queries = []
+
+        def fake_sql(_port, query, database="postgres"):
+            queries.append(query)
+            if "FROM pg_roles" in query:
+                return "1"
+            if "FROM pg_database" in query:
+                return "1"
+            return ""
+
+        with patch.object(deploy, "sql_proxy", return_value=nullcontext(15432)), \
+             patch.object(deploy, "sql", side_effect=fake_sql), \
+             patch.object(deploy.subprocess, "run", return_value=SimpleNamespace(returncode=0)):
+            deploy.preview_database(27, "x" * 40)
+            deploy.delete_preview_database(27)
+        grant = "GRANT heat_pr_27 TO heat_preview_provisioner WITH INHERIT TRUE, SET FALSE;"
+        self.assertEqual(queries.count(grant), 2)
+        self.assertIn("DROP DATABASE heat_pr_27 WITH (FORCE);", queries)
+        self.assertNotIn("pg_signal_backend", " ".join(queries))
+
     def test_missing_ok_does_not_hide_permission_failure(self):
         denied = subprocess.CompletedProcess(["gcloud"], 1, b"", b"PERMISSION_DENIED")
         with patch.object(deploy.subprocess, "run", return_value=denied):

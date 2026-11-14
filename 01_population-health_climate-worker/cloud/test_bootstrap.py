@@ -29,9 +29,24 @@ class BootstrapTests(unittest.TestCase):
         with patch.object(bootstrap, "preflight"), \
              patch.object(bootstrap.deploy, "gcloud") as cloud, \
              patch.dict(bootstrap.os.environ, {"GITHUB_REPOSITORY": "owner/repo"}), \
-             patch.object(sys, "argv", ["bootstrap_cloud_run.py"]):
+             patch.object(sys, "argv", ["bootstrap_cloud_run.py", "--cloud-only"]):
             with self.assertRaisesRegex(RuntimeError, "presenter-member"):
                 bootstrap.main()
+        cloud.assert_not_called()
+
+    def test_github_only_reads_state_without_gcp_preflight_or_writes(self):
+        outputs = {"wif_provider": {"value": "provider"}}
+        with patch.object(bootstrap, "preflight") as preflight, \
+             patch.object(bootstrap, "terraform_outputs", return_value=outputs) as state, \
+             patch.object(bootstrap, "github_vars") as github, \
+             patch.object(bootstrap.deploy, "gcloud") as cloud, \
+             patch.dict(bootstrap.os.environ, {"GITHUB_REPOSITORY": "owner/repo"}), \
+             patch.object(sys, "argv", ["bootstrap_cloud_run.py", "--github-only"]), \
+             redirect_stdout(io.StringIO()):
+            bootstrap.main()
+        preflight.assert_not_called()
+        state.assert_called_once_with()
+        github.assert_called_once_with("owner/repo", outputs)
         cloud.assert_not_called()
 
     def test_missing_iam_permission_stops_before_any_write(self):
