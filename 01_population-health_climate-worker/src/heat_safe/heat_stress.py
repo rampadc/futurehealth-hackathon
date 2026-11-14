@@ -69,16 +69,28 @@ def compute_heat_stress(
     out["withdrawal_limit"] = withdrawal
 
     data_issue = env[REQUIRED].isna().any(axis=1) | np.isnan(capped)
-    zones = [rules.twl_zone(t) if not bad else rules.ZONE_HIGH for t, bad in zip(capped, data_issue)]
-    out["twl_zone"] = zones
-    out["twl_zone_shade"] = [rules.twl_zone(t) if not bad else rules.ZONE_HIGH
-                             for t, bad in zip(capped_shade, data_issue)]
-    out["band"] = [rules.ZONE_BAND[z].name.lower() for z in zones]
     out["data_issue"] = np.where(data_issue, "missing weather input: band set to red (fail-safe)", "")
 
     local = pd.DatetimeIndex(out["time"]).tz_localize(None)
     out["midday_break_minutes"] = [rules.midday_break_minutes(t) for t in local]
     out["heat_programme_required"] = ta >= rules.HEAT_PROGRAMME_TRIGGER_C
+    out = rezone(out)
+    out["source"] = env.get("source", "")
+    out["rules_version"] = rules.RULES_VERSION
+    return out
+
+
+def rezone(hs: pd.DataFrame) -> pd.DataFrame:
+    """(Re)compute everything that follows from TWL: zones, band, controls and work minutes per hour.
+
+    compute_heat_stress calls it once; sensor.apply_measurements calls it again after replacing TWL
+    with measured values. A row with a `data_issue` is High whatever its TWL (fail-safe).
+    """
+    out = hs.copy()
+    bad = out["data_issue"] != ""
+    out["twl_zone"] = [rules.ZONE_HIGH if b else rules.twl_zone(t) for t, b in zip(out["twl_wm2"], bad)]
+    out["twl_zone_shade"] = [rules.ZONE_HIGH if b else rules.twl_zone(t) for t, b in zip(out["twl_shade_wm2"], bad)]
+    out["band"] = [rules.ZONE_BAND[z].name.lower() for z in out["twl_zone"]]
 
     controls = out["twl_zone"].map(rules.ZONE_CONTROLS)
     out["work_rest_light"] = controls.map(lambda c: c.work_rest_light)
@@ -90,9 +102,6 @@ def compute_heat_stress(
     open_minutes = 60 - out["midday_break_minutes"]
     out["work_minutes_light"] = (open_minutes * controls.map(lambda c: c.work_minutes_per_hour_light) / 60).round().astype(int)
     out["work_minutes_heavy"] = (open_minutes * controls.map(lambda c: c.work_minutes_per_hour_heavy) / 60).round().astype(int)
-
-    out["source"] = env.get("source", "")
-    out["rules_version"] = rules.RULES_VERSION
     return out
 
 
