@@ -3,22 +3,41 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
+import httpx
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from .service import CaseError, CaseService, PEOPLE
+from . import access, storage
+
+
+def check_hosted_config() -> None:
+    if os.getenv('K_SERVICE') and (not storage.database_url() or not os.getenv('STATIC_DIR')):
+        raise RuntimeError('Cloud Run requires PostgreSQL configuration and the bundled frontend')
+
+
+check_hosted_config()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    access.initialize()
     await app.state.service.replay_unfinished()
     yield
 
-app = FastAPI(title='Heat Safe local case', lifespan=lifespan)
+app = FastAPI(title='Heat Safe case', lifespan=lifespan,
+              docs_url=None if access.required() else '/docs',
+              redoc_url=None if access.required() else '/redoc',
+              openapi_url=None if access.required() else '/openapi.json')
 app.state.service = CaseService()
+app.middleware('http')(access.protect)
+app.include_router(access.router)
 
 
 @app.exception_handler(CaseError)
@@ -59,6 +78,18 @@ async def health():
     return {'ok':True,'service':'heat-safe-case'}
 
 
+@app.get('/api/ready')
+async def ready():
+    try:
+        storage.ping()
+        async with httpx.AsyncClient(timeout=2) as client:
+            response = await client.get(f'{app.state.service.solver_url}/health')
+            response.raise_for_status()
+    except Exception:
+        return JSONResponse({'ok':False}, status_code=503)
+    return {'ok':True}
+
+
 @app.get('/api/personas')
 async def personas():
     return list(PEOPLE.values())
@@ -71,10 +102,11 @@ async def session(request: Request):
 
 
 @app.post('/api/session')
-async def choose_session(body: SessionInput):
+async def choose_session(body: SessionInput, request: Request):
     token,person=app.state.service.create_session(body.persona_id)
+    access.bind_persona(request, token)
     response=JSONResponse({'person':person})
-    response.set_cookie('heat_persona',token,httponly=True,samesite='lax',secure=False)
+    response.set_cookie('heat_persona',token,httponly=True,samesite='lax',secure=access.required())
     return response
 
 
@@ -106,6 +138,8 @@ async def retry(request: Request, body: RetryInput):
 @app.get('/api/case/events')
 async def events(request: Request):
     service=app.state.service
+    if service.actor_from_request(request) is None:
+        raise CaseError(401, 'Choose a local persona')
     q=asyncio.Queue(maxsize=20)
     service._listeners.add(q)
     async def stream():
@@ -159,3 +193,33 @@ except ImportError:
     pass
 else:
     app.include_router(assistant_router)
+
+
+class FrontendAssets(StaticFiles):
+    async def get_response(self, path, scope):
+        response = await super().get_response(path, scope)
+        response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+        return response
+
+
+def serve_frontend(directory: str, application: FastAPI = app) -> None:
+    root = Path(directory).resolve()
+    if not (root / 'index.html').is_file():
+        raise RuntimeError('STATIC_DIR does not contain the built frontend')
+    if (root / 'assets').is_dir():
+        application.mount('/assets', FrontendAssets(directory=root / 'assets'), name='frontend-assets')
+
+    @application.get('/{path:path}', include_in_schema=False)
+    async def frontend(path: str):
+        if path == 'api' or path.startswith('api/') or path in {'docs', 'redoc', 'openapi.json', 'guide'} or path.startswith('guide/'):
+            raise HTTPException(404, 'Not found')
+        candidate = (root / path).resolve()
+        if candidate.is_relative_to(root) and candidate.is_file():
+            return FileResponse(candidate)
+        if Path(path).suffix:
+            raise HTTPException(404, 'Not found')
+        return FileResponse(root / 'index.html', headers={'Cache-Control':'no-cache'})
+
+
+if os.getenv('STATIC_DIR'):
+    serve_frontend(os.environ['STATIC_DIR'])

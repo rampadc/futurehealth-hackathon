@@ -15,3 +15,7 @@ Run the opt-in end-to-end check with a local solver running:
 ```sh
 RUN_LIVE_APPLICATION=1 uv run pytest -q tests/test_application_live_journey.py
 ```
+
+For hosted deployment, set `STATIC_DIR` to the built frontend directory and supply PostgreSQL via `DATABASE_URL` or the `DATABASE_HOST/NAME/USER/PASSWORD` components. The app retains SQLite for local use. Shared-code access is automatically required on Cloud Run; its digests are `HEAT_ACCESS_CODE_SHA256` and `HEAT_PRESENTER_CODE_SHA256`. `GET/POST/DELETE /api/access` manages the eight-hour perimeter session; presenter APIs require the presenter role independently of the selected persona.
+
+`/api/health` is a public liveness endpoint; `/api/ready` additionally checks the database and loopback solver. API routes do not fall through to the SPA, and the private presenter guide is never served. The runtime supervisor starts the solver in its isolated Python environment and terminates both processes if either exits.

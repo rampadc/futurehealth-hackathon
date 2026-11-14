@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 import pytest
 
 from heat_safe.application.service import CaseService
+from heat_safe.application import storage
 
 pytestmark = pytest.mark.skipif(os.getenv('RUN_LIVE_APPLICATION') != '1', reason='opt-in live solver journey')
 BASE = datetime.fromisoformat('2025-08-04T08:00:00+04:00')
@@ -24,8 +25,21 @@ def execute(coro):
     return asyncio.run(coro)
 
 
-def test_live_shift_journey(tmp_path):
-    service=CaseService(tmp_path/'journey.sqlite3')
+def make_service(tmp_path, name, monkeypatch):
+    url = os.getenv('POSTGRES_TEST_URL')
+    if not url:
+        return CaseService(tmp_path / name)
+    from sqlalchemy.engine import make_url
+    assert make_url(url).database.endswith('_test'), 'Live tests require a disposable *_test database'
+    monkeypatch.setenv('DATABASE_URL', url)
+    service = CaseService()
+    with storage.connection() as db:
+        db.execute('TRUNCATE events, runs, cases, sessions RESTART IDENTITY CASCADE')
+    return service
+
+
+def test_live_shift_journey(tmp_path, monkeypatch):
+    service=make_service(tmp_path, 'journey.sqlite3', monkeypatch)
     current=execute(service.start())
     assert current['capture']['response']['heat']['held_task_ids']==['civil_heavy']
     assert current['runs'][0]['graph_events'][-1]=='blocked_path'
@@ -113,8 +127,8 @@ def test_live_shift_journey(tmp_path):
 @pytest.mark.parametrize(('minute','expected'),[
     (6,'reading_stale'), (270,'midday_restriction'),
 ])
-def test_live_stale_and_midday_holds(tmp_path, minute, expected):
-    service=CaseService(tmp_path/f'hold-{minute}.sqlite3')
+def test_live_stale_and_midday_holds(tmp_path, minute, expected, monkeypatch):
+    service=make_service(tmp_path, f'hold-{minute}.sqlite3', monkeypatch)
     execute(service.start())
     execute(service.advance_clock(time_of(1)))
     execute(service.command('P03',{'command_id':'issue','expected_version':1,'action':'issue','payload':{}}))

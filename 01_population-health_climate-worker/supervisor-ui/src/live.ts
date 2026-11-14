@@ -27,6 +27,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     headers: { ...(init?.body ? { 'Content-Type': 'application/json' } : {}), ...init?.headers },
   });
   if (!response.ok) {
+    if (response.status === 401) window.dispatchEvent(new Event('heat-access-expired'));
     let message = `Request failed (${response.status})`;
     try {
       const body = await response.json();

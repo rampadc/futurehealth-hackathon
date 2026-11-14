@@ -1,0 +1,181 @@
+"""Small DB-API boundary shared by the case ledger and live assistant."""
+from __future__ import annotations
+
+import os
+import sqlite3
+import asyncio
+import atexit
+from contextlib import asynccontextmanager
+from pathlib import Path
+from functools import lru_cache
+
+
+def database_url() -> str | None:
+    explicit = os.getenv('DATABASE_URL')
+    if explicit:
+        return explicit
+    if not os.getenv('DATABASE_HOST'):
+        return None
+    from sqlalchemy.engine import URL
+
+    return URL.create('postgresql', username=os.environ['DATABASE_USER'],
+                      password=os.environ['DATABASE_PASSWORD'], host=None,
+                      database=os.environ['DATABASE_NAME'],
+                      query={'host': os.environ['DATABASE_HOST']}).render_as_string(hide_password=False)
+
+
+def _postgres_sql(query: str) -> str:
+    """Compile static qmark SQL to psycopg placeholders outside SQL literals."""
+    output = []
+    quote = None
+    index = 0
+    while index < len(query):
+        char = query[index]
+        if quote:
+            output.append(char)
+            if char == quote:
+                if index + 1 < len(query) and query[index + 1] == quote:
+                    output.append(query[index + 1])
+                    index += 1
+                else:
+                    quote = None
+        elif char in ("'", '"'):
+            quote = char
+            output.append(char)
+        elif char == '?':
+            output.append('%s')
+        else:
+            output.append(char)
+        index += 1
+    if quote:
+        raise ValueError('Unterminated SQL literal')
+    return ''.join(output)
+
+
+class Row(dict):
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            return tuple(self.values())[key]
+        return super().__getitem__(key)
+
+
+def _row_factory(cursor):
+    if cursor.description is None:
+        return lambda values: values
+    keys = [column.name for column in cursor.description]
+    return lambda values: Row(zip(keys, values))
+
+
+class PostgresConnection:
+    def __init__(self, url: str, schema: str):
+        if schema not in {'app', 'adk'}:
+            raise ValueError('Unknown database schema')
+        try:
+            self._context = _pool(url).connection(timeout=10)
+            self._db = self._context.__enter__()
+            self._db.execute(f'SET search_path TO {schema}')
+        except Exception as error:
+            if hasattr(self, '_db'):
+                self._context.__exit__(type(error), error, error.__traceback__)
+            raise ConnectionError('PostgreSQL connection unavailable') from None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, kind, value, traceback):
+        return self._context.__exit__(kind, value, traceback)
+
+    def execute(self, query: str, parameters=()):
+        if query == 'BEGIN IMMEDIATE':
+            # All case writers take one transaction-scoped lock, including start/reset.
+            return self._db.execute('SELECT pg_advisory_xact_lock(17104217)')
+        return self._db.execute(_postgres_sql(query), parameters)
+
+    def commit(self):
+        self._db.commit()
+
+
+@lru_cache(maxsize=2)
+def _pool(url: str):
+    from psycopg_pool import ConnectionPool
+
+    pool = ConnectionPool(conninfo=url.replace('postgresql+psycopg://', 'postgresql://', 1),
+                          min_size=0, max_size=8, open=True, kwargs={'row_factory': _row_factory,
+                                                           'connect_timeout': 5})
+    atexit.register(pool.close)
+    return pool
+
+
+def connection(db_path: str | Path | None = None, *, schema: str = 'app'):
+    url = database_url() if db_path is None else None
+    if url:
+        return PostgresConnection(url, schema)
+    path = Path(db_path or os.getenv('HEAT_CASE_DB') or
+                (Path(os.getenv('HEAT_SAFE_LOCAL_DIR', Path.cwd() / '.local' / 'heat-safe')) / 'cases.sqlite3'))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    db = sqlite3.connect(path, timeout=15)
+    db.row_factory = sqlite3.Row
+    db.execute('PRAGMA journal_mode=WAL')
+    db.execute('PRAGMA foreign_keys=ON')
+    return db
+
+
+def initialize(db_path: str | Path | None = None):
+    if db_path is None and database_url():
+        with connection() as db:
+            db.execute('SELECT pg_advisory_xact_lock(17104218)')
+            existing = {row['nspname'] for row in db.execute(
+                "SELECT nspname FROM pg_namespace WHERE nspname IN ('app', 'adk')")}
+            for schema in {'app', 'adk'} - existing:
+                db.execute(f'CREATE SCHEMA {schema}')
+            db.execute('SET search_path TO app')
+            for statement in (
+                'CREATE TABLE IF NOT EXISTS cases(id TEXT PRIMARY KEY, version INTEGER NOT NULL, clock TEXT NOT NULL, active INTEGER NOT NULL)',
+                'CREATE UNIQUE INDEX IF NOT EXISTS one_active_case ON cases(active) WHERE active=1',
+                'CREATE TABLE IF NOT EXISTS events(id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY, case_id TEXT NOT NULL REFERENCES cases(id), command_id TEXT NOT NULL, actor_id TEXT NOT NULL, action TEXT NOT NULL, occurred_at TEXT NOT NULL, payload TEXT NOT NULL, UNIQUE(case_id,command_id))',
+                'CREATE TABLE IF NOT EXISTS sessions(token TEXT PRIMARY KEY, persona_id TEXT NOT NULL)',
+                'CREATE TABLE IF NOT EXISTS runs(seq BIGINT GENERATED BY DEFAULT AS IDENTITY UNIQUE, id TEXT PRIMARY KEY, case_id TEXT NOT NULL REFERENCES cases(id), version INTEGER NOT NULL, status TEXT NOT NULL, started_at TEXT NOT NULL, finished_at TEXT, request TEXT NOT NULL, response TEXT, http_status INTEGER, graph_events TEXT, error TEXT, applied INTEGER NOT NULL DEFAULT 0)',
+                'CREATE INDEX IF NOT EXISTS runs_case ON runs(case_id,version)',
+                'CREATE TABLE IF NOT EXISTS chat_threads(thread_key TEXT PRIMARY KEY, session_id TEXT NOT NULL)',
+                'CREATE TABLE IF NOT EXISTS chat_messages(id TEXT PRIMARY KEY, thread_key TEXT NOT NULL, author TEXT NOT NULL, text TEXT NOT NULL, metadata TEXT NOT NULL, recorded_at TEXT NOT NULL)',
+                'CREATE TABLE IF NOT EXISTS agent_runs(id TEXT PRIMARY KEY, case_id TEXT NOT NULL, persona_id TEXT NOT NULL, recorded_at TEXT NOT NULL, detail TEXT NOT NULL)',
+            ):
+                db.execute(statement)
+
+
+def ping() -> bool:
+    with connection() as db:
+        db.execute('SELECT 1').fetchone()
+    return True
+
+
+@asynccontextmanager
+async def chat_lock(key: str):
+    """Serialize one ADK conversation across workers and Cloud Run revisions."""
+    with connection() as db:
+        while not db.execute('SELECT pg_try_advisory_xact_lock(hashtextextended(?, 0)) AS acquired', (key,)).fetchone()['acquired']:
+            await asyncio.sleep(0.1)
+        yield
+
+
+@asynccontextmanager
+async def run_lock(key: str):
+    with connection() as db:
+        acquired = db.execute('SELECT pg_try_advisory_lock(hashtextextended(?, 1)) AS acquired', (key,)).fetchone()['acquired']
+        db.commit()  # A session lock survives commit; the graph call holds no open transaction.
+        try:
+            yield acquired
+        finally:
+            if acquired:
+                db.execute('SELECT pg_advisory_unlock(hashtextextended(?, 1))', (key,))
+
+
+def adk_database_url() -> str | None:
+    if not database_url():
+        return None
+    from sqlalchemy.engine import make_url
+
+    url = make_url(os.getenv('ADK_DATABASE_URL') or database_url())
+    if url.get_backend_name() != 'postgresql':
+        raise ValueError('ADK_DATABASE_URL must use PostgreSQL')
+    return url.set(drivername='postgresql+asyncpg').render_as_string(hide_password=False)

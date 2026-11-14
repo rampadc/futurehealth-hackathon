@@ -181,7 +181,7 @@ function Activity({ story }: { story: StoryState }) {
   </Panel>;
 }
 
-export default function App() {
+export default function App({ onLockAccess }: { onLockAccess?: () => void } = {}) {
   const [person, setPerson] = useState<Persona | null>(null);
   const [caseView, setCaseView] = useState<CaseView | null>(null);
   const [initialising, setInitialising] = useState(true);
@@ -288,6 +288,7 @@ export default function App() {
       <Typography variant="body2" color="text.secondary" sx={{ flexGrow: 1, minWidth: 0 }}>Sandline site · Civil area</Typography>
       {caseView && <Button ref={assistantButton} variant={assistantOpen ? 'contained' : 'outlined'} startIcon={<span aria-hidden="true">✦</span>} aria-label={assistantOpen ? 'Hide planning assistant' : 'Open planning assistant'} aria-expanded={assistantOpen} onClick={() => setAssistantOpen(open => !open)}>Ask assistant</Button>}
       <Identity person={person} compact /><Button disabled={busy} onClick={() => void signOut()}>Sign out</Button>
+      {onLockAccess && <Button onClick={onLockAccess}>Lock access</Button>}
     </Toolbar></AppBar>
     <Box sx={{ display: 'flex', flex: 1, minWidth: 0 }}>
       <Box sx={{ display: 'grid', gridTemplateColumns: theme => `${theme.spacing(27)} minmax(0, 1fr)`, flex: 1, minWidth: 0 }}>

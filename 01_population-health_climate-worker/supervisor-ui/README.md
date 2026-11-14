@@ -24,3 +24,13 @@ Cases, commands, events and solver runs persist under ignored `.local/heat-safe/
 Runtime proposals come from the existing operational solver. Its `applied: false` results are kept separate from human observations and confirmations. The app records supplier coordination without sending messages and records review without authorising field restart. Clinical notes remain outside the shared operations record.
 
 See [LIVE_VERIFICATION.md](LIVE_VERIFICATION.md) for the executed cross-persona journey, live Gemini checks, solver branches and restart proof.
+
+## Hosted runtime
+
+The Cloud Run image serves this build from FastAPI on the same origin. Browser requests use `/api`; Vite is only for local development. The hosted entry code is separate from named persona selection: the viewer code permits the product story, while the presenter code additionally permits `/demo-control` and all presenter APIs. Lock access ends the entry session; ordinary Sign out still switches personas. Codes never enter the frontend build.
+
+Cloud Run requires PostgreSQL and bundled static files, and always enables the code gate. Access cookies expire after eight hours; rotating either configured code digest revokes existing access sessions. Local development keeps SQLite and does not require a code unless `HEAT_REQUIRE_ACCESS=true`.
+
+Cloud configuration accepts `DATABASE_URL`, or `DATABASE_HOST`, `DATABASE_NAME`, `DATABASE_USER`, `DATABASE_PASSWORD`. PostgreSQL application tables use schema `app`; ADK sessions use `adk`. `ADK_DATABASE_URL` can override the derived ADK connection. Existing local SQLite databases are not uploaded or imported automatically.
+
+The separate [CI/CD PR #6](https://github.com/rampadc/futurehealth-hackathon/pull/6) supplies `Dockerfile.cloudrun`, deployment workflows and the owner-run bootstrap under `cloud/`. It must merge and complete bootstrap before PR previews can deploy.

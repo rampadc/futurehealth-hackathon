@@ -16,6 +16,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from heat_safe.paths import ROOT
+from heat_safe.application import storage
 
 router = APIRouter()
 _locks: dict[str, asyncio.Lock] = {}
@@ -28,6 +29,8 @@ def local_dir() -> Path:
 
 
 def connect():
+    if storage.database_url():
+        return storage.connection(schema='app')
     db = sqlite3.connect(local_dir() / 'assistant.sqlite3')
     db.row_factory = sqlite3.Row
     db.executescript('''
@@ -55,19 +58,20 @@ def scoped_case(request: Request):
 
 def thread_id(key: str) -> str:
     with connect() as db:
-        db.execute('INSERT OR IGNORE INTO chat_threads VALUES (?, ?)', (key, 'chat-' + uuid.uuid4().hex))
-        return db.execute('SELECT session_id FROM chat_threads WHERE thread_key=?', (key,)).fetchone()[0]
+        db.execute('INSERT INTO chat_threads VALUES (?, ?) ON CONFLICT DO NOTHING', (key, 'chat-' + uuid.uuid4().hex))
+        return db.execute('SELECT session_id FROM chat_threads WHERE thread_key=?', (key,)).fetchone()['session_id']
 
 
 def save_message(key: str, message_id: str, author: str, text: str, metadata=None):
     with connect() as db:
-        db.execute('INSERT OR IGNORE INTO chat_messages VALUES (?, ?, ?, ?, ?, ?)',
+        db.execute('INSERT INTO chat_messages VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING',
                    (message_id, key, author, text, json.dumps(metadata or {}), datetime.now(timezone.utc).isoformat()))
 
 
 def messages(key: str):
     with connect() as db:
-        rows = db.execute('SELECT * FROM chat_messages WHERE thread_key=? ORDER BY recorded_at, rowid', (key,)).fetchall()
+        order = 'recorded_at, id' if storage.database_url() else 'recorded_at, rowid'
+        rows = db.execute(f'SELECT * FROM chat_messages WHERE thread_key=? ORDER BY {order}', (key,)).fetchall()
     return [dict(id=r['id'], author=r['author'], text=r['text'], **json.loads(r['metadata'])) for r in rows]
 
 
@@ -82,6 +86,8 @@ def reset_history(request: Request):
     actor, view = scoped_case(request)
     key = f"{view['case_id']}:{actor}"
     with connect() as db:
+        if storage.database_url():
+            db.execute('SELECT pg_advisory_xact_lock(hashtextextended(?, 0))', (key,))
         db.execute('DELETE FROM chat_messages WHERE thread_key=?', (key,))
         db.execute('DELETE FROM chat_threads WHERE thread_key=?', (key,))
     return {'messages': []}
@@ -209,7 +215,8 @@ async def chat(command: ChatCommand, request: Request):
     key = f"{command.case_id}:{actor}"
 
     async def stream():
-        async with _locks.setdefault(key, asyncio.Lock()):
+        lock = storage.chat_lock(key) if storage.database_url() else _locks.setdefault(key, asyncio.Lock())
+        async with lock:
             # Retry an interrupted HTTP response without generating a duplicate model answer.
             existing = next((m for m in messages(key) if m['id'] == command.message_id + '-answer'), None)
             if existing:
@@ -227,7 +234,10 @@ async def chat(command: ChatCommand, request: Request):
                 from google.adk.sessions import DatabaseSessionService
                 from google.genai import types
                 agent, sources = build_agent(request.app.state.service, actor, command.case_id)
-                sessions = DatabaseSessionService(db_url=f'sqlite+aiosqlite:///{local_dir() / "adk-sessions.sqlite3"}')
+                adk_url = storage.adk_database_url()
+                sessions = (DatabaseSessionService(db_url=adk_url,
+                    connect_args={'server_settings': {'search_path': 'adk'}}, pool_size=2, max_overflow=0)
+                    if adk_url else DatabaseSessionService(db_url=f'sqlite+aiosqlite:///{local_dir() / "adk-sessions.sqlite3"}'))
                 sid = thread_id(key)
                 session = await sessions.get_session(app_name='heat_safe_cases', user_id=actor, session_id=sid)
                 if session is None:
@@ -253,7 +263,7 @@ async def chat(command: ChatCommand, request: Request):
                 detail.update(status='completed', grounding=grounding, session_id=sid, case_version=view['version'])
                 yield sse('answer', {'id': command.message_id + '-answer', 'text': answer, **metadata})
             except Exception as error:
-                detail.update(status='failed', error=f'{type(error).__name__}: {str(error)[:1000]}')
+                detail.update(status='failed', error=type(error).__name__)
                 yield sse('error', {'message': 'The live assistant could not complete this request. Your case and tasks are unchanged. Please try again.'})
             finally:
                 try:

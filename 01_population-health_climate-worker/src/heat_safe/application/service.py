@@ -7,13 +7,13 @@ import json
 import math
 import os
 import secrets
-import sqlite3
 import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 
 from .workflow import run_graph
+from . import storage
 
 SEED = json.loads((Path(__file__).parent / 'seed.json').read_text())
 PERSONAS = [
@@ -96,21 +96,22 @@ def encoded(value: Any) -> str:
 
 class CaseService:
     def __init__(self, db_path: str | Path | None = None, solver_url: str | None = None):
+        self._postgres = db_path is None and bool(storage.database_url())
         self.db_path = str(db_path or os.getenv('HEAT_CASE_DB') or (Path(os.getenv('HEAT_SAFE_LOCAL_DIR', Path.cwd() / '.local' / 'heat-safe')) / 'cases.sqlite3'))
         self.solver_url = (solver_url or os.getenv('HEAT_SOLVER_URL', 'http://127.0.0.1:8765')).rstrip('/')
-        Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
+        if not self._postgres: Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
+        self._run_order = 'seq' if self._postgres else 'rowid'
         self._init()
         self._listeners: set[asyncio.Queue] = set()
         self._retry_lock = asyncio.Lock()
 
     def _conn(self):
-        conn = sqlite3.connect(self.db_path, timeout=15)
-        conn.row_factory = sqlite3.Row
-        conn.execute('PRAGMA journal_mode=WAL')
-        conn.execute('PRAGMA foreign_keys=ON')
-        return conn
+        return storage.connection(None if self._postgres else self.db_path)
 
     def _init(self):
+        if self._postgres:
+            storage.initialize()
+            return
         with self._conn() as c:
             c.executescript('''
                 CREATE TABLE IF NOT EXISTS cases(id TEXT PRIMARY KEY, version INTEGER NOT NULL, clock TEXT NOT NULL, active INTEGER NOT NULL);
@@ -146,7 +147,7 @@ class CaseService:
         return [dict(row) | {'payload':json.loads(row['payload'])} for row in c.execute('SELECT * FROM events WHERE case_id=? ORDER BY id',(case_id,))]
 
     def _latest(self, c, case_id, version):
-        return c.execute("SELECT * FROM runs WHERE case_id=? AND version=? AND status='completed' AND applied=1 ORDER BY rowid DESC LIMIT 1",(case_id,version)).fetchone()
+        return c.execute(f"SELECT * FROM runs WHERE case_id=? AND version=? AND status='completed' AND applied=1 ORDER BY {self._run_order} DESC LIMIT 1",(case_id,version)).fetchone()
 
     def _project(self, case, events):
         q = copy.deepcopy(SEED)
@@ -227,16 +228,19 @@ class CaseService:
 
     async def start(self):
         with self._conn() as c:
+            if self._postgres: c.execute('BEGIN IMMEDIATE')
             row = self._active(c)
-            if row: return self.read_case(None)
-            cid = str(uuid.uuid4())
-            c.execute('INSERT INTO cases VALUES (?,?,?,1)',(cid,0,SEED['decision_at']))
+            if not row:
+                cid = str(uuid.uuid4())
+                c.execute('INSERT INTO cases VALUES (?,?,?,1)',(cid,0,SEED['decision_at']))
+        if row: return self.read_case(None)
         await self.recompute(cid,0)
         self._notify(cid,0)
         return self.read_case(None)
 
     async def reset(self):
         with self._conn() as c:
+            if self._postgres: c.execute('BEGIN IMMEDIATE')
             c.execute('UPDATE cases SET active=0 WHERE active=1')
             cid = str(uuid.uuid4())
             c.execute('INSERT INTO cases VALUES (?,?,?,1)',(cid,0,SEED['decision_at']))
@@ -256,15 +260,17 @@ class CaseService:
         if actor not in {'P02','P03','C01'}: raise CaseError(403,'Calculation retry belongs to an operational lead')
         async with self._retry_lock:
             with self._conn() as c:
+                if self._postgres: c.execute('BEGIN IMMEDIATE')
                 case=self._active(c)
                 if not case: raise CaseError(404,'No active case')
                 if expected_version!=case['version']: raise CaseError(409,'Case version changed')
-                latest_run=c.execute('SELECT * FROM runs WHERE case_id=? AND version=? ORDER BY rowid DESC LIMIT 1',
+                latest_run=c.execute(f'SELECT * FROM runs WHERE case_id=? AND version=? ORDER BY {self._run_order} DESC LIMIT 1',
                                      (case['id'],case['version'])).fetchone()
                 capture=self._latest(c,case['id'],case['version'])
                 if not self._retryable(latest_run,capture): raise CaseError(409,'Calculation is not retryable')
                 case_id,version=case['id'],case['version']
-            await self.recompute(case_id,version)
+            if not await self.recompute(case_id,version):
+                raise CaseError(409,'Calculation is already processing')
             return self.read_case(actor)
 
     async def command(self, actor: str | None, body: dict):
@@ -276,6 +282,7 @@ class CaseService:
         p = body.get('payload') or {}
         if not isinstance(p,dict): raise CaseError(422,'payload must be an object')
         self._validate_payload(action,p)
+        repeated = False
         with self._conn() as c:
             c.execute('BEGIN IMMEDIATE')
             case = self._active(c)
@@ -283,32 +290,37 @@ class CaseService:
             prior = c.execute('SELECT action,actor_id,payload FROM events WHERE case_id=? AND command_id=?',(case['id'],command_id)).fetchone()
             if prior:
                 if prior['action'] != action or prior['actor_id'] != actor or prior['payload'] != encoded(p): raise CaseError(409,'command_id already used')
-                return self.read_case(actor)
-            if body.get('expected_version') != case['version']: raise CaseError(409,'Case version changed')
-            if action=='fresh' and at(p['reading']['received_at'])>at(case['clock']): raise CaseError(422,'Reading has not arrived at case clock')
-            if action=='activity' and any(at(i['ends_at'])>at(case['clock']) for i in p['intervals']): raise CaseError(422,'Observed activity extends beyond case clock')
-            if action in {'readiness','leila'} and any(at(i['valid_until'])<=at(case['clock']) for i in p['confirmations']): raise CaseError(422,'Readiness must remain valid after confirmation')
-            if action=='activity': self._validate_activity_continuity(case,self._events(c,case['id']),p['intervals'])
-            done = {r['action'] for r in c.execute('SELECT action FROM events WHERE case_id=?',(case['id'],))}
-            if action in done and action not in {'activity','readiness','fresh',*RESTART_ACTIONS}: raise CaseError(409,'Action already recorded')
-            if not all(prereq in done for prereq in ACTIONS[action][2]): raise CaseError(409,'Prerequisite evidence missing')
-            if action == 'review':
-                latest=self._latest(c,case['id'],case['version'])
-                if not latest or json.loads(latest['response']).get('restart',{}).get('status')!='ready_for_human_review': raise CaseError(409,'Restart evidence is not ready for human review')
-            if action == 'assign':
-                latest=self._latest(c,case['id'],case['version'])
-                if not latest: raise CaseError(409,'Current solver plan unavailable')
-                plan=json.loads(latest['response']).get('crew_rest',{})
-                proposed={i['person_id'] for i in plan.get('intervals',[]) if i['kind']=='work' and i['task_id']=='workshop_prep'}
-                if plan.get('planning_status')!='planned' or not json.loads(latest['response']).get('plan_check',{}).get('accepted') or not proposed:
-                    raise CaseError(409,'Workshop plan remains blocked or unchecked')
-                if not p.get('person_ids') or not set(p['person_ids']) <= proposed: raise CaseError(422,'Assignment needs workers in current solver plan')
-            c.execute('INSERT INTO events(case_id,command_id,actor_id,action,occurred_at,payload) VALUES (?,?,?,?,?,?)',(case['id'],command_id,actor,action,case['clock'],encoded(p)))
-            version = case['version']+1
-            c.execute('UPDATE cases SET version=? WHERE id=?',(version,case['id']))
+                repeated = True
+            if not repeated and body.get('expected_version') != case['version']: raise CaseError(409,'Case version changed')
+            if not repeated:
+                self._record_command(c, case, action, command_id, actor, p)
+                version = case['version']+1
+        if repeated: return self.read_case(actor)
         await self.recompute(case['id'],version)
         self._notify(case['id'],version)
         return self.read_case(actor)
+
+    def _record_command(self, c, case, action, command_id, actor, p):
+        if action=='fresh' and at(p['reading']['received_at'])>at(case['clock']): raise CaseError(422,'Reading has not arrived at case clock')
+        if action=='activity' and any(at(i['ends_at'])>at(case['clock']) for i in p['intervals']): raise CaseError(422,'Observed activity extends beyond case clock')
+        if action in {'readiness','leila'} and any(at(i['valid_until'])<=at(case['clock']) for i in p['confirmations']): raise CaseError(422,'Readiness must remain valid after confirmation')
+        if action=='activity': self._validate_activity_continuity(case,self._events(c,case['id']),p['intervals'])
+        done = {r['action'] for r in c.execute('SELECT action FROM events WHERE case_id=?',(case['id'],))}
+        if action in done and action not in {'activity','readiness','fresh',*RESTART_ACTIONS}: raise CaseError(409,'Action already recorded')
+        if not all(prereq in done for prereq in ACTIONS[action][2]): raise CaseError(409,'Prerequisite evidence missing')
+        if action == 'review':
+            latest=self._latest(c,case['id'],case['version'])
+            if not latest or json.loads(latest['response']).get('restart',{}).get('status')!='ready_for_human_review': raise CaseError(409,'Restart evidence is not ready for human review')
+        if action == 'assign':
+            latest=self._latest(c,case['id'],case['version'])
+            if not latest: raise CaseError(409,'Current solver plan unavailable')
+            plan=json.loads(latest['response']).get('crew_rest',{})
+            proposed={i['person_id'] for i in plan.get('intervals',[]) if i['kind']=='work' and i['task_id']=='workshop_prep'}
+            if plan.get('planning_status')!='planned' or not json.loads(latest['response']).get('plan_check',{}).get('accepted') or not proposed:
+                raise CaseError(409,'Workshop plan remains blocked or unchecked')
+            if not p.get('person_ids') or not set(p['person_ids']) <= proposed: raise CaseError(422,'Assignment needs workers in current solver plan')
+        c.execute('INSERT INTO events(case_id,command_id,actor_id,action,occurred_at,payload) VALUES (?,?,?,?,?,?)',(case['id'],command_id,actor,action,case['clock'],encoded(p)))
+        c.execute('UPDATE cases SET version=? WHERE id=?',(case['version']+1,case['id']))
 
     def _validate_payload(self, action, p):
         if action == 'recover':
@@ -393,10 +405,29 @@ class CaseService:
         self._notify(case['id'],version)
         return self.read_case(None)
 
-    async def recompute(self, case_id: str, version: int):
+    async def recompute(self, case_id: str, version: int, *, recovery: bool = False):
+        if self._postgres:
+            async with storage.run_lock(f'{case_id}:{version}') as acquired:
+                if acquired:
+                    await self._recompute_claimed(case_id, version, recovery=recovery)
+                    return True
+            return False
+        else:
+            await self._recompute_claimed(case_id, version, recovery=recovery)
+            return True
+
+    async def _recompute_claimed(self, case_id: str, version: int, *, recovery: bool = False):
         with self._conn() as c:
+            if self._postgres: c.execute('BEGIN IMMEDIATE')
             case=c.execute('SELECT * FROM cases WHERE id=?',(case_id,)).fetchone()
-            if case is None or case['version']!=version: return
+            if case is None or case['version']!=version:
+                if self._postgres:
+                    c.execute("UPDATE runs SET status='interrupted',error='Case version changed during graph invocation' WHERE case_id=? AND version=? AND status='processing'",(case_id,version))
+                return
+            if self._postgres:
+                existing=c.execute(f'SELECT status FROM runs WHERE case_id=? AND version=? ORDER BY {self._run_order} DESC LIMIT 1',(case_id,version)).fetchone()
+                if recovery and existing and existing['status']!='processing': return
+                c.execute("UPDATE runs SET status='interrupted',error='Run owner exited before completion' WHERE case_id=? AND version=? AND status='processing'",(case_id,version))
             events=self._events(c,case_id)
             request=self._project(case,events)
             run_id=str(uuid.uuid4())
@@ -410,21 +441,24 @@ class CaseService:
             c.execute('BEGIN IMMEDIATE')
             current=c.execute('SELECT version FROM cases WHERE id=?',(case_id,)).fetchone()
             applied=int(current is not None and current['version']==version and status==200)
-            c.execute('UPDATE runs SET status=?,finished_at=?,response=?,http_status=?,graph_events=?,error=?,applied=? WHERE id=?',('completed' if status==200 else 'failed',request['decision_at'],encoded(response),status,encoded(graph_events),error,applied,run_id))
+            c.execute("UPDATE runs SET status=?,finished_at=?,response=?,http_status=?,graph_events=?,error=?,applied=? WHERE id=? AND status='processing'",('completed' if status==200 else 'failed',request['decision_at'],encoded(response),status,encoded(graph_events),error,applied,run_id))
         self._notify(case_id,version)
 
     async def replay_unfinished(self):
         with self._conn() as c:
-            rows=c.execute("SELECT DISTINCT case_id,version FROM runs WHERE status='processing' UNION SELECT id,version FROM cases WHERE active=1 AND NOT EXISTS (SELECT 1 FROM runs WHERE runs.case_id=cases.id AND runs.version=cases.version)").fetchall()
-            c.execute("UPDATE runs SET status='interrupted',error='Process restarted during graph invocation' WHERE status='processing'")
+            if self._postgres:
+                rows=c.execute("SELECT DISTINCT case_id,version FROM runs WHERE status='processing' UNION SELECT id,version FROM cases WHERE active=1 AND NOT EXISTS (SELECT 1 FROM runs WHERE runs.case_id=cases.id AND runs.version=cases.version)").fetchall()
+            else:
+                rows=c.execute("SELECT DISTINCT case_id,version FROM runs WHERE status='processing' UNION SELECT id,version FROM cases WHERE active=1 AND NOT EXISTS (SELECT 1 FROM runs WHERE runs.case_id=cases.id AND runs.version=cases.version)").fetchall()
+                c.execute("UPDATE runs SET status='interrupted',error='Process restarted during graph invocation' WHERE status='processing'")
         for row in rows:
-            await self.recompute(row['case_id'],row['version'])
+            await self.recompute(row['case_id'],row['version'], recovery=self._postgres)
 
     def runs(self):
         with self._conn() as c:
             case=self._active(c)
             if not case: return []
-            rows=c.execute('SELECT id,version,status,started_at,finished_at,request,response,http_status,graph_events,error,applied FROM runs WHERE case_id=? ORDER BY rowid DESC',(case['id'],)).fetchall()
+            rows=c.execute(f'SELECT id,version,status,started_at,finished_at,request,response,http_status,graph_events,error,applied FROM runs WHERE case_id=? ORDER BY {self._run_order} DESC',(case['id'],)).fetchall()
         return [dict(row)|{'request':json.loads(row['request']),'response':json.loads(row['response'] or 'null'),
                            'graph_events':json.loads(row['graph_events'] or '[]'),'applied':bool(row['applied'])} for row in rows]
 
@@ -468,7 +502,7 @@ class CaseService:
             if not case: return None
             events=self._events(c,case['id'])
             capture_row=self._latest(c,case['id'],case['version'])
-            run_rows=c.execute('SELECT id,version,status,http_status,error,graph_events,applied FROM runs WHERE case_id=? ORDER BY rowid DESC LIMIT 8',(case['id'],)).fetchall()
+            run_rows=c.execute(f'SELECT id,version,status,http_status,error,graph_events,applied FROM runs WHERE case_id=? ORDER BY {self._run_order} DESC LIMIT 8',(case['id'],)).fetchall()
         done={e['action'] for e in events}
         current_request=self._project(case,events)
         current_snapshot=current_request['snapshot']

@@ -36,3 +36,9 @@ The browser uses the same-origin application API through Vite. Google credential
 Live guidance retrieval also completed through the assistant, with returned source citation and URL passing grounding checks.
 
 A real `optimizer_unknown` result occurred during the long browser run. The product displayed the calculation problem while retaining protective decisions. Retrying from Rashid’s workspace produced a planned, accepted-check result at the same case version 37, with identical human events and `applied: false`; `civil_heavy` remained held.
+
+## Cloud readiness implementation (14 November 2026)
+
+PostgreSQL tests cover shared case/history, repeat-safe commands, cross-process calculation ownership and restart recovery; the access tests run against SQLite and PostgreSQL and exercise viewer/presenter separation, origin checks, expiry, throttling and code rotation. UI gate tests and the production build pass. A local combined container smoke test verifies frontend/readiness success, anonymous case rejection and the absence of `/guide`.
+
+Cloud deployment remains unverified: the one-time IAM bootstrap preflight under both CLI and ADC identities reports missing project IAM, custom role, federation, service-policy and dataset-policy grants. It fails before mutation. No GCP resources have been created by this implementation.
