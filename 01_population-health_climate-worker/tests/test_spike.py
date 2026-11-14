@@ -124,6 +124,22 @@ def test_a_reading_at_the_same_zone_also_restarts_the_clock():
     assert ds[-1].zone == "high"  # counted from 12, not 5: one minute short
 
 
+def test_the_plans_own_step_down_between_hours_is_not_a_deviation():
+    """07:00 planned High and measured High; 08:00 planned Medium and measured Medium: nothing to hold back."""
+    d1 = decide(obs(0, HIGH_TWL), planned=rules.ZONE_HIGH, worked=0)
+    t8 = Observation(T0 + timedelta(minutes=5), MEDIUM_TWL, 40.0, 28.0)
+    d2 = adjust_for_observation(t8, rules.ZONE_MEDIUM, 0, "heavy", True, d1.state)
+    assert (d1.action, d2.action, d2.zone, d2.alert) == (CONTINUE, CONTINUE, "medium", False)
+
+
+def test_a_spike_still_carries_into_the_next_hour():
+    """A deviation in force at the hour change is held (lower slowly), even if the new hour's plan is lower."""
+    d1 = decide(obs(0, HIGH_TWL), planned=rules.ZONE_MEDIUM, worked=0)          # spike: tighten to High
+    t = Observation(T0 + timedelta(minutes=5), MEDIUM_TWL, 40.0, 28.0)
+    d2 = adjust_for_observation(t, rules.ZONE_MEDIUM, 0, "heavy", True, d1.state)
+    assert (d1.action, d2.zone) == (TIGHTEN, "high")
+
+
 # --- 5. Alerts are news, not repeats -----------------------------------------------------------------
 
 def test_the_same_action_alerts_once():

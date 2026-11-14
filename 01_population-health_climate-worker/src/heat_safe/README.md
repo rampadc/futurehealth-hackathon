@@ -114,3 +114,24 @@ What the replay day taught us:
   raises the zone by one and alerts, but it never triggers a withdrawal and never relaxes anything.
 - **The correction is one-sided.** Hotter than forecast lowers the next hours' TWL (fading over 3 hours).
   A cooler reading never raises it.
+
+**Connected to the agent (14 Nov).** `get_site_sensor` gives the agent what the sensor measured per hour
+against the forecast, the faulty readings it excluded, and (given the crew) what the risk monitor already
+told the crew plus whether it recommends a re-plan (`sensor.replan_recommendation`: measured worse than
+the plan for 30 min, or a withdrawal). `optimise_schedule(replan_from, use_site_sensor)` then re-plans
+from the next whole hour. Eval scenarios: `spike_replan`, `sensor_fault_not_heat`.
+
+What connecting it taught us:
+- **The re-plan nearly used a faulty reading.** It dropped only self-reported faults, so the sun-struck
+  70 °C would have become an hour's "worst TWL". Now both loops use one check (`spike.reading_fault`).
+- **Hold back deviations, not the plan's own changes.** The fast loop first held the plan's High zone
+  (07:00) into its Medium hour (08:00) and sent a "tighten" before any spike. "Lower slowly" now applies
+  only while a deviation is in force.
+- **The synthetic feed must match the forecast's assumptions** (each hour's values held, shade globe =
+  air temperature). Otherwise its own drift fires alerts and the spike is no longer the only cause.
+- **Give numbers in the form people say them.** The agent wrote "the remaining 150 minutes" (its own
+  subtraction), "115 W/m² (High)" (114.96 rounded up across the threshold) and "19 W/m² worse" (the tool
+  had -19). Fixed in the tools, not the guardrail: `work_still_needed_hm`, `rules.display_twl` (rounds
+  down, so the number always agrees with its zone) and positive `worse_than_forecast_wm2`.
+- **The first eval failure was the eval.** `within_acclimatisation_share` only applies to a
+  reduced-share worker; the scenario's crew was acclimatised.

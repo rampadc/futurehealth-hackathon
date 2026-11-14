@@ -65,3 +65,10 @@ def test_acclimatisation_schedule_reaches_full_load_by_day_5():
     assert rules.ACCLIMATISATION_NEW[1] == 0.20
     assert rules.ACCLIMATISATION_EXPERIENCED[1] == 0.50
     assert rules.ACCLIMATISATION_NEW[rules.FULLY_ACCLIMATISED_DAY] == 1.0
+
+
+def test_displayed_twl_always_agrees_with_its_zone():
+    """114.96 W/m² is High; showing it as 115 (the Medium threshold) would contradict the zone beside it."""
+    import numpy as np
+    for twl in np.arange(100.0, 160.0, 0.01):
+        assert rules.twl_zone(rules.display_twl(twl)) == rules.twl_zone(twl), twl
