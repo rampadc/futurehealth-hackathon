@@ -272,17 +272,19 @@ def replay_fast_loop(measured: pd.DataFrame, plan: dict, acclimatised: bool = Tr
                 alert, held_back = True, None
         elif d.action != CONTINUE:
             held_back = None
+        step = 5  # minutes to the next reading (the synthetic feed's interval)
+        worked_now = 0
+        if d.action not in (REST_NOW, WITHDRAW) and b["scheduled_work_minutes"] > 0:
+            # never more than the limit allows now, nor more than the plan scheduled for this clock hour
+            worked_now = min(step, left)
+            if worked_now:
+                work_log.append((o.time, worked_now))
+                worked_hour += worked_now
         measured_zone = "" if d.action == SENSOR_FAULT else rules.twl_zone(o.twl_wm2)
         rows.append(dict(time=o.time, twl_wm2=o.twl_wm2, dry_bulb_c=o.dry_bulb_c, planned_zone=b["twl_zone"],
                          measured_zone=measured_zone, action=d.action, zone=d.zone, worked_minutes=worked,
-                         work_minutes_left=left, plan_minutes_left=plan_left, alert=alert, reason=d.reason))
-        step = 5  # minutes to the next reading (the synthetic feed's interval)
-        if d.action not in (REST_NOW, WITHDRAW) and b["scheduled_work_minutes"] > 0:
-            # never more than the limit allows now, nor more than the plan scheduled for this clock hour
-            minutes = min(step, left)
-            if minutes:
-                work_log.append((o.time, minutes))
-                worked_hour += minutes
+                         work_minutes_left=left, plan_minutes_left=plan_left, alert=alert, reason=d.reason,
+                         worked_now=worked_now))  # minutes the crew worked from this reading to the next
     return pd.DataFrame(rows)
 
 
