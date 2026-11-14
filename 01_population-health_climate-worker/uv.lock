@@ -433,6 +433,7 @@ dependencies = [
     { name = "pandas" },
     { name = "pyarrow" },
     { name = "pypdf" },
+    { name = "pyyaml" },
     { name = "requests" },
     { name = "thermofeel" },
 ]
@@ -453,6 +454,7 @@ requires-dist = [
     { name = "pandas", specifier = ">=3.1.0" },
     { name = "pyarrow", specifier = ">=26.0.0" },
     { name = "pypdf", specifier = ">=6.21.4" },
+    { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "requests", specifier = ">=2.34.2" },
     { name = "thermofeel", specifier = "==2.3.0" },
 ]
