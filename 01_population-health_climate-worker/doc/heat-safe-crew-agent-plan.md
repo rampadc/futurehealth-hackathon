@@ -32,7 +32,7 @@ Each of the six "Your solution should" items maps to a concrete feature and a de
 | 3 | Worker-first governance | Opt-in consent per data type, data minimisation, BigQuery row/column-level security, retention limits, purpose-limitation guardrail that refuses disciplinary or ranking queries | Supervisor asks "who complains most?" and the agent refuses; the refusal is logged |
 | 4 | Field-ready operation | Offline-capable worker app (PWA) with an on-device rule table, SMS fallback, sensor-loss fail-safe that *raises* the risk band, stale-data detection, dust and PPE factors | Network cut mid-shift; the app still warns from cached forecast and rules; data syncs later |
 | 5 | Supervisor decision support | Crew/site dashboard: risk by crew and hour, recommended breaks, rotation and task timing; individuals shown only as "needs rest now", never with vitals or symptoms | Morning plan moves roofing to 05:30–10:00 and adds a rotation |
-| 6 | Safety and productivity measures | Metrics computed in BigQuery from a full-summer backtest with synthetic crews: lead time, false alarms, adherence, symptoms/incidents, escalations, compliance, lost work time | Metrics tab next to the Trust tab |
+| 6 | Safety and productivity measures | **Built (15 Nov):** a replay-day comparison of one crew under no plan, the morning plan, and Heat-Safe, judged against measured heat: minutes over the ADOSH-SF work limit, work by zone, midday-break and withdrawal compliance, detection delay, faults caught, false withdrawals, work delivered, shortfall, minutes cut and moved, alerts (`doc/metrics_replay_2025-08-01.md`). Full-summer backtest: roadmap | The comparison table |
 
 ## Architecture
 
@@ -222,7 +222,9 @@ The worker app and the alert path must work without the LLM and without the netw
 
 ## Safety and productivity measures
 
-All metrics are computed in BigQuery views and shown in a Looker Studio Metrics tab. For the prototype they come from a **backtest over a full past Abu Dhabi summer (Jun–Sep) with synthetic crews**. The synthetic heat-illness events come from a documented simulation, and we label them that way.
+**Built for the prototype (15 Nov): one replayed day, not a backtest.** `tools/replay_metrics.py` compares the same crew (steel fixers in shade, 5 h) under A. no plan, B. the morning plan only and C. Heat-Safe, judged against the measured (synthetic) sensor heat, and writes `doc/metrics_replay_2025-08-01.md`. Result: minutes worked over the ADOSH-SF work limit A 280, B 20, C 0; C delivers 255 of 300 minutes, and the 45 it does not deliver is reported as a shortfall, not squeezed into unsafe heat. No illness is simulated, so the safety measure is limit exceedance, not illness prevented. Adherence, symptoms and escalations need the worker app (roadmap).
+
+*Original target (roadmap):* all metrics computed in BigQuery views and shown in a Looker Studio Metrics tab, from a **backtest over a full past Abu Dhabi summer (Jun–Sep) with synthetic crews**, with synthetic heat-illness events from a documented simulation, labelled as such.
 
 | Metric | Definition (prototype) |
 |---|---|
