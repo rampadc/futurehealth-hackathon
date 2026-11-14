@@ -2,6 +2,7 @@
 
     uv run python tools/replay_heat_spike.py                 # steel fixers in shade, Mussafah, 1 Aug 2025
     uv run python tools/replay_heat_spike.py --replan-at 09:00 --save
+    uv run python tools/replay_heat_spike.py --alert-mode production   # or HEAT_SAFE_ALERT_MODE=production
 
 1. Morning plan from the forecast (optimise_schedule, shade TWL).
 2. Fast loop over the SYNTHETIC sensor feed (spike 08:15-09:15, faulty reading 09:40): every decision
@@ -42,6 +43,8 @@ def main() -> None:
     ap.add_argument("--hours", type=float, default=5)
     ap.add_argument("--replan-at", default="09:00", help="local HH:MM when the supervisor re-plans")
     ap.add_argument("--save", action="store_true")
+    ap.add_argument("--alert-mode", choices=("demo", "production"), default=None,
+                    help="how unreviewed translations are sent (default: HEAT_SAFE_ALERT_MODE, else demo)")
     args = ap.parse_args()
 
     weather = get_replay(args.date, sites=[args.site])
@@ -68,11 +71,11 @@ def main() -> None:
                                   work_hours_needed=args.hours, shade=True, from_hour=from_hour,
                                   already_worked_minutes=worked)
 
-    print(f"\n2. Fast loop, 08:00-10:00 (SYNTHETIC sensor feed): what each person received ({mode()} mode)")
+    print(f"\n2. Fast loop, 08:00-10:00 (SYNTHETIC sensor feed): what each person received ({args.alert_mode or mode()} mode)")
     print(f"   The monitor follows the morning plan, then the re-plan from {replanned['replanned_from']}.")
     log = replay_fast_loop(measured, plan, start="08:00", end="10:00", replans=(replanned,))
     langs = load_templates()["languages"]
-    sent = alerts_for(log, crew=f"{args.role.capitalize()} crew")
+    sent = alerts_for(log, crew=f"{args.role.capitalize()} crew", alert_mode=args.alert_mode)
     switch_shown = False
     for a in sent:
         if a.recipient == "supervisor":
