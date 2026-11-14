@@ -41,6 +41,7 @@ jobs:
     needs: validate
     if: needs.validate.outputs.kind == 'preview' && needs.validate.outputs.ready == 'true'
     runs-on: ubuntu-24.04
+    environment: heat-safe-preview
     timeout-minutes: 40
     concurrency:
       group: heat-safe-preview-${{ needs.validate.outputs.pr }}
@@ -50,7 +51,6 @@ jobs:
       actions: read
       pull-requests: read
       issues: write
-      id-token: write
     env:
       GITHUB_TOKEN: ${{ github.token }}
       GOOGLE_CLOUD_PROJECT: ${{ vars.GCP_PROJECT_ID }}
@@ -77,8 +77,7 @@ jobs:
         run: python3 01_population-health_climate-worker/cloud/ci/verify_artifact.py '${{ runner.temp }}/image-artifact' "$SOURCE_SHA" "$RUN_ID"
       - uses: google-github-actions/auth@b7593ed2efd1c1617e1b0254da33b86225adb2a5 # v2.1.12
         with:
-          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
-          service_account: ${{ vars.GCP_PREVIEW_DEPLOY_SA }}
+          credentials_json: ${{ secrets.GCP_PREVIEW_DEPLOY_KEY }}
       - uses: google-github-actions/setup-gcloud@77e7a554d41e2ee56fc945c52dfd3f33d12def9a # v2.1.4
         with:
           project_id: ${{ vars.GCP_PROJECT_ID }}

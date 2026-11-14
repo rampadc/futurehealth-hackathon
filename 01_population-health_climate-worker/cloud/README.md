@@ -1,10 +1,10 @@
 # Heat-Safe Cloud Run control plane
 
-This module is separate from `infra/`, which belongs to the earlier supervisor demo. It creates private main and preview Artifact Registry repositories, a zonal PostgreSQL 16 Cloud SQL instance, four fixed service accounts, UAE Secret Manager secrets, and GitHub OIDC federation. The application services and per-PR database resources are managed by `deploy.py`.
+This module is separate from `infra/`, which belongs to the earlier supervisor demo. It creates private main and preview Artifact Registry repositories, a zonal PostgreSQL 16 Cloud SQL instance, four fixed service accounts, UAE Secret Manager secrets, and two scoped deployment identities authenticated with service-account JSON keys. The application services and per-PR database resources are managed by `deploy.py`.
 
 ## Owner bootstrap
 
-An account able to create IAM roles, service accounts, workload identity pools, and project IAM bindings must run the cloud setup. The current Editor account lacks those permissions. Bootstrap has **not** been run yet. The GCP owner and GitHub repository administrator can run separate modes with their own credentials; neither needs to share OAuth tokens.
+An account able to create IAM roles, service accounts, and project IAM bindings must run the cloud setup. The current Editor account lacks those permissions. Bootstrap has **not** been run yet. The GCP owner and GitHub repository administrator can run separate modes with their own credentials; neither needs to share OAuth tokens.
 
 For the GCP owner: `gcloud`, `terraform >=1.5`, PostgreSQL `psql`, and `cloud-sql-proxy` v2 on `PATH`; Cloud SQL and Artifact Registry available in `me-central1`. Authenticate the CLI and Application Default Credentials as the **same GCP bootstrap principal**, and select the exact project. The script checks both credential sets for required IAM permissions before any writes:
 
@@ -24,16 +24,24 @@ python3 01_population-health_climate-worker/tools/bootstrap_cloud_run.py --cloud
 
 Cloud setup creates a versioned GCS Terraform state bucket with uniform access and public access prevention, enables APIs, applies this module, initializes PostgreSQL roles and schemas, and creates random access codes and credentials. It creates a **private** main Cloud Run placeholder so the main deployment identity needs update permission only. A first successful main deployment replaces it and enables the application gate.
 
-The GitHub repository administrator uses their own GCP ADC identity with **read access to the existing private state bucket** and their own `gh` login. `--github-only` reads Terraform outputs from that bucket and sets repository variables; it does not run GCP bootstrap or require GCP owner IAM privileges:
+The GitHub repository administrator uses their own GCP ADC identity with **read access to the existing private state bucket** and their own `gh` login. `--github-only` reads Terraform outputs, validates two administrator-provided service-account key files against the exact deployment identities, and uploads them directly to GitHub environment secrets. It does not create cloud keys or require IAM administration. Transfer those files through a private channel; never put them in the repository or chat:
 
 ```sh
 gcloud auth application-default login --account=YOUR_GCP_STATE_READER_ACCOUNT
 gh auth login
 export GITHUB_REPOSITORY=rampadc/futurehealth-hackathon
-python3 01_population-health_climate-worker/tools/bootstrap_cloud_run.py --github-only
+python3 01_population-health_climate-worker/tools/bootstrap_cloud_run.py --github-only \
+  --main-key-file /private/path/main-deploy.json \
+  --preview-key-file /private/path/preview-deploy.json
 ```
 
-The default mode still runs both stages for one person who has both sets of permissions. The two-actor sequence avoids sharing credentials.
+The default mode runs both stages for one person with GCP setup and GitHub administration permissions. It creates missing deployment keys in a private temporary directory, uploads JSON through stdin to GitHub, and removes local copies. A failed upload deletes the newly created Google key. Existing environment secrets are retained on reruns rather than minting more keys. Keys are never Terraform resources or state outputs.
+
+The two GitHub environments are `heat-safe-main` and `heat-safe-preview`, with secrets `GCP_MAIN_DEPLOY_KEY` and `GCP_PREVIEW_DEPLOY_KEY` respectively. Both allow only the exact `main` branch and require no manual approval. Setup verifies that restriction before uploading keys and fails if the repository's GitHub plan does not support it. There are no deployment keys in repository-wide secrets, and unprivileged PR CI does not reference these environments.
+
+For separate administrators, after cloud setup the GCP administrator creates one JSON key for `heat-main-deploy@future-health-513202.iam.gserviceaccount.com` and one for `heat-preview-deploy@future-health-513202.iam.gserviceaccount.com`, using `gcloud iam service-accounts keys create PRIVATE_FILE --iam-account=ACCOUNT`. Use a private directory outside the checkout (`umask 077`), transfer files privately, and delete both copies after installation. Cloud organization policy must allow service-account key creation.
+
+To rotate a key, create a replacement for the same service account, update its environment secret using `gh secret set SECRET_NAME --repo rampadc/futurehealth-hackathon --env ENVIRONMENT < PRIVATE_FILE`, verify an automated run succeeds, then delete the old key with `gcloud iam service-accounts keys delete OLD_KEY_ID --iam-account=ACCOUNT`. Delete the replacement file. Do not revoke an in-use key before verifying the replacement. In an exposure incident, disable/delete the affected key immediately and replace its environment secret.
 
 Raw main access and presenter codes are in `heat-safe-main-gate-code` and `heat-safe-main-presenter-code`. The explicit `--presenter-member` account can read only those two raw main code secrets and preview `heat-safe-pr-N-codes` versions. It cannot read the main DB password, preview DB passwords, or SQL provisioner credential through these grants. The current designated operator is `user:ishka.quark@gmail.com`; pass a different member explicitly if that changes. Their SHA-256 digests are separate secrets mounted as Cloud Run environment variables. The main DB password is mounted from Secret Manager; the main deployer does not read it. Preview code pairs are in `heat-safe-pr-N-codes` and preview DB passwords in `heat-safe-pr-N-db-password`. Preview services receive only code digests; the preview DB password is passed as a Cloud Run environment variable for that one service. The preview runtime identity has no Secret Manager permissions.
 
@@ -63,7 +71,7 @@ The controller appends `service=` and `url=` to `GITHUB_OUTPUT` only after a bou
 
 The main runtime can access Vertex AI, BigQuery jobs, the `vectors` dataset, Cloud SQL, and only its own digest/password secrets. Preview runtime has the same AI, dataset, and SQL access but no Secret Manager or Cloud Run read access. The SQL preview provisioner has `CREATEDB` and `CREATEROLE`, but no PostgreSQL admin or main database access. `PUBLIC` database access is revoked for main and each preview database. Runtime roles own only their `app` and `adk` schemas, and database `CREATE` is revoked after schema setup.
 
-Creating a Cloud Run service or Secret Manager secret has no existing target resource to condition, so the preview deployer has project-level create permission. Existing-resource update/delete and secret access are conditioned to the preview name prefix. The GitHub identity provider accepts only the specified repository and owner numeric IDs, the main ref, and exact trusted workflow paths/events. `deploy-main.yml` alone maps to the main deployer principal set; `deploy-preview.yml`, `cleanup.yml`, and `reconcile.yml` map to the preview set. Test these IAM denials with the deployed identities before releasing the workflow.
+Creating a Cloud Run service or Secret Manager secret has no existing target resource to condition, so the preview deployer has project-level create permission. Existing-resource update/delete and secret access are conditioned to the preview name prefix. Deployment keys are stored only in main-branch-restricted GitHub environments. Trusted default-branch workflows retain their event, provenance, open-PR and SHA checks before authentication; they never execute PR source with keys available. A service-account key itself is not bound to a workflow or repository, so its theft allows use outside GitHub until revoked. Keep GitHub repository administration restricted and rotate keys regularly. Test these IAM denials with the deployed identities before releasing the workflow.
 
 Local validation:
 

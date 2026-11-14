@@ -8,11 +8,9 @@ locals {
     "aiplatform.googleapis.com",
     "bigquery.googleapis.com",
     "iam.googleapis.com",
-    "iamcredentials.googleapis.com",
     "run.googleapis.com",
     "secretmanager.googleapis.com",
     "sqladmin.googleapis.com",
-    "sts.googleapis.com",
   ])
   main_service   = "heat-safe-app"
   preview_prefix = "heat-safe-pr-"
@@ -226,46 +224,6 @@ resource "google_project_iam_member" "cloudsql_client" {
     title      = "HeatSafeInstanceOnly"
     expression = "resource.name == 'projects/${var.project}/instances/${google_sql_database_instance.app.name}' && resource.service == 'sqladmin.googleapis.com'"
   }
-}
-
-resource "google_iam_workload_identity_pool" "github" {
-  workload_identity_pool_id = "heat-safe-github"
-  display_name              = "Heat-Safe trusted GitHub workflows"
-  depends_on                = [google_project_service.apis]
-}
-resource "google_iam_workload_identity_pool_provider" "github" {
-  workload_identity_pool_id          = google_iam_workload_identity_pool.github.workload_identity_pool_id
-  workload_identity_pool_provider_id = "github-actions"
-  display_name                       = "Trusted default branch only"
-  attribute_mapping = {
-    "google.subject"                = "assertion.sub"
-    "attribute.repository_id"       = "assertion.repository_id"
-    "attribute.repository_owner_id" = "assertion.repository_owner_id"
-    "attribute.deployer"            = "assertion.event_name == 'workflow_run' && assertion.workflow_ref == '${var.github_repository}/.github/workflows/deploy-main.yml@refs/heads/main' ? 'main' : 'preview'"
-  }
-  attribute_condition = <<-EOT
-    assertion.repository_id == '${var.github_repository_id}' &&
-    assertion.repository_owner_id == '${var.github_owner_id}' &&
-    assertion.repository == '${var.github_repository}' &&
-    assertion.ref == 'refs/heads/main' &&
-    ((assertion.event_name == 'workflow_run' && assertion.workflow_ref == '${var.github_repository}/.github/workflows/deploy-main.yml@refs/heads/main') ||
-     (assertion.event_name == 'workflow_run' && assertion.workflow_ref == '${var.github_repository}/.github/workflows/deploy-preview.yml@refs/heads/main') ||
-     (assertion.event_name == 'pull_request_target' && assertion.workflow_ref == '${var.github_repository}/.github/workflows/cleanup.yml@refs/heads/main') ||
-     ((assertion.event_name == 'schedule' || assertion.event_name == 'workflow_dispatch') && assertion.workflow_ref == '${var.github_repository}/.github/workflows/reconcile.yml@refs/heads/main'))
-  EOT
-  oidc {
-    issuer_uri = "https://token.actions.githubusercontent.com"
-  }
-}
-resource "google_service_account_iam_member" "github_impersonation" {
-  for_each = {
-    main    = google_service_account.main_deploy.name
-    preview = google_service_account.preview_deploy.name
-  }
-  service_account_id = each.value
-  role               = "roles/iam.workloadIdentityUser"
-  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/attribute.deployer/${each.key}"
-  depends_on         = [google_iam_workload_identity_pool_provider.github]
 }
 
 resource "google_artifact_registry_repository_iam_member" "main_push" {

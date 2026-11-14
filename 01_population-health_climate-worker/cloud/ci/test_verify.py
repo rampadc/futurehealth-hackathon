@@ -7,6 +7,7 @@ import unittest
 from pathlib import Path
 
 HERE = Path(__file__).parent
+WORKFLOWS = HERE.parents[2] / ".github" / "workflows"
 
 
 def load(name):
@@ -135,6 +136,30 @@ class EventGuardTests(unittest.TestCase):
         finally:
             comment.request = original
         self.assertEqual(calls, [("GET", "pulls/5")])
+
+
+class WorkflowAuthTests(unittest.TestCase):
+    def test_cloud_auth_uses_only_environment_scoped_keys(self):
+        deployments = {
+            "deploy-main.yml": ("heat-safe-main", "GCP_MAIN_DEPLOY_KEY"),
+            "deploy-preview.yml": ("heat-safe-preview", "GCP_PREVIEW_DEPLOY_KEY"),
+            "cleanup.yml": ("heat-safe-preview", "GCP_PREVIEW_DEPLOY_KEY"),
+            "reconcile.yml": ("heat-safe-preview", "GCP_PREVIEW_DEPLOY_KEY"),
+        }
+        for path in WORKFLOWS.glob("*.yml"):
+            source = path.read_text()
+            with self.subTest(workflow=path.name):
+                self.assertNotIn("id-token: write", source)
+                self.assertNotIn("workload_identity_provider:", source)
+                self.assertNotIn("service_account:", source)
+                if path.name in deployments:
+                    environment, secret = deployments[path.name]
+                    self.assertEqual(source.count(f"environment: {environment}"), 1)
+                    self.assertEqual(source.count(f"credentials_json: ${{{{ secrets.{secret} }}}}"), 1)
+                    self.assertEqual(source.count("google-github-actions/auth@"), 1)
+                else:
+                    self.assertNotIn("credentials_json:", source)
+                    self.assertNotIn("environment:", source)
 
 
 class ArtifactTests(unittest.TestCase):
