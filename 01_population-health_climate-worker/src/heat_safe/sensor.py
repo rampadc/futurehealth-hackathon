@@ -214,7 +214,7 @@ def available_work_minutes(work_log: list[tuple], now, limit: int, window_min: i
 
 
 def replay_fast_loop(measured: pd.DataFrame, plan: dict, acclimatised: bool = True,
-                     start: str = "00:00", end: str = "24:00") -> pd.DataFrame:
+                     start: str = "00:00", end: str = "24:00", replans: tuple[dict, ...] = ()) -> pd.DataFrame:
     """Run the fast loop (spike.adjust_for_observation) over sensor readings against a stored plan.
 
     The crew is modelled simply: from the start of each hour they work until the plan's minutes for that
@@ -225,15 +225,28 @@ def replay_fast_loop(measured: pd.DataFrame, plan: dict, acclimatised: bool = Tr
     of work in 80 under a "20 min work / 40 min rest" cycle. Now the minutes worked in the last 60 minutes
     count, whichever hour they fell in. Returns one row per reading: the decision, the zone in force, and
     `worked_minutes` (worked in the last 60 minutes). This is what the risk-monitor job does on live readings.
-    """
-    from heat_safe.spike import (REST_NOW, SENSOR_FAULT, WITHDRAW, LoopState, adjust_for_observation,
-                                 allowed_minutes)
 
-    blocks = {int(b["start"][:2]): b for b in plan["hours"]}
+    The monitor follows the plan IN FORCE (15 Nov): `replans` (optimise_schedule results with
+    `replanned_from`) take over from their own start hour, keeping the state and the work already done.
+    An alert never offers more minutes than that plan still schedules for the hour, and "tighten" /
+    "rest now" are not sent while the plan has the crew resting anyway; if one was held back and still
+    applies when work resumes, it is sent then. Sensor faults and withdrawals always alert.
+    """
+    from heat_safe.spike import (CONTINUE, REST_NOW, SENSOR_FAULT, TIGHTEN, WITHDRAW, LoopState,
+                                 adjust_for_observation, allowed_minutes)
+
+    def blocks_of(p):
+        return {int(b["start"].split(":")[0]): b for b in p["hours"]}
+
+    # (first hour, blocks) for the plan and each re-plan, latest first: the first that has started applies
+    plans = sorted([(0, blocks_of(plan))] + [(int(p["replanned_from"].split(":")[0]), blocks_of(p)) for p in replans],
+                   key=lambda x: -x[0])
     intensity = plan["work_intensity"]
     window = pd.Timedelta(minutes=60)
     rows, state, hour, worked_hour, work_log = [], None, None, 0, []  # work_log: (start time, minutes)
+    held_back = None  # a work alert not sent during planned rest
     for o in to_observations(measured):
+        blocks = next(bl for first, bl in plans if o.time.hour >= first)
         if not (start <= o.time.strftime("%H:%M") < end) or o.time.hour not in blocks:
             continue
         b = blocks[o.time.hour]
@@ -248,15 +261,25 @@ def replay_fast_loop(measured: pd.DataFrame, plan: dict, acclimatised: bool = Tr
         stretch = available_work_minutes(work_log, o.time, limit)
         d = adjust_for_observation(o, b["twl_zone"], limit - stretch, intensity, acclimatised, state)
         state = d.state
+        plan_left = max(0, b["scheduled_work_minutes"] - worked_hour)  # what the plan in force still schedules
+        left = min(d.work_minutes_left, plan_left)
+        alert = d.alert
+        if d.action in (TIGHTEN, REST_NOW):
+            if plan_left == 0:  # the crew is resting by plan: nothing to tell them about work now
+                held_back = d.action if (alert or held_back) else None
+                alert = False
+            elif held_back == d.action:  # work resumes and the held-back alert still applies
+                alert, held_back = True, None
+        elif d.action != CONTINUE:
+            held_back = None
         measured_zone = "" if d.action == SENSOR_FAULT else rules.twl_zone(o.twl_wm2)
         rows.append(dict(time=o.time, twl_wm2=o.twl_wm2, dry_bulb_c=o.dry_bulb_c, planned_zone=b["twl_zone"],
-                         measured_zone=measured_zone,
-                         action=d.action, zone=d.zone, worked_minutes=worked, work_minutes_left=d.work_minutes_left,
-                         alert=d.alert, reason=d.reason))
+                         measured_zone=measured_zone, action=d.action, zone=d.zone, worked_minutes=worked,
+                         work_minutes_left=left, plan_minutes_left=plan_left, alert=alert, reason=d.reason))
         step = 5  # minutes to the next reading (the synthetic feed's interval)
         if d.action not in (REST_NOW, WITHDRAW) and b["scheduled_work_minutes"] > 0:
             # never more than the limit allows now, nor more than the plan scheduled for this clock hour
-            minutes = min(step, d.work_minutes_left, max(0, b["scheduled_work_minutes"] - worked_hour))
+            minutes = min(step, left)
             if minutes:
                 work_log.append((o.time, minutes))
                 worked_hour += minutes

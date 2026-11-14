@@ -21,7 +21,7 @@ from heat_safe.forecast import get_replay
 from heat_safe.heat_stress import compute_heat_stress
 from heat_safe.job_profile import lookup_job_profile
 from heat_safe.paths import PROCESSED
-from heat_safe.schedule import optimise_schedule
+from heat_safe.schedule import minutes_scheduled_before, optimise_schedule
 from heat_safe.sensor import apply_measurements, measured_twl, replay_fast_loop, synthetic_feed
 
 
@@ -58,13 +58,27 @@ def main() -> None:
         feed.to_csv(out, index=False)
         print(f"\nfeed saved: {out}")
 
+    # The supervisor re-plans at --replan-at on measured heat; from the re-plan's first hour the monitor
+    # follows the NEW plan, so its alerts and the re-plan describe the same day.
     h, m = map(int, args.replan_at.split(":"))
+    now = datetime.fromisoformat(f"{args.date}T{args.replan_at}")
+    from_hour = h + (m > 0)
+    worked = minutes_scheduled_before(plan, from_hour)
+    replanned = optimise_schedule(apply_measurements(hs, measured, now, shade=True), profile,
+                                  work_hours_needed=args.hours, shade=True, from_hour=from_hour,
+                                  already_worked_minutes=worked)
+
     print(f"\n2. Fast loop, 08:00-10:00 (SYNTHETIC sensor feed): what each person received ({mode()} mode)")
-    log = replay_fast_loop(measured, plan, start="08:00", end="10:00")
+    print(f"   The monitor follows the morning plan, then the re-plan from {replanned['replanned_from']}.")
+    log = replay_fast_loop(measured, plan, start="08:00", end="10:00", replans=(replanned,))
     langs = load_templates()["languages"]
     sent = alerts_for(log, crew=f"{args.role.capitalize()} crew")
+    switch_shown = False
     for a in sent:
         if a.recipient == "supervisor":
+            if not switch_shown and a.time >= replanned["replanned_from"]:
+                print(f"\n  {replanned['replanned_from']}  -- re-plan accepted: the monitor now follows it --")
+                switch_shown = True
             print(f"\n  {a.time}  SUPERVISOR  {a.text}")
         else:
             note = a.marker or (f"[{a.fallback}]" if a.fallback else "")
@@ -76,13 +90,7 @@ def main() -> None:
         pd.DataFrame([a.to_dict() for a in sent]).to_csv(out, index=False)
         print(f"  alert log saved: {out}")
 
-    now = datetime.fromisoformat(f"{args.date}T{args.replan_at}")
-    worked = sum(b["scheduled_work_minutes"] for b in plan["hours"] if int(b["start"][:2]) < h)
-    replanned = optimise_schedule(apply_measurements(hs, measured, now, shade=True), profile,
-                                  work_hours_needed=args.hours, shade=True, from_hour=h + (m > 0),
-                                  already_worked_minutes=worked)
     show(replanned, f"3. Re-plan at {args.replan_at} on measured heat ({worked} min already worked)")
-
 
 if __name__ == "__main__":
     main()
