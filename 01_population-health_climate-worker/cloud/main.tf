@@ -185,6 +185,29 @@ resource "google_secret_manager_secret_iam_member" "main_presenter_access" {
   role      = "roles/secretmanager.secretAccessor"
   member    = google_service_account.main_runtime.member
 }
+resource "google_secret_manager_secret_iam_member" "presenter_main_codes" {
+  for_each = {
+    gate      = google_secret_manager_secret.main_gate.id
+    presenter = google_secret_manager_secret.main_presenter.id
+  }
+  secret_id = each.value
+  role      = "roles/secretmanager.secretAccessor"
+  member    = var.presenter_member
+}
+resource "google_project_iam_member" "presenter_preview_codes" {
+  project = var.project
+  role    = "roles/secretmanager.secretAccessor"
+  member  = var.presenter_member
+  condition {
+    title      = "PreviewCodesOnly"
+    expression = <<-EOT
+      resource.type == 'secretmanager.googleapis.com/SecretVersion' &&
+      (resource.name.startsWith('projects/${var.project}/secrets/heat-safe-pr-') ||
+       resource.name.startsWith('projects/${data.google_project.current.number}/secrets/heat-safe-pr-')) &&
+      resource.name.extract('/secrets/{secret}/versions/').endsWith('-codes')
+    EOT
+  }
+}
 resource "google_secret_manager_secret_iam_member" "provisioner_access" {
   secret_id = google_secret_manager_secret.sql_provisioner.id
   role      = "roles/secretmanager.secretAccessor"

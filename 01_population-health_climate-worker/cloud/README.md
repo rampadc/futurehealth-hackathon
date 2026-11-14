@@ -19,12 +19,20 @@ After `--check` reports no missing permissions, run from the repository root:
 
 ```sh
 export GITHUB_REPOSITORY=OWNER/REPO
-python3 01_population-health_climate-worker/tools/bootstrap_cloud_run.py
+python3 01_population-health_climate-worker/tools/bootstrap_cloud_run.py --presenter-member=user:ishka.quark@gmail.com
 ```
 
 Bootstrap creates a versioned GCS Terraform state bucket with uniform access and public access prevention, enables APIs, applies this module, initializes PostgreSQL roles and schemas, creates random access codes and credentials, and sets GitHub Actions variables. It creates a **private** main Cloud Run placeholder so the main deployment identity needs update permission only. A first successful main deployment replaces it and enables the application gate.
 
-Raw main access and presenter codes are in `heat-safe-main-gate-code` and `heat-safe-main-presenter-code`. Their SHA-256 digests are separate secrets mounted as Cloud Run environment variables. The main DB password is mounted from Secret Manager; the main deployer does not read it. Preview code pairs are in `heat-safe-pr-N-codes` and preview DB passwords in `heat-safe-pr-N-db-password`. Preview services receive only code digests; the preview DB password is passed as a Cloud Run environment variable for that one service. The preview runtime identity has no Secret Manager permissions.
+Raw main access and presenter codes are in `heat-safe-main-gate-code` and `heat-safe-main-presenter-code`. The explicit `--presenter-member` account can read only those two raw main code secrets and preview `heat-safe-pr-N-codes` versions. It cannot read the main DB password, preview DB passwords, or SQL provisioner credential through these grants. The current designated operator is `user:ishka.quark@gmail.com`; pass a different member explicitly if that changes. Their SHA-256 digests are separate secrets mounted as Cloud Run environment variables. The main DB password is mounted from Secret Manager; the main deployer does not read it. Preview code pairs are in `heat-safe-pr-N-codes` and preview DB passwords in `heat-safe-pr-N-db-password`. Preview services receive only code digests; the preview DB password is passed as a Cloud Run environment variable for that one service. The preview runtime identity has no Secret Manager permissions.
+
+The designated presenter can retrieve codes without an owner intervening for each PR:
+
+```sh
+gcloud secrets versions access latest --project=future-health-513202 --secret=heat-safe-main-gate-code
+gcloud secrets versions access latest --project=future-health-513202 --secret=heat-safe-main-presenter-code
+gcloud secrets versions access latest --project=future-health-513202 --secret=heat-safe-pr-123-codes
+```
 
 ## Trusted deployment controller
 

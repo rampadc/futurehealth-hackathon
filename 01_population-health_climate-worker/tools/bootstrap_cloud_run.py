@@ -75,6 +75,16 @@ def preflight():
         raise RuntimeError("bootstrap IAM preflight failed before any mutation")
 
 
+def verify_state_bucket(bucket):
+    # gcloud storage emits snake_case; the API's camelCase shape is accepted too.
+    iam = bucket.get("iamConfiguration", {})
+    pap = bucket.get("public_access_prevention", iam.get("publicAccessPrevention"))
+    uniform = bucket.get("uniform_bucket_level_access", iam.get("uniformBucketLevelAccess", {}).get("enabled"))
+    versioned = bucket.get("versioning_enabled", bucket.get("versioning", {}).get("enabled"))
+    if pap != "enforced" or uniform is not True or versioned is not True:
+        raise RuntimeError("Terraform state bucket is not private, uniform-access, and versioned")
+
+
 def ensure_secret(name, value):
     if not deploy.secret_exists(name):
         deploy.gcloud("secrets", "create", name, "--replication-policy", "user-managed",
@@ -155,10 +165,13 @@ def github_vars(repository, outputs):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true", help="check bootstrap permissions without changing cloud resources")
+    parser.add_argument("--presenter-member", help="explicit user:email IAM member allowed to retrieve raw access codes")
     args = parser.parse_args()
     preflight()
     if args.check:
         return
+    if not args.presenter_member or not re.fullmatch(r"user:[^@\s]+@[^@\s]+", args.presenter_member):
+        raise RuntimeError("bootstrap requires --presenter-member=user:email@example.com")
     repository = os.environ.get("GITHUB_REPOSITORY", "")
     if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository):
         raise RuntimeError("set GITHUB_REPOSITORY=owner/repo")
@@ -180,16 +193,12 @@ def main():
             "--project", PROJECT, "--versioning", "--public-access-prevention")
     bucket = json.loads(command("gcloud", "storage", "buckets", "describe", f"gs://{BUCKET}",
                                 "--project", PROJECT, "--format=json"))
-    iam = bucket.get("iamConfiguration", {})
-    if (iam.get("publicAccessPrevention") != "enforced" or
-            not iam.get("uniformBucketLevelAccess", {}).get("enabled") or
-            not bucket.get("versioning", {}).get("enabled")):
-        raise RuntimeError("Terraform state bucket is not private, uniform-access, and versioned")
+    verify_state_bucket(bucket)
     command("terraform", "init", "-input=false", f"-backend-config=bucket={BUCKET}",
             "-backend-config=prefix=heat-safe/cloud", cwd=MODULE)
     command("terraform", "apply", "-input=false", "-auto-approve",
             f"-var=github_repository={repository}", f"-var=project={PROJECT}",
-            f"-var=region={REGION}", cwd=MODULE)
+            f"-var=region={REGION}", f"-var=presenter_member={args.presenter_member}", cwd=MODULE)
     outputs = json.loads(command("terraform", "output", "-json", cwd=MODULE))
 
     admin_password = ensure_secret("heat-safe-sql-admin-password", deploy.secrets.token_urlsafe(48))
