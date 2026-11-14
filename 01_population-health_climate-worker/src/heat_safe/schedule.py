@@ -73,7 +73,7 @@ def optimise_schedule(
             outdoor_work_must_end_by=_must_end_by(r["hour"], int(r["midday_break_minutes"])),
             twl_zone=zone,
             band=rules.ZONE_BAND[zone].name.lower(),
-            twl_wm2=round(float(r[twl_col])),
+            twl_wm2=rules.display_twl(float(r[twl_col])),
             temperature_c=round(float(r["temperature_c"]), 1),
             work_rest=controls.work_rest_heavy if profile.work_intensity == "heavy" else controls.work_rest_light,
             fluid_l_per_hr=controls.fluid_l_per_hr,
@@ -108,6 +108,9 @@ def optimise_schedule(
         work_minutes_allowed_by_acclimatisation=cap,
         replanned_from=f"{from_hour:02d}:00" if from_hour is not None else "",
         already_worked_minutes=already_worked_minutes,
+        # What is left to place after a re-plan, in the forms the model should quote (it must not subtract)
+        work_minutes_still_needed=max(0, need - already_worked_minutes),
+        work_still_needed_hm=_hm(max(0, need - already_worked_minutes)),
         work_minutes_scheduled=scheduled,  # includes already_worked_minutes
         shortfall_minutes=max(0, need - scheduled),
         # Totals in hours and minutes, so the model quotes them instead of doing the arithmetic
@@ -135,3 +138,9 @@ def _must_end_by(hour: int, break_minutes: int) -> str:
     if 0 < break_minutes < 60 and hour == rules.MIDDAY_BREAK_START.hour:
         return rules.MIDDAY_BREAK_START.strftime("%H:%M")
     return ""
+
+
+def minutes_scheduled_before(plan: dict, hour: int) -> int:
+    """Work minutes a plan scheduled before `hour`: what the crew has done if they followed it until then."""
+    return sum(b["scheduled_work_minutes"] for b in plan["hours"] if int(b["start"].split(":")[0]) < hour)
+

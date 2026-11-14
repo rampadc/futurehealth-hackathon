@@ -5,6 +5,8 @@ RULES_VERSION and the unit tests in tests/test_rules.py.
 """
 from __future__ import annotations
 
+import math
+
 from dataclasses import dataclass
 from datetime import date, datetime, time
 from enum import IntEnum
@@ -97,6 +99,12 @@ ZONE_CONTROLS = {
 }
 
 
+def display_twl(twl: float) -> int:
+    """TWL as shown to people: rounded DOWN, so the number always agrees with its zone (114.96 is High and
+    shows as 114, never as 115) and any display error is on the cautious side (14 Nov)."""
+    return math.floor(twl)
+
+
 def twl_zone(twl: float) -> str:
     if twl < TWL_HIGH_RISK_BELOW:
         return ZONE_HIGH
@@ -125,6 +133,10 @@ SENSOR_MAX_CHANGE_C_PER_MIN = 2.0
 # difference is applied in full to the next hour and fades linearly to zero over this many hours.
 # Cooler-than-forecast readings never raise future TWL: the forecast is only ever corrected toward caution.
 SENSOR_BIAS_FADE_HOURS = 3
+# The fast loop RECOMMENDS a re-plan (the supervisor decides) after a withdrawal, or once the zone in force
+# has stayed stricter than the plan's zone for this long: by then the morning plan no longer fits the day.
+# A sensor fault alone means "check the sensor", not "re-plan".
+REPLAN_RECOMMEND_AFTER_MINUTES = 30
 
 # --- Acclimatisation ([ADOSH_COP] 3.2(b)(i), p.7; [ADOSH_TG] section 3, p.6) ---------------------
 # Decision 6 Nov 2026 (option B; review with an OHS advisor). The documents give no single cutoff:
