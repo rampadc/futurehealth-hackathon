@@ -145,6 +145,14 @@ and then a full 20. A first version reported "20 minus what is in the window" (5
 was correct for that instant but told a crew to stop after 5 minutes they did not need to stop.
 A supervisor's question about one alert found this.
 
+**The monitor follows the plan in force (15 Nov).** The demo's monitor kept following the morning plan
+after the 09:00 re-plan, so at 09:10 it told the crew "work 20 minutes" while the re-plan had moved
+that work to the afternoon. Now `replay_fast_loop(replans=...)` switches to a re-plan from its first
+hour, an alert never offers more minutes than the plan in force still schedules, and "tighten" /
+"rest now" are held back while the plan has the crew resting (sent when work resumes, if they still
+apply). Sensor faults and withdrawals always alert. Two loops that act on the same crew must read the
+same plan.
+
 ### 4. Alert text is reviewed data, not generated text (14 Nov)
 
 `alert_templates.yaml` holds what a worker receives for each fast-loop action, in English, Mandarin,

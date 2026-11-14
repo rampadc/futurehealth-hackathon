@@ -310,3 +310,31 @@ def test_replay_day_follows_a_twenty_forty_cycle_in_high(weather, hs):
     alerts = [(f"{r.time:%H:%M}", r.action, r.work_minutes_left) for r in log[log["alert"]].itertuples()]
     assert alerts[:3] == [("08:30", "rest_now", 0), ("09:10", "tighten", 20), ("09:30", "rest_now", 0)]
 
+
+
+# --- the monitor follows the plan in force (15 Nov) ------------------------------------------------------
+
+def test_after_a_replan_alerts_agree_with_it(weather, hs):
+    from heat_safe.sensor import apply_measurements, replay_fast_loop
+    steel = lookup_job_profile("steel fixer")
+    plan = optimise_schedule(hs, steel, work_hours_needed=5, shade=True)
+    measured = measured_twl(synthetic_feed(weather))
+    replanned = optimise_schedule(apply_measurements(hs, measured, datetime(2025, 8, 1, 9, 0), shade=True), steel,
+                                  work_hours_needed=5, shade=True, from_hour=9, already_worked_minutes=150)
+    log = replay_fast_loop(measured, plan, start="08:00", end="10:00", replans=(replanned,))
+    assert (log["work_minutes_left"] <= log["plan_minutes_left"]).all()  # never offers more than the plan in force
+    after = log[log["time"].dt.hour >= 9]
+    assert not after.loc[after["action"].isin(["tighten", "rest_now"]), "alert"].any()  # the re-plan rests the crew
+    assert after.loc[after["action"] == "sensor_fault", "alert"].all()  # but a sensor fault is still reported
+
+
+def test_a_work_alert_held_during_planned_rest_is_sent_when_work_resumes():
+    from heat_safe.sensor import replay_fast_loop
+    plan = {"work_intensity": "heavy", "hours": [
+        {"start": "09:00", "twl_zone": "medium", "scheduled_work_minutes": 0},    # planned rest
+        {"start": "10:00", "twl_zone": "medium", "scheduled_work_minutes": 20}]}
+    t = pd.date_range("2025-08-01 09:00", "2025-08-01 10:55", freq="5min", tz="Asia/Dubai")
+    hot = pd.DataFrame(dict(time=t, twl_wm2=100.0, dry_bulb_c=38.0, wet_bulb_c=28.0, sensor_ok=True))  # High all along
+    log = replay_fast_loop(hot, plan)
+    sent = [(f"{r.time:%H:%M}", r.action, r.work_minutes_left) for r in log[log["alert"]].itertuples()]
+    assert sent[0] == ("10:00", "tighten", 20)  # nothing during the planned rest; told when work starts
