@@ -274,3 +274,39 @@ def test_site_sensor_alerts_carry_the_exact_texts_sent(weather, hs):
     a = get_site_sensor("mussafah", DAY, "08:30", weather, hs, plan)["fast_loop_alerts"][-1]
     assert a["worker_message"] == render("rest_now", "en").text
     assert a["supervisor_message"].startswith("Steel fixer crew: rest now at 08:30")
+
+
+# --- rolling 60-minute work limit (15 Nov) ---------------------------------------------------------------
+
+from heat_safe.sensor import available_work_minutes  # noqa: E402
+
+T8 = pd.Timestamp("2025-08-01 08:00", tz="Asia/Dubai")
+WORKED_8_TO_830 = [(T8 + pd.Timedelta(minutes=m), 5) for m in range(0, 30, 5)]  # 30 min of work
+
+
+def at(hhmm):
+    return pd.Timestamp(f"2025-08-01 {hhmm}", tz="Asia/Dubai")
+
+
+def test_nothing_worked_means_the_whole_allowance():
+    assert available_work_minutes([], at("09:00"), 20) == 20
+
+
+def test_work_before_the_hour_still_counts_after_it():
+    """The clock-hour reset let a crew work 08:00-08:30 and again from 09:00: 50 minutes in 80 under 20/40."""
+    assert available_work_minutes(WORKED_8_TO_830, at("09:00"), 20) == 0
+    assert available_work_minutes(WORKED_8_TO_830, at("09:05"), 20) == 0
+
+
+def test_after_forty_minutes_rest_a_full_twenty_minute_stretch():
+    """Old minutes drop out of the window as the new stretch goes on, so it is 20, not 20 minus what is left."""
+    assert available_work_minutes(WORKED_8_TO_830, at("09:10"), 20) == 20
+
+
+def test_replay_day_follows_a_twenty_forty_cycle_in_high(weather, hs):
+    from heat_safe.sensor import replay_fast_loop
+    plan = optimise_schedule(hs, lookup_job_profile("steel fixer"), work_hours_needed=5, shade=True)
+    log = replay_fast_loop(measured_twl(synthetic_feed(weather)), plan, start="08:00", end="10:00")
+    alerts = [(f"{r.time:%H:%M}", r.action, r.work_minutes_left) for r in log[log["alert"]].itertuples()]
+    assert alerts[:3] == [("08:30", "rest_now", 0), ("09:10", "tighten", 20), ("09:30", "rest_now", 0)]
+
