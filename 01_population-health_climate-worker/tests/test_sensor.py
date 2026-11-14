@@ -130,9 +130,8 @@ def test_cooler_than_forecast_never_raises_the_forecast(hs):
 
 
 def test_faulty_and_future_readings_are_ignored(weather, hs):
-    m = measured_twl(synthetic_feed(weather))  # includes the 09:40 fault
-    out = apply_measurements(hs, m.assign(sensor_ok=~m["note"].str.contains("fault")), datetime(2025, 8, 1, 9, 50),
-                             shade=True)
+    m = measured_twl(synthetic_feed(weather))  # includes the 09:40 fault, which the sensor does NOT self-report
+    out = apply_measurements(hs, m, datetime(2025, 8, 1, 9, 50), shade=True)  # flag_faults must catch it
     h9 = pd.DatetimeIndex(out["time"]).hour == 9
     assert out.loc[h9, "twl_shade_wm2"].iloc[0] > 60.0  # the 70 °C fault did not become the hour's worst
     from_8 = m[pd.DatetimeIndex(m["time"]).hour >= 8]  # a sensor installed at 08:00
@@ -170,7 +169,7 @@ def test_replan_on_measured_heat_moves_work_out_of_the_hot_hours(weather, hs):
     # 10:00 was forecast Medium (122.8); measured heat at 08:xx corrects it to High: 20 min work, not 45
     assert (by(before)["10:00"]["twl_zone"], by(after)["10:00"]["twl_zone"]) == (rules.ZONE_MEDIUM, rules.ZONE_HIGH)
     assert by(after)["10:00"]["allowed_work_minutes"] < by(before)["10:00"]["allowed_work_minutes"]
-    assert by(after)["10:00"]["twl_basis"].startswith("forecast -")  # the agent can say why
+    assert by(after)["10:00"]["twl_basis"].endswith("W/m² worse (sensor)")  # the agent can say why
 
 
 def test_already_worked_without_from_hour_is_rejected(hs):
@@ -195,3 +194,75 @@ def test_fast_loop_reacts_to_the_spike_and_the_fault(weather, hs):
     for _, r in log.iterrows():  # never more than the plan allowed in that hour
         assert r["work_minutes_left"] <= max(0, allowed_minutes(r["planned_zone"], "heavy", True) - r["worked_minutes"])
     assert log["alert"].sum() < len(log) / 3  # alerts are news, not every reading
+
+
+# --- faults, the re-plan recommendation and the agent's view of the sensor (14 Nov) ----------------------
+
+from heat_safe.sensor import flag_faults, get_site_sensor, replan_recommendation  # noqa: E402
+from heat_safe.spike import CONTINUE, REST_NOW, SENSOR_FAULT, TIGHTEN, WITHDRAW  # noqa: E402
+
+
+def test_flag_faults_uses_the_fast_loops_check(weather):
+    f = flag_faults(measured_twl(synthetic_feed(weather)))
+    bad = f[f["fault"] != ""]
+    assert list(bad["time"].dt.strftime("%H:%M")) == ["09:40"] and "implausible" in bad["fault"].iloc[0]
+
+
+def log_of(*rows, start=datetime(2025, 8, 1, 8, 0)):
+    """A replay_fast_loop-shaped log: (minute, action, measured_zone, planned_zone)."""
+    return pd.DataFrame([dict(time=start + pd.Timedelta(minutes=m), action=a, measured_zone=z, planned_zone=p)
+                         for m, a, z, p in rows])
+
+
+def test_no_replan_when_readings_match_the_plan_or_only_the_sensor_failed():
+    assert replan_recommendation(log_of((0, CONTINUE, "medium", "medium"), (5, CONTINUE, "medium", "medium"))) == (False, "")
+    faults = log_of(*[(m, SENSOR_FAULT, "", "medium") for m in range(0, 60, 5)])
+    assert replan_recommendation(faults)[0] is False  # "check the sensor", not "re-plan"
+
+
+def test_replan_after_a_withdrawal():
+    ok, why = replan_recommendation(log_of((0, CONTINUE, "medium", "medium"), (5, WITHDRAW, "high", "medium")))
+    assert ok and "08:05" in why
+
+
+def test_replan_only_after_the_set_time_worse_than_planned():
+    n = rules.REPLAN_RECOMMEND_AFTER_MINUTES
+    short = log_of((0, TIGHTEN, "high", "medium"), (n - 1, REST_NOW, "high", "medium"))
+    enough = log_of((0, TIGHTEN, "high", "medium"), (n, REST_NOW, "high", "medium"))
+    assert replan_recommendation(short)[0] is False and replan_recommendation(enough)[0] is True
+
+
+def test_a_better_reading_restarts_the_count():
+    n = rules.REPLAN_RECOMMEND_AFTER_MINUTES
+    log = log_of((0, TIGHTEN, "high", "medium"), (5, TIGHTEN, "medium", "medium"), (10, TIGHTEN, "high", "medium"),
+                 (n + 5, TIGHTEN, "high", "medium"))
+    assert replan_recommendation(log)[0] is False  # counted from minute 10: n - 5 minutes
+
+
+def test_site_sensor_on_the_replay_day(weather, hs):
+    plan = optimise_schedule(hs, lookup_job_profile("steel fixer"), work_hours_needed=5, shade=True)
+    r = get_site_sensor("mussafah", DAY, "09:45", weather, hs, plan)
+    assert r["status"] == "ok" and r["synthetic"] and r["location"] == "shade"
+    h8 = next(h for h in r["hourly"] if h["hour"] == "08:00")
+    assert (h8["forecast_zone"], h8["measured_zone"]) == ("medium", "high") and h8["worse_than_forecast_wm2"] > 0
+    assert [f["time"] for f in r["faults"]] == ["09:40"] and r["fault_note"]
+    assert all(h["max_dry_bulb_c"] < 70 for h in r["hourly"])  # the fault is excluded from the numbers
+    alerts = [(a["time"], a["action"]) for a in r["fast_loop_alerts"]]
+    assert ("08:30", "rest_now") in alerts and ("09:40", "sensor_fault") in alerts
+    assert not any(t < "08:25" for t, _ in alerts)  # no alert before the spike: the feed matches the forecast
+    assert r["replan_recommended"] and "plan medium" in r["replan_reason"]
+
+
+def test_site_sensor_until_is_inclusive_and_other_days_have_no_sensor(weather, hs):
+    plan = optimise_schedule(hs, lookup_job_profile("steel fixer"), work_hours_needed=5, shade=True)
+    at_830 = get_site_sensor("mussafah", DAY, "08:30", weather, hs, plan)
+    assert at_830["fast_loop_alerts"][-1]["time"] == "08:30"
+    assert get_site_sensor("ruwais", DAY, "09:00", weather, hs)["status"] == "no_sensor"
+    assert "fast_loop_alerts" not in get_site_sensor("mussafah", DAY, "09:00", weather, hs)  # no crew given
+
+
+
+def test_replan_reports_the_work_still_needed(hs):
+    plan = optimise_schedule(hs, lookup_job_profile("steel fixer"), work_hours_needed=5, shade=True, from_hour=9,
+                             already_worked_minutes=150)
+    assert (plan["work_minutes_still_needed"], plan["work_still_needed_hm"]) == (150, "2 h 30 min")

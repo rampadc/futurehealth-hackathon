@@ -90,6 +90,21 @@ def allowed_minutes(zone: str, work_intensity: str, acclimatised: bool) -> int:
             else controls.work_minutes_per_hour_light)
 
 
+def reading_fault(obs: Observation, last_good: Observation | None) -> str:
+    """Why a reading cannot be used, or "" if it can. One definition, shared by the fast loop (step 1 below)
+    and the slow loop (sensor.flag_faults), so both ignore exactly the same readings."""
+    if not obs.sensor_ok:
+        return "sensor reports a fault"
+    if obs.twl_wm2 is None or obs.dry_bulb_c is None or obs.wet_bulb_c is None:
+        return "sensor reading incomplete"
+    if last_good is not None:
+        minutes = max((obs.time - last_good.time).total_seconds() / 60, 1 / 60)
+        change = abs(obs.dry_bulb_c - last_good.dry_bulb_c)
+        if change > rules.SENSOR_MAX_CHANGE_C_PER_MIN * minutes:
+            return f"implausible jump of {change:.1f} °C in {minutes:.0f} min"
+    return ""
+
+
 # --- The fast loop -----------------------------------------------------------------------------------
 
 def adjust_for_observation(
@@ -120,6 +135,8 @@ def adjust_for_observation(
          obs.time - better_since >= rules.STEP_DOWN_AFTER_MINUTES, then take `observed` and stop the
          timer.                                                      (lower slowly)
        - same: keep it; better_since = None (a run of better readings was interrupted).
+       Hysteresis holds only a DEVIATION: if the previous action was CONTINUE, start from planned_zone
+       instead of state.zone, so the plan's own zone change between hours is not treated as a spike.
        Then zone = stricter(that, planned_zone): the fast loop never relaxes below the plan.
 
     4. Minutes and action. left = max(0, allowed_minutes(zone, ...) - worked_minutes).
@@ -164,16 +181,7 @@ def adjust_for_observation(
         return Decision(action, zone, left, alert, reason, new_state)
 
     # 1. Sensor fault: a bad input moves toward safety, never away from it
-    fault = ""
-    if not obs.sensor_ok:
-        fault = "sensor reports a fault"
-    elif obs.twl_wm2 is None or obs.dry_bulb_c is None or obs.wet_bulb_c is None:
-        fault = "sensor reading incomplete"
-    elif state.last_good is not None:
-        minutes = max((obs.time - state.last_good.time).total_seconds() / 60, 1 / 60)
-        change = abs(obs.dry_bulb_c - state.last_good.dry_bulb_c)
-        if change > rules.SENSOR_MAX_CHANGE_C_PER_MIN * minutes:
-            fault = f"implausible jump of {change:.1f} °C in {minutes:.0f} min"
+    fault = reading_fault(obs, state.last_good)
     if fault:
         zone = stricter(one_stricter(planned_zone), state.zone)
         return decide(SENSOR_FAULT, zone, None,
@@ -188,7 +196,13 @@ def adjust_for_observation(
 
     # 3. Zone with hysteresis: raise fast, lower slowly
     observed = rules.twl_zone(obs.twl_wm2)
-    zone, better_since = state.zone, state.better_since
+    if state.last_action == CONTINUE:
+        # No deviation in force: start from the plan's zone for THIS reading. "Lower slowly" holds back a
+        # deviation (a spike, a fault), not the plan's own change between hours, e.g. High at 07:00 to
+        # Medium at 08:00 as forecast. Without this, every planned step down raised a "tighten" (14 Nov).
+        zone, better_since = planned_zone, None
+    else:
+        zone, better_since = state.zone, state.better_since
     if ZONES.index(observed) > ZONES.index(zone):    # hotter: applies at once
         zone, better_since = observed, None
     elif ZONES.index(observed) < ZONES.index(zone):  # cooler: only after a steady run of cooler readings
@@ -201,5 +215,5 @@ def adjust_for_observation(
 
     # 4. Minutes and action (inside decide)
     return decide(None, zone, better_since,
-                  f"Measured TWL {obs.twl_wm2:.0f} W/m² ({observed} zone); plan assumed {planned_zone}; "
+                  f"Measured TWL {rules.display_twl(obs.twl_wm2)} W/m² ({observed} zone); plan assumed {planned_zone}; "
                   f"{zone} zone controls in force")

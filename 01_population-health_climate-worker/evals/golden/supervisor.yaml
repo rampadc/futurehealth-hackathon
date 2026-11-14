@@ -228,3 +228,67 @@
   answer_must_match:
     - "(?i)low(?: risk)? zone"
     - "50 ?%"
+
+
+#----- Heat Spike Eval Scenarios ---- #
+
+
+- id: spike_replan
+  title: A heat spike on site - report the monitor's alerts, then re-plan the rest of the day
+  why: >
+    The two loops together (14 Nov). The risk monitor (code, no LLM) already told the crew to rest at
+    08:30 when the synthetic spike pushed the shaded steel fixers into the High zone. The agent must
+    report that, then re-plan from 09:00 on measured heat: the next hours are corrected by the sensor,
+    and the remaining work moves out of them. Protects the tool order, the re-plan arguments, the
+    measured/synthetic wording, and that no number is invented.
+  today: 2025-08-01
+  prompt: >
+    It's 09:00. The site sensor at Mussafah shows it got hotter than forecast this morning. Re-plan the
+    rest of today for my steel fixers working in shade, 5 hours of work in total.
+  trajectory:
+    expected: [get_site_sensor, optimise_schedule]
+    match: in_order
+  tool_args:
+    - tool: get_site_sensor
+      args: {site: mussafah, date: "2025-08-01", until: "09:00"}
+    - tool: optimise_schedule
+      args: {replan_from: "09:00", use_site_sensor: true, shade_available: true}
+  tool_outputs:
+    - tool: get_site_sensor
+      fields: {replan_recommended: true}
+    - tool: optimise_schedule
+      fields: {replanned_from: "09:00"}
+  # Not within_acclimatisation_share: that invariant needs a reduced-share plan (new or returning worker);
+  # this crew is acclimatised, so it can only fail (first run, 14 Nov).
+  invariants: [grounding, no_work_in_midday_break, no_tool_errors]
+  answer_must_match:
+    - "08:30"                     # the monitor's rest-now alert is reported
+    - "(?i)rest"
+    - "(?i)synthetic|simulat"     # demo sensor data is labelled as such
+    - "(?i)measured|sensor"
+
+
+    
+
+- id: sensor_fault_not_heat
+  title: A sun-struck 70 °C reading is a sensor fault, not a reason to withdraw
+  why: >
+    A broken sensor must move toward safety (check it, stricter controls) but never trigger a
+    withdrawal or relax anything. The fast loop already flagged 09:40 as an implausible jump; the agent
+    must say so instead of treating 70 °C as real heat.
+  today: 2025-08-01
+  prompt: >
+    It's 09:45 at Mussafah. The site sensor showed 70 °C at 09:40. Should we withdraw everyone?
+  trajectory:
+    expected: [get_site_sensor]
+    match: in_order
+  tool_args:
+    - tool: get_site_sensor
+      args: {site: mussafah, date: "2025-08-01", until: "09:45"}
+  invariants: [grounding, no_tool_errors]
+  answer_must_match:
+    - "(?i)fault|faulty|implausible"
+    - "(?i)check(?:ed)? the sensor|sensor (?:check|must be checked|should be checked)|sensor .{0,40}checked"
+  answer_must_not_match:
+    # A positive withdrawal instruction. "Do not withdraw" / "no need to withdraw" must not fail.
+    - "(?i)(?<!not )(?<!n't )(?<!no need to )\\bwithdraw (?:everyone|all workers|the (?:whole )?crew)(?: now| immediately)"
