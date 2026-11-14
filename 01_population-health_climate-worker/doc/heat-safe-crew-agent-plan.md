@@ -165,6 +165,8 @@ Thresholds live in versioned code (`rules.py`, `RULES_VERSION`) and are unit-tes
 
 Alert text comes from **fixed templates translated in advance and reviewed by native speakers**. The LLM can explain why an alert fired, but it never writes the safety instruction in a language nobody on the team can check.
 
+**Built 14 Nov** (`src/heat_safe/alert_templates.yaml`, `alerts.py`): `tighten`, `rest_now`, `sensor_fault`, `withdraw` and `emergency` (998, not yet triggered automatically), for the worker in English, Mandarin, Hindi, Urdu, Malayalam and Bengali, plus a crew-level English line for the supervisor with no health detail. Each language records its review status, which decides how it is sent. English is the source. **Mandarin: reviewed by a native speaker on the team (14 Nov), sent alone. Hindi, Urdu, Malayalam, Bengali: AI drafts back-translated with Google Translate and cross-checked with a second translation tool (meaning confirmed), not yet native-reviewed, so always sent together with the English text.** Any future unchecked language is a draft: marked in demo mode, refused in production (English instead). Alerts are logged, not sent (SMS, push and voice are on the roadmap).
+
 ### Unstructured inputs
 
 | Input | Processing | Lands in | Priority |
@@ -325,12 +327,14 @@ The UAE [National Center of Meteorology](https://www.ncm.gov.ae/) is the officia
 | Wearable signals (HR, skin temp) | Per-worker streams driven by workload and site TWL; consent flags | `compute_worker_risk` | Week 2 |
 | Pre-start notes, site photos | Written / photographed for the demo | `get_site_context` | Week 2 |
 | Contractor heat plan, accommodation/transport note, emergency plan | Written for the demo | RAG corpus | Week 2 |
-| Alert templates | Four levels in English + 3 worker languages, reviewed by native speakers | `send_alert`, offline rule table | Week 3 |
+| Alert templates | Five actions in English + Mandarin (native-reviewed), Hindi, Urdu, Malayalam, Bengali (back-translated, sent with English) | `alerts.py`, offline rule table | Done; native review of 4 languages pending |
 | Voice check-ins | Recorded by the team in 2–3 of: Arabic, Hindi, Urdu, Malayalam, Bengali, Tagalog | Check-in flow, extraction evals | Week 3 |
 | Incident narratives, symptom events | Written / simulated with a documented model | Incident retrieval, backtest metrics | Week 3–4 |
 | Golden eval scenarios | Written by the team | Evals | From Week 1 |
 
 #### Data limitations
+
+- Hindi, Urdu, Malayalam and Bengali alert texts are machine-checked (back-translation), not native-reviewed; they are always sent with the English text until a native speaker reviews them. Right-to-left display of Urdu with numbers is untested on real phones.
 
 - ERA5 and CAMS are 10–40 km grids: no site microclimate (roof surfaces, reflected heat, urban heat island). Mussafah and Abu Dhabi city fall in the same air-quality cell, so their values are identical.
 - ERA5 has no UV index; it exists only in the forecast and CAMS data.

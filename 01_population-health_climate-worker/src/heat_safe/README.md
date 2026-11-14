@@ -135,3 +135,26 @@ What connecting it taught us:
   down, so the number always agrees with its zone) and positive `worse_than_forecast_wm2`.
 - **The first eval failure was the eval.** `within_acclimatisation_share` only applies to a
   reduced-share worker; the scenario's crew was acclimatised.
+
+### 4. Alert text is reviewed data, not generated text (14 Nov)
+
+`alert_templates.yaml` holds what a worker receives for each fast-loop action, in English, Mandarin,
+Hindi, Urdu, Malayalam and Bengali, and a crew-level line for the supervisor. `alerts.py` only fills in
+values code computed (`{minutes}`, `{time}`, `{crew}`, `{zone}`); the agent quotes `worker_message`
+and never writes or translates alert text.
+
+- **Languages follow the workforce.** Abu Dhabi crews are mostly South Asian (Indian, especially from
+  Kerala; Pakistani; Bangladeshi), and Chinese contractors bring Chinese crews. Spoken Hindi reaches Urdu
+  speakers, but written alerts need both scripts.
+- **Review status is recorded, and decides how a text is sent.** `reviewed` (a native speaker, name and
+  date required): sent alone. `back_translated` (Google Translate back to English matched; who and when
+  required): always sent together with the English text. `draft`: marked in demo mode, refused in
+  production (English instead). State on 14 Nov: Mandarin reviewed by a native speaker on the team;
+  Hindi, Urdu, Malayalam and Bengali back-translated, still waiting for native-speaker review.
+- **Back-translation is not a review.** It catches large meaning errors, not unnatural or ambiguous
+  wording. So those texts never travel without the English original, and the docs never call them
+  reviewed.
+- **The checks run when the file loads, not mid-shift:** every action exists in every language, and every
+  translation fills the same values as the English. A translation that drops `{minutes}` fails at start-up.
+- **Short, literal sentences** ("Stop work now. Rest in the shade. Drink water.") translate more reliably
+  and suit workers with limited literacy.

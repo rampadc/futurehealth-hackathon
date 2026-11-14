@@ -14,6 +14,9 @@ from __future__ import annotations
 import argparse
 from datetime import datetime
 
+import pandas as pd
+
+from heat_safe.alerts import alerts_for, load_templates, mode
 from heat_safe.forecast import get_replay
 from heat_safe.heat_stress import compute_heat_stress
 from heat_safe.job_profile import lookup_job_profile
@@ -56,14 +59,22 @@ def main() -> None:
         print(f"\nfeed saved: {out}")
 
     h, m = map(int, args.replan_at.split(":"))
-    print("\n2. Fast loop, 08:00-10:00 (SYNTHETIC sensor feed): alerts only")
-    try:
-        log = replay_fast_loop(measured, plan, start="08:00", end="10:00")
-        for r in log[log["alert"]].itertuples():
-            print(f"  {r.time:%H:%M}  {r.action:12s} zone {r.zone:6s} {r.work_minutes_left:>2} min left  {r.reason}")
-        print(f"  ({int(log['alert'].sum())} alerts from {len(log)} readings)")
-    except NotImplementedError:
-        print("  skipped: write spike.adjust_for_observation first (tests/test_spike.py)")
+    print(f"\n2. Fast loop, 08:00-10:00 (SYNTHETIC sensor feed): what each person received ({mode()} mode)")
+    log = replay_fast_loop(measured, plan, start="08:00", end="10:00")
+    langs = load_templates()["languages"]
+    sent = alerts_for(log, crew=f"{args.role.capitalize()} crew")
+    for a in sent:
+        if a.recipient == "supervisor":
+            print(f"\n  {a.time}  SUPERVISOR  {a.text}")
+        else:
+            note = a.marker or (f"[{a.fallback}]" if a.fallback else "")
+            text = a.text.replace("\n", "\n" + " " * 20)  # a back-translated text carries the English below it
+            print(f"         {langs[a.language]['name'][:9]:9s}  {text}  {note}")
+    print(f"\n  ({int(log['alert'].sum())} alerts from {len(log)} readings; logged, not sent: SMS/voice is roadmap)")
+    if args.save:
+        out = PROCESSED / "synthetic" / f"alerts_{args.site}_{args.date}.csv"
+        pd.DataFrame([a.to_dict() for a in sent]).to_csv(out, index=False)
+        print(f"  alert log saved: {out}")
 
     now = datetime.fromisoformat(f"{args.date}T{args.replan_at}")
     worked = sum(b["scheduled_work_minutes"] for b in plan["hours"] if int(b["start"][:2]) < h)

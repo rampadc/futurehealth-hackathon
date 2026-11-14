@@ -266,3 +266,11 @@ def test_replan_reports_the_work_still_needed(hs):
     plan = optimise_schedule(hs, lookup_job_profile("steel fixer"), work_hours_needed=5, shade=True, from_hour=9,
                              already_worked_minutes=150)
     assert (plan["work_minutes_still_needed"], plan["work_still_needed_hm"]) == (150, "2 h 30 min")
+
+
+def test_site_sensor_alerts_carry_the_exact_texts_sent(weather, hs):
+    from heat_safe.alerts import render
+    plan = optimise_schedule(hs, lookup_job_profile("steel fixer"), work_hours_needed=5, shade=True)
+    a = get_site_sensor("mussafah", DAY, "08:30", weather, hs, plan)["fast_loop_alerts"][-1]
+    assert a["worker_message"] == render("rest_now", "en").text
+    assert a["supervisor_message"].startswith("Steel fixer crew: rest now at 08:30")

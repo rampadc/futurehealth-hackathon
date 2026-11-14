@@ -1,0 +1,127 @@
+# Fixed alert texts for the fast loop (spike.py decisions). Loaded by heat_safe/alerts.py.
+#
+# The LLM never writes or translates alert text at run time: these texts are written once, reviewed by
+# people, and only filled in with values computed by code ({minutes}, {time}, {crew}, {zone}).
+# Wording rules: short, literal sentences; one instruction each; nothing a worker has to interpret.
+#
+# REVIEW STATUS (be honest here; tests check it):
+#   source    the English original
+#   reviewed        checked by a native speaker: set reviewed_by and reviewed_on. Sent alone.
+#   back_translated machine-checked only: Google Translate back to English matched the meaning, but no
+#                   native speaker has reviewed it. Set checked_by and checked_on. ALWAYS sent together
+#                   with the English text, so a slightly wrong translation still arrives with the original.
+#   draft           not checked at all. Demo mode sends it with a "[draft translation]" marker;
+#                   production mode refuses it and falls back to English.
+# How to review a draft: read it as a worker would; fix it in place; set status, reviewed_by, reviewed_on.
+# Google Translate back-translation (fill back_translation) catches large meaning errors but is NOT a review.
+
+languages:
+  en:
+    name: English
+    script: Latin
+    status: source
+    method: written by the team
+    reviewed_by: ""
+    reviewed_on: ""
+  zh:
+    name: Mandarin (Simplified Chinese)
+    script: Chinese characters
+    status: reviewed
+    method: drafted by AI (Claude); reviewed and approved by a native Mandarin speaker on the team
+    reviewed_by: wzha8255
+    reviewed_on: "2026-11-14"
+  hi:
+    name: Hindi
+    script: Devanagari
+    status: back_translated
+    method: drafted by AI (Claude); back-translated with Google Translate and cross-checked with a second translation tool, meaning confirmed; pending native-speaker review
+    checked_by: wzha8255
+    checked_on: "2026-11-14"
+    reviewed_by: ""
+    reviewed_on: ""
+    back_translation: {}
+  ur:
+    name: Urdu
+    script: Arabic (Nastaliq), right to left
+    status: back_translated
+    method: drafted by AI (Claude); back-translated with Google Translate and cross-checked with a second translation tool, meaning confirmed; pending native-speaker review
+    checked_by: wzha8255
+    checked_on: "2026-11-14"
+    reviewed_by: ""
+    reviewed_on: ""
+    back_translation: {}
+  ml:
+    name: Malayalam
+    script: Malayalam
+    status: back_translated
+    method: drafted by AI (Claude); back-translated with Google Translate and cross-checked with a second translation tool, meaning confirmed; pending native-speaker review
+    checked_by: wzha8255
+    checked_on: "2026-11-14"
+    reviewed_by: ""
+    reviewed_on: ""
+    back_translation: {}
+  bn:
+    name: Bengali
+    script: Bengali
+    status: back_translated
+    # "পানি" for water: Bangladeshi usage (West Bengal says "জল"); most Bengali-speaking workers in the UAE
+    # are from Bangladesh. Native reviewer: confirm.
+    method: drafted by AI (Claude); back-translated with Google Translate and cross-checked with a second translation tool, meaning confirmed; pending native-speaker review
+    checked_by: wzha8255
+    checked_on: "2026-11-14"
+    reviewed_by: ""
+    reviewed_on: ""
+    back_translation: {}
+
+actions:
+  tighten:
+    supervisor: "{crew}: tighten at {time}. Heat above plan. {zone} zone rules: {minutes} work minutes left this hour."
+    worker:
+      en: "Heat is higher than planned. Work only {minutes} more minutes this hour. Then rest in the shade. Drink water."
+      zh: "高温超出计划。本小时只能再工作{minutes}分钟。然后到阴凉处休息。请喝水。"
+      hi: "गर्मी योजना से ज़्यादा है। इस घंटे सिर्फ़ {minutes} मिनट और काम करें। फिर छाया में आराम करें। पानी पिएँ।"
+      ur: "گرمی منصوبے سے زیادہ ہے۔ اس گھنٹے صرف {minutes} منٹ اور کام کریں۔ پھر سائے میں آرام کریں۔ پانی پئیں۔"
+      ml: "ചൂട് പ്ലാൻ ചെയ്തതിലും കൂടുതലാണ്. ഈ മണിക്കൂറിൽ ഇനി {minutes} മിനിറ്റ് മാത്രം ജോലി ചെയ്യുക. പിന്നെ തണലിൽ വിശ്രമിക്കുക. വെള്ളം കുടിക്കുക."
+      bn: "গরম পরিকল্পনার চেয়ে বেশি। এই ঘণ্টায় আর মাত্র {minutes} মিনিট কাজ করুন। তারপর ছায়ায় বিশ্রাম নিন। পানি পান করুন।"
+
+  rest_now:
+    supervisor: "{crew}: rest now at {time}. Heat above plan. {zone} zone rules."
+    worker:
+      en: "Stop work now. Rest in the shade. Drink water. Tell your supervisor if you feel unwell."
+      zh: "立即停止工作。到阴凉处休息。请喝水。如感到不适，请告诉主管。"
+      hi: "अभी काम बंद करें। छाया में आराम करें। पानी पिएँ। तबीयत ठीक न लगे तो अपने सुपरवाइज़र को बताएँ।"
+      ur: "ابھی کام بند کریں۔ سائے میں آرام کریں۔ پانی پئیں۔ طبیعت ٹھیک نہ لگے تو اپنے سپروائزر کو بتائیں۔"
+      ml: "ഇപ്പോൾ ജോലി നിർത്തുക. തണലിൽ വിശ്രമിക്കുക. വെള്ളം കുടിക്കുക. സുഖമില്ലെങ്കിൽ സൂപ്പർവൈസറോട് പറയുക."
+      bn: "এখনই কাজ বন্ধ করুন। ছায়ায় বিশ্রাম নিন। পানি পান করুন। অসুস্থ বোধ করলে আপনার সুপারভাইজারকে বলুন।"
+
+  sensor_fault:
+    supervisor: "{crew}: sensor fault at {time}. Check the sensor. {zone} zone rules apply until it is fixed."
+    worker:
+      en: "The heat sensor is not working. Follow the strict rest times until it is fixed. Drink water."
+      zh: "高温监测传感器出现故障。修好之前，请严格按照休息时间执行。请喝水。"
+      hi: "गर्मी का सेंसर काम नहीं कर रहा है। ठीक होने तक आराम के सख़्त समय का पालन करें। पानी पिएँ।"
+      ur: "گرمی کا سینسر کام نہیں کر رہا۔ ٹھیک ہونے تک آرام کے سخت اوقات پر عمل کریں۔ پانی پئیں۔"
+      ml: "ചൂട് അളക്കുന്ന സെൻസർ പ്രവർത്തിക്കുന്നില്ല. അത് ശരിയാക്കുന്നതുവരെ കർശനമായ വിശ്രമ സമയം പാലിക്കുക. വെള്ളം കുടിക്കുക."
+      bn: "তাপ সেন্সর কাজ করছে না। ঠিক না হওয়া পর্যন্ত কঠোর বিশ্রামের সময় মেনে চলুন। পানি পান করুন।"
+
+  withdraw:
+    supervisor: "{crew}: withdrawal at {time}. Withdrawal limit reached. Stop all outdoor work."
+    worker:
+      en: "Stop all outdoor work now. Go to the shade or a cool room. Drink water."
+      zh: "立即停止所有户外工作。前往阴凉处或凉爽的房间。请喝水。"
+      hi: "सारा बाहरी काम अभी बंद करें। छाया में या ठंडे कमरे में जाएँ। पानी पिएँ।"
+      ur: "تمام بیرونی کام ابھی بند کریں۔ سائے میں یا ٹھنڈے کمرے میں جائیں۔ پانی پئیں۔"
+      ml: "എല്ലാ പുറംജോലിയും ഇപ്പോൾ നിർത്തുക. തണലിലേക്കോ തണുത്ത മുറിയിലേക്കോ പോകുക. വെള്ളം കുടിക്കുക."
+      bn: "এখনই সব বাইরের কাজ বন্ধ করুন। ছায়ায় বা ঠান্ডা ঘরে যান। পানি পান করুন।"
+
+  # Not triggered automatically yet: emergencies come from red-flag symptoms (check-ins, on the roadmap),
+  # never from the environment alone. Ready for the demo story and the documentation.
+  emergency:
+    supervisor: "{crew}: EMERGENCY at {time}. Call 998. Start cooling. Stay with the worker."
+    worker:
+      en: "Emergency. Call 998. Move the worker to the shade. Cool them with water. Stay with them."
+      zh: "紧急情况。拨打998。把工人移到阴凉处。用水为其降温。陪在其身边。"
+      hi: "आपातकाल। 998 पर कॉल करें। मज़दूर को छाया में ले जाएँ। पानी से उसे ठंडा करें। उसके साथ रहें।"
+      ur: "ہنگامی صورتحال۔ 998 پر کال کریں۔ مزدور کو سائے میں لے جائیں۔ پانی سے اسے ٹھنڈا کریں۔ اس کے ساتھ رہیں۔"
+      ml: "അടിയന്തരാവസ്ഥ. 998-ൽ വിളിക്കുക. തൊഴിലാളിയെ തണലിലേക്ക് മാറ്റുക. വെള്ളം ഉപയോഗിച്ച് ശരീരം തണുപ്പിക്കുക. അയാളുടെ കൂടെ നിൽക്കുക."
+      bn: "জরুরি অবস্থা। 998 নম্বরে ফোন করুন। শ্রমিককে ছায়ায় নিয়ে যান। পানি দিয়ে তার শরীর ঠান্ডা করুন। তার সাথে থাকুন।"

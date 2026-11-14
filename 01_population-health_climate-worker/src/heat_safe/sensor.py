@@ -312,17 +312,27 @@ def get_site_sensor(site: str, day: str, until: str, weather: pd.DataFrame, hs: 
         nxt = h * 60 + m + 1  # replay_fast_loop's end is exclusive; one minute later includes `until`
         log = replay_fast_loop(upto, plan, end=f"{nxt // 60:02d}:{nxt % 60:02d}")
         alerts = log[log["alert"]]
+        crew_name = f"{plan['role'].replace('_', ' ').capitalize()} crew"
         recommended, why = replan_recommendation(log)
         out |= {
             "crew": dict(role=plan["role"], shade=plan["shade"], assumption=(
                 "acclimatised crew working the original plan until a monitor decision cut it")),
-            "fast_loop_alerts": [dict(time=f"{r.time:%H:%M}", action=r.action, zone=r.zone,
-                                      work_minutes_left=int(r.work_minutes_left), reason=r.reason)
-                                 for r in alerts.itertuples()],
+            "fast_loop_alerts": [_alert_summary(r, crew_name) for r in alerts.itertuples()],
             "fast_loop_note": "Sent automatically by the risk monitor to the crew and supervisor, not by the assistant.",
             "replan_recommended": recommended, "replan_reason": why,
         }
     return out
+
+
+def _alert_summary(r, crew_name: str) -> dict:
+    """One fast-loop alert as the agent sees it, with the exact texts the crew and supervisor received
+    (English; the worker also got it in their own language, see alerts.alerts_for)."""
+    from heat_safe.alerts import render
+
+    kw = dict(minutes=int(r.work_minutes_left), time=f"{r.time:%H:%M}", crew=crew_name, zone=r.zone)
+    return dict(time=kw["time"], action=r.action, zone=r.zone, work_minutes_left=kw["minutes"], reason=r.reason,
+                worker_message=render(r.action, "en", **kw).text,
+                supervisor_message=render(r.action, recipient="supervisor", **kw).text)
 
 
 def replan_from_hour(now: str) -> int:
