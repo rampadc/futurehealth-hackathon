@@ -43,3 +43,6 @@ test-results/
 
 # Terraform plan files can contain secrets
 tfplan
+
+# Eval run results: also written to BigQuery telemetry.eval_results
+01_population-health_climate-worker/evals/results/
