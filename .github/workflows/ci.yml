@@ -236,4 +236,5 @@ jobs:
           name: heat-safe-image-${{ env.SOURCE_SHA }}
           path: ${{ env.APP }}/image-artifact/
           retention-days: 2
+          overwrite: true
           if-no-files-found: error
