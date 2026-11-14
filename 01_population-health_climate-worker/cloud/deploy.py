@@ -92,7 +92,7 @@ def validate_pr(pr):
 
 
 def connection_name():
-    return gcloud("sql", "instances", "describe", INSTANCE, "--format=value(connectionName)")
+    return f"{PROJECT}:{REGION}:{INSTANCE}"
 
 
 @contextmanager
@@ -321,7 +321,7 @@ def deploy_main(args):
     if not SHA_RE.fullmatch(args.sha):
         raise ValueError("invalid commit SHA")
     if gcloud("run", "services", "describe", MAIN_SERVICE, "--region", REGION, missing_ok=True) is None:
-        raise RuntimeError("bootstrap must create the private main service before the first deployment")
+        raise RuntimeError("create the private main service as documented in cloud/README.md before the first deployment")
     values = dict(GOOGLE_CLOUD_PROJECT=PROJECT, GOOGLE_CLOUD_LOCATION=REGION,
                   HEAT_SAFE_MODEL_LOCATION="global", HEAT_SAFE_TELEMETRY="0",
                   STATIC_DIR="/app/static", HEAT_REQUIRE_ACCESS="true",

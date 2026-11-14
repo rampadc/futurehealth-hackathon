@@ -1,16 +1,14 @@
-# Christine: Heat-Safe IAM handoff
+# Message to send Christine
 
-Run the first-time block below in a terminal authenticated as an account already authorized to manage IAM in project `future-health-513202`. Ishka prepares the four service accounts, both Artifact Registry repositories, the Cloud SQL instance, and all seven named secrets before this handoff. No secret values are needed. The first-time block grants no Owner or ongoing IAM administrator role.
+Hi Christine — I’ve prepared the Cloud Run infrastructure in `future-health-513202`: four service accounts, two private image registries, PostgreSQL 16 and the main database, seven empty secrets, and private versioned Terraform state. The changes are in [draft PR #6](https://github.com/rampadc/futurehealth-hackathon/pull/6).
 
-This handoff uses the Google Cloud CLI directly. It does not run Terraform, the project bootstrap, or a custom CLI. IAM policy changes can take a few minutes to propagate.
+Could you run the `gcloud` commands below once using your GCP administrator account? They grant the deployment/runtime accounts their scoped access and let me read the seven setup secrets. They do not make me Owner or grant me ongoing IAM administration. No secret values, deployment keys, GitHub configuration, Terraform or setup script are involved in your step.
 
-The two BigQuery Data Viewer grants are conditional on the `vectors` dataset and its descendants. Project-wide BigQuery job creation remains a separate `jobUser` grant. The main runtime reads only its two code digests and main database password. The preview deployer reads only the SQL provisioner password here. The seven grants to `ishka.quark@gmail.com` cover all bootstrap secrets, including the SQL admin password; these are sensitive administrator credentials.
+The seven named custom roles are not yet present. Their permission sets and the six conditions have been checked against Google IAM, and the grants have had an independent security review. Main and preview access stay separate, and BigQuery reads stay limited to `vectors`.
 
-`heatSafeRunCreate`, `heatSafeSecretCreate`, `heatSafeRunRead`, and `heatSafeSqlInventory` contain create/list permissions, which cannot be restricted to an existing target resource by a resource-name condition. They are granted only to the preview deployment identity used by the trusted deployment workflow.
+If a command fails, please send me the command and error text, without any tokens, keys or passwords. Once the grants are applied, I’ll verify access and finish the database, deployment keys, CI/CD and previews. You won’t need to handle routine deployments afterward.
 
-## First-time handoff
-
-The seven custom roles are not yet present in this project. After the owner creates the named resources, copy this entire block once:
+## Commands
 
 ```sh
 gcloud iam roles create heatSafeImageCleanup --project=future-health-513202 --title='Heat-Safe image cleanup' --permissions=artifactregistry.repositories.deleteArtifacts,artifactregistry.packages.delete,artifactregistry.versions.delete,artifactregistry.tags.delete --stage=GA
@@ -56,6 +54,12 @@ gcloud secrets add-iam-policy-binding heat-safe-sql-provisioner-password --proje
 gcloud secrets add-iam-policy-binding heat-safe-sql-admin-password --project=future-health-513202 --member='user:ishka.quark@gmail.com' --role=roles/secretmanager.secretAccessor
 ```
 
+---
+
+## Operator reference
+
+The block above is the first-time handoff. IAM changes can take a few minutes to propagate. Creation and inventory permissions are project-scoped because those operations have no existing target resource; management of existing services and secrets remains name-restricted. The operator’s seven secret grants include SQL administrator credentials and are intentionally limited to the designated person and those seven secrets.
+
 ## If a custom role already exists
 
 If a `gcloud iam roles create` command reports that its role already exists, run only that role's matching `update` command below. Each update sets the exact permissions of that role; do not run this whole block automatically after the first-time block.
@@ -69,23 +73,3 @@ gcloud iam roles update heatSafeSecretCreate --project=future-health-513202 --ti
 gcloud iam roles update heatSafeSecretManage --project=future-health-513202 --title='Heat-Safe preview secret management' --permissions=secretmanager.secrets.get,secretmanager.secrets.delete,secretmanager.secrets.getIamPolicy,secretmanager.secrets.setIamPolicy,secretmanager.versions.add,secretmanager.versions.get,secretmanager.versions.access,secretmanager.versions.list --stage=GA
 gcloud iam roles update heatSafeSqlInventory --project=future-health-513202 --title='Heat-Safe SQL database inventory' --permissions=cloudsql.databases.list --stage=GA
 ```
-
-## Verify
-
-```sh
-gcloud iam roles list --project=future-health-513202 --format='table(name,title,stage)'
-gcloud projects get-iam-policy future-health-513202 --format=json
-gcloud artifacts repositories get-iam-policy heat-safe-main --project=future-health-513202 --location=me-central1 --format=json
-gcloud artifacts repositories get-iam-policy heat-safe-previews --project=future-health-513202 --location=me-central1 --format=json
-gcloud iam service-accounts get-iam-policy heat-main-runtime@future-health-513202.iam.gserviceaccount.com --project=future-health-513202 --format=json
-gcloud iam service-accounts get-iam-policy heat-preview-runtime@future-health-513202.iam.gserviceaccount.com --project=future-health-513202 --format=json
-gcloud secrets get-iam-policy heat-safe-main-gate-code --project=future-health-513202 --format=json
-gcloud secrets get-iam-policy heat-safe-main-presenter-code --project=future-health-513202 --format=json
-gcloud secrets get-iam-policy heat-safe-main-gate-sha256 --project=future-health-513202 --format=json
-gcloud secrets get-iam-policy heat-safe-main-presenter-sha256 --project=future-health-513202 --format=json
-gcloud secrets get-iam-policy heat-safe-main-db-password --project=future-health-513202 --format=json
-gcloud secrets get-iam-policy heat-safe-sql-provisioner-password --project=future-health-513202 --format=json
-gcloud secrets get-iam-policy heat-safe-sql-admin-password --project=future-health-513202 --format=json
-```
-
-Check that the project policy has the condition titles and expressions shown above, that repository and service-account policies contain the intended deployer bindings, and that each of the seven secret policies includes the designated user. Do not replace the `vectors` dataset ACL or add `roles/bigquery.dataViewer` without its `VectorsOnly` condition.

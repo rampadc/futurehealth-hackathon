@@ -10,6 +10,12 @@ import deploy
 
 
 class DeploymentTests(unittest.TestCase):
+    def test_connection_name_needs_no_sql_admin_permission(self):
+        with patch.object(deploy, "gcloud") as cloud:
+            self.assertEqual(deploy.connection_name(),
+                             f"{deploy.PROJECT}:{deploy.REGION}:{deploy.INSTANCE}")
+        cloud.assert_not_called()
+
     def test_preview_role_membership_is_scoped_for_force_cleanup(self):
         queries = []
 
