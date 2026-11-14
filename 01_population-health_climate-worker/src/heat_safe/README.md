@@ -81,3 +81,36 @@ There were two ways to make it pass:
 
 We took the second. **When a model keeps doing arithmetic, give it the answer instead.** It is the
 same principle as moving thresholds out of the prompt: anything code can compute, code should.
+
+### 3. A heat spike runs two loops at different speeds (13–14 Nov)
+
+A forecast describes each hour with one value. A sensor on site can show it is hotter than that, so
+the plan has to change during the shift. That needs two loops:
+
+```
+sensor reading ─► sensor.measured_twl ─► spike.adjust_for_observation   FAST: every reading, no LLM
+                                            continue / tighten / rest_now / sensor_fault / withdraw + alert
+             └──► sensor.apply_measurements ─► schedule.optimise_schedule(from_hour, already_worked_minutes)
+                                                                         SLOW: re-plan the rest of the day
+```
+
+| File | Role |
+|---|---|
+| `spike.py` | Fast loop. A pure function: one reading and a small state in, one decision out. Only ever stricter than the plan |
+| `sensor.py` | Measured TWL (same model as the forecast), conversion of readings for the fast loop, forecast correction, synthetic feed, `replay_fast_loop` |
+| `schedule.py` | `from_hour` and `already_worked_minutes`: re-plan without touching past hours or exceeding the acclimatisation share |
+| `tools/replay_heat_spike.py` | The demo: morning plan, then the alerts during the spike, then the re-plan |
+| `rules.py` | `STEP_DOWN_AFTER_MINUTES`, `SENSOR_MAX_CHANGE_C_PER_MIN` and `SENSOR_BIAS_FADE_HOURS`: design choices, not ADOSH-SF |
+
+What the replay day taught us:
+- **An hourly forecast is not the whole hour.** Even without the synthetic spike, the shade sensor
+  drifts into High during the 10:00 hour as the air heats towards 11:00, while the forecast says
+  Medium (122.8). That is the case for site sensors in the pitch.
+- **The spike had to be placed with care.** In the sun, 07:00–17:00 is already High (the TWL floor), so
+  a spike changes nothing there. After 10:00 a +3 °C spike crosses the 44 °C withdrawal limit. The demo
+  spike is 08:15–09:15 for a crew in shade, where the plan assumed Medium.
+- **Raise fast, lower slowly; a bad input moves toward safety.** A stricter zone applies from the first
+  reading and is lifted only after 30 minutes of better readings (15 until 14 Nov; see `rules.py`). An implausible jump is a fault: it
+  raises the zone by one and alerts, but it never triggers a withdrawal and never relaxes anything.
+- **The correction is one-sided.** Hotter than forecast lowers the next hours' TWL (fading over 3 hours).
+  A cooler reading never raises it.

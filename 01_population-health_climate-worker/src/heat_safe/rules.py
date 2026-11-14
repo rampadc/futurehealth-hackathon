@@ -11,7 +11,7 @@ from enum import IntEnum
 
 from heat_safe.twl import DEFAULT_ICL
 
-RULES_VERSION = "2026.11.07-1"  # 06 Nov: 2026 midday-break season (-1); acclimatisation option B (-2); note b restored (-3). 07 Nov: clothing ensembles (-1)
+RULES_VERSION = "2026.11.14-1"  # 06 Nov: 2026 midday-break season (-1); acclimatisation option B (-2); note b restored (-3). 07 Nov: clothing ensembles (-1). 13 Nov: heat-spike response (-1). 14 Nov: step-down 15 -> 30 min (-1)
 
 ADOSH_TG = "ADOSH-SF Technical Guideline, Safety in the Heat, v4.0 (15 Jul 2024), Table 1, p.5"
 ADOSH_COP = "ADOSH-SF CoP 11.0, Safety in the Heat, v4.0 (Jul 2024)"
@@ -109,6 +109,22 @@ def twl_zone(twl: float) -> str:
 # Conditions where TWL is capped into the High Risk zone regardless of the heat-balance result.
 WITHDRAWAL_DRY_BULB_C = 44.0
 WITHDRAWAL_WET_BULB_C = 32.0  # psychrometric wet bulb
+
+# --- Heat-spike response (spike.py, the fast loop on site-sensor readings) ----------------------
+# Project design choices, NOT from ADOSH-SF: review with an OHS advisor.
+# Raise fast, lower slowly: a stricter zone applies from the first reading; it is lifted only after the
+# readings have stayed in a better zone for this long, so a reading near a boundary cannot flip the crew
+# between work and rest every few minutes. 30 rather than 15 (changed 14 Nov): body heat stored in the
+# hotter zone takes time to shed, and the TWL work/rest limits (like ISO 7243 / ACGIH WBGT averaging)
+# work in hours, so a 15-minute window was shorter than the unit everything else uses.
+STEP_DOWN_AFTER_MINUTES = 30
+# A dry-bulb change faster than this between two readings is physically implausible on a site: treat it
+# as a sensor fault (lost input -> one zone stricter, check the sensor), never as real heat or as cooling.
+SENSOR_MAX_CHANGE_C_PER_MIN = 2.0
+# Slow loop (sensor.apply_measurements): when the site is measured HOTTER than forecast (lower TWL), the
+# difference is applied in full to the next hour and fades linearly to zero over this many hours.
+# Cooler-than-forecast readings never raise future TWL: the forecast is only ever corrected toward caution.
+SENSOR_BIAS_FADE_HOURS = 3
 
 # --- Acclimatisation ([ADOSH_COP] 3.2(b)(i), p.7; [ADOSH_TG] section 3, p.6) ---------------------
 # Decision 6 Nov 2026 (option B; review with an OHS advisor). The documents give no single cutoff:
