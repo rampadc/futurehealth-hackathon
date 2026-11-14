@@ -1,6 +1,6 @@
 # Heat-Safe Cloud Run control plane
 
-This module is separate from `infra/`, which belongs to the earlier supervisor demo. Terraform creates the private main and preview Artifact Registry repositories, a PostgreSQL 16 Cloud SQL instance and main database, four service accounts, and seven fixed Secret Manager secrets. [Christine's IAM instructions](CHRISTINE-IAM.md) grant the narrowly scoped permissions after those resources exist. The trusted `cloud/deploy.py` controller manages application services and per-PR resources during deployment.
+This module is separate from `infra/`, which belongs to the earlier supervisor demo. Terraform creates the private main and preview Artifact Registry repositories, a PostgreSQL 16 Cloud SQL instance and main database, four service accounts, and seven fixed Secret Manager secrets. IAM grants are managed separately using the standard `gcloud` CLI after those resources exist; Terraform does not own IAM policies. The trusted `cloud/deploy.py` controller manages application services and per-PR resources during deployment.
 
 ## Prepared state — 14 November 2026
 
@@ -8,11 +8,11 @@ Infrastructure preparation completed as `ishka.quark@gmail.com` with the existin
 
 The state bucket is private, uniform-access and versioned; anonymous state retrieval returns 403. Both registry paths reject anonymous requests with 401 and have no public IAM grants. PostgreSQL is RUNNABLE with no authorized public networks. The existing `supervisor-demo` generation and revision are unchanged. The two GitHub environments allow only `main`, require no approvals, and have the four non-secret deployment variables configured.
 
-No service-account keys or secret values have been created, and no IAM grants have been applied by this preparation. The remaining administrator work is the single first-time block in [the ready-to-send Christine message](CHRISTINE-IAM.md#commands). After it succeeds, the operator can read the seven setup secrets and complete the steps below. Live application deployment and teardown remain unverified until then.
+No service-account keys or secret values have been created, and no IAM grants have been applied by this preparation. The remaining administrator work is the scoped IAM grants; the operator shares the exact commands directly with the project administrator. After it succeeds, the operator can read the seven setup secrets and complete the steps below. Live application deployment and teardown remain unverified until then.
 
 ## One-time operator setup
 
-Run these commands from the repository root as `ishka.quark@gmail.com`, the project Editor and designated setup operator. Christine performs the separate IAM grants in `CHRISTINE-IAM.md`. You need `gcloud`, Terraform 1.5 or newer, `cloud-sql-proxy` v2, `psql`, `openssl`, and `gh`. Cloud SQL and Artifact Registry must be available in `me-central1`. Authenticate the CLI and Terraform's Application Default Credentials as Ishka:
+Run these commands from the repository root as `ishka.quark@gmail.com`, the project Editor and designated setup operator. A project administrator performs the separate IAM grants. You need `gcloud`, Terraform 1.5 or newer, `cloud-sql-proxy` v2, `psql`, `openssl`, and `gh`. Cloud SQL and Artifact Registry must be available in `me-central1`. Authenticate the CLI and Terraform's Application Default Credentials as Ishka:
 
 ```sh
 gcloud auth login --account=ishka.quark@gmail.com
@@ -45,7 +45,7 @@ terraform -chdir=01_population-health_climate-worker/cloud plan -out=/private/pa
 terraform -chdir=01_population-health_climate-worker/cloud apply /private/path/heat-safe.tfplan
 ```
 
-Keep the plan file outside the checkout and delete it after apply. Then follow [CHRISTINE-IAM.md](CHRISTINE-IAM.md) for the direct `gcloud` IAM grants. Complete the grants before creating deployment keys or running the workflows.
+Keep the plan file outside the checkout and delete it after apply. Then ask the project administrator to apply the reviewed IAM grants with `gcloud`. Complete the grants before creating deployment keys or running the workflows.
 
 ### Initialize the fixed secret values
 
