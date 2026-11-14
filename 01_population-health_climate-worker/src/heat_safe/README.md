@@ -136,6 +136,15 @@ What connecting it taught us:
 - **The first eval failure was the eval.** `within_acclimatisation_share` only applies to a
   reduced-share worker; the scenario's crew was acclimatised.
 
+**Rolling 60-minute work limit (15 Nov).** The fast loop first reset "minutes worked" at each clock
+hour, so a crew could work 08:00-08:30, rest 30 minutes and work again from 09:00: 50 minutes in 80
+under a "20 min work / 40 min rest" cycle. Now work counts over the last 60 minutes, and the alert gives
+how long the crew can work **in one stretch** from now (`sensor.available_work_minutes`): earlier
+minutes drop out of the window as the stretch goes on, so after 08:00-08:30 the answer is 0 until 09:10
+and then a full 20. A first version reported "20 minus what is in the window" (5 minutes at 09:15), which
+was correct for that instant but told a crew to stop after 5 minutes they did not need to stop.
+A supervisor's question about one alert found this.
+
 ### 4. Alert text is reviewed data, not generated text (14 Nov)
 
 `alert_templates.yaml` holds what a worker receives for each fast-loop action, in English, Mandarin,

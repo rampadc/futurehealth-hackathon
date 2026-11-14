@@ -1,0 +1,56 @@
+action,recipient,language,text,template_status,marker,fallback,time
+rest_now,supervisor,en,Steel fixer crew: rest now at 08:30. Heat above plan. High zone rules.,source,,,08:30
+rest_now,worker,en,Stop work now. Rest in the shade. Drink water. Tell your supervisor if you feel unwell.,source,,,08:30
+rest_now,worker,zh,立即停止工作。到阴凉处休息。请喝水。如感到不适，请告诉主管。,reviewed,,,08:30
+rest_now,worker,hi,"अभी काम बंद करें। छाया में आराम करें। पानी पिएँ। तबीयत ठीक न लगे तो अपने सुपरवाइज़र को बताएँ।
+Stop work now. Rest in the shade. Drink water. Tell your supervisor if you feel unwell.",back_translated,"[machine-checked translation, English included]",,08:30
+rest_now,worker,ur,"ابھی کام بند کریں۔ سائے میں آرام کریں۔ پانی پئیں۔ طبیعت ٹھیک نہ لگے تو اپنے سپروائزر کو بتائیں۔
+Stop work now. Rest in the shade. Drink water. Tell your supervisor if you feel unwell.",back_translated,"[machine-checked translation, English included]",,08:30
+rest_now,worker,ml,"ഇപ്പോൾ ജോലി നിർത്തുക. തണലിൽ വിശ്രമിക്കുക. വെള്ളം കുടിക്കുക. സുഖമില്ലെങ്കിൽ സൂപ്പർവൈസറോട് പറയുക.
+Stop work now. Rest in the shade. Drink water. Tell your supervisor if you feel unwell.",back_translated,"[machine-checked translation, English included]",,08:30
+rest_now,worker,bn,"এখনই কাজ বন্ধ করুন। ছায়ায় বিশ্রাম নিন। পানি পান করুন। অসুস্থ বোধ করলে আপনার সুপারভাইজারকে বলুন।
+Stop work now. Rest in the shade. Drink water. Tell your supervisor if you feel unwell.",back_translated,"[machine-checked translation, English included]",,08:30
+tighten,supervisor,en,Steel fixer crew: tighten at 09:00. Heat above plan. High zone rules: 20 work minutes left this hour.,source,,,09:00
+tighten,worker,en,Heat is higher than planned. Work only 20 more minutes this hour. Then rest in the shade. Drink water.,source,,,09:00
+tighten,worker,zh,高温超出计划。本小时只能再工作20分钟。然后到阴凉处休息。请喝水。,reviewed,,,09:00
+tighten,worker,hi,"गर्मी योजना से ज़्यादा है। इस घंटे सिर्फ़ 20 मिनट और काम करें। फिर छाया में आराम करें। पानी पिएँ।
+Heat is higher than planned. Work only 20 more minutes this hour. Then rest in the shade. Drink water.",back_translated,"[machine-checked translation, English included]",,09:00
+tighten,worker,ur,"گرمی منصوبے سے زیادہ ہے۔ اس گھنٹے صرف 20 منٹ اور کام کریں۔ پھر سائے میں آرام کریں۔ پانی پئیں۔
+Heat is higher than planned. Work only 20 more minutes this hour. Then rest in the shade. Drink water.",back_translated,"[machine-checked translation, English included]",,09:00
+tighten,worker,ml,"ചൂട് പ്ലാൻ ചെയ്തതിലും കൂടുതലാണ്. ഈ മണിക്കൂറിൽ ഇനി 20 മിനിറ്റ് മാത്രം ജോലി ചെയ്യുക. പിന്നെ തണലിൽ വിശ്രമിക്കുക. വെള്ളം കുടിക്കുക.
+Heat is higher than planned. Work only 20 more minutes this hour. Then rest in the shade. Drink water.",back_translated,"[machine-checked translation, English included]",,09:00
+tighten,worker,bn,"গরম পরিকল্পনার চেয়ে বেশি। এই ঘণ্টায় আর মাত্র 20 মিনিট কাজ করুন। তারপর ছায়ায় বিশ্রাম নিন। পানি পান করুন।
+Heat is higher than planned. Work only 20 more minutes this hour. Then rest in the shade. Drink water.",back_translated,"[machine-checked translation, English included]",,09:00
+rest_now,supervisor,en,Steel fixer crew: rest now at 09:20. Heat above plan. High zone rules.,source,,,09:20
+rest_now,worker,en,Stop work now. Rest in the shade. Drink water. Tell your supervisor if you feel unwell.,source,,,09:20
+rest_now,worker,zh,立即停止工作。到阴凉处休息。请喝水。如感到不适，请告诉主管。,reviewed,,,09:20
+rest_now,worker,hi,"अभी काम बंद करें। छाया में आराम करें। पानी पिएँ। तबीयत ठीक न लगे तो अपने सुपरवाइज़र को बताएँ।
+Stop work now. Rest in the shade. Drink water. Tell your supervisor if you feel unwell.",back_translated,"[machine-checked translation, English included]",,09:20
+rest_now,worker,ur,"ابھی کام بند کریں۔ سائے میں آرام کریں۔ پانی پئیں۔ طبیعت ٹھیک نہ لگے تو اپنے سپروائزر کو بتائیں۔
+Stop work now. Rest in the shade. Drink water. Tell your supervisor if you feel unwell.",back_translated,"[machine-checked translation, English included]",,09:20
+rest_now,worker,ml,"ഇപ്പോൾ ജോലി നിർത്തുക. തണലിൽ വിശ്രമിക്കുക. വെള്ളം കുടിക്കുക. സുഖമില്ലെങ്കിൽ സൂപ്പർവൈസറോട് പറയുക.
+Stop work now. Rest in the shade. Drink water. Tell your supervisor if you feel unwell.",back_translated,"[machine-checked translation, English included]",,09:20
+rest_now,worker,bn,"এখনই কাজ বন্ধ করুন। ছায়ায় বিশ্রাম নিন। পানি পান করুন। অসুস্থ বোধ করলে আপনার সুপারভাইজারকে বলুন।
+Stop work now. Rest in the shade. Drink water. Tell your supervisor if you feel unwell.",back_translated,"[machine-checked translation, English included]",,09:20
+sensor_fault,supervisor,en,Steel fixer crew: sensor fault at 09:40. Check the sensor. High zone rules apply until it is fixed.,source,,,09:40
+sensor_fault,worker,en,The heat sensor is not working. Follow the strict rest times until it is fixed. Drink water.,source,,,09:40
+sensor_fault,worker,zh,高温监测传感器出现故障。修好之前，请严格按照休息时间执行。请喝水。,reviewed,,,09:40
+sensor_fault,worker,hi,"गर्मी का सेंसर काम नहीं कर रहा है। ठीक होने तक आराम के सख़्त समय का पालन करें। पानी पिएँ।
+The heat sensor is not working. Follow the strict rest times until it is fixed. Drink water.",back_translated,"[machine-checked translation, English included]",,09:40
+sensor_fault,worker,ur,"گرمی کا سینسر کام نہیں کر رہا۔ ٹھیک ہونے تک آرام کے سخت اوقات پر عمل کریں۔ پانی پئیں۔
+The heat sensor is not working. Follow the strict rest times until it is fixed. Drink water.",back_translated,"[machine-checked translation, English included]",,09:40
+sensor_fault,worker,ml,"ചൂട് അളക്കുന്ന സെൻസർ പ്രവർത്തിക്കുന്നില്ല. അത് ശരിയാക്കുന്നതുവരെ കർശനമായ വിശ്രമ സമയം പാലിക്കുക. വെള്ളം കുടിക്കുക.
+The heat sensor is not working. Follow the strict rest times until it is fixed. Drink water.",back_translated,"[machine-checked translation, English included]",,09:40
+sensor_fault,worker,bn,"তাপ সেন্সর কাজ করছে না। ঠিক না হওয়া পর্যন্ত কঠোর বিশ্রামের সময় মেনে চলুন। পানি পান করুন।
+The heat sensor is not working. Follow the strict rest times until it is fixed. Drink water.",back_translated,"[machine-checked translation, English included]",,09:40
+rest_now,supervisor,en,Steel fixer crew: rest now at 09:45. Heat above plan. High zone rules.,source,,,09:45
+rest_now,worker,en,Stop work now. Rest in the shade. Drink water. Tell your supervisor if you feel unwell.,source,,,09:45
+rest_now,worker,zh,立即停止工作。到阴凉处休息。请喝水。如感到不适，请告诉主管。,reviewed,,,09:45
+rest_now,worker,hi,"अभी काम बंद करें। छाया में आराम करें। पानी पिएँ। तबीयत ठीक न लगे तो अपने सुपरवाइज़र को बताएँ।
+Stop work now. Rest in the shade. Drink water. Tell your supervisor if you feel unwell.",back_translated,"[machine-checked translation, English included]",,09:45
+rest_now,worker,ur,"ابھی کام بند کریں۔ سائے میں آرام کریں۔ پانی پئیں۔ طبیعت ٹھیک نہ لگے تو اپنے سپروائزر کو بتائیں۔
+Stop work now. Rest in the shade. Drink water. Tell your supervisor if you feel unwell.",back_translated,"[machine-checked translation, English included]",,09:45
+rest_now,worker,ml,"ഇപ്പോൾ ജോലി നിർത്തുക. തണലിൽ വിശ്രമിക്കുക. വെള്ളം കുടിക്കുക. സുഖമില്ലെങ്കിൽ സൂപ്പർവൈസറോട് പറയുക.
+Stop work now. Rest in the shade. Drink water. Tell your supervisor if you feel unwell.",back_translated,"[machine-checked translation, English included]",,09:45
+rest_now,worker,bn,"এখনই কাজ বন্ধ করুন। ছায়ায় বিশ্রাম নিন। পানি পান করুন। অসুস্থ বোধ করলে আপনার সুপারভাইজারকে বলুন।
+Stop work now. Rest in the shade. Drink water. Tell your supervisor if you feel unwell.",back_translated,"[machine-checked translation, English included]",,09:45
