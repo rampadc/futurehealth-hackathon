@@ -1,57 +1,182 @@
 # Heat-Safe Cloud Run control plane
 
-This module is separate from `infra/`, which belongs to the earlier supervisor demo. It creates private main and preview Artifact Registry repositories, a zonal PostgreSQL 16 Cloud SQL instance, four fixed service accounts, UAE Secret Manager secrets, and two scoped deployment identities authenticated with service-account JSON keys. The application services and per-PR database resources are managed by `deploy.py`.
+This module is separate from `infra/`, which belongs to the earlier supervisor demo. Terraform creates the private main and preview Artifact Registry repositories, a PostgreSQL 16 Cloud SQL instance and main database, four service accounts, and seven fixed Secret Manager secrets. [Christine's IAM instructions](CHRISTINE-IAM.md) grant the narrowly scoped permissions after those resources exist. The trusted `cloud/deploy.py` controller manages application services and per-PR resources during deployment.
 
-## Owner bootstrap
+## One-time operator setup
 
-An account able to create IAM roles, service accounts, and project IAM bindings must run the cloud setup. The current Editor account lacks those permissions. Bootstrap has **not** been run yet. The GCP owner and GitHub repository administrator can run separate modes with their own credentials; neither needs to share OAuth tokens.
-
-For the GCP owner: `gcloud`, `terraform >=1.5`, PostgreSQL `psql`, and `cloud-sql-proxy` v2 on `PATH`; Cloud SQL and Artifact Registry available in `me-central1`. Authenticate the CLI and Application Default Credentials as the **same GCP bootstrap principal**, and select the exact project. The script checks both credential sets for required IAM permissions before any writes:
+Run these commands from the repository root as `ishka.quark@gmail.com`, the project Editor and designated setup operator. Christine performs the separate IAM grants in `CHRISTINE-IAM.md`. You need `gcloud`, Terraform 1.5 or newer, `cloud-sql-proxy` v2, `psql`, `openssl`, and `gh`. Cloud SQL and Artifact Registry must be available in `me-central1`. Authenticate the CLI and Terraform's Application Default Credentials as Ishka:
 
 ```sh
-gcloud auth login --account=YOUR_BOOTSTRAP_ACCOUNT
-gcloud auth application-default login --account=YOUR_BOOTSTRAP_ACCOUNT
+gcloud auth login --account=ishka.quark@gmail.com
+gcloud auth application-default login --account=ishka.quark@gmail.com
 gcloud config set project future-health-513202
-python3 01_population-health_climate-worker/tools/bootstrap_cloud_run.py --check
-```
-
-After `--check` reports no missing permissions, the GCP owner runs from the repository root:
-
-```sh
-export GITHUB_REPOSITORY=rampadc/futurehealth-hackathon
-python3 01_population-health_climate-worker/tools/bootstrap_cloud_run.py --cloud-only --presenter-member=user:ishka.quark@gmail.com
-```
-
-Cloud setup creates a versioned GCS Terraform state bucket with uniform access and public access prevention, enables APIs, applies this module, initializes PostgreSQL roles and schemas, and creates random access codes and credentials. It creates a **private** main Cloud Run placeholder so the main deployment identity needs update permission only. A first successful main deployment replaces it and enables the application gate.
-
-The GitHub repository administrator uses their own GCP ADC identity with **read access to the existing private state bucket** and their own `gh` login. `--github-only` reads Terraform outputs, validates two administrator-provided service-account key files against the exact deployment identities, and uploads them directly to GitHub environment secrets. It does not create cloud keys or require IAM administration. Transfer those files through a private channel; never put them in the repository or chat:
-
-```sh
-gcloud auth application-default login --account=YOUR_GCP_STATE_READER_ACCOUNT
 gh auth login
-export GITHUB_REPOSITORY=rampadc/futurehealth-hackathon
-python3 01_population-health_climate-worker/tools/bootstrap_cloud_run.py --github-only \
-  --main-key-file /private/path/main-deploy.json \
-  --preview-key-file /private/path/preview-deploy.json
 ```
 
-The default mode runs both stages for one person with GCP setup and GitHub administration permissions. It creates missing deployment keys in a private temporary directory, uploads JSON through stdin to GitHub, and removes local copies. A failed upload deletes the newly created Google key. Existing environment secrets are retained on reruns rather than minting more keys. Keys are never Terraform resources or state outputs.
+Confirm the project has no `allUsers` or `allAuthenticatedUsers` IAM binding before creating images or other artifacts. Keep the Terraform state bucket private, with uniform bucket-level access, public access prevention, and versioning:
 
-The two GitHub environments are `heat-safe-main` and `heat-safe-preview`, with secrets `GCP_MAIN_DEPLOY_KEY` and `GCP_PREVIEW_DEPLOY_KEY` respectively. Both allow only the exact `main` branch and require no manual approval. Setup verifies that restriction before uploading keys and fails if the repository's GitHub plan does not support it. There are no deployment keys in repository-wide secrets, and unprivileged PR CI does not reference these environments.
+```sh
+gcloud projects get-iam-policy future-health-513202 --format=json
+gcloud storage buckets create gs://future-health-513202-heat-safe-terraform \
+  --project=future-health-513202 --location=me-central1 \
+  --uniform-bucket-level-access --public-access-prevention
+gcloud storage buckets update gs://future-health-513202-heat-safe-terraform \
+  --project=future-health-513202 --versioning --public-access-prevention
+gcloud storage buckets describe gs://future-health-513202-heat-safe-terraform --format=json
+```
 
-For separate administrators, after cloud setup the GCP administrator creates one JSON key for `heat-main-deploy@future-health-513202.iam.gserviceaccount.com` and one for `heat-preview-deploy@future-health-513202.iam.gserviceaccount.com`, using `gcloud iam service-accounts keys create PRIVATE_FILE --iam-account=ACCOUNT`. Use a private directory outside the checkout (`umask 077`), transfer files privately, and delete both copies after installation. Cloud organization policy must allow service-account key creation.
+Create the bucket only if it does not exist. If it already exists, verify its owner and private settings before using it; do not reuse an unknown bucket. The bucket name is globally unique. Apply the base resources with the private GCS backend. Terraform state may contain sensitive resource metadata, so restrict bucket access to the operators who need it:
 
-To rotate a key, create a replacement for the same service account, update its environment secret using `gh secret set SECRET_NAME --repo rampadc/futurehealth-hackathon --env ENVIRONMENT < PRIVATE_FILE`, verify an automated run succeeds, then delete the old key with `gcloud iam service-accounts keys delete OLD_KEY_ID --iam-account=ACCOUNT`. Delete the replacement file. Do not revoke an in-use key before verifying the replacement. In an exposure incident, disable/delete the affected key immediately and replace its environment secret.
+```sh
+gcloud services enable serviceusage.googleapis.com cloudresourcemanager.googleapis.com storage.googleapis.com \
+  --project=future-health-513202
+terraform -chdir=01_population-health_climate-worker/cloud init -reconfigure \
+  -backend-config=bucket=future-health-513202-heat-safe-terraform \
+  -backend-config=prefix=heat-safe/cloud
+terraform -chdir=01_population-health_climate-worker/cloud plan -out=/private/path/heat-safe.tfplan
+terraform -chdir=01_population-health_climate-worker/cloud apply /private/path/heat-safe.tfplan
+```
 
-Raw main access and presenter codes are in `heat-safe-main-gate-code` and `heat-safe-main-presenter-code`. The explicit `--presenter-member` account can read only those two raw main code secrets and preview `heat-safe-pr-N-codes` versions. It cannot read the main DB password, preview DB passwords, or SQL provisioner credential through these grants. The current designated operator is `user:ishka.quark@gmail.com`; pass a different member explicitly if that changes. Their SHA-256 digests are separate secrets mounted as Cloud Run environment variables. The main DB password is mounted from Secret Manager; the main deployer does not read it. Preview code pairs are in `heat-safe-pr-N-codes` and preview DB passwords in `heat-safe-pr-N-db-password`. Preview services receive only code digests; the preview DB password is passed as a Cloud Run environment variable for that one service. The preview runtime identity has no Secret Manager permissions.
+Keep the plan file outside the checkout and delete it after apply. Then follow [CHRISTINE-IAM.md](CHRISTINE-IAM.md) for the direct `gcloud` IAM grants. Complete the grants before creating deployment keys or running the workflows.
 
-The designated presenter can retrieve codes without an owner intervening for each PR:
+### Initialize the fixed secret values
+
+First inspect all seven secrets for enabled versions. Run this initialization only when none has an enabled version. If all seven already have enabled versions, keep them: generating replacements would change application credentials and break the existing database roles or code digests. If only some have versions, stop and reconcile the partial setup using the existing values before proceeding.
+
+```sh
+gcloud secrets versions list heat-safe-sql-admin-password --project=future-health-513202 --filter='state:ENABLED'
+gcloud secrets versions list heat-safe-main-db-password --project=future-health-513202 --filter='state:ENABLED'
+gcloud secrets versions list heat-safe-sql-provisioner-password --project=future-health-513202 --filter='state:ENABLED'
+gcloud secrets versions list heat-safe-main-gate-code --project=future-health-513202 --filter='state:ENABLED'
+gcloud secrets versions list heat-safe-main-presenter-code --project=future-health-513202 --filter='state:ENABLED'
+gcloud secrets versions list heat-safe-main-gate-sha256 --project=future-health-513202 --filter='state:ENABLED'
+gcloud secrets versions list heat-safe-main-presenter-sha256 --project=future-health-513202 --filter='state:ENABLED'
+```
+
+For a first installation, use a private directory outside the checkout. Keep files mode 600, never display their contents in terminal output, and never put passwords in command arguments, shell history, logs, or the repository. Generate the raw values and their SHA-256 digests locally:
+
+```sh
+umask 077
+mkdir -p -m 700 /private/path/heat-safe-secrets
+openssl rand -hex 32 | tr -d '\n' > /private/path/heat-safe-secrets/sql-admin-password
+openssl rand -hex 32 | tr -d '\n' > /private/path/heat-safe-secrets/main-db-password
+openssl rand -hex 32 | tr -d '\n' > /private/path/heat-safe-secrets/sql-provisioner-password
+openssl rand -hex 24 | tr -d '\n' > /private/path/heat-safe-secrets/main-gate-code
+openssl rand -hex 24 | tr -d '\n' > /private/path/heat-safe-secrets/main-presenter-code
+shasum -a 256 /private/path/heat-safe-secrets/main-gate-code | cut -d ' ' -f 1 | tr -d '\n' > /private/path/heat-safe-secrets/main-gate-sha256
+shasum -a 256 /private/path/heat-safe-secrets/main-presenter-code | cut -d ' ' -f 1 | tr -d '\n' > /private/path/heat-safe-secrets/main-presenter-sha256
+```
+
+All seven files must contain no trailing newline. Terraform creates the seven secret resources. Add one version of each:
+
+```sh
+gcloud secrets versions add heat-safe-sql-admin-password --project=future-health-513202 --data-file=/private/path/heat-safe-secrets/sql-admin-password
+gcloud secrets versions add heat-safe-main-db-password --project=future-health-513202 --data-file=/private/path/heat-safe-secrets/main-db-password
+gcloud secrets versions add heat-safe-sql-provisioner-password --project=future-health-513202 --data-file=/private/path/heat-safe-secrets/sql-provisioner-password
+gcloud secrets versions add heat-safe-main-gate-code --project=future-health-513202 --data-file=/private/path/heat-safe-secrets/main-gate-code
+gcloud secrets versions add heat-safe-main-presenter-code --project=future-health-513202 --data-file=/private/path/heat-safe-secrets/main-presenter-code
+gcloud secrets versions add heat-safe-main-gate-sha256 --project=future-health-513202 --data-file=/private/path/heat-safe-secrets/main-gate-sha256
+gcloud secrets versions add heat-safe-main-presenter-sha256 --project=future-health-513202 --data-file=/private/path/heat-safe-secrets/main-presenter-sha256
+```
+
+On a rerun with all seven versions present, skip the generation and `versions add` commands. If database setup remains incomplete, recover its existing passwords into new private files outside the checkout without printing them:
+
+```sh
+umask 077
+mkdir -p -m 700 /private/path/heat-safe-secrets
+gcloud secrets versions access latest --project=future-health-513202 --secret=heat-safe-sql-admin-password --out-file=/private/path/heat-safe-secrets/sql-admin-password
+gcloud secrets versions access latest --project=future-health-513202 --secret=heat-safe-main-db-password --out-file=/private/path/heat-safe-secrets/main-db-password
+gcloud secrets versions access latest --project=future-health-513202 --secret=heat-safe-sql-provisioner-password --out-file=/private/path/heat-safe-secrets/sql-provisioner-password
+```
+
+For the first installation, use `gcloud sql users set-password postgres --instance=heat-safe-pg16 --project=future-health-513202 --prompt-for-password` and enter the admin password from the private file at the hidden prompt. On a rerun, skip that password change if the admin password is already set to the stored value. In another terminal, run `cloud-sql-proxy future-health-513202:me-central1:heat-safe-pg16 --address=127.0.0.1 --port=5432`. With the proxy running, connect as admin (the `-W` prompt hides input):
+
+```sh
+psql 'host=127.0.0.1 port=5432 dbname=postgres user=postgres' -W -v ON_ERROR_STOP=1
+```
+
+For the first installation, enter these statements in `psql`. `\password` asks for each password without recording it in SQL command history. Paste the values from the corresponding private files into those hidden prompts. On a rerun, check whether the roles already exist and skip their `CREATE ROLE` and `\password` commands if they do:
+
+```sql
+CREATE ROLE heat_main LOGIN;
+\password heat_main
+CREATE ROLE heat_preview_provisioner LOGIN CREATEDB CREATEROLE;
+\password heat_preview_provisioner
+REVOKE ALL ON DATABASE heat_safe_main FROM PUBLIC;
+GRANT CONNECT, CREATE, TEMP ON DATABASE heat_safe_main TO heat_main;
+```
+
+Connect as `heat_main` to create the schemas it owns, then reconnect as admin to remove database-level `CREATE` and verify the provisioner cannot connect to main:
+
+```sh
+psql 'host=127.0.0.1 port=5432 dbname=heat_safe_main user=heat_main' -W -v ON_ERROR_STOP=1
+```
+
+```sql
+CREATE SCHEMA IF NOT EXISTS app;
+CREATE SCHEMA IF NOT EXISTS adk;
+```
+
+```sh
+psql 'host=127.0.0.1 port=5432 dbname=postgres user=postgres' -W -v ON_ERROR_STOP=1
+```
+
+```sql
+REVOKE CREATE ON DATABASE heat_safe_main FROM heat_main;
+SELECT has_database_privilege('heat_preview_provisioner', 'heat_safe_main', 'CONNECT');
+```
+
+The final query must return `f`. Create the main Cloud Run target once, before the main deployer runs. Omit both authentication flags and use `--quiet` so the CLI does not prompt for a public invoker grant:
+
+```sh
+gcloud run deploy heat-safe-app \
+  --project=future-health-513202 --region=me-central1 \
+  --image=us-docker.pkg.dev/cloudrun/container/hello \
+  --service-account=heat-main-runtime@future-health-513202.iam.gserviceaccount.com --quiet
+gcloud run services get-iam-policy heat-safe-app --project=future-health-513202 --region=me-central1 --format=json
+```
+
+The service policy must contain neither `allUsers` nor `allAuthenticatedUsers`. If Cloud Run attempts an IAM change and Ishka lacks permission, stop and have Christine complete or verify the private placeholder; do not request broader Editor grants or make the service public.
+
+### Connect the existing GitHub environments
+
+`heat-safe-main` and `heat-safe-preview` must each allow only the exact `main` branch and require no manual approval. Verify their branch policies and protection rules in GitHub before uploading keys:
+
+```sh
+gh api repos/rampadc/futurehealth-hackathon/environments/heat-safe-main
+gh api repos/rampadc/futurehealth-hackathon/environments/heat-safe-main/deployment-branch-policies
+gh api repos/rampadc/futurehealth-hackathon/environments/heat-safe-preview
+gh api repos/rampadc/futurehealth-hackathon/environments/heat-safe-preview/deployment-branch-policies
+```
+
+Each environment must report one `main` branch policy, custom branch policies enabled, and no reviewer or wait-timer protection rule. There must be no repository-wide deployment keys. As the authorized GCP key creator and GitHub repository administrator, create one key per deployer in a private directory outside the checkout and upload each through stdin to its environment secret:
+
+```sh
+umask 077
+mkdir -m 700 /private/path/heat-safe-keys
+gcloud iam service-accounts keys create /private/path/heat-safe-keys/main.json \
+  --iam-account=heat-main-deploy@future-health-513202.iam.gserviceaccount.com --project=future-health-513202
+gcloud iam service-accounts keys create /private/path/heat-safe-keys/preview.json \
+  --iam-account=heat-preview-deploy@future-health-513202.iam.gserviceaccount.com --project=future-health-513202
+gh secret set GCP_MAIN_DEPLOY_KEY --repo rampadc/futurehealth-hackathon --env heat-safe-main < /private/path/heat-safe-keys/main.json
+gh secret set GCP_PREVIEW_DEPLOY_KEY --repo rampadc/futurehealth-hackathon --env heat-safe-preview < /private/path/heat-safe-keys/preview.json
+gh variable set GCP_PROJECT_ID --repo rampadc/futurehealth-hackathon --body future-health-513202
+gh variable set GCP_REGION --repo rampadc/futurehealth-hackathon --body me-central1
+gh variable set GCP_MAIN_DEPLOY_SA --repo rampadc/futurehealth-hackathon --body heat-main-deploy@future-health-513202.iam.gserviceaccount.com
+gh variable set GCP_PREVIEW_DEPLOY_SA --repo rampadc/futurehealth-hackathon --body heat-preview-deploy@future-health-513202.iam.gserviceaccount.com
+```
+
+Delete the private key and secret files once stored in the intended secure stores. To rotate a key, create a replacement for the same service account, update its environment secret with `gh secret set ... < PRIVATE_FILE`, verify an automated run succeeds, then delete the old Google key with `gcloud iam service-accounts keys delete OLD_KEY_ID --iam-account=ACCOUNT`. In an exposure incident, disable or delete the affected key immediately and replace its environment secret.
+
+The designated presenter (`user:ishka.quark@gmail.com` unless the owner changes the grant) can retrieve raw main codes and preview code pairs:
 
 ```sh
 gcloud secrets versions access latest --project=future-health-513202 --secret=heat-safe-main-gate-code
 gcloud secrets versions access latest --project=future-health-513202 --secret=heat-safe-main-presenter-code
 gcloud secrets versions access latest --project=future-health-513202 --secret=heat-safe-pr-123-codes
 ```
+
+Treat command output as sensitive. The main runtime receives only code digests and its DB password. The preview runtime receives code digests and its own preview DB password, and has no Secret Manager access. The SQL preview provisioner has `CREATEDB` and `CREATEROLE`, but no PostgreSQL admin or main database access.
 
 ## Trusted deployment controller
 
@@ -65,15 +190,9 @@ python3 cloud/deploy.py cleanup-preview --pr 123
 GITHUB_TOKEN=... GITHUB_REPOSITORY=OWNER/REPO python3 cloud/deploy.py reconcile
 ```
 
-The controller appends `service=` and `url=` to `GITHUB_OUTPUT` only after a bounded HTTPS smoke check passes: readiness and product HTML return 200, unauthenticated case/chat/demo APIs return 401, and `/guide` returns 404. Preview smoke additionally logs in separately with viewer and presenter codes, checks demo access (403/200), and logs out. A failed check removes the public Cloud Run invoker binding and emits no URL. Cleanup is repeatable and deletes only that PR's service, database, role, secrets, and all versions of `pr-N/app`. Reconcile lists open GitHub PRs and deletes stale preview resources, including orphaned database roles, secrets, or image paths without a service. It emits `removed_prs=` only after successful cleanup. It requires `cloud-sql-proxy` and `psql` on `PATH`. The proxy is launched on loopback and its output is suppressed. Passwords and raw codes are never printed by the controller.
+The controller emits `service=` and `url=` to `GITHUB_OUTPUT` only after HTTPS smoke checks pass. Cleanup deletes only that PR's service, database, role, secrets, and image versions. Reconcile removes stale preview resources. It requires `cloud-sql-proxy` and `psql` on `PATH`.
 
-## Boundaries and checks
-
-The main runtime can access Vertex AI, BigQuery jobs, the `vectors` dataset, Cloud SQL, and only its own digest/password secrets. Preview runtime has the same AI, dataset, and SQL access but no Secret Manager or Cloud Run read access. The SQL preview provisioner has `CREATEDB` and `CREATEROLE`, but no PostgreSQL admin or main database access. `PUBLIC` database access is revoked for main and each preview database. Runtime roles own only their `app` and `adk` schemas, and database `CREATE` is revoked after schema setup.
-
-Creating a Cloud Run service or Secret Manager secret has no existing target resource to condition, so the preview deployer has project-level create permission. Existing-resource update/delete and secret access are conditioned to the preview name prefix. Deployment keys are stored only in main-branch-restricted GitHub environments. Trusted default-branch workflows retain their event, provenance, open-PR and SHA checks before authentication; they never execute PR source with keys available. A service-account key itself is not bound to a workflow or repository, so its theft allows use outside GitHub until revoked. Keep GitHub repository administration restricted and rotate keys regularly. Test these IAM denials with the deployed identities before releasing the workflow.
-
-Local validation:
+## Local validation
 
 ```sh
 terraform -chdir=01_population-health_climate-worker/cloud init -backend=false
