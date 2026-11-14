@@ -1,4 +1,5 @@
 import importlib.util
+from http.client import RemoteDisconnected
 import json
 import tarfile
 import tempfile
@@ -161,8 +162,16 @@ class ArtifactTests(unittest.TestCase):
 
 
 class SmokeTests(unittest.TestCase):
+    def test_startup_disconnect_is_retryable(self):
+        original = smoke.urlopen
+        try:
+            smoke.urlopen = lambda *_args, **_kwargs: (_ for _ in ()).throw(RemoteDisconnected("starting"))
+            self.assertEqual(smoke.fetch("/api/ready"), (None, b""))
+        finally:
+            smoke.urlopen = original
+
     def test_local_smoke_checks_readiness_and_anonymous_routes(self):
-        sequence = iter([(503, b""), (200, b'{"ok":true}'), (200, b""),
+        sequence = iter([(None, b""), (503, b""), (200, b'{"ok":true}'), (200, b""),
                          (401, b""), (401, b""), (404, b"")])
         paths = []
         original_fetch, original_sleep = smoke.fetch, smoke.time.sleep
@@ -172,7 +181,7 @@ class SmokeTests(unittest.TestCase):
             smoke.smoke()
         finally:
             smoke.fetch, smoke.time.sleep = original_fetch, original_sleep
-        self.assertEqual(paths, ["/api/ready", "/api/ready", "/", "/api/case", "/api/demo/state", "/guide"])
+        self.assertEqual(paths, ["/api/ready", "/api/ready", "/api/ready", "/", "/api/case", "/api/demo/state", "/guide"])
 
     def test_local_smoke_rejects_public_case_route(self):
         sequence = iter([(200, b'{"ok":true}'), (200, b""), (200, b"")])
@@ -180,6 +189,16 @@ class SmokeTests(unittest.TestCase):
         try:
             smoke.fetch = lambda _: next(sequence)
             with self.assertRaisesRegex(RuntimeError, "expected HTTP 401"):
+                smoke.smoke()
+        finally:
+            smoke.fetch = original_fetch
+
+    def test_disconnect_after_ready_fails(self):
+        sequence = iter([(200, b'{"ok":true}'), (None, b"")])
+        original_fetch = smoke.fetch
+        try:
+            smoke.fetch = lambda _: next(sequence)
+            with self.assertRaisesRegex(RuntimeError, "expected HTTP 200"):
                 smoke.smoke()
         finally:
             smoke.fetch = original_fetch

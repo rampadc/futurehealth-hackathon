@@ -196,13 +196,13 @@ jobs:
             -e POSTGRES_USER=heat_safe_smoke -e POSTGRES_PASSWORD=heat_safe_smoke \
             -e POSTGRES_DB=heat_safe_smoke postgres:16.10 >/dev/null
           for attempt in {1..30}; do
-            if docker exec "$db" pg_isready -U heat_safe_smoke -d heat_safe_smoke >/dev/null 2>&1; then
+            if docker exec "$db" pg_isready -h 127.0.0.1 -U heat_safe_smoke -d heat_safe_smoke >/dev/null 2>&1; then
               echo "PostgreSQL ready after $attempt checks"
               break
             fi
             sleep 1
           done
-          docker exec "$db" pg_isready -U heat_safe_smoke -d heat_safe_smoke >/dev/null
+          docker exec "$db" pg_isready -h 127.0.0.1 -U heat_safe_smoke -d heat_safe_smoke >/dev/null
           access_hash="$(printf %s ci-viewer-fixture | sha256sum | cut -d' ' -f1)"
           presenter_hash="$(printf %s ci-presenter-fixture | sha256sum | cut -d' ' -f1)"
           docker run -d --name "$app" --network "$network" -p 127.0.0.1:8088:8080 \

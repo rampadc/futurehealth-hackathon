@@ -2,7 +2,8 @@
 
 import json
 import time
-from urllib.error import HTTPError, URLError
+from http.client import HTTPException
+from urllib.error import HTTPError
 from urllib.request import urlopen
 
 BASE = "http://127.0.0.1:8088"
@@ -14,12 +15,13 @@ def fetch(path):
             return response.status, response.read()
     except HTTPError as error:
         return error.code, error.read()
-    except URLError:
+    except (OSError, HTTPException):
         return None, b""
 
 
 def smoke():
-    for attempt in range(120):
+    deadline = time.monotonic() + 120
+    while time.monotonic() < deadline:
         status, payload = fetch("/api/ready")
         if status == 200:
             if json.loads(payload).get("ok") is True:
@@ -27,7 +29,7 @@ def smoke():
             raise RuntimeError("readiness response is not healthy")
         if status not in (None, 503):
             raise RuntimeError(f"unexpected readiness HTTP {status}")
-        time.sleep(1)
+        time.sleep(min(1, max(0, deadline - time.monotonic())))
     else:
         raise RuntimeError("container did not become ready within two minutes")
     for path, expected in (("/", 200), ("/api/case", 401), ("/api/demo/state", 401), ("/guide", 404)):
