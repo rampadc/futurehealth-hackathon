@@ -4,6 +4,7 @@ import { CssBaseline, ThemeProvider } from '@mui/material';
 import App from './App';
 import { AccessBoundary } from './AccessBoundary';
 import { theme } from './theme';
+import '../../ui_design_system/tokens.css';
 import './styles.css';
 
 createRoot(document.getElementById('root')!).render(
