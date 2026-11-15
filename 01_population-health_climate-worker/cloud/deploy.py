@@ -271,10 +271,11 @@ def deploy_service(name, image, runtime, values, secrets_flag=None, codes=None):
     prior_ready = prior_service.get("status", {}).get("latestReadyRevisionName")
     changed = prior_container.get("image") != image or any(prior_env.get(key) != value for key, value in values.items())
     with env_file(values) as path:
+        # Each signed-in tab holds an SSE request; leave room for API calls alongside those streams.
         command = ["run", "deploy", name, "--image", image, "--region", REGION,
                    "--service-account", runtime, "--ingress", "all", "--port", "8080",
                    "--cpu", "2", "--memory", "2Gi", "--max-instances", "1",
-                   "--min-instances", "0", "--timeout", "600", "--concurrency", "4",
+                   "--min-instances", "0", "--timeout", "600", "--concurrency", "80",
                    "--set-cloudsql-instances", connection_name(), "--env-vars-file", str(path),
                    "--async", "--quiet"]
         if secrets_flag:

@@ -2,6 +2,8 @@
 
 This module is separate from `infra/`, which belongs to the earlier supervisor demo. Terraform creates the private main and preview Artifact Registry repositories, a PostgreSQL 16 Cloud SQL instance and main database, four service accounts, and seven fixed Secret Manager secrets. IAM grants are managed separately using the standard `gcloud` CLI after those resources exist; Terraform does not own IAM policies. The trusted `cloud/deploy.py` controller manages application services and per-PR resources during deployment.
 
+The controller allows 80 concurrent requests per Cloud Run instance so live event streams leave capacity for access and case API calls.
+
 ## Prepared state — 15 November 2026
 
 Infrastructure preparation completed as `contributor-f10ae3d0821d@example.invalid` with the existing Editor access. Terraform manages 24 resources and its post-apply plan reports no changes: nine enabled APIs, four service accounts, two private registries, seven fixed secrets, the PostgreSQL 16 Enterprise instance `heat-safe-pg16`, and database `heat_safe_main`.
