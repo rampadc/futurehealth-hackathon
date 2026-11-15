@@ -87,11 +87,20 @@ const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const attr = (k, v) => (v === undefined || v === null || v === false || v === '' ? '' : ` ${k}="${String(v).replace(/"/g, '&quot;')}"`);
 
 /* ───────── components ───────── */
-function av(key, { sm } = {}) {
+/* Person key → the ID whose photo they wear. Amal has no ID in this story; this Noura is
+   drawn with the Noura photo the rest of the product uses, so a name always has one face. */
+const PHOTO_ID = { amal: 'P01', noura: 'P05' };
+function photoId(key) { const p = PEOPLE[key]; return p && !p.machine ? PHOTO_ID[key] || p.id || null : null; }
+/* Crew photo for people (round, ui_design_system/people.js); a square ⚙ tile for software. */
+function av(key, { sm, size, cls } = {}) {
   const p = PEOPLE[key]; if (!p) return '';
-  const ini = p.n.length <= 3 ? p.n : p.n.slice(0, 2).toUpperCase();
-  return `<span class="avatar ${p.machine ? 'machine' : ''} ${sm ? 'sm' : ''}" role="img" aria-label="${p.n}${p.id ? ' (' + p.id + ')' : ''}, ${p.role}">${p.machine ? '⚙' : ini}<span class="e" aria-hidden="true">${p.e}</span></span>`;
+  const label = `${p.n}${p.id ? ' (' + p.id + ')' : ''}, ${p.role}`;
+  if (p.machine) return `<span class="avatar machine ${sm ? 'sm' : ''}" role="img" aria-label="${label}">⚙</span>`;
+  const id = photoId(key);
+  return HSPeople.avatar(id, { size: size || (sm ? 'sm' : 'md'), cls }).replace(' aria-hidden="true"', ` role="img" aria-label="${label}"`);
 }
+/* Photo + name, for sentences and table cells. */
+function pv(key, size = 'xs') { return `<span class="person">${av(key, { size })}<span>${who(key)}</span></span>`; }
 function who(key) { const p = PEOPLE[key]; return p ? `${p.n}${p.id && p.n !== p.id ? ' (' + p.id + ')' : ''}` : key; }
 const B = {
   stop:   (l = 'Stop-work', a) => badge('■ ' + l, 'b-red', a),
@@ -234,7 +243,7 @@ function webShell(s, r) {
     <div class="side">
       ${brandBar(App.brandRes, 'Heat-Safe Crew · Mussafah')}
       <nav aria-label="Main">${nav}<div class="sep"></div><button class="navi" data-act="toast" data-msg="Site setup · locations, roster and sensors (not in this prototype)"><span class="ph" aria-hidden="true">⋯</span><span>Site setup</span></button><button class="navi ${s.id === 'w9' ? 'on' : ''}" data-go="w9"><span class="ph" aria-hidden="true">◐</span><span>Organisation branding</span></button></nav>
-      <div class="me">${av(ROLES[App.role].who)}<span><b>${user.n}</b>${user.role}</span></div>
+      <button class="me" data-go="w10" aria-label="Your account: ${user.n}">${av(ROLES[App.role].who)}<span><b>${user.n}</b>${user.role}</span></button>
     </div>
     <div class="content">
       <header class="topnav"><div class="l">${back}</div><div class="ttl">${nv.title || s.name}<small>Dune Civil Works · 4 Aug 2025 · ${nv.clock || s.clock || '08:18'}${nv.updated ? ' · updated ' + nv.updated : ''}</small></div><div class="r">${topRight(r, false)}</div></header>
@@ -249,7 +258,7 @@ const SITE_TABS = [
   { k: 'crew', l: 'Crew', ic: '☰', go: 'm3' },
   { k: 'plan', l: 'Plan', ic: '▤', go: 'm5' },
   { k: 'ask', l: 'Ask ◇', ic: '◇', go: 'm8' },
-  { k: 'me', l: 'Me', ic: '□', act: 'me-sheet' },
+  { k: 'me', l: 'Me', ic: '□', go: 'm9' },
 ];
 const WORKER_TABS = [
   { k: 'now', key: 'tab.now', ic: '●', go: 'p2' },
@@ -262,7 +271,8 @@ function mobileShell(s, r) {
   const worker = s.device === 'worker';
   const tabs = worker ? WORKER_TABS : SITE_TABS;
   const nv = r.nav || {};
-  const left = nv.leftHtml || (nv.back ? `<button class="iconbtn" data-go="${nv.back}"${attr('data-v', nv.backV)} aria-label="Back" style="${worker ? 'width:56px;height:56px' : ''}">←</button>` : '');
+  const me = worker ? 'rana' : ROLES[App.role].who;
+  const left = nv.leftHtml || (nv.back ? `<button class="iconbtn" data-go="${nv.back}"${attr('data-v', nv.backV)} aria-label="Back" style="${worker ? 'width:56px;height:56px' : ''}">←</button>` : `<button class="iconbtn mephoto" data-go="${worker ? 'p9' : 'm9'}" aria-label="Your account">${av(me, { size: 'md' })}</button>`);
   const top = r.noTop ? '' : `<header class="topnav"><div class="l">${left}</div><div class="ttl">${nv.title || s.name}${nv.sub ? `<small>${nv.sub}</small>` : ''}</div><div class="r">${topRight(r, true)}</div></header>`;
   let inner;
   if (r.empty) inner = `<div class="scroll">${emptyHtml(r.empty)}</div>`;

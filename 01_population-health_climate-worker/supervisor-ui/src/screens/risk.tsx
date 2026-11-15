@@ -3,7 +3,7 @@ import type { CrewRisk, OwnRisk, RiskBand } from '../contract';
 import { live } from '../live';
 import type { CaseSession } from '../session';
 import { who } from './data';
-import { Band, Computed, List, Note, Row, Section } from './kit';
+import { Band, Computed, List, Note, Row, Section, Person } from './kit';
 
 const LABEL: Record<RiskBand, string> = { green: 'Green', amber: 'Amber', red: 'Red', emergency: 'Emergency' };
 const ORDER: RiskBand[] = ['emergency', 'red', 'amber', 'green'];
@@ -48,7 +48,7 @@ export function CrewRiskPanel({ session }: { session: CaseSession }) {
         <div className="hs-scroll"><table className="hs-table" aria-label="Heat risk by worker">
           <thead><tr><th>Worker</th><th>Band</th><th>Action</th></tr></thead>
           <tbody>{[...risk.workers].sort((a, b) => ORDER.indexOf(a.band) - ORDER.indexOf(b.band)).map(w => <tr key={w.person_id}>
-            <td>{who(w.person_id)}</td>
+            <td><Person id={w.person_id} size="sm">{who(w.person_id)}</Person></td>
             <td><Band band={w.band} label={LABEL[w.band]} /></td>
             <td>{w.needs_rest ? <b>{w.action}</b> : w.action}</td>
           </tr>)}</tbody>

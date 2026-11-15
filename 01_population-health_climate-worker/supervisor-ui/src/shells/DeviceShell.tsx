@@ -8,6 +8,8 @@ import { useCaseSession } from '../session';
 import { ADMIN, PERSONAS } from '../story';
 import { DEVICE_INFO, findScreen, screensFor, type Device, type ScreenDef } from '../screens/registry';
 import { Placeholder } from '../screens/Placeholder';
+import { Avatar } from '../screens/kit';
+import { usePhotoSync } from '../people';
 import './fonts';
 import './shell.css';
 
@@ -27,6 +29,8 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
   const [workerLang] = useWorkerLanguage(device === 'worker' ? session.person?.id : undefined);
   const lang = device === 'worker' ? workerLang ?? 'en' : 'en';
   const brand = usePublishedBrand(!!session.person, device === 'web' ? 'platform' : 'mobile');
+  usePhotoSync(!!session.person, session.caseView?.version);
+  const account = screens.find(s => s.id === 'account');
   // Stop-work and emergency screens drop the brand entirely.
   const showBrand = brand && !['stop-work', 'alert'].includes(screen.id);
 
@@ -40,7 +44,7 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
         <p className="hs-label">Heat-Safe Crew · {info.name}</p>
         <h1>Choose who is using this {phone ? 'phone' : device === 'kiosk' ? 'kiosk' : 'workspace'}</h1>
         <p className="hs-muted">Named sign-in is demo persona selection, not authentication.</p>
-        <ul className="hs-people">{people.map(p => <li key={p.id}><button type="button" className="hs-btn" disabled={session.busy} onClick={() => void session.signIn(p)}><b>{p.name}</b><span>{p.role} · {p.organisation}</span></button></li>)}</ul>
+        <ul className="hs-people">{people.map(p => <li key={p.id}><button type="button" className="hs-btn" disabled={session.busy} onClick={() => void session.signIn(p)}><Avatar id={p.id} size="md" /><span><b>{p.name}</b><span>{p.role} · {p.organisation}</span></span></button></li>)}</ul>
         {session.error && <p role="alert" className="hs-error">{session.error}</p>}
         <DeviceSwitch current={device} />
       </main>
@@ -57,7 +61,9 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
       <strong>Heat-Safe Crew</strong>
       <span className="hs-muted">{info.name}</span>
       <span className="hs-grow" />
-      <span>{session.person.name}</span>
+      {account
+        ? <button type="button" className="hs-me" aria-current={screen.id === 'account' ? 'page' : undefined} aria-label={`My account: ${session.person.name}`} onClick={() => go(account)}><Avatar id={session.person.id} size={phone ? 'md' : undefined} /><span>{session.person.name}</span></button>
+        : <span className="hs-person"><Avatar id={session.person.id} /><span>{session.person.name}</span></span>}
       <button type="button" className="hs-link" disabled={session.busy} onClick={() => void session.signOut()}>Sign out</button>
       {onLockAccess && <button type="button" className="hs-link" onClick={onLockAccess}>Lock access</button>}
     </header>

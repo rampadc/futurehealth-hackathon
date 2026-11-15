@@ -1,12 +1,20 @@
 import type { ReactNode } from 'react';
 import { Accordion, AccordionDetails, AccordionSummary, Avatar, Box, Paper, Stack, Typography } from '@mui/material';
 import type { Persona } from '../story';
+import { photoUrl, usePhotos } from '../people';
+import { nameOf } from '../replay';
 import type { CaseView, Task } from '../live';
 import { reasonLabel } from '../copy';
 
 export const readable = reasonLabel;
 export const firstName = (name: string) => name.split(' ')[0];
 export const initials = (name: string) => name.split(' ').filter((_, i) => i === 0 || i === 2).map(x => x[0]).join('');
+/** Round crew photo for the classic MUI app; initials when there is no photo (ui_design_system section 26). */
+export function PersonAvatar({ id, size = 4 }: { id: string; size?: number }) {
+  usePhotos();
+  return <Avatar src={photoUrl(id) ?? undefined} alt="" aria-hidden="true"
+    sx={{ width: theme => theme.spacing(size), height: theme => theme.spacing(size), bgcolor: 'action.selected', color: 'text.primary', typography: size > 4 ? 'body2' : 'caption', border: '1px solid', borderColor: 'text.primary' }}>{initials(nameOf(id))}</Avatar>;
+}
 export const nextTask = (tasks: Task[]) => tasks.find(task => task.status === 'ready');
 export const isReady = (caseView: CaseView, id: string) => caseView.tasks.some(task => task.action === id && task.status === 'ready');
 
@@ -27,7 +35,7 @@ export function LaterStep({ title, ready, children }: { title: string; ready: bo
 
 export function Identity({ person, compact = false }: { person: Persona; compact?: boolean }) {
   return <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
-    <Avatar sx={{ bgcolor: 'primary.main', width: theme => theme.spacing(compact ? 4 : 5), height: theme => theme.spacing(compact ? 4 : 5), typography: 'body2' }}>{initials(person.name)}</Avatar>
+    <PersonAvatar id={person.id} size={compact ? 4 : 5} />
     <Box><Typography variant={compact ? 'body2' : 'subtitle1'} component="p" sx={{ fontWeight: 600 }}>{person.name}</Typography><Typography variant="caption" color="text.secondary">{person.role} · {person.organisation}</Typography></Box>
   </Stack>;
 }

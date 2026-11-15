@@ -34,13 +34,16 @@
 
 /* ── Derived tokens: re-resolved wherever a theme is set ─────────────── */
 :root, [data-theme] {
-  /* The one emissive accent: the "needs action now" signal edge. */
+  /* The one emissive accent: the "needs action now" signal frame. */
   --color-emissive: var(--color-signal-red);
 
   /* Rules (line weight = hierarchy) */
   --rule-hair: 1px solid var(--color-ink);           /* rows, cells          */
   --rule-structure: 2px solid var(--color-ink);      /* sections, frames     */
-  --rule-signal: 4px solid var(--color-emissive);    /* state edge           */
+  /* Signal: an 8px frame on all four sides of the cell that needs action now.
+     Draw it with --rule-signal (border) or --signal-frame (outline, no layout shift). */
+  --signal-width: 8px;
+  --rule-signal: var(--signal-width) solid var(--color-emissive);  /* signal frame */
   --rule-draft: 2px dashed var(--color-ink);         /* AI, proposal, draft  */
   --border-brutalist: var(--rule-structure);
   --hatch-rest: repeating-linear-gradient(135deg, transparent 0 6px, var(--color-ink) 6px 7px);
@@ -53,6 +56,7 @@
 :root {
   /* ── Geometry ─────────────────────────────────────────────────────── */
   --radius: 0;                    /* absolute: every corner is square      */
+  --radius-photo: 50%;            /* the one exception: crew photos        */
   --spacing-unit: 0.5rem;         /* 8px                                   */
   --space-half: calc(var(--spacing-unit) * .5);   /* 4  */
   --space-1: var(--spacing-unit);                  /* 8  */
@@ -131,7 +135,8 @@
   --color-on-caution: #000000;
   --rule-hair: 2px solid var(--color-ink);
   --rule-structure: 3px solid var(--color-ink);
-  --rule-signal: 6px solid var(--color-emissive);
+  --signal-width: 10px;
+  --rule-signal: var(--signal-width) solid var(--color-emissive);
   --rule-draft: 3px dashed var(--color-ink);
   --fs-label: 0.8125rem;          /* 13 */
   --fs-small: 0.9375rem;          /* 15 */

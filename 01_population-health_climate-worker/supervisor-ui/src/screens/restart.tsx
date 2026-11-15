@@ -5,7 +5,7 @@ import { nameOf } from '../replay';
 import { navigate } from '../router';
 import { thermalStatus } from '../thermal';
 import { heatNow, progress, taskFor, time } from './data';
-import { ActionButton, Band, Computed, CtaBar, Empty, Head, Hero, Hold, List, Metric, NoCase, Note, Row, Section, taskBadge } from './kit';
+import { ActionButton, Band, Computed, CtaBar, Empty, Head, Hero, Hold, List, Metric, NoCase, Note, Row, Section, taskBadge, Avatar } from './kit';
 import type { ScreenProps } from './registry';
 
 /** Fresh reading: a same-zone local reading for the restart review. */
@@ -83,7 +83,8 @@ export function RestartReviewScreen({ session }: ScreenProps) {
     <Section title="Eight checks" hint="Each human check needs a named confirmer">
       <List>{CHECKS.map(([label, action, key]) => {
         const c = key ? (checks as Record<string, { status: string; actor_id: string | null; observed_at: string | null }> | null)?.[key] : null;
-        return <Row key={label} title={label} detail={`${nameOf(progress(caseView, action).owner)}${c?.observed_at ? ` · ${time(c.observed_at)}` : ''}`} badge={taskBadge(session, action)} />;
+        const owner = progress(caseView, action).owner;
+        return <Row key={label} lead={owner ? <Avatar id={owner} size="md" /> : undefined} title={label} detail={`${nameOf(owner)}${c?.observed_at ? ` · ${time(c.observed_at)}` : ''}`} badge={taskBadge(session, action)} />;
       })}</List>
       <Computed />
     </Section>

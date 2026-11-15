@@ -44,6 +44,7 @@
       <li><a href="#capture"><span>23</span>Field capture</a></li>
       <li><a href="#zones"><span>24</span>Zone plan</a></li>
       <li><a href="#brand"><span>25</span>Company branding</a></li>
+      <li><a href="#crew-photos"><span>26</span>Crew photos</a></li>
     </ol>
     <div class="controls">
       <div class="field"><span class="field__label" id="themeL">Light</span>
@@ -68,7 +69,7 @@
       <h1 class="hero-title" id="h-metaphor">The issued sheet.</h1>
       <p>Heat-Safe is read in a site cabin and in 45 °C glare by people who already trust two things: engineering drawings and safety signs. Every screen is a <b>sheet on the site permit board</b>. Drawing conventions decide structure; safety-sign conventions decide colour. Nothing floats, glows or casts a shadow, because a sheet doesn’t.</p></header>
     <ol class="rules-list">
-      <li><b>1 · Line weight is hierarchy.</b><span class="t-small muted">Hair 1px separates rows. Structure 2px frames a section. Signal 4px marks the one thing that needs action.</span></li>
+      <li><b>1 · Line weight is hierarchy.</b><span class="t-small muted">Hair 1px separates rows. Structure 2px frames a section. Signal 8px frames, on all four sides, the one cell that needs action.</span></li>
       <li><b>2 · Line style is certainty.</b><span class="t-small muted">Solid = issued fact. Dashed = draft, proposal or AI, not yet issued. Hatched = no work happens here.</span></li>
       <li><b>3 · Ink fill is a stamp.</b><span class="t-small muted">A solid ink block means a human recorded it, or an emergency. Stamps are the heaviest mass on a sheet, so they are rare.</span></li>
       <li><b>4 · Colour is a safety signal, never decoration.</b><span class="t-small muted">ISO 3864 meanings only: red prohibits, yellow cautions, green confirms a safe condition, blue instructs. Components are identified by number, not hue.</span></li>
@@ -78,7 +79,7 @@
     <div class="lineset" aria-label="Line vocabulary">
       <div class="line-spec"><i style="border-block-start: var(--rule-hair)"></i><b>Hair · 1px</b>Rows, cells</div>
       <div class="line-spec"><i style="border-block-start: var(--rule-structure)"></i><b>Structure · 2px</b>Sections, frames</div>
-      <div class="line-spec"><i style="border-block-start: var(--rule-signal)"></i><b>Signal · 4px</b>Needs action now</div>
+      <div class="line-spec"><i style="border: var(--rule-signal)"></i><b>Signal · 8px frame</b>Needs action now · the whole cell</div>
       <div class="line-spec"><i style="border-block-start: var(--rule-draft)"></i><b>Draft · 2px dashed</b>AI, proposal</div>
       <div class="line-spec"><i style="background: var(--hatch-rest); border: var(--rule-hair)"></i><b>Hatch</b>Rest, break, excluded</div>
       <div class="line-spec"><i style="background: var(--color-ink)"></i><b>Stamp</b>Recorded, emergency</div>
@@ -164,7 +165,7 @@
   <!-- 08 ─────────────────────────────────────────────────────────── -->
   <section class="gsec" id="buttons" aria-labelledby="h-buttons">
     <header><span class="gsec__num">08 · Buttons</span><h2 id="h-buttons">Every state, every variant</h2>
-      <p>Hover adds a yellow rail; press sinks 1px (secondary inverts); focus is an ink ring with a yellow halo that survives glare; disabled is hatched pencil with <code>disabled</code> and a not-allowed cursor; loading keeps the width and sets <code>aria-busy</code>; error adds a red signal edge and a reason.</p></header>
+      <p>Hover adds a yellow rail; press sinks 1px (secondary inverts); focus is an ink ring with a yellow halo that survives glare; disabled is hatched pencil with <code>disabled</code> and a not-allowed cursor; loading keeps the width and sets <code>aria-busy</code>; error closes the button in the red 8px signal frame and adds a reason.</p></header>
     <div class="matrix-scroll"><div class="matrix" style="--cols:6">
       <div class="mh">Variant</div><div class="mh">Default</div><div class="mh">Hover</div><div class="mh">Focus</div><div class="mh">Active</div><div class="mh">Disabled</div><div class="mh">Loading</div>
       <div><b>Primary</b></div>
@@ -232,7 +233,7 @@
   <!-- 10 ─────────────────────────────────────────────────────────── -->
   <section class="gsec" id="status" aria-labelledby="h-status">
     <header><span class="gsec__num">10 · Stamps and readouts</span><h2 id="h-status">Status words and instrument readings</h2>
-      <p>Readouts sit in one ruled band, divided by hairlines, not floated in separate cards. The focal readout takes double width and the 4px signal edge.</p></header>
+      <p>Readouts sit in one ruled band, divided by hairlines, not floated in separate cards. The focal readout takes double width and the 8px signal frame on all four sides.</p></header>
     <div class="row-flex">
       <span class="stamp stamp--stop" data-glyph="■">Stop-work</span>
       <span class="stamp stamp--caution" data-glyph="▲">Caution</span>
@@ -263,15 +264,15 @@
   <!-- 11 ─────────────────────────────────────────────────────────── -->
   <section class="gsec" id="rows" aria-labelledby="h-rows">
     <header><span class="gsec__num">11 · Action rows</span><h2 id="h-rows">The workhorse of every list</h2>
-      <p>One row is one touch target. The trailing stamp carries status; the inline-start edge carries selection (ink) or urgency (signal). On the worker app descriptions never truncate.</p></header>
+      <p>One row is one touch target. The lead is the crew photo whenever the row is about a person. The trailing stamp carries status; the inline-start edge carries selection (ink); urgency closes the whole row in the 8px signal frame. On the worker app descriptions never truncate.</p></header>
     <section class="ledger" aria-labelledby="ledgerH">
       <div class="ledger__head"><span class="t-label" id="ledgerH">Needs action</span><span class="ledger__count">4 · sorted by urgency</span></div>
       <ul class="ledger__list">
-        <li><button class="arow arow--urgent" type="button"><span class="arow__lead"><span class="rail__num">2</span></span><span class="arow__body"><span class="arow__title">Bilal (C08) · needs rest now</span><span class="arow__desc">Remove from heat and check on him within 10 minutes. Unplanned rest recorded 08:18.</span></span><span class="arow__trail"><span class="stamp stamp--stop" data-glyph="■">Red</span><span class="arow__time">due 08:28</span></span></button></li>
-        <li><button class="arow is-hover" type="button" tabindex="-1"><span class="arow__lead"><span class="rail__num">2</span></span><span class="arow__body"><span class="arow__title">Record first-aid contact · hover</span><span class="arow__desc">Salim (P06) notified 08:18.</span></span><span class="arow__trail"><span class="stamp stamp--waiting" data-glyph="…">Waiting</span></span></button></li>
+        <li><button class="arow arow--urgent" type="button"><span class="arow__lead" data-person="C08" data-size="md"></span><span class="arow__body"><span class="arow__title">Bilal (C08) · needs rest now</span><span class="arow__desc">Remove from heat and check on him within 10 minutes. Unplanned rest recorded 08:18.</span></span><span class="arow__trail"><span class="stamp stamp--stop" data-glyph="■">Red</span><span class="arow__time">due 08:28</span></span></button></li>
+        <li><button class="arow is-hover" type="button" tabindex="-1"><span class="arow__lead" data-person="P06" data-size="md"></span><span class="arow__body"><span class="arow__title">Record first-aid contact · hover</span><span class="arow__desc">Salim (P06) notified 08:18.</span></span><span class="arow__trail"><span class="stamp stamp--waiting" data-glyph="…">Waiting</span></span></button></li>
         <li><button class="arow is-focus is-selected" type="button" tabindex="-1" aria-current="true"><span class="arow__lead"><span class="rail__num">3</span></span><span class="arow__body"><span class="arow__title">Review replan 08:18–09:18 · focus + selected</span><span class="arow__desc">Bilal excluded from work. Leila unconfirmed: choose a branch before sending.</span></span><span class="arow__trail"><span class="stamp stamp--overdue" data-glyph="!">Overdue</span></span></button></li>
         <li><button class="arow arow--done" type="button"><span class="arow__lead"><span class="rail__num">2</span></span><span class="arow__body"><span class="arow__title">Confirm a safe recovery location · done</span><span class="arow__desc">11 of 11 checked in at Shelter A, 08:04 · kiosk.</span></span><span class="arow__trail"><span class="stamp" data-glyph="✓">Done</span></span></button></li>
-        <li><button class="arow" type="button" disabled><span class="arow__lead"><span class="rail__num">4</span></span><span class="arow__body"><span class="arow__title">Record restart decision · disabled</span><span class="arow__desc">Only Rashid (superintendent) can record a restart.</span></span><span class="arow__trail"><span class="stamp" data-glyph="🔒" style="border-color:var(--color-pencil)">Locked</span></span></button></li>
+        <li><button class="arow" type="button" disabled><span class="arow__lead" data-person="P02" data-size="md"></span><span class="arow__body"><span class="arow__title">Record restart decision · disabled</span><span class="arow__desc">Only Rashid (superintendent) can record a restart.</span></span><span class="arow__trail"><span class="stamp" data-glyph="🔒" style="border-color:var(--color-pencil)">Locked</span></span></button></li>
         <li aria-hidden="true"><div class="arow"><span class="arow__lead"><span class="skel" style="inline-size:1.5rem;block-size:1.5rem"></span></span><span class="arow__body"><span class="skel skel--title"></span><span class="skel skel--line"></span></span><span class="arow__trail"><span class="skel skel--stamp"></span></span></div></li>
       </ul>
     </section>
@@ -380,16 +381,16 @@
           <div class="w1__main">
             <div class="w1__col">
               <div class="readouts">
-                <div class="readout readout--focal"><span class="readout__label">Needs action now</span><span class="readout__value">1</span><span class="readout__note">Bilal (C08) needs rest now · due 08:28</span></div>
+                <div class="readout readout--focal"><span class="readout__label">Needs action now</span><span class="readout__value">1</span><span class="readout__note"><span data-person="C08" data-mode="person" data-size="sm"></span> needs rest now · due 08:28</span></div>
                 <div class="readout"><span class="readout__label">Band · TWL 145</span><span class="readout__value"><span class="band band--low" style="font-size:inherit"><span class="band__swatch"></span>Low</span></span><span class="readout__note">sensor t1 · 08:00</span></div>
                 <div class="readout"><span class="readout__label">Heavy-work hold</span><span class="readout__value">Active</span><span class="readout__note">since 08:01</span></div>
                 <div class="readout"><span class="readout__label">Accounted for</span><span class="readout__value">11 / 11</span><span class="readout__note">Shelter A · 08:04</span></div>
               </div>
               <section class="ledger" aria-labelledby="c1h"><div class="ledger__head"><span class="t-label" id="c1h">Needs action</span><span class="ledger__count">3</span></div>
                 <ul class="ledger__list">
-                  <li><button class="arow arow--urgent" type="button" aria-current="true"><span class="arow__lead"><span class="rail__num">2</span></span><span class="arow__body"><span class="arow__title">Bilal (C08) · needs rest now</span><span class="arow__desc">Remove from heat and check on him within 10 minutes.</span></span><span class="arow__trail"><span class="stamp stamp--stop" data-glyph="■">Red</span><span class="arow__time">due 08:28</span></span></button></li>
+                  <li><button class="arow arow--urgent" type="button" aria-current="true"><span class="arow__lead" data-person="C08" data-size="md"></span><span class="arow__body"><span class="arow__title">Bilal (C08) · needs rest now</span><span class="arow__desc">Remove from heat and check on him within 10 minutes.</span></span><span class="arow__trail"><span class="stamp stamp--stop" data-glyph="■">Red</span><span class="arow__time">due 08:28</span></span></button></li>
                   <li><button class="arow" type="button"><span class="arow__lead"><span class="rail__num">3</span></span><span class="arow__body"><span class="arow__title">Review replan 08:18–09:18</span><span class="arow__desc">Bilal excluded. Leila unconfirmed.</span></span><span class="arow__trail"><span class="stamp stamp--waiting" data-glyph="…">Waiting</span></span></button></li>
-                  <li><button class="arow" type="button"><span class="arow__lead"><span class="rail__num">4</span></span><span class="arow__body"><span class="arow__title">Restart decision open</span><span class="arow__desc">Owner: Rashid · 8 checks.</span></span><span class="arow__trail"><span class="stamp" data-glyph="">Info</span></span></button></li>
+                  <li><button class="arow" type="button"><span class="arow__lead" data-person="P02" data-size="md"></span><span class="arow__body"><span class="arow__title">Restart decision open</span><span class="arow__desc">Owner: Rashid · 8 checks.</span></span><span class="arow__trail"><span class="stamp" data-glyph="">Info</span></span></button></li>
                 </ul></section>
               <section class="ledger" aria-labelledby="c2h"><div class="ledger__head"><span class="t-label" id="c2h">Crew by location</span><span class="ledger__count">aggregates only</span></div>
                 <ul class="ledger__list">
@@ -400,8 +401,8 @@
             <aside class="w1__detail" aria-label="Selected action">
               <div class="pad">
                 <span class="t-label">2 · Protective response</span>
-                <h3 class="t-heading" style="margin:0">Bilal (C08) needs rest now</h3>
-                <dl class="kv"><dt>Owner</dt><dd>Huda (C01)</dd><dt>Due</dt><dd><b>08:28</b></dd><dt>Source</dt><dd>Worker report → escalation rule</dd></dl>
+                <h3 class="t-heading" style="margin:0;display:flex;gap:var(--space-1);align-items:center"><span data-person="C08" data-size="md"></span>Bilal (C08) needs rest now</h3>
+                <dl class="kv"><dt>Owner</dt><dd><span data-person="C01" data-mode="person" data-size="sm"></span></dd><dt>Due</dt><dd><b>08:28</b></dd><dt>Source</dt><dd>Worker report → escalation rule</dd></dl>
                 <p class="t-small" style="margin:0;border-inline-start:var(--rule-structure);padding-inline-start:var(--space-1)">No health detail here. Details stay in Bilal’s own health record.</p>
                 <span class="calc"><svg class="icon" aria-hidden="true"><use href="#i-calc"/></svg>Computed · rules v2026.11.07-1</span>
               </div>
@@ -416,7 +417,7 @@
       <!-- M6 · site app -->
       <div class="device device--phone" aria-label="Composition: worker action card, site app">
         <div class="device__status"><span>08:18</span><span>Heat-Safe Site</span><span>4G</span></div>
-        <header class="titleblock"><button class="ibtn" type="button" aria-label="Back"><svg class="icon icon--dir" aria-hidden="true"><use href="#i-back"/></svg></button><div class="titleblock__main"><div class="titleblock__title">Bilal (C08)</div><div class="titleblock__meta"><span>Workshop</span><span>08:18</span></div></div><button class="sync" type="button" data-sync data-state="synced">✓ Synced</button></header>
+        <header class="titleblock"><button class="ibtn" type="button" aria-label="Back"><svg class="icon icon--dir" aria-hidden="true"><use href="#i-back"/></svg></button><div class="titleblock__main" style="display:flex;gap:var(--space-1);align-items:center"><span data-person="C08" data-size="md"></span><div><div class="titleblock__title">Bilal (C08)</div><div class="titleblock__meta"><span>Workshop</span><span>08:18</span></div></div></div><button class="sync" type="button" data-sync data-state="synced">✓ Synced</button></header>
         <div class="device__body"><div class="device__scroll">
           <div class="readouts">
             <div class="readout readout--focal"><span class="readout__label">Needs rest now</span><span class="readout__value">9:42</span><span class="readout__note">minutes left to check on him</span></div>
@@ -424,7 +425,7 @@
           <section class="ledger pad" aria-labelledby="m6h"><div class="ledger__head"><span class="t-label" id="m6h">Steps</span><span class="ledger__count">0 of 3</span></div>
             <ul class="ledger__list">
               <li><div class="arow arow--urgent"><span class="arow__lead t-title">1</span><span class="arow__body"><span class="arow__title">Remove Bilal from the heat</span><span class="arow__desc">Confirm where he is now.</span></span><span class="arow__trail"><span class="stamp stamp--waiting" data-glyph="…">Waiting</span></span></div></li>
-              <li><div class="arow"><span class="arow__lead t-title">2</span><span class="arow__body"><span class="arow__title">Record first-aid contact</span><span class="arow__desc">Salim (P06) notified 08:18.</span></span><span class="arow__trail"><span class="stamp stamp--waiting" data-glyph="…">Waiting</span></span></div></li>
+              <li><div class="arow"><span class="arow__lead" data-person="P06" data-size="md"></span><span class="arow__body"><span class="arow__title">Record first-aid contact</span><span class="arow__desc">Salim (P06) notified 08:18.</span></span><span class="arow__trail"><span class="stamp stamp--waiting" data-glyph="…">Waiting</span></span></div></li>
               <li><div class="arow"><span class="arow__lead t-title">3</span><span class="arow__body"><span class="arow__title">Check on Bilal</span><span class="arow__desc">Due by 08:28.</span></span><span class="arow__trail"><span class="stamp stamp--waiting" data-glyph="…">Waiting</span></span></div></li>
             </ul></section>
           <p class="pad t-small muted" style="margin:0">No health detail here. ⚙ Escalation rule · not AI.</p>
@@ -436,7 +437,7 @@
       <!-- P2 · worker app, EN/AR -->
       <div class="device device--phone" id="p2" lang="en" dir="ltr" aria-label="Composition: worker home, Health Reporting">
         <div class="device__status"><span>08:04</span><span data-t="app">Health Reporting</span><span>4G</span></div>
-        <header class="titleblock"><span></span><div class="titleblock__main"><div class="titleblock__title" data-t="now">Now</div><div class="titleblock__meta"><span>08:04</span><span data-t="online">Online</span></div></div>
+        <header class="titleblock"><span data-person="C05" data-size="md"></span><div class="titleblock__main"><div class="titleblock__title" data-t="now">Now</div><div class="titleblock__meta"><span>08:04</span><span data-t="online">Online</span></div></div>
           <div class="seg" role="radiogroup" aria-label="Language" id="p2lang"><button class="seg__opt" role="radio" aria-checked="true" data-value="en">EN</button><button class="seg__opt" role="radio" aria-checked="false" data-value="ar" lang="ar">ع</button></div></header>
         <div class="device__body"><div class="device__scroll">
           <div class="readouts">
@@ -655,12 +656,68 @@
     <section class="ledger" aria-labelledby="bChecksH"><div class="ledger__head"><span class="t-label" id="bChecksH">Checks</span><span class="ledger__count" id="bChecksN" aria-live="polite"></span></div><ul class="ledger__list" id="bChecks"></ul></section>
     <details class="brandlab__out"><summary class="t-small"><b>Generated brand tokens and web app manifest</b></summary><pre id="bCss"></pre><pre id="bManifest"></pre></details>
   </section>
+  <!-- 26 ─────────────────────────────────────────────────────────── -->
+  <section class="gsec" id="crew-photos" aria-labelledby="h-photos">
+    <header><span class="gsec__num">26 · Crew photos</span><h2 id="h-photos">A face beside every name</h2>
+      <p>Wherever a row, readout, stamp, message or task belongs to a named person, a small round crew photo sits in front of the name. On a busy site people find a face faster than they read a name, so the eye links content to a person before reading. The circle is the system’s <b>one round shape</b>. Nothing else is round, so a photo can never be mistaken for a control, stamp or signal.</p></header>
+    <h3>Sizes</h3>
+    <div class="photo-specs">
+      <figure><span data-person="C01" data-size="xs"></span><figcaption><b>xs · 20px</b>Inline in a sentence</figcaption></figure>
+      <figure><span data-person="C01" data-size="sm"></span><figcaption><b>sm · 24px</b>Table cell, stamp, chip</figcaption></figure>
+      <figure><span data-person="C01"></span><figcaption><b>Default · 32px</b>Title block, rail, dense row</figcaption></figure>
+      <figure><span data-person="C01" data-size="md"></span><figcaption><b>md · 40px</b>Action row lead</figcaption></figure>
+      <figure><span data-person="C01" data-size="lg"></span><figcaption><b>lg · 64px</b>Detail header</figcaption></figure>
+      <figure><span data-person="C01" data-size="xl"></span><figcaption><b>xl · 120px</b>Account page only</figcaption></figure>
+    </div>
+    <h3>States</h3>
+    <div class="photo-specs">
+      <figure><span data-person="C08" data-size="md"></span><figcaption><b>Photo</b>Issued or uploaded</figcaption></figure>
+      <figure><span data-person="C11" data-size="md"></span><figcaption><b>No photo yet</b>Initials on sheet paper</figcaption></figure>
+      <figure><span id="excludedDemo"></span><figcaption><b>Excluded from work</b>Rest hatch over the face</figcaption></figure>
+      <figure><span class="avatar avatar--md is-loading" aria-hidden="true"></span><figcaption><b>Loading</b>Unknown hatch</figcaption></figure>
+      <figure><span id="stackDemo"></span><figcaption><b>Crew stack</b>First four, then a count</figcaption></figure>
+    </div>
+    <h3>In context</h3>
+    <section class="ledger" aria-labelledby="photoLedgerH">
+      <div class="ledger__head"><span class="t-label" id="photoLedgerH">Crew in Shelter A</span><span class="ledger__count">photo · name · status</span></div>
+      <ul class="ledger__list">
+        <li><div class="arow"><span class="arow__lead" data-person="C05" data-size="md"></span><span class="arow__body"><span class="arow__title">Rana (C05)</span><span class="arow__desc">Checked in 08:04 · kiosk</span></span><span class="arow__trail"><span class="stamp" data-glyph="✓">Recovery</span></span></div></li>
+        <li><div class="arow"><span class="arow__lead" data-person="C09" data-size="md"></span><span class="arow__body"><span class="arow__title">Leila (C09)</span><span class="arow__desc">Readiness not confirmed</span></span><span class="arow__trail"><span class="stamp stamp--waiting" data-glyph="…">Waiting</span></span></div></li>
+        <li><div class="arow"><span class="arow__lead" data-person="C11" data-size="md"></span><span class="arow__body"><span class="arow__title">Mariam (C11)</span><span class="arow__desc">No photo on record yet: initials until she adds one</span></span><span class="arow__trail"><span class="stamp" data-glyph="✓">Recovery</span></span></div></li>
+      </ul>
+    </section>
+    <p class="t-small" style="margin:0">✓ Recorded by <span data-person="C01" data-mode="person" data-size="xs"></span> at 08:11. A decision stamp keeps the ink stamp and adds the face of the person who recorded it.</p>
+    <div class="do-dont">
+      <div><b>Do</b>Always write the name beside the photo. The photo helps people recognise each other; it is never the only identifier. It is hidden from screen readers (<code>aria-hidden</code>) because the name is read instead.</div>
+      <div class="dont"><b>Don’t</b>Put a photo on anything that is not about a person: zones, sensors, unowned tasks, AI drafts. The Planning Agent never gets a face.</div>
+      <div class="dont"><b>Don’t</b>Ring, tint or badge a photo with a signal colour to show status. Status stays in the stamp beside it. The only overlay is the rest hatch for “excluded from work”.</div>
+    </div>
+
+    <h3>Account page: add or replace your photo</h3>
+    <p class="t-small muted" style="margin:0">Each person manages their own photo from their account page, and only they can change it. The picked image is square-cropped and shrunk to 256px on the device before it is sent. Remove goes back to the photo issued with the account, or to initials. In this guide the photo stays in this browser only.</p>
+    <div class="photo-upload" id="photoUpload" style="max-inline-size:36rem;border-block:var(--rule-structure);padding-block:var(--space-2)">
+      <span data-person="C05" data-size="xl" id="photoDrop"></span>
+      <div style="display:grid;gap:var(--space-1)">
+        <div class="person__text"><span class="person__name t-title">Rana Al Nadir</span><span class="person__meta">Civil worker · Dune Civil Works · C05</span></div>
+        <div class="photo-upload__actions">
+          <label class="btn btn--primary" for="photoFile">Upload new photo</label>
+          <input id="photoFile" type="file" accept="image/jpeg,image/png,image/webp">
+          <button class="btn btn--quiet" type="button" id="photoRemove">Remove my photo</button>
+        </div>
+        <p class="field__error" id="photoError" role="alert" hidden></p>
+        <p class="t-small muted" id="photoStatus" role="status" aria-live="polite" style="margin:0"></p>
+      </div>
+      <p class="photo-upload__note">JPEG, PNG or WebP. Drop a photo on the circle, or take one with the phone camera. Head and shoulders, face visible. Your crew and supervisors see it next to your name. It is never used to identify you automatically.</p>
+    </div>
+  </section>
+
   </main>
 </div>
 
 <script src="system.js"></script>
 <script src="field.js"></script>
 <script src="brand.js"></script>
+<script src="people.js"></script>
 <script>
 /* Style-guide wiring only. */
 (() => {
@@ -756,6 +813,29 @@
   const links = [...document.querySelectorAll('.guide__nav a')];
   const io = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) links.forEach(a => a.setAttribute('aria-current', String(a.hash === '#' + en.target.id))); }), { rootMargin: '-40% 0px -55% 0px' });
   document.querySelectorAll('.gsec').forEach(s => io.observe(s));
+})();
+
+/* 26 · Crew photos: fill [data-person] slots, then wire the account-page upload. */
+(function () {
+  const $ = s => document.querySelector(s);
+  const P = window.HSPeople;
+  $('#excludedDemo').outerHTML = P.avatar('C08', { size: 'md', cls: 'is-excluded' });
+  $('#stackDemo').outerHTML = P.stack(['C05', 'C06', 'C07', 'C08', 'C09', 'C10', 'C11'], { size: 'md' });
+  P.hydrate(document);
+  const ID = 'C05', box = $('#photoUpload'), file = $('#photoFile'), err = $('#photoError'), status = $('#photoStatus'), remove = $('#photoRemove');
+  const sync = () => { remove.disabled = !P.isUploaded(ID); remove.textContent = P.hasBundled(ID) ? 'Use issued photo' : 'Remove my photo'; };
+  const take = async picked => {
+    err.hidden = true; status.textContent = 'Preparing photo…';
+    try { P.setPhoto(ID, await P.resize(picked)); status.textContent = 'Photo updated. Your crew sees it next to your name.'; }
+    catch (e) { err.hidden = false; err.textContent = '■ ' + e.message; status.textContent = ''; }
+    sync();
+  };
+  file.addEventListener('change', () => { if (file.files[0]) take(file.files[0]); file.value = ''; });
+  remove.addEventListener('click', () => { P.clearPhoto(ID); status.textContent = P.hasBundled(ID) ? 'Back to the photo issued with your account.' : 'Photo removed. Your initials are shown instead.'; sync(); });
+  box.addEventListener('dragover', e => { e.preventDefault(); box.classList.add('is-dragover'); });
+  box.addEventListener('dragleave', () => box.classList.remove('is-dragover'));
+  box.addEventListener('drop', e => { e.preventDefault(); box.classList.remove('is-dragover'); if (e.dataTransfer.files[0]) take(e.dataTransfer.files[0]); });
+  sync();
 })();
 </script>
 </body>

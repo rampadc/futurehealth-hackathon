@@ -200,3 +200,71 @@ screen('w9', {
     }),
   },
 });
+
+/* ───────── Account: your crew photo (W10 web · M9 site · P9 worker) ─────────
+   Everyone can add or replace their own photo; only they can. The photo is cropped to a
+   square and shrunk to 256px on the device. In these wireframes it is kept in this browser
+   (ui_design_system/people.js); the app stores it on the server (PUT /api/people/me/photo). */
+function accountBody(key, worker) {
+  const p = PEOPLE[key];
+  const id = photoId(key);
+  const uploaded = HSPeople.isUploaded(id);
+  const issued = HSPeople.hasBundled(id);
+  const L = k => worker ? t(k) : (STR.en[k] || k);
+  const status = App.f.photoMsg || (uploaded ? L('acct.yours') : issued ? L('acct.issued') : L('acct.none'));
+  const upload = `<div class="photo-upload" id="photoBox">
+      ${HSPeople.avatar(id, { size: 'xl' })}
+      <div style="display:grid;gap:8px;min-width:0">
+        <div><div class="h2" style="margin:0">${HSPeople.name(id)}</div><div class="p muted">${p.role} · ${id}</div></div>
+        <div class="acts">
+          <label class="btn solid" for="photoFile">${L(uploaded || issued ? 'acct.replace' : 'acct.upload')}</label>
+          <input id="photoFile" type="file" accept="image/jpeg,image/png,image/webp">
+          ${uploaded ? `<button class="btn" data-act="photoRemove">${L(issued ? 'acct.useissued' : 'acct.remove')}</button>` : ''}
+        </div>
+        <div class="p" role="status" aria-live="polite" id="photoStatus">${status}</div>
+      </div>
+      <p class="pnote">${L('acct.note')}</p>
+    </div>`;
+  const preview = section(L('acct.where'), list([
+    row({ lead: av(key), t: `${p.n} · ${p.role}`, d: L('acct.where.row'), b: B.done('Recorded'), static: true }),
+  ]));
+  return [upload, preview, `<p class="p muted">${L('acct.private')}</p>`];
+}
+function accountMount(key) {
+  const box = $('#photoBox'), file = $('#photoFile'); if (!box || !file) return;
+  const id = photoId(key);
+  const take = async picked => {
+    App.f.photoMsg = '…';
+    try { HSPeople.setPhoto(id, await HSPeople.resize(picked)); App.f.photoMsg = '✓ ' + (SCREENS[App.route].device === 'worker' ? t('acct.saved') : STR.en['acct.saved']); }
+    catch (e) { App.f.photoMsg = '■ ' + e.message; }
+    refresh();
+  };
+  file.addEventListener('change', () => { if (file.files[0]) take(file.files[0]); });
+  box.addEventListener('dragover', e => { e.preventDefault(); box.classList.add('is-dragover'); });
+  box.addEventListener('dragleave', () => box.classList.remove('is-dragover'));
+  box.addEventListener('drop', e => { e.preventDefault(); box.classList.remove('is-dragover'); if (e.dataTransfer.files[0]) take(e.dataTransfer.files[0]); });
+}
+const ACCOUNT_ACTIONS = key => ({
+  photoRemove: () => { HSPeople.clearPhoto(photoId(key())); App.f.photoMsg = ''; refresh(); toast('Photo removed', null); },
+});
+const ACCOUNT_DEF = {
+  persona: 'Everyone with a Heat-Safe sign-in: workers, foremen, safety officers, first aiders, supervisors.',
+  context: 'Any time. Most people add a photo on their first day, or when their crew can’t put a face to the name.',
+  job: 'Add or replace my own crew photo so people recognise me next to my name in every list.',
+  noError: true,
+};
+screen('w10', { ...ACCOUNT_DEF, device: 'web', name: 'My account · crew photo', short: 'My account', clock: '16:45',
+  render() { const k = ROLES[App.role].who; return { nav: { title: 'My account' }, body: accountBody(k, false) }; },
+  mount() { accountMount(ROLES[App.role].who); },
+  actions: ACCOUNT_ACTIONS(() => ROLES[App.role].who),
+});
+screen('m9', { ...ACCOUNT_DEF, device: 'site', tab: 'me', name: 'Me · my account and photo', short: 'My account', clock: '16:45',
+  render() { const k = ROLES[App.role].who; return { nav: { title: 'My account', leftHtml: ' ' }, overflow: [{ label: 'Switch role on this phone', fn: () => ACT['me-sheet']() }], body: accountBody(k, false) }; },
+  mount() { accountMount(ROLES[App.role].who); },
+  actions: ACCOUNT_ACTIONS(() => ROLES[App.role].who),
+});
+screen('p9', { ...ACCOUNT_DEF, device: 'worker', tab: 'me', name: 'Me: my photo', short: 'My photo', clock: '17:12',
+  render() { return { nav: { title: t('acct.title'), back: 'p8' }, navRight: langBtn(), body: accountBody('rana', true) }; },
+  mount() { accountMount('rana'); },
+  actions: { ...LANG_ACT, ...ACCOUNT_ACTIONS(() => 'rana') },
+});

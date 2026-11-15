@@ -4,6 +4,7 @@ import { simplePayload } from '../commands';
 import type { CaseSession } from '../session';
 import { progress, taskFor, time } from './data';
 import { nameOf } from '../replay';
+import { initialsOf, photoUrl, usePhotos } from '../people';
 import './screens.css';
 
 /**
@@ -60,8 +61,34 @@ export function Badge({ tone, children }: { tone: BadgeTone; children: ReactNode
   return <span className="hs-badge" data-tone={tone}>{tone === 'done' ? '✓ ' : tone === 'over' ? '■ ' : ''}{children}</span>;
 }
 
-export function Avatar({ id }: { id: string }) {
-  return <span className="hs-avatar" aria-hidden="true">{id}</span>;
+export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+/**
+ * Round crew photo (ui_design_system section 26). Decorative: the name is always written
+ * beside it, so screen readers skip it. Falls back to initials if there is no photo or it fails.
+ */
+export function Avatar({ id, size, excluded }: { id: string; size?: AvatarSize; excluded?: boolean }) {
+  usePhotos();
+  const src = photoUrl(id);
+  const [failed, setFailed] = useState<string | null>(null);
+  const photo = !!src && failed !== src;
+  // Initials are drawn by CSS (attr), so they never leak into the row's accessible text.
+  return <span className="hs-avatar" data-size={size} data-excluded={excluded || undefined} data-person={id} data-initials={photo ? undefined : initialsOf(id)} aria-hidden="true">
+    {photo && <img src={src} alt="" loading="lazy" decoding="async" onError={() => setFailed(src)} />}
+  </span>;
+}
+
+/** Photo + name, for sentences, table cells and title bars. */
+export function Person({ id, size = 'xs', children, excluded }: { id: string; size?: AvatarSize; children?: ReactNode; excluded?: boolean }) {
+  return <span className="hs-person"><Avatar id={id} size={size} excluded={excluded} /><span>{children ?? nameOf(id)}</span></span>;
+}
+
+/** Overlapping crew faces: the first four, then a count. */
+export function Avatars({ ids, size = 'sm', max = 4 }: { ids: string[]; size?: AvatarSize; max?: number }) {
+  if (!ids.length) return null;
+  return <span className="hs-avatars" aria-hidden="true">
+    {ids.slice(0, max).map(id => <Avatar key={id} id={id} size={size} />)}
+    {ids.length > max && <span className="hs-avatars-more">+{ids.length - max}</span>}
+  </span>;
 }
 
 export function Statement({ tone, children, source }: { tone?: Tone; children: ReactNode; source?: ReactNode }) {
@@ -153,7 +180,7 @@ export function ActionButton({ session, action, label, payload, primary, danger,
   return <div className="hs-action">
     {hold ? <HoldButton className={className} disabled={off} onConfirm={run} hint={hold}>{label}</HoldButton>
       : <button type="button" className={className} disabled={off} onClick={() => confirm ? setAsking(true) : run()}>{session.busy && ready ? 'Recording…' : label}</button>}
-    {!ready && <p className="hs-small hs-muted">{mine ? taskLine(session, action) : state.owner ? `${nameOf(state.owner)} records this (${state.owner})` : 'Not part of this case'}</p>}
+    {!ready && <p className="hs-small hs-muted">{mine ? taskLine(session, action) : state.owner ? <Person id={state.owner}>{`${nameOf(state.owner)} records this (${state.owner})`}</Person> : 'Not part of this case'}</p>}
     {confirm && asking && <TypedConfirm word={confirm.word} title={confirm.title} body={confirm.body} onCancel={() => setAsking(false)} onConfirm={() => { setAsking(false); run(); }} />}
   </div>;
 }
