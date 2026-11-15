@@ -37,6 +37,12 @@ class DeploymentTests(unittest.TestCase):
         self.assertIn("DROP DATABASE heat_pr_27 WITH (FORCE);", queries)
         self.assertNotIn("pg_signal_backend", " ".join(queries))
 
+    def test_missing_cloud_run_service_is_a_supported_first_deploy(self):
+        absent = subprocess.CompletedProcess(["gcloud"], 1, b"",
+                    b"ERROR: (gcloud.run.services.describe) Cannot find service [heat-safe-pr-27]")
+        with patch.object(deploy.subprocess, "run", return_value=absent):
+            self.assertIsNone(deploy.gcloud("run", "services", "describe", "heat-safe-pr-27", missing_ok=True))
+
     def test_missing_ok_does_not_hide_permission_failure(self):
         denied = subprocess.CompletedProcess(["gcloud"], 1, b"", b"PERMISSION_DENIED")
         with patch.object(deploy.subprocess, "run", return_value=denied):

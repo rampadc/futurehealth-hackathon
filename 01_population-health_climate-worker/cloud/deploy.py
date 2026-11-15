@@ -34,7 +34,7 @@ def run(*args, input_bytes=None, missing_ok=False):
     result = subprocess.run(command, input=input_bytes, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if result.returncode:
         error = result.stderr.decode(errors="replace")
-        if missing_ok and re.search(r"NOT_FOUND|not found|does not exist|could not find", error, re.I):
+        if missing_ok and re.search(r"NOT_FOUND|not found|does not exist|could not find|Cannot find service \[[^\]]+\]", error, re.I):
             return None
         # Cloud CLIs may repeat submitted values on failure. Do not surface them.
         raise RuntimeError(f"{command[0]} {command[1]} failed (exit {result.returncode}); inspect Cloud Audit Logs")

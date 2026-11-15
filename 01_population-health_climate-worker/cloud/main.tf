@@ -8,6 +8,8 @@ locals {
     "aiplatform.googleapis.com",
     "bigquery.googleapis.com",
     "iam.googleapis.com",
+    "iamcredentials.googleapis.com",
+    "sts.googleapis.com",
     "run.googleapis.com",
     "secretmanager.googleapis.com",
     "sqladmin.googleapis.com",

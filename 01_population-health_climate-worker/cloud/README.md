@@ -2,13 +2,13 @@
 
 This module is separate from `infra/`, which belongs to the earlier supervisor demo. Terraform creates the private main and preview Artifact Registry repositories, a PostgreSQL 16 Cloud SQL instance and main database, four service accounts, and seven fixed Secret Manager secrets. IAM grants are managed separately using the standard `gcloud` CLI after those resources exist; Terraform does not own IAM policies. The trusted `cloud/deploy.py` controller manages application services and per-PR resources during deployment.
 
-## Prepared state — 14 November 2026
+## Prepared state — 15 November 2026
 
-Infrastructure preparation completed as `ishka.quark@gmail.com` with the existing Editor access. Terraform manages 22 resources and its post-apply plan reports no changes: seven enabled APIs, four service accounts, two private registries, seven empty secrets, the PostgreSQL 16 Enterprise instance `heat-safe-pg16`, and database `heat_safe_main`.
+Infrastructure preparation completed as `ishka.quark@gmail.com` with the existing Editor access. Terraform manages 24 resources and its post-apply plan reports no changes: nine enabled APIs, four service accounts, two private registries, seven fixed secrets, the PostgreSQL 16 Enterprise instance `heat-safe-pg16`, and database `heat_safe_main`.
 
-The state bucket is private, uniform-access and versioned; anonymous state retrieval returns 403. Both registry paths reject anonymous requests with 401 and have no public IAM grants. PostgreSQL is RUNNABLE with no authorized public networks. The existing `supervisor-demo` generation and revision are unchanged. The two GitHub environments allow only `main`, require no approvals, and have the four non-secret deployment variables configured.
+The state bucket is private, uniform-access and versioned; anonymous state retrieval returns 403. Both registry paths reject anonymous requests with 401 and have no public IAM grants. PostgreSQL is RUNNABLE with no authorized public networks. The existing `supervisor-demo` generation and revision are unchanged. The two GitHub environments allow only `main`, require no approvals, and have the four original non-secret deployment variables configured; the WIF provider variable is part of the setup below.
 
-No service-account keys or secret values have been created, and no IAM grants have been applied by this preparation. The remaining administrator work is the scoped IAM grants; the operator shares the exact commands directly with the project administrator. After it succeeds, the operator can read the seven setup secrets and complete the steps below. Live application deployment and teardown remain unverified until then.
+All seven fixed secrets now have enabled versions, and the main PostgreSQL roles and schemas are initialized. No GitHub JSON-key secrets are configured. Organization policy blocks service-account key creation, so deployments use GitHub OIDC and Workload Identity Federation (WIF); keep that policy in place. Scoped IAM grants and the WIF provider are configured. A manual preview deployment and default-branch merge are still pending; live application deployment and teardown have not been verified.
 
 ## One-time operator setup
 
@@ -45,7 +45,7 @@ terraform -chdir=01_population-health_climate-worker/cloud plan -out=/private/pa
 terraform -chdir=01_population-health_climate-worker/cloud apply /private/path/heat-safe.tfplan
 ```
 
-Keep the plan file outside the checkout and delete it after apply. Then ask the project administrator to apply the reviewed IAM grants with `gcloud`. Complete the grants before creating deployment keys or running the workflows.
+Keep the plan file outside the checkout and delete it after apply. Then ask the project administrator to apply the reviewed IAM grants with `gcloud`. Complete the grants and WIF setup before running the workflows.
 
 ### Initialize the fixed secret values
 
@@ -148,7 +148,7 @@ The service policy must contain neither `allUsers` nor `allAuthenticatedUsers`. 
 
 ### Connect the existing GitHub environments
 
-`heat-safe-main` and `heat-safe-preview` must each allow only the exact `main` branch and require no manual approval. Verify their branch policies and protection rules in GitHub before uploading keys:
+`heat-safe-main` and `heat-safe-preview` must each allow only the exact `main` branch and require no manual approval. Verify their branch policies and protection rules in GitHub:
 
 ```sh
 gh api repos/rampadc/futurehealth-hackathon/environments/heat-safe-main
@@ -157,24 +157,38 @@ gh api repos/rampadc/futurehealth-hackathon/environments/heat-safe-preview
 gh api repos/rampadc/futurehealth-hackathon/environments/heat-safe-preview/deployment-branch-policies
 ```
 
-Each environment must report one `main` branch policy, custom branch policies enabled, and no reviewer or wait-timer protection rule. There must be no repository-wide deployment keys. As the authorized GCP key creator and GitHub repository administrator, create one key per deployer in a private directory outside the checkout and upload each through stdin to its environment secret:
+Each environment must report one `main` branch policy, custom branch policies enabled, and no reviewer or wait-timer protection rule. There must be no repository-wide deployment keys. A project administrator creates the WIF pool and OIDC provider once, in the project containing the deployer service accounts. A GitHub repository administrator sets the variables at the end:
 
 ```sh
-umask 077
-mkdir -m 700 /private/path/heat-safe-keys
-gcloud iam service-accounts keys create /private/path/heat-safe-keys/main.json \
-  --iam-account=heat-main-deploy@future-health-513202.iam.gserviceaccount.com --project=future-health-513202
-gcloud iam service-accounts keys create /private/path/heat-safe-keys/preview.json \
-  --iam-account=heat-preview-deploy@future-health-513202.iam.gserviceaccount.com --project=future-health-513202
-gh secret set GCP_MAIN_DEPLOY_KEY --repo rampadc/futurehealth-hackathon --env heat-safe-main < /private/path/heat-safe-keys/main.json
-gh secret set GCP_PREVIEW_DEPLOY_KEY --repo rampadc/futurehealth-hackathon --env heat-safe-preview < /private/path/heat-safe-keys/preview.json
+gcloud iam workload-identity-pools create heat-safe-github \
+  --project=future-health-513202 --location=global \
+  --display-name='Heat-Safe GitHub'
+
+mapping="google.subject=assertion.sub,attribute.repository_id=assertion.repository_id,attribute.repository_owner_id=assertion.repository_owner_id,attribute.deployer=assertion.event_name == 'workflow_run' && assertion.workflow_ref == 'rampadc/futurehealth-hackathon/.github/workflows/deploy-main.yml@refs/heads/main' ? 'main' : 'preview'"
+condition="assertion.repository_id == '1444949018' && assertion.repository_owner_id == '5560025' && assertion.repository == 'rampadc/futurehealth-hackathon' && assertion.ref == 'refs/heads/main' && ((assertion.event_name == 'workflow_run' && assertion.workflow_ref == 'rampadc/futurehealth-hackathon/.github/workflows/deploy-main.yml@refs/heads/main') || (assertion.event_name == 'workflow_run' && assertion.workflow_ref == 'rampadc/futurehealth-hackathon/.github/workflows/deploy-preview.yml@refs/heads/main') || (assertion.event_name == 'pull_request_target' && assertion.workflow_ref == 'rampadc/futurehealth-hackathon/.github/workflows/cleanup.yml@refs/heads/main') || ((assertion.event_name == 'schedule' || assertion.event_name == 'workflow_dispatch') && assertion.workflow_ref == 'rampadc/futurehealth-hackathon/.github/workflows/reconcile.yml@refs/heads/main'))"
+gcloud iam workload-identity-pools providers create-oidc github-actions \
+  --project=future-health-513202 --location=global \
+  --workload-identity-pool=heat-safe-github \
+  --issuer-uri=https://token.actions.githubusercontent.com \
+  --attribute-mapping="$mapping" --attribute-condition="$condition"
+
+gcloud iam service-accounts add-iam-policy-binding \
+  heat-main-deploy@future-health-513202.iam.gserviceaccount.com \
+  --project=future-health-513202 --role=roles/iam.workloadIdentityUser \
+  --member='principalSet://iam.googleapis.com/projects/350411621586/locations/global/workloadIdentityPools/heat-safe-github/attribute.deployer/main'
+gcloud iam service-accounts add-iam-policy-binding \
+  heat-preview-deploy@future-health-513202.iam.gserviceaccount.com \
+  --project=future-health-513202 --role=roles/iam.workloadIdentityUser \
+  --member='principalSet://iam.googleapis.com/projects/350411621586/locations/global/workloadIdentityPools/heat-safe-github/attribute.deployer/preview'
+
 gh variable set GCP_PROJECT_ID --repo rampadc/futurehealth-hackathon --body future-health-513202
 gh variable set GCP_REGION --repo rampadc/futurehealth-hackathon --body me-central1
 gh variable set GCP_MAIN_DEPLOY_SA --repo rampadc/futurehealth-hackathon --body heat-main-deploy@future-health-513202.iam.gserviceaccount.com
 gh variable set GCP_PREVIEW_DEPLOY_SA --repo rampadc/futurehealth-hackathon --body heat-preview-deploy@future-health-513202.iam.gserviceaccount.com
+gh variable set GCP_WIF_PROVIDER --repo rampadc/futurehealth-hackathon --body projects/350411621586/locations/global/workloadIdentityPools/heat-safe-github/providers/github-actions
 ```
 
-Delete the private key and secret files once stored in the intended secure stores. To rotate a key, create a replacement for the same service account, update its environment secret with `gh secret set ... < PRIVATE_FILE`, verify an automated run succeeds, then delete the old Google key with `gcloud iam service-accounts keys delete OLD_KEY_ID --iam-account=ACCOUNT`. In an exposure incident, disable or delete the affected key immediately and replace its environment secret.
+The provider condition limits tokens to repository ID `1444949018`, owner ID `5560025`, the default branch, and the four trusted workflow files and events. The `deployer` attribute limits the main service account to the main deployment workflow; the preview service account handles preview deployment, cleanup, and reconciliation. Workflows must request `id-token: write` and authenticate with `google-github-actions/auth` using the provider resource and the relevant deployer service account. Do not create JSON keys or populate the old `GCP_MAIN_DEPLOY_KEY` and `GCP_PREVIEW_DEPLOY_KEY` secrets. Keep the organization key-creation policy enabled.
 
 The designated presenter (`user:ishka.quark@gmail.com` unless the owner changes the grant) can retrieve raw main codes and preview code pairs:
 
@@ -185,6 +199,10 @@ gcloud secrets versions access latest --project=future-health-513202 --secret=he
 ```
 
 Treat command output as sensitive. The main runtime receives only code digests and its DB password. The preview runtime receives code digests and its own preview DB password, and has no Secret Manager access. The SQL preview provisioner has `CREATEDB` and `CREATEROLE`, but no PostgreSQL admin or main database access.
+
+## Cloud Run permission boundary
+
+The main deployment role is bound directly to `heat-safe-app`. Cloud Run does not support `resource.name` conditions for service management, so the preview deployment account has project-level service create/list/manage permissions. The trusted controller restricts its operations to validated `heat-safe-pr-N` names; IAM does not enforce that name prefix. This is an explicit hackathon trade-off: a compromised preview deployment identity could manage other Cloud Run services in this project. Registry permissions, main secret access and PostgreSQL logins remain separated. Do not describe the preview service-management permission as prefix-restricted IAM.
 
 ## Trusted deployment controller
 

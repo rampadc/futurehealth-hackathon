@@ -139,26 +139,30 @@ class EventGuardTests(unittest.TestCase):
 
 
 class WorkflowAuthTests(unittest.TestCase):
-    def test_cloud_auth_uses_only_environment_scoped_keys(self):
+    def test_cloud_auth_uses_only_trusted_workload_identity_jobs(self):
         deployments = {
-            "deploy-main.yml": ("heat-safe-main", "GCP_MAIN_DEPLOY_KEY"),
-            "deploy-preview.yml": ("heat-safe-preview", "GCP_PREVIEW_DEPLOY_KEY"),
-            "cleanup.yml": ("heat-safe-preview", "GCP_PREVIEW_DEPLOY_KEY"),
-            "reconcile.yml": ("heat-safe-preview", "GCP_PREVIEW_DEPLOY_KEY"),
+            "deploy-main.yml": ("heat-safe-main", "GCP_MAIN_DEPLOY_SA"),
+            "deploy-preview.yml": ("heat-safe-preview", "GCP_PREVIEW_DEPLOY_SA"),
+            "cleanup.yml": ("heat-safe-preview", "GCP_PREVIEW_DEPLOY_SA"),
+            "reconcile.yml": ("heat-safe-preview", "GCP_PREVIEW_DEPLOY_SA"),
         }
         for path in WORKFLOWS.glob("*.yml"):
             source = path.read_text()
             with self.subTest(workflow=path.name):
-                self.assertNotIn("id-token: write", source)
-                self.assertNotIn("workload_identity_provider:", source)
-                self.assertNotIn("service_account:", source)
+                self.assertNotIn("credentials_json:", source)
                 if path.name in deployments:
-                    environment, secret = deployments[path.name]
+                    environment, account = deployments[path.name]
                     self.assertEqual(source.count(f"environment: {environment}"), 1)
-                    self.assertEqual(source.count(f"credentials_json: ${{{{ secrets.{secret} }}}}"), 1)
+                    self.assertEqual(source.count("id-token: write"), 1)
+                    self.assertEqual(source.count("workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}"), 1)
+                    self.assertEqual(source.count(f"service_account: ${{{{ vars.{account} }}}}"), 1)
                     self.assertEqual(source.count("google-github-actions/auth@"), 1)
+                    if path.name.startswith("deploy-"):
+                        self.assertNotIn("id-token: write", source.split("  deploy:\n", 1)[0])
                 else:
-                    self.assertNotIn("credentials_json:", source)
+                    self.assertNotIn("id-token: write", source)
+                    self.assertNotIn("workload_identity_provider:", source)
+                    self.assertNotIn("service_account:", source)
                     self.assertNotIn("environment:", source)
 
 
