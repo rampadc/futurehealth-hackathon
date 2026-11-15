@@ -19,7 +19,7 @@ type Props = { onLockAccess?: () => void };
 /** Wireframe screens load on demand, so the current desktop app stays small. */
 const DeviceShell = lazy(() => import('./shells/DeviceShell').then(m => ({ default: m.DeviceShell })));
 
-/** Routes between the current desktop app (`/`, `/demo-control`) and the wireframe device shells. */
+/** Routes between the device shells (`/`, `/web`, `/site`, `/worker`, `/kiosk`), presenter controls and the classic app. */
 export default function App({ onLockAccess }: Props = {}) {
   const route = parseRoute(usePath());
   if (route.kind === 'device') return <Suspense fallback={<Box sx={{ p: 5 }} role="status"><CircularProgress size={24} /> Loading…</Box>}><DeviceShell device={route.device} screen={route.screen} onLockAccess={onLockAccess} /></Suspense>;
@@ -38,7 +38,7 @@ function DesktopApp({ onLockAccess, demoControl }: Props & { demoControl: boolea
   const { person, caseView, initialising, busy, error, feedback, setFeedback, refreshCase, act, retryCalculation } = session;
 
   if (initialising) return <Box sx={{ p: 5 }} role="status"><CircularProgress size={24} /> Loading case…</Box>;
-  if (demoControl) return <DemoControl caseView={caseView} onReturn={() => navigate('/')} onChange={async next => { if (person) await refreshCase(); else session.setCaseView(next); setFeedback(''); }} />;
+  if (demoControl) return <DemoControl caseView={caseView} onReturn={() => navigate('/classic')} onChange={async next => { if (person) await refreshCase(); else session.setCaseView(next); setFeedback(''); }} />;
   if (!person) return <><SignIn caseView={caseView} onSignIn={selected => { void session.signIn(selected); }} />{error && <Alert severity="error" role="alert" sx={{ position: 'fixed', bottom: 24, right: 24 }}>{error}</Alert>}</>;
   const story = caseView?.story;
   const capture = caseView?.capture ?? undefined;

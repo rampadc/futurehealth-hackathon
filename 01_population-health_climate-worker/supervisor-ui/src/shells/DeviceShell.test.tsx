@@ -26,9 +26,10 @@ beforeEach(() => {
 });
 
 describe('routes', () => {
-  it('keeps / and unknown paths on the desktop app', () => {
-    expect(parseRoute('/')).toEqual({ kind: 'desktop' });
-    expect(parseRoute('/nope')).toEqual({ kind: 'desktop' });
+  it('opens the web shell at / and keeps the classic app and presenter controls', () => {
+    expect(parseRoute('/')).toEqual({ kind: 'device', device: 'web' });
+    expect(parseRoute('/nope')).toEqual({ kind: 'device', device: 'web' });
+    expect(parseRoute('/classic/')).toEqual({ kind: 'classic' });
     expect(parseRoute('/demo-control/')).toEqual({ kind: 'demo-control' });
   });
   it('parses device shells and screen ids', () => {

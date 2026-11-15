@@ -4,7 +4,8 @@ import { live } from '../../live';
 import { nameOf } from '../../replay';
 import { navigate } from '../../router';
 import { crew, heatNow, SCREEN_FOR_ACTION, time, who } from '../data';
-import { Badge, Band, Computed, Empty, Head, Hero, Hold, List, Metric, NoCase, Note, Row, Section, taskBadge } from '../kit';
+import { nextHandoff } from '../../story';
+import { ActionButton, Badge, Band, Computed, Empty, Head, Hero, Hold, List, Metric, NoCase, Note, Row, Section, taskBadge } from '../kit';
 import type { ScreenProps } from '../registry';
 
 /** W1 · Squad Monitoring: within five seconds, does anyone need action now? */
@@ -20,6 +21,7 @@ export function W1SquadMonitoring({ session }: ScreenProps) {
   const needsHelp = people.filter(p => p.excluded);
   const byLocation = new Map<string, number>();
   for (const p of people) { const where = p.excluded ? 'welfare' : p.inRecovery ? 'shelter_a' : p.location ?? 'unknown'; byLocation.set(where, (byLocation.get(where) ?? 0) + 1); }
+  const handoff = nextHandoff(story);
   const actions = [...open].sort((a, b) => Number(!!b.due_at && overdue.includes(b)) - Number(!!a.due_at && overdue.includes(a)));
   return <div className="hs-screen">
     <Head kicker={`Squad Monitoring · Civil area · ${time(caseView.clock)} GST`} title="Squad Monitoring" />
@@ -30,9 +32,12 @@ export function W1SquadMonitoring({ session }: ScreenProps) {
     </Hero>
     <p className="hs-statusline"><Band band={heat.band.band} label={heat.reading ? `TWL ${heat.reading.twl} W/m² · ${heat.band.label}` : 'No reading'} /> · {heat.reading ? `sensor ${heat.reading.sensor_id} · ${time(heat.reading.measured_at)}` : ''} {heat.heavyHeld && <Hold />}</p>
     <div className="hs-grid">
-      <Section title="Needs action" hint="Overdue first">
-        {actions.length ? <List>{actions.map(t => { const target = SCREEN_FOR_ACTION[t.action]?.web; return <Row key={t.action} title={t.label} detail={`${nameOf(t.actor_id)}${t.due_at ? ` · due ${time(t.due_at)}` : ''}`} badge={taskBadge(session, t.action)} onClick={target ? () => navigate(`/web/${target}`) : undefined} />; })}</List>
-          : <Empty>Nothing waiting.</Empty>}
+      <Section title="Your actions" hint="Overdue first">
+        {actions.length ? <List>{actions.filter(t => SCREEN_FOR_ACTION[t.action]?.web).map(t => <Row key={t.action} title={t.label} detail={`${nameOf(t.actor_id)}${t.due_at ? ` · due ${time(t.due_at)}` : ''}`} badge={taskBadge(session, t.action)} onClick={() => navigate(`/web/${SCREEN_FOR_ACTION[t.action].web}`)} />)}</List>
+          : <Empty>Nothing waiting for you.</Empty>}
+        {/* Actions with no dedicated wireframe screen (delivery, cost review) are recorded here. */}
+        {actions.filter(t => !SCREEN_FOR_ACTION[t.action]?.web).map(t => <ActionButton key={t.action} session={session} action={t.action} label={t.label} />)}
+        <p className="hs-statusline">Next site handoff: {handoff.actorId ? `${nameOf(handoff.actorId)} · ${handoff.title}` : handoff.title}</p>
       </Section>
       <Section title="Crew by location" hint="Aggregates only · no health data">
         <List>{[...byLocation.entries()].map(([where, n]) => <Row key={where} title={nameOf(where)} badge={<Badge tone="muted">{n}</Badge>} />)}</List>

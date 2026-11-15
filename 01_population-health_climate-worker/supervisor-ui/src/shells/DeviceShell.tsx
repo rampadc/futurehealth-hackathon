@@ -83,7 +83,7 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
 function DeviceSwitch({ current }: { current: Device }) {
   return <p className="hs-switch">
     {(Object.keys(DEVICE_INFO) as Device[]).filter(d => d !== current).map(d => <button key={d} type="button" className="hs-link" onClick={() => navigate(`/${d}`)}>{DEVICE_INFO[d].name}</button>)}
-    <button type="button" className="hs-link" onClick={() => navigate('/')}>Current desktop app</button>
+    <button type="button" className="hs-link" onClick={() => navigate('/classic')}>Classic desktop app</button>
   </p>;
 }
 
