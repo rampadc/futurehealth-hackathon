@@ -20,17 +20,21 @@ export function usePath() {
 }
 
 export type Route =
-  | { kind: 'desktop' }
+  | { kind: 'classic' }
   | { kind: 'demo-control' }
   | { kind: 'device'; device: 'web' | 'site' | 'worker' | 'kiosk'; screen?: string };
 
 const DEVICES = ['web', 'site', 'worker', 'kiosk'] as const;
 
-/** `/` and unknown paths stay on the current desktop app until the web shell replaces it. */
+/**
+ * `/` and unknown paths open the supervisor web shell. The original nine-workspace desktop app
+ * stays available at `/classic`; presenter controls stay at `/demo-control`.
+ */
 export function parseRoute(path: string): Route {
   const parts = path.replace(/\/+$/, '').split('/').filter(Boolean);
   if (parts[0] === 'demo-control' && parts.length === 1) return { kind: 'demo-control' };
+  if (parts[0] === 'classic' && parts.length === 1) return { kind: 'classic' };
   const device = DEVICES.find(d => d === parts[0]);
   if (device) return { kind: 'device', device, screen: parts[1]?.toLowerCase() };
-  return { kind: 'desktop' };
+  return { kind: 'device', device: 'web' };
 }
