@@ -1,0 +1,76 @@
+/* Device shells for the wireframe screens. Uses Issued Sheet tokens from
+   ui_design_system/tokens.css (imported in main.tsx). Scoped under .hs-shell so the
+   current MUI desktop app is unaffected. Logical properties throughout for RTL. */
+
+.hs-shell {
+  min-block-size: 100vh; display: flex; flex-direction: column;
+  font-family: var(--font); font-size: var(--fs-body); line-height: var(--lh-body);
+  color: var(--color-ink); background: var(--color-base);
+}
+.hs-shell *, .hs-shell *::before, .hs-shell *::after { box-sizing: border-box; }
+.hs-shell button { font: inherit; color: inherit; cursor: pointer; }
+.hs-shell :focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.hs-shell code { font-size: var(--fs-small); padding-inline: var(--space-half); border: var(--rule-hair); margin-inline-end: var(--space-1); }
+
+.hs-pad { padding: var(--gutter); }
+.hs-grow { flex: 1; }
+.hs-muted { color: var(--color-graphite); }
+.hs-label { font-size: var(--fs-label); letter-spacing: var(--track-label); text-transform: uppercase; color: var(--color-graphite); margin: 0; }
+:not(:lang(en)) > .hs-label { text-transform: none; }
+
+.hs-bar {
+  display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--gutter);
+  border-block-end: var(--rule-structure); background: var(--color-sheet);
+}
+.hs-body { flex: 1; display: grid; grid-template-columns: minmax(12rem, 16rem) minmax(0, 1fr); min-block-size: 0; }
+.hs-rail { display: flex; flex-direction: column; gap: var(--space-half); padding: var(--space-2); border-inline-end: var(--rule-hair); background: var(--color-sheet); }
+.hs-rail > button { text-align: start; background: none; border: 0; padding: var(--space-1) var(--space-2); min-block-size: var(--target); border-inline-start: 3px solid transparent; }
+.hs-rail > button[aria-current='page'] { border-inline-start-color: var(--color-ink); font-weight: var(--weight-bold); }
+.hs-rail small { color: var(--color-pencil); }
+.hs-main { padding: var(--gutter); min-inline-size: 0; }
+
+.hs-sheet { max-inline-size: 60rem; background: var(--color-sheet); border: var(--rule-structure); padding: var(--space-4); }
+.hs-sheet h1 { font-size: var(--fs-heading); line-height: var(--lh-title); margin: var(--space-1) 0 var(--space-2); }
+.hs-sheet h2 { font-size: var(--fs-title); margin-block: var(--space-4) var(--space-1); }
+.hs-draft { background: var(--color-tracing); border: var(--rule-draft); padding: var(--space-2); }
+.hs-contract { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--space-1) var(--space-3); }
+.hs-contract dt { font-weight: var(--weight-medium); }
+.hs-contract dd { margin: 0; }
+.hs-plain { padding-inline-start: var(--space-3); }
+
+.hs-error, .hs-ok { border-inline-start: var(--rule-signal); padding: var(--space-1) var(--space-2); background: var(--color-sheet); }
+.hs-error { border-inline-start-color: var(--color-signal-red); }
+.hs-ok { border-inline-start-color: var(--color-signal-green); }
+.hs-link { background: none; border: 0; padding: 0; text-decoration: underline; min-block-size: var(--target-pointer); }
+.hs-btn { inline-size: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-half); padding: var(--space-2); min-block-size: var(--target-touch); background: var(--color-sheet); border: var(--border-brutalist); text-align: start; }
+.hs-btn span { color: var(--color-graphite); font-size: var(--fs-small); }
+
+.hs-signin { max-inline-size: 36rem; margin-inline: auto; padding: var(--space-6) var(--gutter); }
+.hs-signin h1 { font-size: var(--fs-heading); line-height: var(--lh-title); }
+.hs-people { list-style: none; padding: 0; display: grid; gap: var(--space-2); }
+.hs-switch { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-block-start: var(--space-4); font-size: var(--fs-small); }
+
+/* Phone shells: one column, screen list collapses under the bar, bottom tabs. */
+.hs-shell[data-device='site'], .hs-shell[data-device='worker'] { max-inline-size: 30rem; margin-inline: auto; border-inline: var(--rule-hair); }
+.hs-shell[data-device='site'] .hs-body, .hs-shell[data-device='worker'] .hs-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; }
+.hs-shell[data-device='site'] .hs-rail, .hs-shell[data-device='worker'] .hs-rail { flex-direction: row; overflow-x: auto; border-inline-end: 0; border-block-end: var(--rule-hair); font-size: var(--fs-small); }
+.hs-shell[data-device='site'] .hs-rail > button, .hs-shell[data-device='worker'] .hs-rail > button { flex: none; border-inline-start: 0; border-block-end: 3px solid transparent; }
+.hs-shell[data-device='site'] .hs-rail > button[aria-current='page'], .hs-shell[data-device='worker'] .hs-rail > button[aria-current='page'] { border-block-end-color: var(--color-ink); }
+.hs-shell[data-device] .hs-rail .hs-switch { margin: 0; flex: none; }
+.hs-tabs { position: sticky; inset-block-end: 0; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border-block-start: var(--rule-structure); background: var(--color-sheet); padding-block-end: var(--edge-safe); }
+.hs-tabs > button { background: none; border: 0; min-block-size: var(--target-glove); font-weight: var(--weight-medium); }
+.hs-tabs > button[aria-current='page'] { box-shadow: inset 0 3px 0 var(--color-ink); }
+.hs-tabs > button:disabled { color: var(--color-pencil); cursor: default; }
+
+/* Kiosk: no rail, large targets. */
+.hs-shell[data-device='kiosk'] .hs-body { grid-template-columns: minmax(0, 1fr); }
+.hs-shell[data-device='kiosk'] .hs-rail { display: none; }
+
+@media (max-width: 720px) {
+  .hs-body { grid-template-columns: minmax(0, 1fr); }
+  .hs-rail { flex-direction: row; overflow-x: auto; border-inline-end: 0; border-block-end: var(--rule-hair); }
+}
+
+.hs-bar { flex-wrap: wrap; row-gap: var(--space-half); }
+.hs-bar strong, .hs-bar span { white-space: nowrap; }
+.hs-shell[data-device='site'] .hs-bar .hs-muted, .hs-shell[data-device='worker'] .hs-bar .hs-muted { display: none; }

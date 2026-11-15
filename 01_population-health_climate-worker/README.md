@@ -14,6 +14,36 @@ The `research/`, `rfqs/`, and any `ideation/` files preserve supporting material
 Heat-stress early warning and shift planning for outdoor construction crews in Abu Dhabi.
 Plan and architecture: `doc/heat-safe-crew-agent-plan.md`.
 
+## Local end-to-end demo
+
+From this directory, with Python 3.12+, `uv`, Node.js 22.12+ and npm installed:
+
+```bash
+uv run --env-file .env python tools/dev_local.py --setup  # first run only
+uv run --env-file .env python tools/dev_local.py          # subsequent runs
+```
+
+The launcher starts the FastAPI application on `127.0.0.1:8001`, the deterministic
+solver on `127.0.0.1:8765`, and the React supervisor app on `127.0.0.1:5174`.
+Open [the app](http://127.0.0.1:5174/) or [presenter controls](http://127.0.0.1:5174/demo-control).
+Use Ctrl+C to stop all three. It refuses occupied ports without stopping another
+process; startup logs are in `.local/logs/`. The app stores local case and assistant
+state under `.local/heat-safe/` by default, which is ignored by Git. Set
+`HEAT_SAFE_LOCAL_DIR` to use another private local directory.
+
+The `.env` file supplies the personal `heat-safe-example` project and the
+separate ADC path described below. Keep its credentials out of source control.
+The nine named roles are fictional demo personas, not authenticated users. The
+presenter clock and inputs simulate site events; the backend and solver compute
+responses for those inputs when called. A plan remains a proposal (`applied: false`):
+this demo does not apply work assignments, release held work, send SMS, or provide
+clinical or field safety approval. The standalone ADK dev UI can still be run with
+`uv run --env-file .env adk web agents` on its own port; it is not needed by this
+three-service launcher.
+
+See [the supervisor walkthrough](supervisor-ui/README.md) and
+[the solver API guide](demo/solver/README.md) for component details.
+
 ## Setup
 
 ```bash
@@ -87,7 +117,7 @@ Notes:
   stream with `fetch()` and `response.body.getReader()`.
 - **Sessions are in memory**, so there's one Cloud Run instance, and a restart forgets chats (a 404 for an
   old `session_id`). ADK's `/run_sse` and our `/agent/chat` keep separate sessions.
-- **CORS:** `localhost:5173` (Vite) is allowed. Add a deployed frontend with
+- **CORS:** `localhost:5173` and `5174` (the Vite dev servers) are allowed. Add a deployed frontend with
   `HEAT_SAFE_ALLOWED_ORIGINS=https://...`.
 - **Deploy:** `infra/README.md` (the same Cloud Run service, now running `uvicorn server:app`).
 

@@ -12,21 +12,20 @@ For the recommended competition choice, commercial comparison and execution cale
 
 These are researched opportunity hypotheses, not validated customer demand. Public announcements, vendor claims, and procurement notices are labelled according to what they establish. Proposed prices and revenue scenarios are assumptions to test, not market forecasts. No buyer interviews or partner commitments are implied.
 
-## Run the Heat-Safe demo
+## Run Heat-Safe locally
 
-Use Node.js 22.12+ and npm. From the repository root:
+Use Python 3.13 with `uv`, Node.js 22.12+ and npm. Configure the private local `.env` with your Google project and Application Default Credentials, following the [application guide](01_population-health_climate-worker/README.md). From the repository root:
 
 ```sh
-cd 01_population-health_climate-worker/ui
-npm ci
-npm run dev
+cd 01_population-health_climate-worker
+uv run --env-file .env python tools/dev_local.py --setup
 ```
 
-Open **http://127.0.0.1:5173/** for the team-facing workspace and **http://127.0.0.1:5173/presenter** in a separate tab for presenter controls. Use the same browser and origin for both tabs. The app stays on port 5173; if it is occupied, stop the existing server first.
+For subsequent runs, omit `--setup`. The launcher starts the desktop app on **http://127.0.0.1:5174/**, the application/ADK backend on port 8001 and the operational solver on port 8765. Open **http://127.0.0.1:5174/demo-control** directly to start a case and inspect executions. Named workspaces contain operational actions; presenter controls stay on their separate route.
 
-The demo runs entirely in the browser with the checked-in Project Sandline fixtures. No API keys, backend or hardware are needed. Local browser storage retains progress; use the presenter reset to start again.
+Cases, human evidence, calculations and assistant conversations persist in ignored worktree-local SQLite files. Solver proposals are freshly calculated from the case event ledger. Live Gemini uses server-side credentials. Named persona selection is for local development; it is not production authentication.
 
-See the [UI guide](01_population-health_climate-worker/ui/README.md) for replay and verification, and the [scenario dossier](01_population-health_climate-worker/demo/README.md) for the ten scenarios and shared context. Keep `ui/` and `demo/` together: the UI imports those fixtures at build time.
+See the [desktop guide](01_population-health_climate-worker/supervisor-ui/README.md), [verification record](01_population-health_climate-worker/supervisor-ui/LIVE_VERIFICATION.md) and [scenario dossier](01_population-health_climate-worker/demo/README.md). Christine’s standalone `adk web` planning agent remains available independently.
 
 ## Supporting material
 
