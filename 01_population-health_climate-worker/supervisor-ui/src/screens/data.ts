@@ -89,7 +89,7 @@ export function reading(caseView: CaseView | null) {
 export function heatNow(caseView: CaseView | null) {
   const r = reading(caseView);
   const assessed = r && caseView ? assessThermalReading({ twl: r.twl, at: r.measured_at }, caseView.clock, r.quality === 'valid' ? 'serviceable' : r.quality) : null;
-  const band = r ? thermalStatus(r.twl) : thermalStatus(undefined, false);
+  const band = thermalStatus(r?.twl, r?.quality === 'valid');
   const held = caseView?.capture?.response.heat.held_task_ids ?? caseView?.request?.snapshot.held_task_ids ?? [];
   return { reading: r, band, freshness: assessed?.reason ?? 'missing', ageMs: assessed?.ageMs ?? null, held, heavyHeld: held.includes('civil_heavy') || !!caseView?.story.issued };
 }

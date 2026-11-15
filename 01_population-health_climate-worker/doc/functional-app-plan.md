@@ -16,6 +16,7 @@ Acceptance story: heat alert (scenario 02) → feasible alternative work (03) �
 | Planning Agent (`/api/chat`) | Real Gemini with case tools plus the supervisor tools (forecast, TWL, guidance search with citations). Ask screens list the tools behind each answer | `src/heat_safe/live_assistant.py`, `screens/ask.tsx` |
 | Trust log | Real: solver runs, human commands, agent answers with tool names; filter by kind | `platform_api.py`, `screens/web/monitor.tsx` |
 | Heat exposure (risk core) | **Connected for context.** `GET /api/case/conditions` returns the hourly TWL for Mussafah on 4 Aug 2025 from the ERA5 replay; shown on Squad Monitoring and Heat controls. Local readings still come from the case; the conditions never clear a hold | `platform_api.py`, `screens/conditions.tsx` |
+| Per-worker heat risk | **Done.** `GET /api/case/crew-risk` (supervisors and responders: band and action only) and `GET /api/worker/risk` (the worker's own band and reasons) run `compute_worker_risk` on the case hour: TWL for each worker's clothing, work/rest for their workload, raised for acclimatisation, a report of feeling unwell or a lost local reading | `worker_risk.py`, `application/crew_risk.py`, `screens/risk.tsx` |
 | Countercases | Presenter controls inject a valid, invalid or stale reading, and presets 02, 06, 08 and 09 set the clock and that reading. People still record the instruction, headcount and symptom report | `DemoControl.tsx`, `scenarioPresets.ts` |
 | Agent → solver | **Done.** `what_if_crew_plan` (supervisors and responders only) sends a changed copy of the case evidence to `/v2/crew-rest/solve`. Checked against the running solver on 15 Nov: C05 unavailable gives 90 instead of 120 useful worker-minutes; C05 unavailable with C09 ready restores 120 | `application/what_if.py`, `tests/test_what_if.py` (opt-in live test) |
 | Hosting | Not verified. Cloud Run bootstrap stops at missing IAM grants | `LIVE_VERIFICATION.md`, `cloud/README.md` |
@@ -29,6 +30,7 @@ IDs match the delivery map (AS = application service, C0/A2/U2/D1 = delivery tas
 - Done: `GET /api/case/conditions` returns the replay TWL zone per hour for the case site from `compute_heat_stress`, with its source. It is read-only and never clears a hold.
 - Done: shown on Squad Monitoring (compact) and Heat controls, labelled "ERA5 replay" or "Forecast" and "Not a local measurement · never clears a hold".
 - **Decided: keep 4 Aug 2025** as the case day, so the case, solver fixtures and verification record stay valid. `compute_heat_stress('mussafah', '2025-08-04')` works from `data/heat_safe/raw/weather/era5_summer_2025.csv`, which is in git and ships in the Cloud Run image (`COPY data/heat_safe/`).
+- Done (15 Nov): per-worker bands on Squad Monitoring, Crew & workshop and the worker's Now screen (see the table above).
 - Optional, not started: feed `get_site_sensor` rows into the presenter's reading injection so readings replay rather than being typed.
 
 ### 2. Countercases from presenter controls (AS02/AS05) · done

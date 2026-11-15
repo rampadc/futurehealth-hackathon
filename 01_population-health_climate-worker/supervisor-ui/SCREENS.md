@@ -56,6 +56,7 @@ What is real and what is simulated:
 | Planning Agent (web and site Ask) | Real: `/api/chat` (ADK + Gemini on the backend). Each answer lists the tools it used. Supervisors and responders also get `what_if_crew_plan`, which asks the solver about a hypothetical change and records nothing; its answers are marked "Hypothetical · not recorded". Workers do not get it |
 | Solver proposals, work/rest plan | Real solver output, shown as drafts with `applied: false` |
 | Site conditions (Squad Monitoring, Heat controls) | Real: `/api/case/conditions`, hourly TWL from the risk core (ERA5 replay for 4 Aug 2025, Mussafah). Planning context only; never clears a hold |
+| Heat risk by worker (Squad Monitoring, Crew & workshop) and My heat risk (worker Now) | Real: `/api/case/crew-risk` gives supervisors each worker's band and action, never the reasons; `/api/worker/risk` gives a worker their own band and why. The reasons are English only for now |
 | Presenter readings (`/demo-control`) | Valid, sensor fault (`quality: invalid`) or stale (measured 10 minutes earlier), plus presets for scenarios 02, 06, 08 and 09 that set the clock and reading |
 | Worker consent (Welcome, My data) and data export (My data) | Real: `/api/worker/consent`, `/api/worker/data` (signed-in worker only) |
 | Trust log (System & trust) | Real: `/api/trust-log` (supervisors; workers are refused). Filter by All, Solver, People or Agent |

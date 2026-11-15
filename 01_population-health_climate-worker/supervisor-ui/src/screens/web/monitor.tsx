@@ -8,6 +8,7 @@ import { nextHandoff } from '../../story';
 import { ActionButton, Badge, Band, Computed, Empty, Head, Hero, Hold, List, Metric, NoCase, Note, Row, Section, taskBadge } from '../kit';
 import type { ScreenProps } from '../registry';
 import { ConditionsPanel } from '../conditions';
+import { CrewRiskPanel } from '../risk';
 
 /** Squad Monitoring: within five seconds, does anyone need action now? */
 export function SquadMonitoringScreen({ session }: ScreenProps) {
@@ -45,6 +46,7 @@ export function SquadMonitoringScreen({ session }: ScreenProps) {
       </Section>
     </div>
     <ConditionsPanel session={session} compact />
+    <CrewRiskPanel session={session} />
     <Section title="Readings">
       <div className="hs-strip" role="list">
         {(caseView.request?.snapshot.readings ?? caseView.capture?.request.snapshot.readings ?? []).map(r => <div key={r.evidence_id} role="listitem"><b>{time(r.measured_at)}</b><span>{r.twl} W/m²</span><span>{r.sensor_id}</span></div>)}

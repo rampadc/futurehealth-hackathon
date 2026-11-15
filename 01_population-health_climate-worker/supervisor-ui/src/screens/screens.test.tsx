@@ -5,6 +5,7 @@ import App from '../App';
 import { loadCase, type CaseId } from '../replay';
 import { ADMIN, PERSONAS, initialStory, type StoryState } from '../story';
 import type { CaseView, Task } from '../live';
+import type { CrewRisk } from '../contract';
 import { SCREENS } from './registry';
 
 const reply = (value: unknown, status = 200) => new Response(JSON.stringify(value), { status, headers: { 'Content-Type': 'application/json' } });
@@ -16,7 +17,11 @@ let brand: { version: number; published_at: string | null; published_by: string 
 let brandCalls: Array<Record<string, unknown>>;
 const hourOf = (hour: string, twl: number, zone: string) => ({ hour, temperature_c: 34.4, wbgt_c: 32.2, twl_sun_wm2: twl, twl_zone_sun: zone, twl_shade_wm2: twl + 40, twl_zone_shade: 'low', band_sun: zone === 'high' ? 'red' : 'amber', midday_break_minutes: 0, withdrawal_limit: '', data_issue: '' });
 let conditions: unknown;
+let crewRisk: CrewRisk;
 let chatHistory: unknown[];
+const riskInputs = { hour: '08:00', site: 'mussafah', weather: 'ok', local_reading: 'used', rules_version: 'rules-test' } as const;
+const ownRisk = { inputs: riskInputs, person_id: 'C05', band: 'amber', twl_wm2: 138, zone: 'medium', factors: ['Cloth coveralls over a shirt lower your work limit to 138 W/m² (medium zone; work wear is low)'],
+  missing_inputs: [], special_controls: false, may_work_here: true, work_rest: '45 min work / 15 min rest (paced work)', action: 'Paced work: 45 min work / 15 min rest (paced work). Drink 1.0-1.2 light; >1.2 heavy L an hour.' };
 let consent: { person_id: string; language: string; scopes: string[]; consented_at: string | null };
 const checks = (primary: string) => [{ id: 'signal', ok: primary !== '#D32F2F', label: primary === '#D32F2F' ? 'Brand colour reads as the stop signal' : 'Brand colour does not read as a safety signal' }];
 
@@ -30,6 +35,11 @@ beforeEach(() => {
   conditions = { status: 'ok', site: 'mussafah', date: '2025-08-04', source: 'cache:era5_summer_2025.csv', kind: 'replay', clock_hour: '08:00', current: hourOf('08:00', 127, 'medium'),
     summary: { max_temperature_c: 45.8, max_wbgt_c: 35.2, min_twl_sun_wm2: 76, worst_band: 'red', hours_high_zone_sun: 5, midday_break: '12:30-15:00', heat_programme_required: true, data_issues: 0 },
     hourly: [hourOf('07:00', 140, 'low'), hourOf('08:00', 127, 'medium'), hourOf('12:00', 90, 'high')], zone_thresholds_wm2: { high_below: 115, low_from: 140 }, citation: [{ cite: 'ADOSH-SF TG', url: null }], rules_version: 'rules-test' };
+  crewRisk = { inputs: { ...riskInputs }, crew: { band: 'red', at_or_above_amber: 3, total: 3, counts: { green: 0, amber: 1, red: 2, emergency: 0 } }, workers: [
+    { person_id: 'C07', band: 'amber', action: 'Paced work: 45 min work / 15 min rest (paced work)', needs_rest: false, check_in_person: false },
+    { person_id: 'C06', band: 'red', action: 'Strict work and rest: 20 min work / 40 min rest', needs_rest: false, check_in_person: false },
+    { person_id: 'C08', band: 'red', action: 'Needs rest now: remove from heat and check in within 10 minutes', needs_rest: true, check_in_person: false },
+  ] };
   person = null; commands = []; commandIds = []; currentCase = null; brandCalls = []; chatHistory = [];
   brand = { version: 0, published_at: null, published_by: null, platform: null, mobile: null };
   consent = { person_id: 'C05', language: 'en', scopes: [], consented_at: null };
@@ -52,6 +62,8 @@ beforeEach(() => {
     if (path === '/api/chat/history') return reply({ messages: chatHistory });
     if (path === '/api/ready') return reply({ ok: true });
     if (path === '/api/case/conditions') return reply(conditions);
+    if (path === '/api/case/crew-risk') return reply(crewRisk);
+    if (path === '/api/worker/risk') return reply(ownRisk);
     if (path === '/api/brand') {
       if (method === 'PUT') { brand = { version: brand.version + 1, published_at: '2025-08-04T16:40:00+04:00', published_by: 'P09', platform: body.platform, mobile: body.mobile }; brandCalls.push(body); return reply(brand); }
       return reply(brand);
@@ -134,6 +146,40 @@ describe('stop-work', () => {
     currentCase = await makeCase('heat_trigger', {}, []);
     await open('/web/monitoring', 'P03');
     expect(await screen.findByText(/Conditions unavailable: no weather data/)).toBeTruthy();
+  });
+
+  it('shows each worker’s heat-risk band and action, most at risk first, without reasons', async () => {
+    currentCase = await makeCase('heat_trigger', {}, []);
+    await open('/web/monitoring', 'P03');
+    const table = await screen.findByRole('table', { name: 'Heat risk by worker' });
+    const rows = [...table.querySelectorAll('tbody tr')].map(r => r.textContent ?? '');
+    expect(rows[0]).toMatch(/C06.*Red.*20 min work/);
+    expect(rows[2]).toMatch(/C07.*Amber/);
+    expect(screen.getByText('Crew band Red · 3 of 3 at Amber or above')).toBeTruthy();
+    expect(table.textContent).not.toMatch(/unwell|coverall|TWL/i);
+  });
+
+  it('never shows a faulty reading as low risk', async () => {
+    currentCase = await makeCase('heat_trigger', {}, []);
+    currentCase.request!.snapshot.readings[0] = { ...currentCase.request!.snapshot.readings[0], twl: 145, quality: 'invalid' };
+    await open('/web/monitoring', 'P03');
+    expect(await screen.findByText(/TWL 145 W\/m² · Unknown/)).toBeTruthy();
+    expect(screen.queryByText(/Low environmental risk/)).toBeNull();
+  });
+
+  it('warns that every band is raised while the local reading is lost', async () => {
+    crewRisk = { ...crewRisk, inputs: { ...crewRisk.inputs, local_reading: 'lost' } };
+    currentCase = await makeCase('heat_trigger', {}, []);
+    await open('/web/crew', 'C01');
+    expect(await screen.findByText(/Local reading faulty or stale: every band is one level higher/)).toBeTruthy();
+  });
+
+  it('shows a worker their own band with the reasons only they see', async () => {
+    currentCase = await makeCase('heat_trigger', {}, []);
+    await open('/worker/now', 'C05');
+    expect(await screen.findByRole('heading', { name: 'My heat risk' })).toBeTruthy();
+    expect(screen.getByText(/Cloth coveralls over a shirt lower your work limit to 138/)).toBeTruthy();
+    expect(screen.getByText(/Your supervisor sees your band and action, never the reasons/)).toBeTruthy();
   });
 
   it('records the headcount for every affected worker at Shelter A', async () => {
