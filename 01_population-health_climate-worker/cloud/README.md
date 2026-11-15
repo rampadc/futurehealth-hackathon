@@ -8,11 +8,15 @@ Infrastructure preparation completed as `ishka.quark@gmail.com` with the existin
 
 The state bucket is private, uniform-access and versioned; anonymous state retrieval returns 403. Both registry paths reject anonymous requests with 401 and have no public IAM grants. PostgreSQL is RUNNABLE with no authorized public networks. The existing `supervisor-demo` generation and revision are unchanged. The two GitHub environments allow only `main`, require no approvals, and have the four original non-secret deployment variables configured; the WIF provider variable is part of the setup below.
 
-All seven fixed secrets now have enabled versions, and the main PostgreSQL roles and schemas are initialized. No GitHub JSON-key secrets are configured. Organization policy blocks service-account key creation, so deployments use GitHub OIDC and Workload Identity Federation (WIF); keep that policy in place. Scoped IAM grants and the WIF provider are configured. A manual preview deployment and default-branch merge are still pending; live application deployment and teardown have not been verified.
+All seven fixed secrets have enabled versions, and the main PostgreSQL roles and schemas are initialized. No JSON keys exist or are configured in GitHub. Organization policy blocks service-account key creation, so deployments use GitHub OIDC and Workload Identity Federation (WIF); keep that policy in place. IAM grants and the WIF provider are configured, with the Cloud Run exception documented below.
+
+[PR #5 preview](https://heat-safe-pr-5-6zb6rqbehq-ww.a.run.app) was deployed manually using the scoped preview deployment identity and the combined PR #5 application / PR #6 container configuration. The live cross-persona journey produced 120 initial worker minutes, 90 after the incident, and 120 after substitution. Restart review retained the heavy-work hold. Two live Gemini/ADK answers and successful BigQuery policy queries were verified. Case version 36, access/persona sessions and chat history survived a backend revision replacement. A disposable preview passed runtime database isolation, active-connection cleanup and repeated full cleanup; its resources were removed. Local test credentials and temporary impersonation grants were removed.
+
+Automatic GitHub deployment/comment/close handling remains unverified until this control-plane PR is merged to the default branch. PR #5 must then incorporate the merged files so its head contains `Dockerfile.cloudrun` and can produce the OCI artifact. Both PRs remain draft/unmerged until approved.
 
 ## One-time operator setup
 
-Run these commands from the repository root as `ishka.quark@gmail.com`, the project Editor and designated setup operator. A project administrator performs the separate IAM grants. You need `gcloud`, Terraform 1.5 or newer, `cloud-sql-proxy` v2, `psql`, `openssl`, and `gh`. Cloud SQL and Artifact Registry must be available in `me-central1`. Authenticate the CLI and Terraform's Application Default Credentials as Ishka:
+Run these commands from the repository root as `ishka.quark@gmail.com`, the designated setup operator. A project administrator performs the separate IAM grants. You need `gcloud`, Terraform 1.5 or newer, `cloud-sql-proxy` v2, `psql`, `openssl`, and `gh`. Cloud SQL and Artifact Registry must be available in `me-central1`. Authenticate the CLI and Terraform's Application Default Credentials as Ishka:
 
 ```sh
 gcloud auth login --account=ishka.quark@gmail.com
@@ -134,7 +138,7 @@ REVOKE CREATE ON DATABASE heat_safe_main FROM heat_main;
 SELECT has_database_privilege('heat_preview_provisioner', 'heat_safe_main', 'CONNECT');
 ```
 
-The final query must return `f`. Create the main Cloud Run target once, before the main deployer runs. Omit both authentication flags and use `--quiet` so the CLI does not prompt for a public invoker grant:
+The final query must return `f`. Create the main Cloud Run target only if it does not already exist, before the main deployer runs. If it exists, skip the placeholder deployment below so a setup rerun cannot overwrite the application with the hello image. Omit both authentication flags and use `--quiet` so the CLI does not prompt for a public invoker grant:
 
 ```sh
 gcloud run deploy heat-safe-app \
@@ -202,7 +206,7 @@ Treat command output as sensitive. The main runtime receives only code digests a
 
 ## Cloud Run permission boundary
 
-The main deployment role is bound directly to `heat-safe-app`. Cloud Run does not support `resource.name` conditions for service management, so the preview deployment account has project-level service create/list/manage permissions. The trusted controller restricts its operations to validated `heat-safe-pr-N` names; IAM does not enforce that name prefix. This is an explicit hackathon trade-off: a compromised preview deployment identity could manage other Cloud Run services in this project. Registry permissions, main secret access and PostgreSQL logins remain separated. Do not describe the preview service-management permission as prefix-restricted IAM.
+The main deployment role is bound directly to `heat-safe-app`. Cloud Run does not support `resource.name` conditions for service management ([supported attributes](https://docs.cloud.google.com/iam/docs/conditions-resource-attributes)), so the preview deployment account has project-level service create/list/manage permissions. The trusted controller restricts its operations to validated `heat-safe-pr-N` names; IAM does not enforce that name prefix. This is an explicit hackathon trade-off: a compromised preview deployment identity could manage other Cloud Run services in this project. Registry permissions, main secret access and PostgreSQL logins remain separated. Do not describe the preview service-management permission as prefix-restricted IAM.
 
 ## Trusted deployment controller
 
