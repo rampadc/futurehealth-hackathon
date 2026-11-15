@@ -27,6 +27,7 @@ sys.path.insert(0, str(ROOT))
 from evals.metrics import score  # noqa: E402
 from heat_safe.rules import RULES_VERSION  # noqa: E402
 
+## all goldend dataset stored in supervisor.yaml for eval
 GOLDEN = ROOT / "evals" / "golden" / "supervisor.yaml"
 RESULTS_DIR = ROOT / "evals" / "results"
 PROJECT = os.getenv("GOOGLE_CLOUD_PROJECT", "heat-safe-example")
@@ -116,6 +117,10 @@ async def main() -> int:
     # Sequential on purpose: easier to read, and it avoids rate-limit noise looking like agent failures
     for s in scenarios:
         for r in range(1, args.repeats + 1):
+            # run_scenario call ask which is shared with ask_supervisor
+            # ask() also collect information that eval checks, e.g. tools trajectory and adk web don't print
+            # including some intermediate states, tool calling and arguments, 
+            # grounding and citations, token usage and latency
             run, result = await run_scenario(s, r)
             rows.append(to_row(run_id, started_at, s, r, run, result, git_sha, dirty))
             mark = "PASS" if result["passed"] else "FAIL"
