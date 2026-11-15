@@ -3,7 +3,7 @@ import { CrewProposal, Schedule } from '../shared/plan';
 import { Panel } from '../shared/ui';
 import type { WorkspaceProps } from './types';
 
-/** C01 · Huda, civil foreman. Wireframes W3/W4 and M2–M6. */
+/** C01 · Huda, civil foreman. Screens: protective response, crew & workshop, stop-work to action card. */
 export function ForemanWorkspace({ story, capture, caseView, actions }: WorkspaceProps) {
   const incidentRecorded = caseView.tasks.find(task => task.action === 'incident_record')?.status === 'recorded';
   const revisedEvidencePending = story.reported && (!story.removed || !story.firstaid);

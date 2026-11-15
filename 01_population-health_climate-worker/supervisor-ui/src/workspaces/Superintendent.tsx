@@ -2,7 +2,7 @@ import { Alert, Box, Chip, List, Stack, Typography } from '@mui/material';
 import { LaterStep, Panel, isReady, readable } from '../shared/ui';
 import type { WorkspaceProps } from './types';
 
-/** P02 · Rashid, superintendent. Wireframe W6 (restart review). */
+/** P02 · Rashid, superintendent. Screen: restart review. */
 export function SuperintendentWorkspace({ story, capture, caseView, actions }: WorkspaceProps) {
   const reviewReady = story.fresh && story.permit && capture.response.restart.status === 'ready_for_human_review';
   const restart = caseView.capture?.request.restart;

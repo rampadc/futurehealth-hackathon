@@ -6,8 +6,8 @@ import { smsInfo, tr, preferredLanguage, langOf, isReady as langReady } from '..
 
 const order = { ready: 0, waiting: 1, recorded: 2 } as const;
 
-/** M1 · Today: the signed-in responder's actions, most urgent first. */
-export function M1Today({ session }: ScreenProps) {
+/** Today: the signed-in responder's actions, most urgent first. */
+export function TodayScreen({ session }: ScreenProps) {
   const { caseView, person } = session;
   if (!caseView) return <NoCase session={session} />;
   const story = caseView.story;
@@ -33,8 +33,8 @@ export function M1Today({ session }: ScreenProps) {
   </div>;
 }
 
-/** M2 · Stop-work instruction: Maya issues; Huda acknowledges and confirms the stop. */
-export function M2StopWork({ session }: ScreenProps) {
+/** Stop-work instruction: Maya issues; Huda acknowledges and confirms the stop. */
+export function StopWorkScreen({ session }: ScreenProps) {
   const { caseView, person } = session;
   if (!caseView) return <NoCase session={session} />;
   const story = caseView.story;
@@ -63,7 +63,7 @@ export function M2StopWork({ session }: ScreenProps) {
       {safety ? <ActionButton session={session} action="issue" label="Record instruction issued" primary />
         : !story.acknowledged ? <ActionButton session={session} action="acknowledge" label="Acknowledge" primary />
           : <ActionButton session={session} action="stop" label="Confirm heavy work stopped" primary />}
-      {story.stopped && <button type="button" className="hs-button" onClick={() => navigate('/site/m3')}>Go to headcount</button>}
+      {story.stopped && <button type="button" className="hs-button" onClick={() => navigate('/site/headcount')}>Go to headcount</button>}
     </CtaBar>
   </div>;
 }
@@ -86,8 +86,8 @@ function SmsPreview({ workerIds, names }: { workerIds: string[]; names: string[]
   })}</ul>;
 }
 
-/** M3 · Headcount: every affected worker in a safe recovery place. */
-export function M3Headcount({ session }: ScreenProps) {
+/** Headcount: every affected worker in a safe recovery place. */
+export function HeadcountScreen({ session }: ScreenProps) {
   const { caseView } = session;
   if (!caseView) return <NoCase session={session} />;
   const people = crew(caseView);

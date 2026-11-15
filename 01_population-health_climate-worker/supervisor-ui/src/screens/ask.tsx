@@ -3,8 +3,15 @@ import { readChatStream } from '../AssistantChat';
 import { Computed, Draft, Head, NoCase, Note, Section } from './kit';
 import type { ScreenProps } from './registry';
 
-type Message = { id: string; author: 'user' | 'assistant'; text: string; case_clock?: string };
-const SUGGESTIONS = ['Who can work in the workshop?', 'What needs attention?', 'Can trench work restart?'];
+type Message = { id: string; author: 'user' | 'assistant'; text: string; case_clock?: string; tools?: string[] };
+const SUGGESTIONS = ['Who can work in the workshop?', 'What needs attention?', 'Can trench work restart?', 'What if Rana were unavailable?'];
+const HYPOTHETICAL = new Set(['what_if_crew_plan']);
+
+/** The tools behind one answer. A what-if result is a solver draft that was never recorded. */
+function ToolsUsed({ tools }: { tools?: string[] }) {
+  if (!tools?.length) return null;
+  return <p className="hs-computed">Used: {tools.join(', ')}{tools.some(t => HYPOTHETICAL.has(t)) && <> · <span className="hs-badge" data-tone="wait">Hypothetical · not recorded</span></>}</p>;
+}
 
 /** Live Planning Agent conversation over `/api/chat` (ADK + Gemini on the backend). */
 function Conversation({ session, compact }: ScreenProps & { compact?: boolean }) {
@@ -32,12 +39,13 @@ function Conversation({ session, compact }: ScreenProps & { compact?: boolean })
     setMessages(m => [...m, { id, author: 'user', text }]);
     const controller = new AbortController(); abort.current = controller;
     let answered = false;
+    const used: string[] = [];
     try {
       const response = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal, body: JSON.stringify({ message: text, message_id: id, case_id: caseId }) });
       await readChatStream(response, (kind, data) => {
         if (kind === 'error') throw new Error(String(data.message));
-        if (kind === 'tool' && data.phase === 'started') setTools(t => [...t, String(data.name)]);
-        if (kind === 'answer') { answered = true; setMessages(m => [...m.filter(x => x.id !== String(data.id)), { id: String(data.id), author: 'assistant', text: String(data.text), case_clock: data.case_clock as string | undefined }]); }
+        if (kind === 'tool' && data.phase === 'started') { setTools(t => [...t, String(data.name)]); if (!used.includes(String(data.name))) used.push(String(data.name)); }
+        if (kind === 'answer') { answered = true; setMessages(m => [...m.filter(x => x.id !== String(data.id)), { id: String(data.id), author: 'assistant', text: String(data.text), case_clock: data.case_clock as string | undefined, tools: Array.isArray(data.tools) ? data.tools.map(String) : used }]); }
       });
       if (!answered) throw new Error('The connection closed before an answer arrived.');
     } catch (e) {
@@ -50,7 +58,7 @@ function Conversation({ session, compact }: ScreenProps & { compact?: boolean })
       {messages.length === 0 && loaded && <Note>Ask about today’s heat, the plan or the rules. Answers use the live case and cite the tools they called.</Note>}
       <div className="hs-chat" aria-live="polite">
         {messages.map(m => m.author === 'assistant'
-          ? <Draft key={m.id} title={`Planning Agent · AI${m.case_clock ? ` · case at ${m.case_clock.slice(11, 16)}` : ''}`}><p className="hs-msg-text">{m.text}</p></Draft>
+          ? <Draft key={m.id} title={`Planning Agent · AI${m.case_clock ? ` · case at ${m.case_clock.slice(11, 16)}` : ''}`}><p className="hs-msg-text">{m.text}</p><ToolsUsed tools={m.tools} /></Draft>
           : <p key={m.id} className="hs-msg" data-author="user">{m.text}</p>)}
         {pending && <p className="hs-computed" role="status">Thinking…{tools.length ? ` · tools: ${tools.join(', ')}` : ''}</p>}
       </div>
@@ -67,14 +75,14 @@ function Conversation({ session, compact }: ScreenProps & { compact?: boolean })
   </div>;
 }
 
-/** W7 · Ask the Planning Agent (supervisor web). */
-export function W7Ask({ session }: ScreenProps) {
+/** Ask the Planning Agent (supervisor web). */
+export function WebAskScreen({ session }: ScreenProps) {
   if (!session.caseView) return <NoCase session={session} />;
   return <div className="hs-screen"><Head kicker="Planning Agent" title="Ask the Planning Agent" sub="Cited answers from the live case, the solver and the guidance corpus." /><Conversation session={session} /></div>;
 }
 
-/** M8 · Ask (site app). */
-export function M8Ask({ session }: ScreenProps) {
+/** Ask (site app). */
+export function SiteAskScreen({ session }: ScreenProps) {
   if (!session.caseView) return <NoCase session={session} />;
   return <div className="hs-screen"><Head kicker="Planning Agent" title="Ask" /><Conversation session={session} compact /><Computed>AI answers · only people record actions</Computed></div>;
 }

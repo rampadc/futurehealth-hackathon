@@ -28,7 +28,7 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
   const lang = device === 'worker' ? workerLang ?? 'en' : 'en';
   const brand = usePublishedBrand(!!session.person, device === 'web' ? 'platform' : 'mobile');
   // Stop-work and emergency screens drop the brand entirely.
-  const showBrand = brand && !['m2', 'p3'].includes(screen.id);
+  const showBrand = brand && !['stop-work', 'alert'].includes(screen.id);
 
   if (session.initialising) return <div className="hs-shell" data-theme={info.theme} data-device={device}><p role="status" className="hs-pad">Loading case…</p></div>;
 
@@ -47,6 +47,7 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
     </div>;
   }
 
+  const railButton = (s: ScreenDef) => <button key={s.id} type="button" aria-current={s.id === screen.id ? 'page' : undefined} onClick={() => go(s)}>{s.name}{!s.component && <small> · planned</small>}</button>;
   const Screen = screen.component;
   const tabs = info.tabs;
   return <div className="hs-shell" data-theme={info.theme} data-device={device}>
@@ -62,7 +63,9 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
     </header>
     <div className="hs-body">
       <nav className="hs-rail" aria-label={`${info.name} screens`} style={showBrand && brand.rail_tint ? { borderInlineStart: `4px solid ${brand.primary}` } : undefined}>
-        {screens.map(s => <button key={s.id} type="button" aria-current={s.id === screen.id ? 'page' : undefined} onClick={() => go(s)}><b>{s.id.toUpperCase()}</b> {s.name}{!s.component && <small> · planned</small>}</button>)}
+        {screens.filter(s => !s.group).map(railButton)}
+        {screens.some(s => s.group === 'admin') && <p className="hs-rail-group">Admin</p>}
+        {screens.filter(s => s.group === 'admin').map(railButton)}
         <DeviceSwitch current={device} />
       </nav>
       <main id="hs-main" tabIndex={-1} className="hs-main">
@@ -87,7 +90,7 @@ function DeviceSwitch({ current }: { current: Device }) {
   </p>;
 }
 
-/** The published company palette for this surface, refreshed when W9 publishes a new one. */
+/** The published company palette for this surface, refreshed when branding publishes a new one. */
 function usePublishedBrand(signedIn: boolean, surface: 'platform' | 'mobile') {
   const [brand, setBrand] = useState<BrandPalette | null>(null);
   useEffect(() => {

@@ -4,7 +4,7 @@ import { timeLabel } from '../Timeline';
 import { LaterStep, Panel, isReady } from '../shared/ui';
 import type { WorkspaceProps } from './types';
 
-/** P03 · Maya, safety officer. Wireframes W2 (heat controls) and M7 (fresh reading). */
+/** P03 · Maya, safety officer. Screens: heat controls and fresh reading. */
 export function SafetyOfficerWorkspace({ story, capture, caseView, actions }: WorkspaceProps) {
   const reading = capture.request.snapshot.readings[0];
   return <Stack spacing={3}>

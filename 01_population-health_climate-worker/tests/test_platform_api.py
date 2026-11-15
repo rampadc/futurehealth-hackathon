@@ -71,7 +71,23 @@ def test_trust_log_lists_runs_commands_and_is_for_supervisors(app):
     assert {'solver_run', 'command'} <= kinds
     assert all(not e['applied'] for e in entries if e['kind'] == 'solver_run')
     assert any('Maya Al Qamar' in e['summary'] for e in entries)
+    assert sum('current result' in e['summary'] for e in entries) <= 1
+    assert all('order' not in e for e in entries)
     assert client(app, 'C05').get('/api/trust-log').status_code == 403
+
+
+def test_trust_log_keeps_sensor_readings_apart_from_people_and_in_order(app):
+    service = app.state.service
+    asyncio.run(service.advance_clock('2025-08-04T08:10:00+04:00'))
+    reading = {'sensor_id': 't1', 'zone_id': 'civil_exposed', 'twl': 145, 'unit': 'W/m²', 'quality': 'invalid',
+               'measured_at': '2025-08-04T08:10:00+04:00', 'received_at': '2025-08-04T08:10:00+04:00'}
+    asyncio.run(service.signal('reading', reading))
+    entries = client(app, 'P02').get('/api/trust-log').json()
+    signals = [e for e in entries if e['kind'] == 'signal']
+    assert [s['summary'] for s in signals] == ['New local monitor reading received']
+    assert not any(e['kind'] == 'command' and 'sensor' in e['summary'] for e in entries)
+    runs = [int(e['summary'].split('version ')[1].split()[0].rstrip(':')) for e in entries if e['kind'] == 'solver_run']
+    assert runs == sorted(runs, reverse=True)
 
 
 PALETTE = {'name': 'Sandline', 'primary': '#1F3A5F', 'on_primary': '#FFFFFF', 'logo_text': 'SANDLINE', 'rail_tint': False}
@@ -94,3 +110,28 @@ def test_branding_guardrails_keep_signal_colours_and_contrast(app, primary, fail
     assert failing in {c['id'] for c in checks if not c['ok']}
     body = {'platform': {**PALETTE, 'primary': primary}, 'mobile': PALETTE, 'expected_version': 0, 'confirm': 'PUBLISH'}
     assert client(app, 'P09').put('/api/brand', json=body).status_code == 422
+
+
+def test_conditions_come_from_the_risk_core_for_the_case_day(app, monkeypatch):
+    calls = []
+
+    def fake(site, day):
+        calls.append((site, day))
+        return {'status': 'ok', 'site': site, 'date': day, 'source': 'cache:era5_summer_2025.csv',
+                'summary': {'worst_band': 'red'}, 'zone_thresholds_wm2': {'high_below': 115, 'low_from': 140},
+                'hourly': [{'hour': '08:00', 'twl_sun_wm2': 127, 'twl_zone_sun': 'medium'}],
+                'citation': [], 'rules_version': 'test'}
+    import heat_safe.agent_tools as tools
+    monkeypatch.setattr(tools, 'compute_heat_stress', fake)
+    body = client(app, 'P03').get('/api/case/conditions').json()
+    assert calls == [('mussafah', '2025-08-04')]
+    assert body['kind'] == 'replay' and body['clock_hour'] == '08:00'
+    assert body['current'] == {'hour': '08:00', 'twl_sun_wm2': 127, 'twl_zone_sun': 'medium'}
+    assert TestClient(app).get('/api/case/conditions').status_code == 401
+
+
+def test_conditions_report_unavailable_instead_of_failing(app, monkeypatch):
+    import heat_safe.agent_tools as tools
+    monkeypatch.setattr(tools, 'compute_heat_stress', lambda site, day: {'status': 'error', 'message': 'no weather data'})
+    body = client(app, 'C01').get('/api/case/conditions').json()
+    assert body == {'status': 'unavailable', 'site': 'mussafah', 'date': '2025-08-04', 'message': 'no weather data'}

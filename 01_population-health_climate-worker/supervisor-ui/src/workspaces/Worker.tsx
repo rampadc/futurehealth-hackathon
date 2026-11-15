@@ -3,7 +3,7 @@ import { Schedule, revisedPlanPending, revisedPlanWait } from '../shared/plan';
 import { Panel } from '../shared/ui';
 import type { WorkspaceProps } from './types';
 
-/** C05 · Rana and C08 · Bilal, civil workers. Desktop stand-in for the worker app (P2–P5). */
+/** C05 · Rana and C08 · Bilal, civil workers. Desktop stand-in for the worker app. */
 export function WorkerWorkspace({ story, person, capture, actions }: WorkspaceProps) {
   return <Stack spacing={3}>
     <Panel title={story.reported && person.id === 'C08' ? 'Your work is paused' : 'Your next action'}>

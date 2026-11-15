@@ -8,8 +8,8 @@ import type { ScreenProps } from '../registry';
 
 const status = (s: string) => s.replaceAll('_', ' ');
 
-/** W4 · Crew & workshop: who can move to covered work, why, and the assignment record. */
-export function W4CrewWorkshop({ session }: ScreenProps) {
+/** Crew & workshop: who can move to covered work, why, and the assignment record. */
+export function CrewWorkshopScreen({ session }: ScreenProps) {
   const { caseView, person } = session;
   if (!caseView || !person) return <NoCase session={session} />;
   const capture = caseView.capture;
@@ -76,8 +76,8 @@ export function W4CrewWorkshop({ session }: ScreenProps) {
   </div>;
 }
 
-/** W5 · Work/rest plan: the next hour's work and recovery, checked by the solver. */
-export function W5WorkRestPlan({ session }: ScreenProps) {
+/** Work/rest plan: the next hour's work and recovery, checked by the solver. */
+export function WorkRestPlanScreen({ session }: ScreenProps) {
   const { caseView } = session;
   if (!caseView) return <NoCase session={session} />;
   const capture = caseView.capture;
