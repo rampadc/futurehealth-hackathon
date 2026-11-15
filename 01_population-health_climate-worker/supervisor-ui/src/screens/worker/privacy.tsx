@@ -6,7 +6,7 @@ import { navigate } from '../../router';
 import { time } from '../data';
 import { Computed, CtaBar, Head, Hero, HoldButton, List, Metric, NoCase, Note, Row, Section } from '../kit';
 import type { ScreenProps } from '../registry';
-import { T, useT, useWorker, WorkerFrame } from './frame';
+import { En, T, useT, useWorker, WorkerFrame } from './frame';
 
 type Consent = { checkins: boolean; wearable: boolean; at: string | null };
 const NONE: Consent = { checkins: false, wearable: false, at: null };
@@ -52,7 +52,7 @@ function Welcome({ session }: ScreenProps) {
         {l.endonym}<small lang="en" dir="ltr">{l.english}{l.status !== 'ready' && ` · ${t('lang.soon')}`}</small>
       </button></li>)}
     </ul>
-    <Note>Translations are drafts and need native-speaker review before real use.</Note>
+    <Note><En>Translations are drafts and need native-speaker review before real use.</En></Note>
   </div>;
   return <div className="hs-screen">
     <Head kicker={<button type="button" className="hs-link" onClick={() => setStep('lang')}>🌐 {langOf(lang).endonym}</button>} title={<T k="p1.title" />} />
@@ -105,7 +105,7 @@ function MyData({ session }: ScreenProps) {
     </Hero>
     <Section title={<T k="p8.consent" />}>
       <List>
-        <Row title={<T k="c.checkins" />} detail={consent.at ? t('p8.agreed', { date: time(consent.at) }) : 'Not chosen yet.'} badge={<span className="hs-badge" data-tone={consent.checkins ? 'done' : 'muted'}>{consent.checkins ? t('on') : t('off')}</span>} onClick={() => navigate('/worker/p1')} />
+        <Row title={<T k="c.checkins" />} detail={consent.at ? t('p8.agreed', { date: time(consent.at) }) : <En>Not chosen yet.</En>} badge={<span className="hs-badge" data-tone={consent.checkins ? 'done' : 'muted'}>{consent.checkins ? t('on') : t('off')}</span>} onClick={() => navigate('/worker/p1')} />
       </List>
     </Section>
     <Section title="What your supervisor saw">
@@ -118,6 +118,6 @@ function MyData({ session }: ScreenProps) {
     </CtaBar>
     {(error || failed) && <p role="alert" className="hs-error">{error || failed}</p>}
     <Note><T k="p8.deletebody" /></Note>
-    <Computed>Your export holds your consent, your own check-ins and reports, and your own plan. Clinical notes are never stored here.</Computed>
+    <Computed><En>Your export holds your consent, your own check-ins and reports, and your own plan. Clinical notes are never stored here.</En></Computed>
   </div>;
 }

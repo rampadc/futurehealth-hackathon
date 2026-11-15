@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { langOf, tr, useWorkerLanguage } from '../../i18n';
+import { live } from '../../live';
 import type { CaseSession } from '../../session';
 
 /** Language and network state for the worker app (P1–P8). */
@@ -12,6 +13,11 @@ export function T({ k, vars }: { k: string; vars?: Record<string, string | numbe
   const { lang } = useWorker();
   const { text, fallback } = tr(k, lang, vars);
   return fallback ? <span lang="en" dir="ltr" className="hs-fallback-text">{text}</span> : <>{text}</>;
+}
+/** English text with no translation yet: marked so Arabic and Urdu lay it out correctly and QA can find it. */
+export function En({ children }: { children: ReactNode }) {
+  const { lang } = useWorker();
+  return lang === 'en' ? <>{children}</> : <span lang="en" dir="ltr" className="hs-untranslated">{children}</span>;
 }
 export const useT = () => { const { lang } = useWorker(); return (k: string, vars?: Record<string, string | number>) => tr(k, lang, vars).text; };
 
@@ -32,6 +38,13 @@ function useOnline() {
 export function WorkerFrame({ session, children, forceOffline }: { session: CaseSession; children: ReactNode; forceOffline?: boolean }) {
   const [stored, choose] = useWorkerLanguage(session.person?.id);
   const online = useOnline() && !forceOffline;
+  // A new phone has no stored language: take the one the worker saved with their consent.
+  useEffect(() => {
+    if (stored || !session.person) return;
+    let current = true;
+    live.consent().then(c => { if (current && (c.consented_at || c.language !== 'en')) choose(c.language); }).catch(() => {});
+    return () => { current = false; };
+  }, [stored, session.person?.id]);
   const lang = stored ?? 'en';
   const meta = langOf(lang);
   return <Ctx.Provider value={{ lang, chosen: !!stored, choose, online }}>
