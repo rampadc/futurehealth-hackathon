@@ -2,10 +2,10 @@
 
 /* ───────── W1 · Squad Monitoring ───────── */
 const W1_ACTIONS = [
-  { id: 'a1', t: 'Bilal (C08) · needs rest now', d: 'Remove from heat and check on him within 10 minutes. Unplanned rest recorded 08:18.', b: () => B.red('Red', 'Red: needs rest now'), owner: 'huda', due: '08:28', comp: 2, src: 'Worker report · Health Reporting → escalation rule', open: { go: 'm6', l: 'Open action card (site app)' } },
-  { id: 'a2', t: 'Record first-aid contact for Bilal', d: 'Salim (P06) notified 08:18. Confirm the contact happened.', b: () => B.wait(), owner: 'huda', due: '08:23', comp: 2, src: 'Escalation rule', open: { go: 'w3', v: 'incident', l: 'Open Protective response' } },
+  { id: 'a1', who: 'bilal', t: 'Bilal (C08) · needs rest now', d: 'Remove from heat and check on him within 10 minutes. Unplanned rest recorded 08:18.', b: () => B.red('Red', 'Red: needs rest now'), owner: 'huda', due: '08:28', comp: 2, src: 'Worker report · Health Reporting → escalation rule', open: { go: 'm6', l: 'Open action card (site app)' } },
+  { id: 'a2', who: 'salim', t: 'Record first-aid contact for Bilal', d: 'Salim (P06) notified 08:18. Confirm the contact happened.', b: () => B.wait(), owner: 'huda', due: '08:23', comp: 2, src: 'Escalation rule', open: { go: 'w3', v: 'incident', l: 'Open Protective response' } },
   { id: 'a3', t: 'Review replan for 08:18–09:18', d: 'Bilal excluded from work. Leila unconfirmed: choose a branch before sending.', b: () => B.wait(), owner: 'huda', due: '08:25', comp: 3, src: 'Work/rest planner', open: { go: 'w5', v: 'replan', l: 'Open Work/rest plan' } },
-  { id: 'a4', t: 'Restart decision open · heavy exposed civil work', d: 'Stop-work active since 08:01. Rashid decides once the eight checks pass.', b: () => B.plain('Info'), owner: 'rashid', due: '—', comp: 4, src: 'Restart readiness', open: { go: 'w6', l: 'Open Restart review' } },
+  { id: 'a4', who: 'rashid', t: 'Restart decision open · heavy exposed civil work', d: 'Stop-work active since 08:01. Rashid decides once the eight checks pass.', b: () => B.plain('Info'), owner: 'rashid', due: '—', comp: 4, src: 'Restart readiness', open: { go: 'w6', l: 'Open Restart review' } },
 ];
 /* The band row is the environmental condition (legal TWL zone). The rows below are task
    holds from the stricter site rule. At 145 W/m² the band is Low and heavy work still
@@ -58,7 +58,7 @@ screen('w1', {
         cta: { label: 'Export shift log', act: 'toast', msg: 'Shift log exported (PDF + CSV)' } };
     }
     const sel = App.sel.w1 || 'a1';
-    const actions = W1_ACTIONS.map(a => row({ id: a.id, act: 'sel', sel: a.id === sel, t: a.t, d: a.d, b: App.f['w1.' + a.id] ? B.done() : a.b(), lead: marker(a.comp) }));
+    const actions = W1_ACTIONS.map(a => row({ id: a.id, act: 'sel', sel: a.id === sel, t: a.t, d: a.d, b: App.f['w1.' + a.id] ? B.done() : a.b(), lead: a.who ? `<span class="lead-stack">${av(a.who)}${marker(a.comp)}</span>` : marker(a.comp) }));
     const locs = [
       row({ t: 'Workshop · 4 of 6 places in use', d: 'Workshop preparation (covered). 2 fixed occupants, 2 from the civil crew.', b: B.plain('Work'), static: true }),
       row({ t: 'Shelter A · 7 workers', d: 'Cooled recovery. Last check-in 08:04.', b: B.plain('Recovery'), static: true }),
@@ -126,7 +126,7 @@ screen('w2', {
       <tr><td>Midday break</td><td>MoHRE · 12:30–15:00, no outdoor work (15 Jun–15 Sep)</td><td>Not active</td></tr>
       </tbody><tfoot><tr><td colspan="3">${COMPUTED}</td></tr></tfoot></table>`;
     const source = drop
-      ? `<div class="statusline" style="border-inline-start:4px solid var(--band-red)">■ Sensor t1 not reporting since 07:52 · band raised one level · forecast used: 145 W/m² (Estimated from forecast)</div>`
+      ? `<div class="statusline signal">■ Sensor t1 not reporting since 07:52 · band raised one level · forecast used: 145 W/m² (Estimated from forecast)</div>`
       : `<div class="statusline">Localised sensor t1 → base station · overrides forecast <span class="age" style="margin-left:auto">Forecast at 08:00: 149 W/m² · Estimated from forecast</span></div>`;
     const evidence = list([
       row({ t: 'Fresh local reading above 150 W/m²', d: 'From sensor t1 or a calibrated meter, no older than 5 minutes.', b: B.wait('Needed'), go: 'm7' }),
@@ -347,7 +347,7 @@ screen('w5', {
     if (v === 'infeasible') {
       return { nav: { title: 'Work/rest plan · 08:11–09:11', back: 'w1', clock: '08:11' }, overflow, filters,
         hero: [metric('Useful work', '0 worker-min', '—'), metric('Unmet', '240 worker-min', 'demand 240'), metric('Status', 'Infeasible', 'rule result, not an error', 'red')],
-        body: [`<div class="statusline" style="border-inline-start:4px solid var(--band-red)">■ No schedule satisfies the work and recovery limits: recovery shelters are unavailable.</div>${computed('optimise_schedule')}`],
+        body: [`<div class="statusline signal">■ No schedule satisfies the work and recovery limits: recovery shelters are unavailable.</div>${computed('optimise_schedule')}`],
         cta: { label: 'Send plan to crew phones', disabled: true, note: 'Nothing to send. Restore a recovery location to replan.' } };
     }
     const replan = v === 'replan';

@@ -81,8 +81,8 @@ button { cursor: pointer; }
   opacity: .8; animation: scan var(--dur-scan) linear infinite;
 }
 @keyframes scan { from { background-position: 0 0; } to { background-position: 48px 0; } }
-/* Error: the action failed; a red signal edge and a reason below it. */
-.btn.is-error, .btn[aria-invalid="true"] { --_bd: var(--color-signal-red); box-shadow: inset 4px 0 0 var(--color-signal-red); }
+/* Error: the action failed; the red 8px signal frame and a reason below it. */
+.btn.is-error, .btn[aria-invalid="true"] { --_bd: var(--color-signal-red); box-shadow: inset 0 0 0 var(--signal-width) var(--color-signal-red); }
 
 .ibtn { display: inline-flex; align-items: center; justify-content: center; min-inline-size: var(--target); min-block-size: var(--target); border: 2px solid var(--color-ink); background: var(--color-base); padding: 0; }
 .ibtn:where(:hover, .is-hover) { background: var(--color-sheet); }
@@ -102,7 +102,7 @@ button { cursor: pointer; }
 .input::placeholder { color: var(--color-pencil); }
 .input:where(:hover, .is-hover):not(:disabled) { background: var(--color-sheet); }
 .input:where(:focus-visible, .is-focus) { box-shadow: var(--focus-ring); background: var(--color-base); }
-.field.is-error .input, .input[aria-invalid="true"] { border-color: var(--color-signal-red); border-inline-start-width: 6px; }
+.field.is-error .input, .input[aria-invalid="true"] { border-color: var(--color-signal-red); box-shadow: inset 0 0 0 calc(var(--signal-width) - 2px) var(--color-signal-red); }
 .input:disabled { border-style: dashed; border-color: var(--color-pencil); color: var(--color-pencil); background: var(--color-base); cursor: not-allowed; }
 .field.is-loading .input { background-image: var(--hatch-unknown); background-size: 200% 100%; animation: scan var(--dur-scan) linear infinite; color: var(--color-pencil); }
 
@@ -174,7 +174,8 @@ button { cursor: pointer; }
 .readout__label { font-size: var(--fs-label); font-weight: var(--weight-bold); letter-spacing: var(--track-label); text-transform: uppercase; color: var(--color-graphite); }
 .readout__value { font-size: var(--fs-readout); font-weight: var(--weight-bold); line-height: var(--lh-tight); overflow-wrap: anywhere; }
 .readout__note { font-size: var(--fs-small); color: var(--color-graphite); }
-.readout--focal { grid-column: 1 / -1; border-inline-start: var(--rule-signal) !important; background: var(--color-base); }
+/* The focal readout carries the signal frame: 8px on all four sides of the cell. Outline keeps the grid from shifting. */
+.readout--focal { grid-column: 1 / -1; background: var(--color-base); outline: var(--rule-signal); outline-offset: calc(-1 * var(--signal-width)); padding: calc(var(--space-2) + var(--signal-width)) calc(var(--gutter) + var(--signal-width)); }
 .readout--focal .readout__value { font-size: var(--fs-focal); letter-spacing: var(--track-focal); }
 .readout.is-stale .readout__value { color: var(--color-pencil); }
 .readout.is-stale .readout__note::after { content: ' · stale'; font-weight: var(--weight-bold); color: var(--color-ink); }
@@ -202,7 +203,7 @@ button { cursor: pointer; }
 button.arow:where(:hover, .is-hover), .arow.is-hover { background: var(--color-sheet); }
 .arow:where(:focus-visible, .is-focus) { box-shadow: var(--focus-ring); }
 .arow[aria-current="true"], .arow.is-selected { border-inline-start-color: var(--color-ink); background: var(--color-sheet); }
-.arow--urgent { border-inline-start-color: var(--color-emissive); }
+.arow--urgent { outline: var(--rule-signal); outline-offset: calc(-1 * var(--signal-width)); padding-block: calc(var(--space-2) + var(--signal-width)); padding-inline-end: calc(var(--space-2) + var(--signal-width)); }
 .arow--done .arow__title { font-weight: var(--weight-medium); color: var(--color-graphite); }
 .arow:disabled { cursor: not-allowed; color: var(--color-pencil); }
 .arow:disabled .arow__desc { color: var(--color-pencil); }
@@ -235,10 +236,10 @@ button.arow:where(:hover, .is-hover), .arow.is-hover { background: var(--color-s
 .calc { display: inline-flex; gap: var(--space-half); align-items: center; font-size: var(--fs-label); color: var(--color-graphite); }
 
 /* ── Banners ─────────────────────────────────────────────────────────── */
-.banner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-1) var(--space-2); padding: var(--space-1) var(--gutter); border-block-end: var(--rule-hair); border-inline-start: var(--rule-signal); background: var(--color-base); font-size: var(--fs-small); animation: wipe-in var(--dur-wipe) var(--easing-step); }
+.banner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-1) var(--space-2); padding: var(--space-1) var(--gutter); border: var(--rule-signal); background: var(--color-base); font-size: var(--fs-small); animation: wipe-in var(--dur-wipe) var(--easing-step); }
 .banner__text { display: flex; gap: var(--space-1); align-items: flex-start; flex: 1 1 16rem; }
-.banner--offline { border-inline-start-color: var(--color-ink); }
-.banner--caution { border-inline-start-color: var(--color-signal-yellow); }
+.banner--offline { border-color: var(--color-ink); }
+.banner--caution { border-color: var(--color-signal-yellow); }
 @keyframes wipe-in { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
 [dir="rtl"] .banner { animation-name: wipe-in-rtl; }
 @keyframes wipe-in-rtl { from { clip-path: inset(0 0 0 100%); } to { clip-path: inset(0); } }
@@ -315,3 +316,38 @@ button.arow:where(:hover, .is-hover), .arow.is-hover { background: var(--color-s
 /* Swipe-safe horizontal strip: never starts at the screen edge. */
 .strip-safe { display: flex; gap: var(--space-1); overflow-x: auto; scroll-snap-type: x mandatory; margin-inline: var(--edge-safe); scroll-padding-inline: 0; overscroll-behavior-x: contain; scrollbar-width: thin; }
 .strip-safe > * { scroll-snap-align: start; flex: 0 0 min(80%, 16rem); }
+
+/* ── Crew photo (avatar) ──────────────────────────────────────────────
+   The one round shape in the system. A face is not a control, a stamp or a signal,
+   so the circle can never be mistaken for one. Use it wherever a row, readout, stamp,
+   message or task relates to a named person: the eye finds the person before the name.
+   No photo yet: the person's initials on sheet paper, never a stock silhouette. */
+.avatar { --_size: 2rem; position: relative; display: inline-grid; place-items: center; flex: none; inline-size: var(--_size); block-size: var(--_size);
+  border-radius: var(--radius-photo) !important; overflow: hidden; border: var(--rule-hair); background: var(--color-sheet); color: var(--color-ink);
+  font-size: calc(var(--_size) * .36); font-weight: var(--weight-bold); line-height: 1; letter-spacing: 0; user-select: none; vertical-align: middle; }
+.avatar img { inline-size: 100%; block-size: 100%; object-fit: cover; display: block; }
+.avatar--xs { --_size: 1.25rem; font-size: .5rem; }
+.avatar--sm { --_size: 1.5rem; }
+.avatar--md { --_size: 2.5rem; }
+.avatar--lg { --_size: 4rem; }
+.avatar--xl { --_size: 7.5rem; border: var(--rule-structure); }
+/* Excluded / off work: the photo stays, a hatch says "not working now". */
+.avatar.is-excluded::after { content: ''; position: absolute; inset: 0; background: var(--hatch-rest); opacity: .55; }
+.avatar.is-loading { background: var(--hatch-unknown); color: transparent; }
+/* Overlapping stack for a crew: the first 4 faces, then a count. */
+.avatars { display: inline-flex; align-items: center; }
+.avatars > .avatar + .avatar { margin-inline-start: calc(var(--_size) * -.3); box-shadow: 0 0 0 2px var(--color-base); }
+.avatars__more { margin-inline-start: var(--space-half); font-size: var(--fs-small); color: var(--color-graphite); }
+/* Person: photo + name, inline in a sentence, cell or stamp. */
+.person { display: inline-flex; align-items: center; gap: var(--space-1); min-inline-size: 0; vertical-align: middle; }
+.person__text { display: grid; min-inline-size: 0; }
+.person__name { font-weight: var(--weight-bold); }
+.person__meta { font-size: var(--fs-small); color: var(--color-graphite); }
+
+/* ── Photo upload (account page) ───────────────────────────────────── */
+.photo-upload { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-2) var(--space-3); align-items: center; }
+.photo-upload__actions { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.photo-upload__note { grid-column: 1 / -1; font-size: var(--fs-small); color: var(--color-graphite); margin: 0; }
+.photo-upload input[type="file"] { position: absolute; inline-size: 1px; block-size: 1px; opacity: 0; pointer-events: none; }
+.photo-upload.is-dragover .avatar { outline: var(--rule-draft); outline-offset: var(--space-half); }
+@media (max-width: 30rem) { .photo-upload { grid-template-columns: 1fr; justify-items: start; } }

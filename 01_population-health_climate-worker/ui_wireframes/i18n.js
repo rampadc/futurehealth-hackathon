@@ -53,6 +53,12 @@ const STR = {
     'p8.deletebody': 'Your supervisor will still get heat alerts for your crew.', 'p8.stored': 'Stored check-ins', 'p8.kept': 'kept 30 days', 'p8.who': 'Who opened my records', 'p8.nurse': 'Occupational health nurse',
     'p8.wear': 'Wearable', 'p8.notpaired': 'Not paired', 'p8.pair': 'Pair a wearable to get early warnings on this phone.', 'p8.agreed': 'You agreed {date}. Withdraw any time.', 'p8.none': 'None.',
     hold: 'Press and hold to confirm', cancel: 'Cancel', 'kiosk.tap': 'Tap your badge', 'kiosk.checked': 'Checked in',
+    'acct.title': 'My photo', 'acct.upload': 'Add my photo', 'acct.replace': 'Replace my photo', 'acct.remove': 'Remove my photo', 'acct.useissued': 'Use issued photo',
+    'acct.yours': 'This is the photo you added.', 'acct.issued': 'This is the photo issued with your account. You can replace it.', 'acct.none': 'No photo yet. Your initials are shown.',
+    'acct.saved': 'Photo updated. Your crew sees it next to your name.',
+    'acct.note': 'JPEG, PNG or WebP. Drop a photo on the circle, or take one with the phone camera. Head and shoulders, face visible.',
+    'acct.where': 'Where your photo appears', 'acct.where.row': 'Next to your name in crew lists, tasks, messages and records.',
+    'acct.private': 'Only you can change your photo. It is never used to recognise you automatically.',
   },
   ar: {
     app: 'الإبلاغ الصحي', 'tab.now': 'الآن', 'tab.plan': 'خطتي', 'tab.check': 'تسجيل الحالة', 'tab.me': 'أنا',

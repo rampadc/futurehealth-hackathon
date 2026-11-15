@@ -236,6 +236,7 @@ screen('p8', {
       overflow: [{ label: tt('p8.delete'), danger: true, fn: () => holdConfirm({ title: t('p8.delete') + '?', body: t('p8.deletebody'), btn: t('p8.delete'), onOk: () => { App.f.p8withdrawn = true; App.f.consent = {}; refresh(); toast('✓'); } }) }],
       hero: [metric(t('p8.shared'), t('p8.actions'), '', true), metric(t('p8.stored'), withdrawn ? '0' : '3', t('p8.kept')), metric(t('p8.wear'), c.hr ? t('on') : t('off'), t('p8.notpaired'))],
       body: [
+        section(t('acct.title'), list([row({ lead: av('rana'), t: t('acct.title'), d: t('acct.where.row'), go: 'p9' })])),
         section(t('p8.consent'), list(CONSENT.map(([k, tk]) => `<div class="row static nolead"><span><span class="t" style="display:block">${t(tk)}</span><span class="d">${c[k] ? t('p8.agreed', { date: agreed }) : t('off')}</span></span><span class="rt"><button class="toggle ${c[k] ? 'on' : ''}" role="switch" aria-checked="${!!c[k]}" aria-label="${tt(tk)}" data-act="tog" data-id="${k}"></button></span></div>`))),
         section(t('p8.stored'), withdrawn ? `<p class="p muted">${t('p8.none')}</p>` : list([
           row({ t: fmtDate(new Date(2025, 7, 4, 8, 18)), d: t('p4.unwell') + ' · ' + t('p4.noflags'), b: B.ai('AI'), static: true }),

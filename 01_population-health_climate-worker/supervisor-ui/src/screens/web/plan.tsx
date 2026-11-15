@@ -3,7 +3,7 @@ import { EvidenceAction } from '../../EvidenceAction';
 import { nameOf } from '../../replay';
 import { Schedule } from '../../shared/plan';
 import { assignedIds, crew, intervalsOf, kindLabel, time, who } from '../data';
-import { ActionButton, Computed, Draft, Empty, Head, Hero, List, Metric, NoCase, Note, Row, Section } from '../kit';
+import { ActionButton, Computed, Draft, Empty, Head, Hero, List, Metric, NoCase, Note, Row, Section, Person } from '../kit';
 import type { ScreenProps } from '../registry';
 import { CrewRiskPanel } from '../risk';
 
@@ -61,7 +61,7 @@ export function CrewWorkshopScreen({ session }: ScreenProps) {
       <div className="hs-scroll"><table className="hs-table">
         <thead><tr><th>Worker</th><th>Qualified</th><th>Readiness</th><th>Last observed</th><th>Proposal</th></tr></thead>
         <tbody>{people.map(p => <tr key={p.id}>
-          <td>{who(p.id)}</td>
+          <td><Person id={p.id} size="sm">{who(p.id)}</Person></td>
           <td>{p.qualifications.includes('civil_worker') ? 'Yes' : 'No'}</td>
           <td>{p.excluded ? '■ Excluded' : p.readiness === 'ready' ? `Ready${p.readinessUntil ? ` until ${time(p.readinessUntil)}` : ''}` : p.readiness === 'not_ready' ? 'Not ready' : 'Unconfirmed'}</td>
           <td>{time(p.lastObserved)}</td>
@@ -105,7 +105,7 @@ export function WorkRestPlanScreen({ session }: ScreenProps) {
       <div className="hs-scroll"><table className="hs-table">
         <thead><tr><th>Worker</th><th>Activity</th><th>Where</th><th>From</th><th>To</th></tr></thead>
         <tbody>{[...new Set(plan.intervals.map(i => i.person_id))].flatMap(id => intervalsOf(capture, id)).map(i => <tr key={i.person_id + i.starts_at}>
-          <td>{who(i.person_id)}</td><td>{kindLabel(i.kind)}{i.requires_revalidation ? ' · revalidate' : ''}</td><td>{nameOf(i.zone_id)}</td><td>{time(i.starts_at)}</td><td>{time(i.ends_at)}</td>
+          <td><Person id={i.person_id} size="sm">{who(i.person_id)}</Person></td><td>{kindLabel(i.kind)}{i.requires_revalidation ? ' · revalidate' : ''}</td><td>{nameOf(i.zone_id)}</td><td>{time(i.starts_at)}</td><td>{time(i.ends_at)}</td>
         </tr>)}</tbody>
       </table></div>
     </Section>

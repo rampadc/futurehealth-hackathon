@@ -1,7 +1,7 @@
 import { reasonLabel } from '../../copy';
 import { nameOf } from '../../replay';
 import { crew, heatNow, progress, time } from '../data';
-import { ActionButton, Band, Computed, Draft, Empty, Head, Hero, Hold, List, Metric, NoCase, Note, Row, Section, taskBadge, taskLine } from '../kit';
+import { ActionButton, Band, Computed, Draft, Empty, Head, Hero, Hold, List, Metric, NoCase, Note, Row, Section, taskBadge, taskLine, Person } from '../kit';
 import type { ScreenProps } from '../registry';
 import { ConditionsPanel } from '../conditions';
 
@@ -89,7 +89,7 @@ export function ProtectiveResponseScreen({ session }: ScreenProps) {
         confirm={t.action === 'remove' ? { word: 'REMOVED', title: 'Confirm the worker is out of the heat', body: 'This records your human confirmation for the protective response. Software cannot record it for you.' } : undefined} />)}
     </Section>}
     {protective && protective.actions.length > 0 && <Section title="Solver’s protective actions" hint="Proposals · applied: false">
-      <Draft><ul className="hs-plain">{protective.actions.map(a => <li key={a.code + a.owner_id}>{reasonLabel(a.code)} · {nameOf(a.owner_id)} · {a.status}{a.due_at ? ` · due ${time(a.due_at)}` : ''}{a.message ? ` — ${a.message}` : ''}</li>)}</ul></Draft>
+      <Draft><ul className="hs-plain">{protective.actions.map(a => <li key={a.code + a.owner_id}>{reasonLabel(a.code)} · <Person id={a.owner_id}>{nameOf(a.owner_id)}</Person> · {a.status}{a.due_at ? ` · due ${time(a.due_at)}` : ''}{a.message ? ` — ${a.message}` : ''}</li>)}</ul></Draft>
     </Section>}
     <Note>No health detail appears here. A worker’s own health record stays with them and occupational health.</Note>
   </div>;

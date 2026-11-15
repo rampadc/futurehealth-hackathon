@@ -1,8 +1,8 @@
-import { Alert, Avatar, Box, Chip, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import { Alert, Box, Chip, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { nameOf, type ReplayCapture } from '../replay';
 import type { StoryState } from '../story';
 import { Timeline, timeLabel } from '../Timeline';
-import { initials, readable } from './ui';
+import { PersonAvatar, readable } from './ui';
 
 export const revisedPlanPending = (story: StoryState) => story.reported && (!story.removed || !story.firstaid);
 export const revisedPlanWait = (story: StoryState) => `Updated work and recovery times are waiting for ${[!story.removed && 'Huda’s removal and location confirmation', !story.firstaid && 'Salim’s first-aid contact'].filter(Boolean).join(' and ')}.`;
@@ -31,7 +31,7 @@ export function CrewProposal({ capture }: { capture: ReplayCapture }) {
     {capture.response.crew_rest.planning_status !== 'planned' && <Alert severity="info" sx={{ mb: 2 }}>Workshop planning is waiting for: {capture.response.crew_rest.blockers.map(readable).join(', ') || 'current readiness and observed activity for all crew'}.</Alert>}
     <Typography color="text.secondary" sx={{ mb: 2 }}>{workshop?.label} · {workshop ? workshop.capacity - fixed.length : 0} available places of {workshop?.capacity}. Heavy trench work remains stopped.</Typography>
     <TableContainer><Table size="small" aria-label="Proposed workshop crew"><TableHead><TableRow><TableCell>Worker</TableCell><TableCell>Task</TableCell><TableCell>Readiness</TableCell></TableRow></TableHead>
-      <TableBody>{assigned.map(id => <TableRow key={id}><TableCell><Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}><Avatar sx={{ width: theme => theme.spacing(4), height: theme => theme.spacing(4), bgcolor: 'action.selected', color: 'primary.main', typography: 'caption' }}>{initials(nameOf(id))}</Avatar><Typography variant="body2">{nameOf(id)}</Typography></Stack></TableCell><TableCell>Workshop preparation</TableCell><TableCell><Chip label="Confirmed" size="small" color="success" variant="outlined" /></TableCell></TableRow>)}</TableBody>
+      <TableBody>{assigned.map(id => <TableRow key={id}><TableCell><Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}><PersonAvatar id={id} /><Typography variant="body2">{nameOf(id)}</Typography></Stack></TableCell><TableCell>Workshop preparation</TableCell><TableCell><Chip label="Confirmed" size="small" color="success" variant="outlined" /></TableCell></TableRow>)}</TableBody>
     </Table></TableContainer>
     {!assigned.length && <Typography sx={{ py: 2 }}>No productive assignment is available yet.</Typography>}
     <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>{capture.request.snapshot.workers.length - assigned.length - capture.response.protective_response.excluded_worker_ids.length} workers remain outside this productive assignment. Recovery and assistance take priority.</Typography>

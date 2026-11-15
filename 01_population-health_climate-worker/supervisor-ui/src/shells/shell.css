@@ -38,9 +38,14 @@
 .hs-contract dd { margin: 0; }
 .hs-plain { padding-inline-start: var(--space-3); }
 
-.hs-error, .hs-ok { border-inline-start: var(--rule-signal); padding: var(--space-1) var(--space-2); background: var(--color-sheet); }
-.hs-error { border-inline-start-color: var(--color-signal-red); }
-.hs-ok { border-inline-start-color: var(--color-signal-green); }
+.hs-error, .hs-ok { border: var(--rule-signal); padding: var(--space-1) var(--space-2); background: var(--color-sheet); }
+.hs-error { border-color: var(--color-signal-red); }
+.hs-ok { border-color: var(--color-signal-green); }
+/* Signed-in person in the title bar: photo + name, opens their account page. */
+.hs-me { display: inline-flex; align-items: center; gap: var(--space-1); background: none; border: 0; padding: var(--space-half); color: inherit; font: inherit; cursor: pointer; min-block-size: var(--target-pointer, 2rem); }
+.hs-me:hover span:last-child { text-decoration: underline; }
+.hs-people .hs-btn { flex-direction: row; align-items: center; gap: var(--space-2); }
+.hs-people .hs-btn > span:last-child { display: flex; flex-direction: column; gap: var(--space-half); }
 .hs-link { background: none; border: 0; padding: 0; text-decoration: underline; min-block-size: var(--target-pointer); }
 .hs-btn { inline-size: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-half); padding: var(--space-2); min-block-size: var(--target-touch); background: var(--color-sheet); border: var(--border-brutalist); text-align: start; }
 .hs-btn span { color: var(--color-graphite); font-size: var(--fs-small); }
