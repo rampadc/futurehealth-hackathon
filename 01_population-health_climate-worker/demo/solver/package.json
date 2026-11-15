@@ -1,0 +1,11 @@
+{
+  "name": "heat-safe-solver-walkthrough-check",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "test:browser": "node check_walkthrough.cjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.64.1"
+  }
+}
