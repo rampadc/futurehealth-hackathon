@@ -1,6 +1,6 @@
 import { navigate } from '../../router';
 import { crew, heatNow, SCREEN_FOR_ACTION, tasksOf, time, who } from '../data';
-import { Band, Computed, CtaBar, Empty, Head, Hero, List, Metric, NoCase, Row, Section, Statement, taskBadge, taskLine, ActionButton, Note } from '../kit';
+import { Band, Computed, CtaBar, Empty, Head, Hero, List, Metric, NoCase, Row, Section, Statement, taskBadge, taskLine, ActionButton, Note, Avatar } from '../kit';
 import type { ScreenProps } from '../registry';
 import { smsInfo, tr, preferredLanguage, langOf, isReady as langReady } from '../../i18n';
 
@@ -102,7 +102,7 @@ export function HeadcountScreen({ session }: ScreenProps) {
       <Metric label="Recorded" value={time(recoveredAt)} sub="Shelter A" />
     </Hero>
     <Section title="Affected workers" hint="Kiosk and phone check-ins appear live">
-      <List>{people.map(p => <Row key={p.id} title={who(p.id)} detail={p.inRecovery ? `In cooled recovery · Shelter A` : `Last known: ${p.location ?? 'unknown'}`} badge={p.inRecovery ? <span className="hs-badge" data-tone="done">✓ Arrived</span> : <span className="hs-badge" data-tone="wait">Not recorded</span>} />)}</List>
+      <List>{people.map(p => <Row key={p.id} lead={<Avatar id={p.id} size="md" excluded={p.excluded} />} title={who(p.id)} detail={p.inRecovery ? `In cooled recovery · Shelter A` : `Last known: ${p.location ?? 'unknown'}`} badge={p.inRecovery ? <span className="hs-badge" data-tone="done">✓ Arrived</span> : <span className="hs-badge" data-tone="wait">Not recorded</span>} />)}</List>
     </Section>
     <CtaBar note="Confirm only after you have seen each worker in Shelter A.">
       <ActionButton session={session} action="recover" label={`Confirm all ${people.length} accounted for`} primary />

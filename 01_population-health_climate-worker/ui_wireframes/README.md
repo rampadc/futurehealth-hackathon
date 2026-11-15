@@ -48,3 +48,7 @@ Worker-facing screens (P1–P8) and the kiosk (K1) are fully translated into Eng
 - **Test tools (left panel):** worker language, RTL mirror for supervisor screens, pseudo-locale +40%, highlight untranslated strings.
 
 No build step: plain HTML, CSS and JS (`core.js` shells and components, `screens-*.js` per device, `screens-admin.js` for W9, `app.js` panel and map).
+
+## Crew photos and account screens
+
+People are drawn with their round crew photo from `../ui_design_system/people.js` (section 26 of the style guide). Software (agents, jobs, the kiosk) keeps a square ⚙ tile. Each person can add or replace their own photo on the account screens: **W10** (web, from your photo in the side bar), **M9** (site app, Me tab) and **P9** (worker app, from Me). Here the upload stays in this browser; the app stores it on the server.

@@ -104,3 +104,9 @@
 
 .stack > .btn, .stack > .holdbtn { justify-self: start; }
 .stack > .holdbtn { inline-size: min(100%, 24rem); }
+
+/* 26 · Crew photos */
+.photo-specs { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--space-3); }
+.photo-specs figure { margin: 0; display: grid; justify-items: start; gap: var(--space-1); }
+.photo-specs figcaption { display: grid; font-size: var(--fs-small); color: var(--color-graphite); }
+.photo-specs figcaption b { color: var(--color-ink); }

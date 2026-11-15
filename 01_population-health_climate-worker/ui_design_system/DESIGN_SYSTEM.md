@@ -15,6 +15,7 @@ Then open http://localhost:8766/ui_design_system/ (the wireframes are at `/ui_wi
 | `tokens.css` | All design tokens: colour (day, glare, night shift), rules, spacing, glove targets, type, motion, focus. Themes apply to any element with `data-theme`, not just the page |
 | `brand.css` | Company brand slots: brand bar, logo mark, phone status bar (section 11) |
 | `brand.js` | `HSBrand`: checks a company palette against the signal colours, fits contrast per theme, emits brand tokens and the web app manifest (section 11) |
+| `people.js`, `people/` | `HSPeople`: crew photos (256px WebP per person ID), initials fallback, avatar/person/stack markup, on-device resize for uploads (section 12) |
 | `components.css` | Components, each with default, hover, focus, active, disabled, loading and error states |
 | `field.css` | Field and system patterns: sync indicator and queue, agent task state, inline suggestion, guardrail record, media capture, zone plan, component empty states |
 | `icons.js` | The icon set (one drawing rule) and the `icon()` helper |
@@ -44,8 +45,8 @@ This metaphor is also a safety argument. Heat-Safe’s hardest design problem is
 |---|---|
 | Palette | Warm ink and paper, plus four signal colours. Grey is warm graphite and pencil, never slate or zinc. The one addition is a company’s brand colour, and only in the identity slots of section 11. |
 | Colour use | Signals carry safety meaning only. They are never component identity, chart series, brand or hover. Brand colour never appears on a control, stamp, band, chart or statement. |
-| Geometry | Every corner is 0px, for buttons, inputs, avatars, dialogs and focus rings alike. |
-| Lines | 1px hair, 2px structure, 4px signal edge, 2px dashed draft. No other weights. |
+| Geometry | Every corner is 0px, for buttons, inputs, dialogs and focus rings alike. The one exception is the crew photo, a circle (`--radius-photo`), so a face can never be mistaken for a control, stamp or signal. |
+| Lines | 1px hair, 2px structure, 8px signal frame, 2px dashed draft. No other weights. The signal frame closes **all four sides** of the cell that needs action; it is never a single edge. |
 | Surfaces | Paper (content), sheet (chrome) and tracing (drafts). No nested cards: sections are a label on a 2px rule. |
 | Type | DM Sans only, at 400, 500 and 700. Hierarchy by size and weight, never by colour or italics. |
 
@@ -66,9 +67,10 @@ Nothing fades, bounces or springs. With `prefers-reduced-motion` every duration 
 
 ### Information hierarchy
 
-- **One focal readout per screen**, at `--fs-focal` (36–56px) with the 4px signal edge, on its own row. Everything else stays at 32px or below. The jump in scale is deliberate tension: the eye lands on what to do.
+- **One focal readout per screen**, at `--fs-focal` (36–56px) inside the 8px signal frame, on its own row. Everything else stays at 32px or below. The jump in scale is deliberate tension: the eye lands on what to do.
 - **The emissive accent is spent once.** Signal red as an edge marks only “needs action now”. Stop-work fills and red bands use the same hue because they mean the same thing.
 - **Supporting information gets quieter as it gets more technical.** Computed captions, rules versions and sources are 12px graphite.
+- **A face before a name.** Anything that belongs to a named person (row, readout note, table cell, task owner, handoff, record stamp) leads with that person’s round crew photo. People find a face faster than they read a name.
 
 ---
 
@@ -89,6 +91,8 @@ All tokens live in `tokens.css`. The headline set:
 | `--color-signal-green` | `#1E6E47` (6.2:1) | `#5CCB93` (9.4:1) | Safe condition, Low band |
 | `--color-signal-blue` | `#1D4A86` (8.8:1) | `#8DB4F0` (8.9:1) | Mandatory instruction: work slots |
 | `--border-brutalist` | 2px solid ink | | Structural rule |
+| `--signal-width` / `--rule-signal` | 8px (glare 10px) | | Signal frame on all four sides. Draw it as a border, or as an inset outline (`outline-offset: -var(--signal-width)`) on grid cells so the grid doesn’t shift |
+| `--radius-photo` | 50% | | Crew photos only. Every other corner stays `--radius: 0` |
 | `--spacing-unit` | 0.5rem (8px) | | Steps 4, 8, 16, 24, 32, 48, 64 |
 | `--easing-mechanical` | `cubic-bezier(.2,0,0,1)` | | |
 | `--target` | 32px pointer, 56px touch | | Switches on `pointer: coarse` |
@@ -103,7 +107,7 @@ Ratios are WCAG 2.2 against paper (day) or base (night). The style guide recompu
 
 - Every text pair is 11:1 or better: ink 21, graphite 16.0, pencil 11.8, red 11.1, green 11.2, blue 14.2, black on yellow 13.2. WCAG AAA asks for 7:1.
 - Sheet and tracing tints become white, so meaning never depends on a subtle tint.
-- Rules thicken to 2/3/6px and the draft rule to 3px dashed.
+- Rules thicken to 2/3/10px (hair, structure, signal frame) and the draft rule to 3px dashed.
 - Body text goes up to 18px at weight 500.
 
 Night shift is not given a glare variant; glare is a daylight problem.
@@ -142,10 +146,13 @@ Every interactive component has a real implementation (semantics, keyboard, ARIA
 | Overflow menu | closed, open, focused item, danger item | `menu`/`menuitem`, arrows, Home/End, Esc, Tab closes |
 | Stamp | stop, caution, safe, mandatory, emergency, recorded, done, waiting, overdue, draft, unknown | Glyph + word; never colour alone |
 | Band | low, caution, high, unknown | Swatch + word |
-| Readout band | default, focal, stale, loading skeleton | One ruled band; no cards |
-| Action row | default, hover, focus, selected, urgent, done, disabled, loading skeleton | Whole row is one target |
+| Readout band | default, focal (8px signal frame), stale, loading skeleton | One ruled band; no cards |
+| Action row | default, hover, focus, selected, urgent (8px signal frame), done, disabled, loading skeleton; crew photo lead when the row is about a person | Whole row is one target |
+| Crew photo | photo, no photo (initials), excluded (rest hatch), loading; sizes xs 20 · sm 24 · 32 · md 40 · lg 64 · xl 120 | `aria-hidden`: the name is always written beside it |
+| Crew stack | first four faces, then +n | `aria-hidden`; names are in the text beside it |
+| Photo upload (account page) | issued, uploaded, none, preparing, error, drag-over | Visible label on a real `<input type="file">`; status in `aria-live`; error in `role="alert"` |
 | Draft block | high confidence, low with grounding warning, proposal, discarded | “Why this?” is a disclosure (`aria-expanded`), not hover-only |
-| Banner | error, offline, caution | `role="alert"` or `status` |
+| Banner | error, offline, caution (8px frame in the state’s colour) | `role="alert"` or `status` |
 | Empty state | onboarding, all-clear | One sentence of why, at most one action |
 | Dialog: typed confirm | empty, wrong word, ready | Native `<dialog>`, Cancel focused, Esc closes |
 | Hold-to-confirm | idle, filling, confirmed | Pointer, Space or Enter held for 1.5s |
@@ -197,7 +204,8 @@ Every interactive component has a real implementation (semantics, keyboard, ARIA
 | AI colour | Violet `#5B21B6` + grey tint | **No hue**: dashed edge, ◇, cool tracing paper | Removes the “grey looks disabled” problem (spec §8) and keeps colour for safety |
 | Hues | Tailwind 700-series values | RAL-derived signal colours | Domain-grounded; same or better contrast |
 | Red band at 145 W/m² (Squad Monitoring) | Red cell | Green **band** + red **hold** stamp | Matches `ui/DESIGN_NOTES.md`: colour is not task permission |
-| Rules | 1px ink everywhere | 1 / 2 / 4px hierarchy + dashed | Lets structure carry hierarchy without boxes |
+| Rules | 1px ink everywhere | 1 / 2px hierarchy, 8px signal frame + dashed | Lets structure carry hierarchy without boxes; the 4px edge was too thin to find at a glance, so the signal now frames the whole cell |
+| People | Name text only | Round crew photo before every name | Faster matching of content to a person on a crowded site |
 | Metric cards | Separate bordered boxes | One ruled readout band | No card-in-card |
 | Focus | 2px ink | Ink ring + yellow halo | Visible in direct sun |
 | Field confirmations | Type CONFIRM / REMOVED | Hold-to-confirm on phones; typed on desktop | Gloves, glare and non-Latin keyboards |
@@ -241,6 +249,7 @@ Each guideline was weighed against what Heat-Safe is: a heat-safety execution la
 - Photo capture: confirm with occupational health and legal that equipment photos never include faces, and how long they are kept.
 - Night shift: is it worth having on the worker app, or only for supervisors in the cabin?
 - Arabic UI for supervisors: the system is RTL-ready, but nobody has reviewed the copy.
+- Crew photos: confirm with HR and legal how photos are collected and retained, whether contractors’ crews consent separately, and whether supervisors may add a photo for a worker who has no phone.
 - Branding: confirm the signal-risk thresholds (section 11) with real client palettes. Should an orange brand that is also a company’s safety colour still be held to the logo mark? Which roles beyond the organisation admin may publish, and do sites within one organisation ever need different brands?
 
 ---
@@ -300,3 +309,34 @@ The desk has room for a full bar and a tint. On a phone the screen is short and 
 | Dune Civil Works | Petrol `#0E4C5A`, sand `#D9B45A` | Petrol fills the bar and the mark; the sand reads as Caution and is not used |
 | Al Noor Facilities | Lilac `#B9A7E0`, plum `#5B2A86` | Lilac fills the bar with ink text; the phone uses the browser colour only |
 | Corniche Logistics | Navy `#1D4B8F` | Too close to signal blue (Mandatory). The bar stays paper; the mark carries the brand |
+
+---
+
+## 12. Crew photos
+
+Every surface shows a small round photo in front of a person’s name: crew lists, task and action rows, readout notes, table cells, handoff lines, decision stamps, the title bar and the sign-in list. The kiosk shows faces on the badge tiles. Try it in the style guide (section 26).
+
+### Rules
+
+- **Always with the name.** The photo helps people recognise each other; it is never the only identifier. It is `aria-hidden`, because the name beside it is what a screen reader reads.
+- **People only.** Zones, sensors, unowned tasks and AI drafts never get a face. Agents, scheduled jobs and the kiosk keep a square ⚙ tile, so software is never drawn as a person.
+- **No signal colour on a face.** Status stays in the stamp beside the photo. The only overlay is the rest hatch for “excluded from work”.
+- **No photo yet:** initials on sheet paper (family particles such as “Al” are skipped: Mariam Al Qamar → MQ). Never a stock silhouette.
+
+### Sources, in order
+
+1. The photo the person uploaded on their account page (`GET /api/people/{id}/photo`, versioned by `GET /api/people/photos`).
+2. The photo issued with the account: `people/<ID>.webp`, 256px square WebP. The app bundles these with Vite; the style guide and wireframes load them through `people.js`.
+3. Initials.
+
+### Account page: add or replace your own photo
+
+- Web: **My account**, opened from your photo and name in the title bar. Site app: the same, from the title bar. Worker app: **Me → My photo**.
+- Only the signed-in person can change their own photo (`PUT` / `DELETE /api/people/me/photo`). There is no route to set someone else’s.
+- The browser square-crops the picked image and shrinks it to 256px WebP (JPEG if the browser can’t encode WebP) before upload. The server accepts JPEG, PNG or WebP only, checks the type from the file’s bytes, and caps the size at 512 KB.
+- **Remove** goes back to the issued photo, or to initials if there isn’t one.
+- In the static style guide and wireframes, uploads stay in this browser (`localStorage`).
+
+### Demo photos
+
+20 photorealistic portraits of fictional people were supplied for the demo and matched to roster IDs by role (for example the first-aid vest goes to Salim, the first aider; white helmets to supervisors and HSE). They cover everyone named in the 4 August story except Lina (P07) and Mariam (C11), plus four more of the crew. Everyone else in the 37-person roster shows initials until they add a photo, which also demonstrates the initials state.

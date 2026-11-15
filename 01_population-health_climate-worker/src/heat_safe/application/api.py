@@ -14,7 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from .service import CaseError, CaseService, PEOPLE
-from . import access, crew_risk, platform_api, storage
+from . import access, crew_risk, people_api, platform_api, storage
 
 
 def check_hosted_config() -> None:
@@ -39,6 +39,7 @@ app.state.service = CaseService()
 app.middleware('http')(access.protect)
 app.include_router(access.router)
 app.include_router(platform_api.router)
+app.include_router(people_api.router)
 app.include_router(crew_risk.router)
 
 

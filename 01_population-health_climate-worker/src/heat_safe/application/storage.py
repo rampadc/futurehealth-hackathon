@@ -142,6 +142,8 @@ def initialize(db_path: str | Path | None = None):
                 # Worker consent and branding (application/platform_api.py).
                 'CREATE TABLE IF NOT EXISTS worker_consent(person_id TEXT PRIMARY KEY, language TEXT NOT NULL, scopes TEXT NOT NULL, consented_at TEXT, updated_at TEXT NOT NULL)',
                 'CREATE TABLE IF NOT EXISTS brand(id INTEGER PRIMARY KEY CHECK (id = 1), version INTEGER NOT NULL, published_at TEXT NOT NULL, published_by TEXT NOT NULL, settings TEXT NOT NULL)',
+                # Crew profile photos (application/people_api.py).
+                'CREATE TABLE IF NOT EXISTS person_photo(person_id TEXT PRIMARY KEY, content_type TEXT NOT NULL, data TEXT NOT NULL, updated_at TEXT NOT NULL)',
             ):
                 db.execute(statement)
 
