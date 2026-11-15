@@ -425,6 +425,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "db-dtypes" },
+    { name = "fastapi" },
     { name = "google-adk" },
     { name = "google-cloud-bigquery" },
     { name = "google-cloud-bigquery-storage" },
@@ -436,16 +437,19 @@ dependencies = [
     { name = "pyyaml" },
     { name = "requests" },
     { name = "thermofeel" },
+    { name = "uvicorn" },
 ]
 
 [package.dev-dependencies]
 dev = [
+    { name = "httpx" },
     { name = "pytest" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "db-dtypes", specifier = ">=1.9.0" },
+    { name = "fastapi", specifier = ">=0.162.0" },
     { name = "google-adk", specifier = ">=2.13.0" },
     { name = "google-cloud-bigquery", specifier = ">=3.47.0" },
     { name = "google-cloud-bigquery-storage", specifier = ">=2.43.0" },
@@ -457,10 +461,14 @@ requires-dist = [
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "requests", specifier = ">=2.34.2" },
     { name = "thermofeel", specifier = "==2.3.0" },
+    { name = "uvicorn", specifier = ">=0.54.0" },
 ]
 
 [package.metadata.requires-dev]
-dev = [{ name = "pytest", specifier = ">=9.2.0" }]
+dev = [
+    { name = "httpx", specifier = ">=0.28.1" },
+    { name = "pytest", specifier = ">=9.2.0" },
+]
 
 [[package]]
 name = "google-adk"

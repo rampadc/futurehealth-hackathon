@@ -313,6 +313,52 @@ def replan_recommendation(log: pd.DataFrame) -> tuple[bool, str]:
     return False, ""
 
 
+SHIFT_HOURS = (5, 19)  # the readings the monitor runs over: the planner's default shift window
+
+
+def replay_day(site: str, day: str, role: str, hours: float, replan_at: str | None = None,
+               shade: bool = True) -> dict:
+    """The replay day end to end, as the risk monitor runs it. Shared by metrics.py and the API's monitor stream.
+
+    1. Morning plan from the forecast.
+    2. The fast loop follows it over the SYNTHETIC sensor feed.
+    3. With `replan_at` (HH:MM): the supervisor re-plans on measured heat from the next whole hour, counting
+       the minutes the monitor actually let the crew work (not the morning plan's assumption), and the
+       monitor follows the re-plan from its first hour.
+
+    Returns weather, heat_stress, profile, measured (flag_faults output, all day), shift (the readings the
+    monitor saw), morning, replanned (None without replan_at), worked_before_replan and log
+    (replay_fast_loop output).
+    """
+    from heat_safe.forecast import get_replay
+    from heat_safe.heat_stress import compute_heat_stress
+    from heat_safe.job_profile import lookup_job_profile
+    from heat_safe.schedule import optimise_schedule
+
+    weather = get_replay(day, sites=[site])
+    hs = compute_heat_stress(weather)
+    profile = lookup_job_profile(role)
+    measured = flag_faults(measured_twl(synthetic_feed(weather)))
+    first, last = SHIFT_HOURS
+    shift = measured[(measured["time"].dt.hour >= first) & (measured["time"].dt.hour < last)]
+    morning = optimise_schedule(hs, profile, work_hours_needed=hours, shade=shade)
+
+    replanned, worked_before, replans = None, None, ()
+    if replan_at:
+        h, m = parse_clock(replan_at)
+        from_hour = h + (1 if m else 0)
+        before = replay_fast_loop(shift, morning, end=f"{from_hour:02d}:00")
+        worked_before = int(before["worked_now"].sum())
+        now = datetime.fromisoformat(f"{day}T{replan_at}")
+        replanned = optimise_schedule(apply_measurements(hs, measured, now, shade=shade), profile,
+                                      work_hours_needed=hours, shade=shade, from_hour=from_hour,
+                                      already_worked_minutes=worked_before)
+        replans = (replanned,)
+    log = replay_fast_loop(shift, morning, replans=replans)
+    return dict(weather=weather, heat_stress=hs, profile=profile, measured=measured, shift=shift,
+                morning=morning, replanned=replanned, worked_before_replan=worked_before, log=log)
+
+
 # --- The site sensor as the agent sees it ---------------------------------------------------------------
 
 # Only the replay day has a (synthetic) sensor. Anywhere else the tool says so instead of inventing readings.

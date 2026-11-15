@@ -129,33 +129,15 @@ def schedule_change(morning: dict, replanned: dict, worked_before: int) -> dict:
 
 def replay_day_metrics(site: str, day: str, role: str, hours: float, replan_at: str) -> tuple[dict, dict, dict]:
     """The three approaches on the replay day: (metrics per approach, what the fast loop did, run settings)."""
-    from datetime import datetime
-
     from heat_safe.alerts import WORKER_LANGUAGES
-    from heat_safe.forecast import get_replay
-    from heat_safe.heat_stress import compute_heat_stress
-    from heat_safe.job_profile import lookup_job_profile
-    from heat_safe.schedule import optimise_schedule
-    from heat_safe.sensor import apply_measurements, flag_faults, measured_twl, replay_fast_loop, synthetic_feed
-
-    weather = get_replay(day, sites=[site])
-    hs = compute_heat_stress(weather)
-    profile = lookup_job_profile(role)
-    need = round(hours * 60)
-    measured = flag_faults(measured_twl(synthetic_feed(weather)))
-    shift = measured[(measured["time"].dt.hour >= 5) & (measured["time"].dt.hour < 19)]
-    morning = optimise_schedule(hs, profile, work_hours_needed=hours, shade=True)
+    from heat_safe.sensor import replay_day
 
     # C: the monitor follows the morning plan until the re-plan; the re-plan counts the minutes the monitor
     # actually let the crew work (not the morning plan's assumption), then the monitor follows the re-plan.
-    h, m = (int(x) for x in replan_at.split(":"))
-    first = h + (1 if m else 0)
-    before = replay_fast_loop(shift, morning, end=f"{first:02d}:00")
-    worked_before = int(before["worked_now"].sum())
-    now = datetime.fromisoformat(f"{day}T{replan_at}")
-    replanned = optimise_schedule(apply_measurements(hs, measured, now, shade=True), profile, work_hours_needed=hours,
-                                  shade=True, from_hour=first, already_worked_minutes=worked_before)
-    log = replay_fast_loop(shift, morning, replans=(replanned,))
+    run = replay_day(site, day, role, hours, replan_at=replan_at, shade=True)
+    profile, measured, shift, morning, log = run["profile"], run["measured"], run["shift"], run["morning"], run["log"]
+    replanned, worked_before = run["replanned"], run["worked_before_replan"]
+    need = round(hours * 60)
 
     results = {
         "A. No plan": crew_day_metrics(baseline_timeline(shift, need), measured, need, profile.work_intensity),

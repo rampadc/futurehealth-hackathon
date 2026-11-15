@@ -1,0 +1,26 @@
+# What `gcloud builds submit` uploads (infra/README.md, note 3). Without this file gcloud falls back
+# to .gitignore, and the upload would include every teammate folder (ui/, demo/, research/ ...).
+# Check the upload set with:  gcloud meta list-files-for-upload
+# Allow-list: ignore everything, then re-include only what the image needs.
+/*
+!/Dockerfile
+!/pyproject.toml
+!/uv.lock
+!/README.md
+!/server.py
+!/src/
+!/agents/
+!/data/
+**/__pycache__/
+.adk/
+
+# Data: only what the API and the agent read at run time
+/data/*
+!/data/heat_safe/
+/data/heat_safe/*
+!/data/heat_safe/raw/
+!/data/heat_safe/processed/
+/data/heat_safe/raw/*
+!/data/heat_safe/raw/weather/
+/data/heat_safe/processed/*
+!/data/heat_safe/processed/onet_work_context_plan_roles.csv

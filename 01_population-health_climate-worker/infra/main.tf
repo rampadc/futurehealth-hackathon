@@ -7,9 +7,10 @@ locals {
   # Everything that goes into the image. The hash names the image, so a change here builds a new
   # image and a new Cloud Run revision, and no change means no rebuild (README note 1)
   image_inputs = sort(concat(
-    [for f in fileset(local.repo_root, "{src,agents}/**/*.py") : f],
-    [for f in fileset(local.repo_root, "data/raw/weather/*.csv") : f],
-    ["data/processed/onet_work_context_plan_roles.csv", "Dockerfile", ".gcloudignore", "pyproject.toml", "uv.lock"],
+    [for f in fileset(local.repo_root, "{src,agents}/**/*.{py,yaml}") : f],
+    [for f in fileset(local.repo_root, "data/heat_safe/raw/weather/*.csv") : f],
+    ["data/heat_safe/processed/onet_work_context_plan_roles.csv", "server.py", "Dockerfile", ".gcloudignore",
+     "pyproject.toml", "uv.lock"],
   ))
   image_hash = substr(sha256(join("", [for f in local.image_inputs : filesha256("${local.repo_root}/${f}")])), 0, 12)
   image      = "${var.region}-docker.pkg.dev/${var.project}/${google_artifact_registry_repository.images.repository_id}/supervisor:${local.image_hash}"

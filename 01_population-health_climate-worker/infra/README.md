@@ -1,20 +1,20 @@
 # `infra/`: the team demo on Cloud Run (Terraform)
 
-A **short-lived, public** deployment of the supervisor agent with the ADK dev UI, so teammates can
-try it before the real frontend exists. Anyone with the URL can use it and spend the project's
+A **short-lived, public** deployment of the Heat-Safe API (`../server.py`): the REST and streaming
+endpoints, the agent chat, and the ADK dev UI at `/dev-ui`, so teammates can call it from their frontend. Anyone with the URL can use it and spend the project's
 Gemini budget, so **destroy it when the demo is over**.
 
 ```bash
-# From the repo root. --env-file .env: Terraform and gcloud must use the heat-safe credentials,
-# never the work ADC (README "Credentials")
-uv run --env-file .env terraform -chdir=infra init        # once: downloads the google provider
-uv run --env-file .env terraform -chdir=infra plan        # what would change (read it every time)
-uv run --env-file .env terraform -chdir=infra apply       # build the image if code changed, deploy
-uv run --env-file .env terraform -chdir=infra output url  # the link to share
-uv run --env-file .env terraform -chdir=infra destroy     # remove it all; `apply` brings it back
+# From 01_population-health_climate-worker/. --env-file ../.env (it lives at the repo root): Terraform
+# and gcloud must use the heat-safe credentials, never the work ADC (README "Credentials")
+uv run --env-file ../.env terraform -chdir=infra init        # once: downloads the google provider
+uv run --env-file ../.env terraform -chdir=infra plan        # what would change (read it every time)
+uv run --env-file ../.env terraform -chdir=infra apply       # build the image if code changed, deploy
+uv run --env-file ../.env terraform -chdir=infra output url  # the link to share
+uv run --env-file ../.env terraform -chdir=infra destroy     # remove it all; `apply` brings it back
 
 # Live date instead of the replay day:
-uv run --env-file .env terraform -chdir=infra apply -var demo_today=""
+uv run --env-file ../.env terraform -chdir=infra apply -var demo_today=""
 # Service logs:
 gcloud run services logs read supervisor-demo --region me-central1 --limit 50
 ```
@@ -29,7 +29,7 @@ top-left). It runs with `HEAT_SAFE_TODAY=2025-07-31`, so "tomorrow" is the hot 1
 
 | File | Role |
 |---|---|
-| `../Dockerfile` | The image: Python 3.12, `uv sync --frozen`, the code, the runtime data, `adk web` |
+| `../Dockerfile` | The image: Python 3.12, `uv sync --frozen`, the code, the runtime data, `uvicorn server:app` |
 | `../.gcloudignore` | What `gcloud builds submit` uploads (and what it must not: `.env`, `.venv`, most of `data/`) |
 | `versions.tf` | Terraform and provider versions; local state |
 | `variables.tf` | Project, region, demo date |
@@ -142,7 +142,7 @@ emulation, which is slow. Cloud Build runs on amd64, so the problem doesn't aris
 
 ### 5. One instance, because sessions live in memory
 
-`adk web` stores sessions in the process's memory. With two instances, a chat's second message could
+`adk web` (and `/agent/chat`, which uses an `InMemoryRunner`) stores sessions in the process's memory. With two instances, a chat's second message could
 reach the instance that never saw the first. `max_instance_count = 1` avoids that, and also caps
 the cost: at most one container, scaling to zero when idle (`min_instance_count = 0`,
 `cpu_idle = true`). The price is a cold start of a few seconds on the first visit.
@@ -186,7 +186,7 @@ without owning them. Exercise 6 practises adopting a resource properly.
 | Demo (now) | Production (with the real frontend) |
 |---|---|
 | `allUsers` invoker, public | IAP (Google sign-in) or IAM-only invoker, behind the frontend |
-| `adk web` dev UI | `adk api_server` or a FastAPI app; the frontend calls it |
+| ~~`adk web` dev UI~~ | Done 15 Nov: `server.py` (FastAPI) serves the API; the dev UI stays at `/dev-ui` for the demo |
 | In-memory sessions, 1 instance | `--session_service_uri` (Cloud SQL / Vertex AI sessions); scale out freely |
 | Image built by `local-exec` in `apply` | CI (Cloud Build trigger or GitHub Actions) builds on merge; Terraform gets the tag |
 | Local `terraform.tfstate` | GCS backend (`future-health-513202-tfstate`, versioned) so the team shares state with locking |
