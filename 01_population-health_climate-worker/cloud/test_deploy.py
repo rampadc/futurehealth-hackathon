@@ -168,22 +168,39 @@ class DeploymentTests(unittest.TestCase):
 
     def test_preview_image_inventory_and_cleanup_stay_in_pr_namespace(self):
         own = deploy.image_path("heat-safe-previews", 27) + "@sha256:" + "a" * 64
+        untagged = deploy.image_path("heat-safe-previews", 27) + "@sha256:" + "d" * 64
         other = deploy.image_path("heat-safe-previews", 28) + "@sha256:" + "b" * 64
+        legacy = deploy.image_path("heat-safe-previews", 29) + "@sha256:" + "e" * 64
         main = deploy.image_path("heat-safe-main") + "@sha256:" + "c" * 64
-        with patch.object(deploy, "gcloud", return_value=json.dumps([
-            {"uri": own}, {"uri": other}, {"uri": main}, {"uri": "unexpected"},
-        ])):
-            self.assertEqual(deploy.preview_images(), {27: [own], 28: [other]})
-        with patch.object(deploy, "gcloud", return_value=None) as cloud, \
+        images = [
+            {"package": own.split("@")[0], "version": own.split("@")[1], "tags": ["latest"]},
+            {"package": untagged.split("@")[0], "version": untagged.split("@")[1]},
+            {"package": other.split("@")[0], "version": other.split("@")[1]},
+            {"package": main.split("@")[0], "version": main.split("@")[1]},
+            {"uri": legacy},  # Older CLI output remains supported.
+            {"package": deploy.image_path("heat-safe-previews", 27), "version": "latest"},
+            {"package": deploy.image_path("heat-safe-previews", 27) + "-copy", "version": "sha256:" + "f" * 64},
+            {"package": deploy.image_path("heat-safe-previews", 27).replace("/pr-27/", "/pr-027/"),
+             "version": "sha256:" + "f" * 64},
+            {"package": deploy.image_path("heat-safe-previews", 27).replace(deploy.PROJECT, "other-project"),
+             "version": "sha256:" + "f" * 64},
+            {"package": main.split("@")[0], "version": main.split("@")[1], "uri": own},
+            {"package": deploy.image_path("heat-safe-previews", 27), "uri": own},
+        ]
+
+        def cloud_result(*args, **_kwargs):
+            return json.dumps(images) if args[:4] == ("artifacts", "docker", "images", "list") else None
+
+        with patch.object(deploy, "gcloud", side_effect=cloud_result) as cloud, \
              patch.object(deploy, "delete_preview_database"), \
              patch.object(deploy, "secret_exists", return_value=False), \
-             patch.object(deploy, "preview_images", return_value={27: [own], 28: [other]}), \
              patch.object(deploy, "emit"):
+            self.assertEqual(deploy.preview_images(), {27: [own, untagged], 28: [other], 29: [legacy]})
             deploy.cleanup_preview(27)
         deletes = [call.args for call in cloud.call_args_list if call.args[:4] ==
                    ("artifacts", "docker", "images", "delete")]
-        self.assertEqual(deletes, [("artifacts", "docker", "images", "delete", own,
-                                    "--delete-tags", "--quiet")])
+        self.assertEqual(deletes, [("artifacts", "docker", "images", "delete", uri,
+                                    "--delete-tags", "--quiet") for uri in (own, untagged)])
 
 
 if __name__ == "__main__":

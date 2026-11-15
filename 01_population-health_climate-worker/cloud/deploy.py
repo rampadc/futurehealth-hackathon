@@ -388,7 +388,13 @@ def preview_images():
     found = {}
     pattern = re.compile(re.escape(repository) + r"/pr-([1-9][0-9]*)/app@sha256:[0-9a-f]{64}")
     for image in images:
-        uri = image.get("uri", "")
+        if "package" in image or "version" in image:
+            package, version = image.get("package"), image.get("version")
+            uri = f"{package}@{version}" if isinstance(package, str) and isinstance(version, str) else None
+        else:
+            uri = image.get("uri")
+        if not isinstance(uri, str):
+            continue
         if match := pattern.fullmatch(uri):
             found.setdefault(int(match.group(1)), []).append(uri)
     return found
