@@ -19,8 +19,8 @@ const readinessBadge = (p: CrewMember) => p.excluded ? <span className="hs-badge
     : p.readiness === 'not_ready' ? <span className="hs-badge" data-tone="muted">Not ready</span>
       : <span className="hs-badge" data-tone="wait">Unconfirmed</span>;
 
-/** M4 · Readiness confirmation: one worker, one task, face to face. */
-export function M4Readiness({ session }: ScreenProps) {
+/** Readiness confirmation: one worker, one task, face to face. */
+export function ReadinessScreen({ session }: ScreenProps) {
   const { caseView, person } = session;
   const [selected, setSelected] = useState<string | null>(null);
   const [basis, setBasis] = useState<Basis>(BASES[0][0]);
@@ -69,12 +69,12 @@ export function M4Readiness({ session }: ScreenProps) {
       <div className="hs-mui"><EvidenceAction action="activity" caseView={caseView} person={person} onAction={session.act} busy={session.busy} /></div>
     </Section>}
     {canConfirm && next && <CtaBar><button type="button" className="hs-button is-primary" onClick={() => setSelected(next.id)}>Confirm next: {next.name.split(' ')[0]}</button></CtaBar>}
-    {!canConfirm && <CtaBar><button type="button" className="hs-button" onClick={() => navigate('/site/m5')}>Review proposal</button></CtaBar>}
+    {!canConfirm && <CtaBar><button type="button" className="hs-button" onClick={() => navigate('/site/proposal')}>Review proposal</button></CtaBar>}
   </div>;
 }
 
-/** M5 · Proposal review: the solver's crew proposal, recorded by the foreman. */
-export function M5Proposal({ session }: ScreenProps) {
+/** Proposal review: the solver's crew proposal, recorded by the foreman. */
+export function ProposalScreen({ session }: ScreenProps) {
   const { caseView } = session;
   if (!caseView) return <NoCase session={session} />;
   const capture = caseView.capture;
@@ -107,8 +107,8 @@ export function M5Proposal({ session }: ScreenProps) {
   </div>;
 }
 
-/** M6 · Worker action card: the steps for one worker who needs help, in order. */
-export function M6ActionCard({ session }: ScreenProps) {
+/** Worker action card: the steps for one worker who needs help, in order. */
+export function ActionCardScreen({ session }: ScreenProps) {
   const { caseView, person } = session;
   if (!caseView || !person) return <NoCase session={session} />;
   const story = caseView.story;

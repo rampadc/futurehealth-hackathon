@@ -8,8 +8,8 @@ import { heatNow, progress, taskFor, time } from './data';
 import { ActionButton, Band, Computed, CtaBar, Empty, Head, Hero, Hold, List, Metric, NoCase, Note, Row, Section, taskBadge } from './kit';
 import type { ScreenProps } from './registry';
 
-/** M7 · Fresh reading: a same-zone local reading for the restart review. */
-export function M7FreshReading({ session }: ScreenProps) {
+/** Fresh reading: a same-zone local reading for the restart review. */
+export function FreshReadingScreen({ session }: ScreenProps) {
   const { caseView, person } = session;
   const [twl, setTwl] = useState('175');
   const [measured, setMeasured] = useState(() => caseView ? atDubai(caseView.clock) : '');
@@ -44,7 +44,7 @@ export function M7FreshReading({ session }: ScreenProps) {
       <CtaBar><button type="submit" className="hs-button is-primary" disabled={!valid || session.busy}>Record fresh local reading</button></CtaBar>
     </form> : <Note>{fresh?.status === 'recorded' ? '✓ Fresh reading recorded for the restart review.' : fresh ? `Fresh reading: ${fresh.status === 'ready' ? `ready for ${nameOf(fresh.actor_id)}` : 'waits for the crew response and first-aid handoff.'}` : 'No restart review in this case.'}</Note>}
     <ActionButton session={session} action="water" label="Confirm water check" />
-    {fresh?.status === 'recorded' && <button type="button" className="hs-button" onClick={() => navigate('/web/w6')}>Open restart review (web)</button>}
+    {fresh?.status === 'recorded' && <button type="button" className="hs-button" onClick={() => navigate('/web/restart-review')}>Open restart review (web)</button>}
   </div>;
 }
 
@@ -59,8 +59,8 @@ const CHECKS: Array<[string, string, string | null]> = [
   ['Crew readiness check', 'crew_readiness', 'crew_readiness'],
 ];
 
-/** W6 · Restart review: all eight checks together, then the superintendent's own review. */
-export function W6RestartReview({ session }: ScreenProps) {
+/** Restart review: all eight checks together, then the superintendent's own review. */
+export function RestartReviewScreen({ session }: ScreenProps) {
   const { caseView, person } = session;
   if (!caseView || !person) return <NoCase session={session} />;
   const capture = caseView.capture;

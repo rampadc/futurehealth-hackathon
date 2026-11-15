@@ -1,5 +1,7 @@
 # Heat-Safe scenario 2 operational demonstration
 
+**New here?** Start with the [solver handoff index](INDEX.md): current schema, how to run it, canonical examples, countercases and which reviews are historical.
+
 The `/v2` operational API evaluates heat controls, protective actions, timed crew/rest plans and restart readiness. Start with [the operational input/output contract](OPERATIONS_API.md). Its current schema is **2.1**: callers supply the location catalogue and task bindings, plus task-specific supervisor readiness records with evidence, basis and expiry. Earlier operational 2.0 requests require migration. The composed endpoint is `POST /v2/response-plans/solve`; each component also has its own endpoint. These are ordinary deterministic Python functions and HTTP JSON contracts, without agents, LLMs, ADK or MCP.
 
 Callers can now supply a root `timing_policy` object with `id`, `initial_recovery_minutes` (0–120), `max_work_minutes` (1–120) and `between_work_recovery_minutes` (1–120). The planner and checker build their timing rules from it. The response echoes the effective policy and its source; changing values changes the fingerprint. Existing `planning.policy_id` requests still select the registered fallback. See the complete [alternative policy request](operations/examples/crew-rest.alternate_timing_policy.request.json) and [actual response](operations/examples/crew-rest.alternate_timing_policy.response.json).

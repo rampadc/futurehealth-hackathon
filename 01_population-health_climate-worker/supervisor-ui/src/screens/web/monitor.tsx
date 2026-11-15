@@ -7,9 +7,11 @@ import { crew, heatNow, SCREEN_FOR_ACTION, time, who } from '../data';
 import { nextHandoff } from '../../story';
 import { ActionButton, Badge, Band, Computed, Empty, Head, Hero, Hold, List, Metric, NoCase, Note, Row, Section, taskBadge } from '../kit';
 import type { ScreenProps } from '../registry';
+import { ConditionsPanel } from '../conditions';
+import { CrewRiskPanel } from '../risk';
 
-/** W1 · Squad Monitoring: within five seconds, does anyone need action now? */
-export function W1SquadMonitoring({ session }: ScreenProps) {
+/** Squad Monitoring: within five seconds, does anyone need action now? */
+export function SquadMonitoringScreen({ session }: ScreenProps) {
   const { caseView } = session;
   if (!caseView) return <NoCase session={session} />;
   const story = caseView.story;
@@ -43,6 +45,8 @@ export function W1SquadMonitoring({ session }: ScreenProps) {
         <List>{[...byLocation.entries()].map(([where, n]) => <Row key={where} title={nameOf(where)} badge={<Badge tone="muted">{n}</Badge>} />)}</List>
       </Section>
     </div>
+    <ConditionsPanel session={session} compact />
+    <CrewRiskPanel session={session} />
     <Section title="Readings">
       <div className="hs-strip" role="list">
         {(caseView.request?.snapshot.readings ?? caseView.capture?.request.snapshot.readings ?? []).map(r => <div key={r.evidence_id} role="listitem"><b>{time(r.measured_at)}</b><span>{r.twl} W/m²</span><span>{r.sensor_id}</span></div>)}
@@ -52,9 +56,13 @@ export function W1SquadMonitoring({ session }: ScreenProps) {
   </div>;
 }
 
-/** W8 · System & trust: what the solver and agent did, and that none of it was applied on site by software. */
-export function W8SystemTrust({ session }: ScreenProps) {
+type TrustFilter = 'all' | TrustLogEntry['kind'];
+const TRUST_FILTERS: Array<[TrustFilter, string]> = [['all', 'All'], ['solver_run', 'Solver'], ['command', 'People'], ['agent_run', 'Agent']];
+
+/** System & trust: what the solver and agent did, and that none of it was applied on site by software. */
+export function SystemTrustScreen({ session }: ScreenProps) {
   const { caseView } = session;
+  const [filter, setFilter] = useState<TrustFilter>('all');
   const [ready, setReady] = useState<boolean | null>(null);
   const [log, setLog] = useState<TrustLogEntry[] | null>(null);
   const [error, setError] = useState('');
@@ -68,6 +76,7 @@ export function W8SystemTrust({ session }: ScreenProps) {
   const runs = caseView.runs ?? [];
   const appliedOnSite = (caseView.capture?.response.applied as boolean | undefined) === true || (log ?? []).some(e => e.kind !== 'command' && e.applied);
   const counts = (kind: TrustLogEntry['kind']) => (log ?? []).filter(e => e.kind === kind).length;
+  const shown = (log ?? []).filter(e => filter === 'all' || e.kind === filter);
   return <div className="hs-screen">
     <Head kicker="System & trust" title="System & trust" sub="Every solver run and agent answer is a proposal. People record every action." />
     <Hero>
@@ -76,15 +85,18 @@ export function W8SystemTrust({ session }: ScreenProps) {
       <Metric label="Applied on site by software" value={appliedOnSite ? 'Yes' : 'None'} sub="every proposal carries applied: false" tone={appliedOnSite ? 'red' : 'ok'} />
     </Hero>
     <Section title="Trust log" hint="Newest first · people’s records and system proposals">
-      {error ? <Note tone="amber">{error}</Note> : !log ? <p className="hs-muted" role="status">Loading…</p> : log.length ? <div className="hs-scroll"><table className="hs-table">
+      <div className="hs-chips" role="group" aria-label="Show entries">
+        {TRUST_FILTERS.map(([id, label]) => <button key={id} type="button" aria-pressed={filter === id} onClick={() => setFilter(id)}>{label}{log && ` · ${id === 'all' ? log.length : counts(id)}`}</button>)}
+      </div>
+      {error ? <Note tone="amber">{error}</Note> : !log ? <p className="hs-muted" role="status">Loading…</p> : shown.length ? <div className="hs-scroll"><table className="hs-table">
         <thead><tr><th>Time</th><th>Kind</th><th>What happened</th><th>Status</th></tr></thead>
-        <tbody>{log.map(e => <tr key={e.id}><td>{time(e.at)}</td><td>{e.kind === 'command' ? 'Person' : e.kind === 'solver_run' ? 'Solver' : e.kind === 'agent_run' ? 'Agent · AI' : 'Guardrail'}</td><td>{e.summary}</td><td>{e.status}</td></tr>)}</tbody>
-      </table></div> : <Empty>Nothing recorded for this case yet.</Empty>}
+        <tbody>{shown.map(e => <tr key={e.id}><td>{time(e.at)}</td><td>{e.kind === 'command' ? 'Person' : e.kind === 'solver_run' ? 'Solver' : e.kind === 'agent_run' ? 'Agent · AI' : e.kind === 'signal' ? 'Sensor or system' : 'Guardrail'}</td><td>{e.summary}</td><td>{e.status}</td></tr>)}</tbody>
+      </table></div> : <Empty>{log.length ? 'No entries of this kind yet.' : 'Nothing recorded for this case yet.'}</Empty>}
     </Section>
     <Section title="Solver runs" hint={`Case version ${caseView.version}`}>
       {runs.length ? <div className="hs-scroll"><table className="hs-table">
         <thead><tr><th>Version</th><th>Status</th><th>HTTP</th><th>Graph</th><th>Shown now</th></tr></thead>
-        <tbody>{runs.map(r => <tr key={r.id}><td>{r.version}</td><td>{r.status}{r.error ? ` · ${r.error}` : ''}</td><td>{r.http_status ?? '—'}</td><td>{r.graph_events?.join(' → ') ?? '—'}</td><td>{r.applied ? 'Current result' : '—'}</td></tr>)}</tbody>
+        <tbody>{runs.map(r => <tr key={r.id}><td>{r.version}</td><td>{r.status}{r.error ? ` · ${r.error}` : ''}</td><td>{r.http_status ?? '—'}</td><td>{r.graph_events?.join(' → ') ?? '—'}</td><td>{r.applied && r.version === caseView.version ? 'Current result' : r.applied ? 'Result for that version' : '—'}</td></tr>)}</tbody>
       </table></div> : <Empty>No solver runs for this case yet.</Empty>}
     </Section>
     <Section title="Guardrails">

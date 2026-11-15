@@ -1,6 +1,7 @@
-"""Worker consent and data, the supervisor trust log, and organisation branding.
+"""Worker consent and data, the supervisor trust log, organisation branding and site heat conditions.
 
-These back the wireframe screens P1, P8, W8 and W9 (see supervisor-ui/src/contract.ts).
+These back the worker welcome and my-data screens, system & trust, admin settings and the
+conditions panel (see supervisor-ui/src/contract.ts).
 Consent and exports only ever cover the signed-in worker. Branding is published only by
 the organisation admin and is checked against the safety signal colours before it is saved.
 """
@@ -53,7 +54,7 @@ def actor(request: Request) -> str:
     return persona
 
 
-# ── Worker consent and data (P1, P8) ─────────────────────────────────────────
+# ── Worker consent and data ─────────────────────────────────────────
 
 class ConsentInput(BaseModel):
     language: str
@@ -133,7 +134,38 @@ def worker_data(request: Request):
     }
 
 
-# ── Trust log (W8) ───────────────────────────────────────────────────────────
+# ── Site heat conditions ─────────────────────────────────────────────────────
+
+CASE_SITE = 'mussafah'  # the Sandline utility corridor in the demo case
+
+
+@router.get('/api/case/conditions')
+def conditions(request: Request):
+    """Hourly TWL zones for the case site and day, from the risk core (ERA5 replay or forecast).
+
+    Read-only context for planning. It is not a local measurement and never clears a hold: only a
+    fresh, valid same-zone reading and the human review do that.
+    """
+    actor(request)
+    view = request.app.state.service.read_case(None)
+    if not view:
+        return None
+    clock = datetime.fromisoformat(view['clock'])
+    from heat_safe.agent_tools import compute_heat_stress
+    result = compute_heat_stress(CASE_SITE, clock.date().isoformat())
+    if result.get('status') != 'ok':
+        return {'status': 'unavailable', 'site': CASE_SITE, 'date': clock.date().isoformat(),
+                'message': result.get('message', 'Heat conditions unavailable')}
+    hour = f'{clock.hour:02}:00'
+    current = next((h for h in result['hourly'] if h['hour'] == hour), None)
+    return {'status': 'ok', 'site': CASE_SITE, 'date': result['date'], 'source': result['source'],
+            'kind': 'replay' if 'era5' in result['source'] else 'forecast', 'clock_hour': hour,
+            'current': current, 'summary': result['summary'], 'hourly': result['hourly'],
+            'zone_thresholds_wm2': result['zone_thresholds_wm2'], 'citation': result['citation'],
+            'rules_version': result['rules_version']}
+
+
+# ── Trust log ───────────────────────────────────────────────────────────
 
 @router.get('/api/trust-log')
 def trust_log(request: Request):
@@ -147,20 +179,26 @@ def trust_log(request: Request):
         return []
     entries = []
     with service._conn() as db:
-        runs = db.execute('SELECT id, version, status, started_at, error, response, applied FROM runs WHERE case_id=?', (view['case_id'],)).fetchall()
-        events = db.execute('SELECT id, actor_id, action, occurred_at FROM events WHERE case_id=?', (view['case_id'],)).fetchall()
+        runs = db.execute('SELECT id, version, status, started_at, error, response, applied FROM runs WHERE case_id=? ORDER BY version', (view['case_id'],)).fetchall()
+        events = db.execute('SELECT id, actor_id, action, occurred_at FROM events WHERE case_id=? ORDER BY id', (view['case_id'],)).fetchall()
     for r in runs:
         # `runs.applied` marks the result the case currently shows; whether the proposal was applied
         # on site is the solver response's own `applied` field, which is always false.
         response = json.loads(r['response'] or 'null') or {}
+        current = r['applied'] and r['version'] == view['version']
         entries.append({'id': f"run-{r['id']}", 'at': r['started_at'], 'kind': 'solver_run', 'status': r['status'],
-                        'summary': f"Solver run for case version {r['version']}" + (' · current result' if r['applied'] else '') + (f": {r['error']}" if r['error'] else ''),
-                        'applied': bool(response.get('applied', False))})
+                        'summary': f"Solver run for case version {r['version']}" + (' · current result' if current else '') + (f": {r['error']}" if r['error'] else ''),
+                        'applied': bool(response.get('applied', False)), 'order': (1, r['version'])})
     for e in events:
-        owner = PEOPLE.get(e['actor_id'], {}).get('name', e['actor_id'])
         title = ACTIONS.get(e['action'], (None, e['action']))[1]
+        # Sensor readings and automatic escalations are not a person's record.
+        if e['actor_id'] in ('sensor', 'system'):
+            entries.append({'id': f"event-{e['id']}", 'at': e['occurred_at'], 'kind': 'signal', 'status': 'received',
+                            'summary': title, 'applied': False, 'order': (0, e['id'])})
+            continue
+        owner = PEOPLE.get(e['actor_id'], {}).get('name', e['actor_id'])
         entries.append({'id': f"event-{e['id']}", 'at': e['occurred_at'], 'kind': 'command', 'status': 'recorded',
-                        'summary': f'{owner}: {title}', 'applied': True})
+                        'summary': f'{owner}: {title}', 'applied': True, 'order': (0, e['id'])})
     try:
         from heat_safe.live_assistant import connect as assistant_db
         with assistant_db() as db:
@@ -174,10 +212,12 @@ def trust_log(request: Request):
         entries.append({'id': f"agent-{a['id']}", 'at': a['recorded_at'], 'kind': 'agent_run', 'status': detail.get('status', 'unknown'),
                         'summary': f"Planning Agent answered {owner}" + (f" · tools: {', '.join(tools)}" if tools else ''),
                         'applied': False})
-    return sorted(entries, key=lambda e: e['at'], reverse=True)
+    # Newest first. Within one instant a record precedes the solver run it triggers; each kind keeps its own order.
+    entries.sort(key=lambda e: (datetime.fromisoformat(e['at']), *e.get('order', (2, 0))), reverse=True)
+    return [{k: v for k, v in e.items() if k != 'order'} for e in entries]
 
 
-# ── Branding (W9) ────────────────────────────────────────────────────────────
+# ── Branding ────────────────────────────────────────────────────────────
 
 HEX = re.compile(r'^#[0-9a-fA-F]{6}$')
 # Hues reserved for safety signals: red (Stop), amber (Caution), green (Safe).

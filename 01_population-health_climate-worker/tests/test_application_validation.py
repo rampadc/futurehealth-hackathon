@@ -85,3 +85,21 @@ def test_assignment_requires_checked_plan(case):
             'action':'assign','payload':{'person_ids':['C05']}}))
     assert error.value.status==409
     assert case.read_case('C01')['version']==current['version']
+
+
+@pytest.mark.parametrize('quality,measured_at',[
+    ('invalid','2025-08-04T08:30:00+04:00'),   # sensor fault
+    ('valid','2025-08-04T08:20:00+04:00'),     # stale: ten minutes old when received
+])
+def test_fault_and_stale_readings_are_recorded_but_never_count_as_fresh(case,quality,measured_at):
+    run(case.advance_clock('2025-08-04T08:30:00+04:00'))
+    before=case.read_case()['version']
+    reading={'sensor_id':'t1','zone_id':'civil_exposed','twl':180,'unit':'W/m²','quality':quality,
+             'measured_at':measured_at,'received_at':'2025-08-04T08:30:00+04:00'}
+    view=run(case.signal('reading',reading))
+    assert view['version']==before+1
+    with case._conn() as db:
+        last=db.execute('SELECT actor_id, action FROM events ORDER BY id DESC LIMIT 1').fetchone()
+    assert (last['actor_id'],last['action'])==('sensor','sensor_reading')
+    fresh=[t for t in view['tasks'] if t['action']=='fresh']
+    assert fresh and fresh[0]['status']!='recorded'
