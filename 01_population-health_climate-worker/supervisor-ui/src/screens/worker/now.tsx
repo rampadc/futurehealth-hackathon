@@ -2,6 +2,7 @@ import { navigate } from '../../router';
 import { heatNow, intervalsOf, kindLabel, nowAndNext, taskFor, time } from '../data';
 import { Band, Computed, CtaBar, Empty, Hero, HoldButton, List, Metric, NoCase, Note, Row, Section, Statement } from '../kit';
 import type { ScreenProps } from '../registry';
+import { OwnRiskPanel } from '../risk';
 import { En, T, useT, useWorker, WorkerFrame } from './frame';
 
 /** Worker's own status: working, resting or excluded. Never shows other workers or health detail. */
@@ -45,6 +46,7 @@ function Now({ session }: ScreenProps) {
       </List>
       {!story.issued && !story.assigned && <Empty><T k="p2.empty" /></Empty>}
     </Section>
+    <OwnRiskPanel session={session} title={<En>My heat risk</En>} wrap={s => <En>{s}</En>} />
     <Computed><T k="p2.computed" /></Computed>
     <CtaBar><button type="button" className="hs-button is-primary" onClick={() => navigate('/worker/check-in')}><T k="unwell" /></button></CtaBar>
   </div>;

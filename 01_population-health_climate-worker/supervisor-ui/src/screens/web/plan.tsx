@@ -5,6 +5,7 @@ import { Schedule } from '../../shared/plan';
 import { assignedIds, crew, intervalsOf, kindLabel, time, who } from '../data';
 import { ActionButton, Computed, Draft, Empty, Head, Hero, List, Metric, NoCase, Note, Row, Section } from '../kit';
 import type { ScreenProps } from '../registry';
+import { CrewRiskPanel } from '../risk';
 
 const status = (s: string) => s.replaceAll('_', ' ');
 
@@ -68,6 +69,7 @@ export function CrewWorkshopScreen({ session }: ScreenProps) {
         </tr>)}</tbody>
       </table></div>
     </Section>
+    <CrewRiskPanel session={session} />
     {huda && <Section title="Record observations" hint="Readiness and activity are human records, never the plan">
       <div className="hs-mui">
         {['readiness', 'activity', 'leila'].map(action => <EvidenceAction key={action} action={action} caseView={caseView} person={person} onAction={session.act} busy={session.busy} />)}

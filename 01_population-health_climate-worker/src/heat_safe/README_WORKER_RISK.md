@@ -1,11 +1,17 @@
 # `compute_worker_risk`: one worker's band, every hour (spec)
 
-**Status, 7 Nov 2026:** this is the specification to build against.
-- **Built:** the clothing ensembles (`rules.CLOTHING`, `tests/test_clothing.py`), acclimatisation
-  (`acclimatisation.py`) and the site heat stress (`heat_stress.py`) it combines.
-- **Not built yet:** `compute_worker_risk` itself, the planned-baseline table, the alert rules.
+**Status, 15 Nov 2026:**
+- **Built:** `compute_worker_risk` and `crew_risk` in `worker_risk.py` (`tests/test_worker_risk.py`): layers
+  L1–L3, L4 as a strain flag from a working wearable, L5 for lost inputs, the red-flag rule and the L6 roll-up.
+  It combines the clothing ensembles (`rules.CLOTHING`), acclimatisation (`acclimatisation.py`) and the site
+  heat stress (`heat_stress.py`). The case app shows it (`application/crew_risk.py`): supervisors see each
+  worker's band and action on Squad Monitoring and Crew & workshop; a worker sees their own band and the
+  reasons on Now.
+- **Not built yet:** the planned-baseline table and the alert triggers below, the low-fluid input from voice
+  check-ins, and any wearable feed. A raised band changes the work/rest limits shown (the stricter zone's), but
+  nothing is pushed.
 
-The tests listed under "Executable spec" come first, then the code that makes them pass.
+The tests listed under "Executable spec" came first, then the code that makes them pass.
 
 ## Why it exists
 
