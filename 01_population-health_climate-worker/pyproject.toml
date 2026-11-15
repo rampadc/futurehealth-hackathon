@@ -5,9 +5,13 @@ description = "Heat-Safe Crew Agent: heat-stress early warning and shift plannin
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "fastapi>=0.162.0,<0.163",
+    "uvicorn>=0.54.0,<0.55",
+    "httpx>=0.28.1,<0.29",
+    "psycopg[binary,pool]>=3.2,<4",
+    "asyncpg>=0.30,<1",
     "db-dtypes>=1.9.0",
-    "fastapi>=0.162.0",
-    "google-adk>=2.13.0",
+    "google-adk[db]>=2.13.0",
     "google-cloud-bigquery>=3.47.0",
     "google-cloud-bigquery-storage>=2.43.0",
     "google-cloud-storage>=3.17.1",
@@ -18,12 +22,10 @@ dependencies = [
     "pyyaml>=6.0.3",
     "requests>=2.34.2",
     "thermofeel==2.3.0",
-    "uvicorn>=0.54.0",
 ]
 
 [dependency-groups]
 dev = [
-    "httpx>=0.28.1",
     "pytest>=9.2.0",
 ]
 

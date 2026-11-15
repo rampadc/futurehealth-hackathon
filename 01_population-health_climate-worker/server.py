@@ -32,8 +32,9 @@ from supervisor.agent import app as supervisor_app  # noqa: E402
 from supervisor.session import UnknownSession, turn  # noqa: E402
 
 # Browsers block calls from another origin unless the server allows it (CORS). Local Vite dev servers
-# are allowed; add a deployed frontend with HEAT_SAFE_ALLOWED_ORIGINS="https://a.example,https://b.example".
-ALLOWED_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"] + [
+# (ui/ wireframes on 5173, supervisor-ui/ on 5174) are allowed; add a deployed frontend with
+# HEAT_SAFE_ALLOWED_ORIGINS="https://a.example,https://b.example".
+ALLOWED_ORIGINS = [f"http://{h}:{p}" for h in ("localhost", "127.0.0.1") for p in (5173, 5174)] + [
     o.strip() for o in os.getenv("HEAT_SAFE_ALLOWED_ORIGINS", "").split(",") if o.strip()]
 
 RUNNER = InMemoryRunner(app=supervisor_app)

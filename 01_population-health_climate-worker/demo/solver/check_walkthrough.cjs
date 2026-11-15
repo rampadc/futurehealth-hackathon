@@ -1,5 +1,4 @@
-// Browser regression checks use the existing UI's local Playwright installation.
-const { chromium } = require('../../ui/node_modules/playwright');
+const { chromium } = require('playwright');
 const assert = require('node:assert/strict');
 const { pathToFileURL } = require('node:url');
 const path = require('node:path');
