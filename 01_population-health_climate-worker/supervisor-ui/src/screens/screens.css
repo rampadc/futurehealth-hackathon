@@ -141,3 +141,10 @@ button.hs-row-body:hover { background: var(--color-base); }
 .hs-worker { display: contents; }
 .hs-worker[data-script='ar'], .hs-worker[data-script='ur'], .hs-worker[data-script='hi'], .hs-worker[data-script='ml'], .hs-worker[data-script='bn'] { text-transform: none; }
 .hs-fallback-text { font-style: italic; }
+
+.hs-brandmark { display: inline-block; padding: 0 var(--space-1); font-weight: var(--weight-bold); font-size: var(--fs-label); letter-spacing: var(--track-label); white-space: nowrap; }
+.hs-previews { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: var(--space-2); }
+.hs-preview { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-2); background: var(--color-base); color: var(--color-ink); border: var(--rule-structure); }
+.hs-preview-bar { display: flex; align-items: center; gap: var(--space-1); padding: var(--space-1); background: var(--color-sheet); border: var(--rule-hair); }
+.hs-shell fieldset.hs-form { border: 0; padding: 0; margin: 0; }
+.hs-shell input[type='color'] { min-block-size: var(--target-touch); padding: 2px; inline-size: 100%; }

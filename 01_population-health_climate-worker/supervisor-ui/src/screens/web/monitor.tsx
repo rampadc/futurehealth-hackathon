@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import type { TrustLogEntry } from '../../contract';
+import { live } from '../../live';
 import { nameOf } from '../../replay';
 import { navigate } from '../../router';
 import { crew, heatNow, SCREEN_FOR_ACTION, time, who } from '../data';
@@ -45,39 +47,40 @@ export function W1SquadMonitoring({ session }: ScreenProps) {
   </div>;
 }
 
-type AgentRun = { id: string; persona_id: string; recorded_at: string; status?: string; model?: string; tools?: Array<{ name: string }>; latency_ms?: number };
-
-/** W8 · System & trust: what the solver and agent did, and that none of it was applied by software. */
+/** W8 · System & trust: what the solver and agent did, and that none of it was applied on site by software. */
 export function W8SystemTrust({ session }: ScreenProps) {
   const { caseView } = session;
   const [ready, setReady] = useState<boolean | null>(null);
-  const [agentRuns, setAgentRuns] = useState<AgentRun[] | 'presenter-only' | null>(null);
+  const [log, setLog] = useState<TrustLogEntry[] | null>(null);
+  const [error, setError] = useState('');
   useEffect(() => {
-    let live = true;
-    fetch('/api/ready').then(r => { if (live) setReady(r.ok); }).catch(() => { if (live) setReady(false); });
-    fetch('/api/demo/agent-runs', { credentials: 'same-origin' }).then(async r => { if (!live) return; if (r.status === 401 || r.status === 403) setAgentRuns('presenter-only'); else if (r.ok) setAgentRuns(await r.json()); else setAgentRuns([]); }).catch(() => { if (live) setAgentRuns([]); });
-    return () => { live = false; };
+    let current = true;
+    fetch('/api/ready').then(r => { if (current) setReady(r.ok); }).catch(() => { if (current) setReady(false); });
+    live.trustLog().then(entries => { if (current) { setLog(entries); setError(''); } }).catch(e => { if (current) setError(e.message); });
+    return () => { current = false; };
   }, [caseView?.version]);
   if (!caseView) return <NoCase session={session} />;
   const runs = caseView.runs ?? [];
-  const applied = runs.some(r => r.applied);
+  const appliedOnSite = (caseView.capture?.response.applied as boolean | undefined) === true || (log ?? []).some(e => e.kind !== 'command' && e.applied);
+  const counts = (kind: TrustLogEntry['kind']) => (log ?? []).filter(e => e.kind === kind).length;
   return <div className="hs-screen">
     <Head kicker="System & trust" title="System & trust" sub="Every solver run and agent answer is a proposal. People record every action." />
     <Hero>
       <Metric label="Services" value={ready === null ? '…' : ready ? 'Ready' : 'Degraded'} sub="database and solver" tone={ready === false ? 'red' : ready ? 'ok' : undefined} />
-      <Metric label="Solver runs" value={String(runs.length)} sub={`latest ${runs[0]?.status ?? '—'}`} />
-      <Metric label="Applied by software" value={applied ? 'Yes' : 'None'} sub="applied: false on every run" tone={applied ? 'red' : 'ok'} />
+      <Metric label="Proposals" value={String(counts('solver_run') + counts('agent_run'))} sub={`${counts('solver_run')} solver · ${counts('agent_run')} agent`} />
+      <Metric label="Applied on site by software" value={appliedOnSite ? 'Yes' : 'None'} sub="every proposal carries applied: false" tone={appliedOnSite ? 'red' : 'ok'} />
     </Hero>
+    <Section title="Trust log" hint="Newest first · people’s records and system proposals">
+      {error ? <Note tone="amber">{error}</Note> : !log ? <p className="hs-muted" role="status">Loading…</p> : log.length ? <div className="hs-scroll"><table className="hs-table">
+        <thead><tr><th>Time</th><th>Kind</th><th>What happened</th><th>Status</th></tr></thead>
+        <tbody>{log.map(e => <tr key={e.id}><td>{time(e.at)}</td><td>{e.kind === 'command' ? 'Person' : e.kind === 'solver_run' ? 'Solver' : e.kind === 'agent_run' ? 'Agent · AI' : 'Guardrail'}</td><td>{e.summary}</td><td>{e.status}</td></tr>)}</tbody>
+      </table></div> : <Empty>Nothing recorded for this case yet.</Empty>}
+    </Section>
     <Section title="Solver runs" hint={`Case version ${caseView.version}`}>
       {runs.length ? <div className="hs-scroll"><table className="hs-table">
-        <thead><tr><th>Version</th><th>Status</th><th>HTTP</th><th>Graph</th><th>Applied</th></tr></thead>
-        <tbody>{runs.map(r => <tr key={r.id}><td>{r.version}</td><td>{r.status}{r.error ? ` · ${r.error}` : ''}</td><td>{r.http_status ?? '—'}</td><td>{r.graph_events?.join(' → ') ?? '—'}</td><td>{r.applied ? 'yes' : 'no'}</td></tr>)}</tbody>
+        <thead><tr><th>Version</th><th>Status</th><th>HTTP</th><th>Graph</th><th>Shown now</th></tr></thead>
+        <tbody>{runs.map(r => <tr key={r.id}><td>{r.version}</td><td>{r.status}{r.error ? ` · ${r.error}` : ''}</td><td>{r.http_status ?? '—'}</td><td>{r.graph_events?.join(' → ') ?? '—'}</td><td>{r.applied ? 'Current result' : '—'}</td></tr>)}</tbody>
       </table></div> : <Empty>No solver runs for this case yet.</Empty>}
-    </Section>
-    <Section title="Planning Agent runs">
-      {agentRuns === 'presenter-only' ? <Note>Agent run telemetry is limited to presenter access in this demo.</Note>
-        : agentRuns?.length ? <List>{agentRuns.slice(0, 20).map(r => <Row key={r.id} title={`${nameOf(r.persona_id)} · ${time(r.recorded_at)}`} detail={`${r.status ?? '—'}${r.model ? ` · ${r.model}` : ''}${r.tools?.length ? ` · tools: ${[...new Set(r.tools.map(t => t.name))].join(', ')}` : ''}${r.latency_ms ? ` · ${Math.round(r.latency_ms)} ms` : ''}`} />)}</List>
-          : <Empty>No agent answers yet.</Empty>}
     </Section>
     <Section title="Guardrails">
       <List>

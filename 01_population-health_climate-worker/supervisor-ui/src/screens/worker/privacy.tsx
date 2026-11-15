@@ -1,22 +1,36 @@
 import { useEffect, useState } from 'react';
+import type { ConsentScope, WorkerConsent } from '../../contract';
 import { LANGS, langOf } from '../../i18n';
+import { live as api } from '../../live';
 import { navigate } from '../../router';
-import { intervalsOf, time } from '../data';
+import { time } from '../data';
 import { Computed, CtaBar, Head, Hero, HoldButton, List, Metric, NoCase, Note, Row, Section } from '../kit';
 import type { ScreenProps } from '../registry';
 import { T, useT, useWorker, WorkerFrame } from './frame';
 
 type Consent = { checkins: boolean; wearable: boolean; at: string | null };
 const NONE: Consent = { checkins: false, wearable: false, at: null };
-const KEY = 'hs-worker-consent';
+const fromServer = (c: WorkerConsent): Consent => ({ checkins: c.scopes.includes('check_in'), wearable: c.scopes.includes('wearable'), at: c.consented_at });
+const toScopes = (c: Consent): ConsentScope[] => [...(c.checkins ? ['check_in', 'symptom_report'] as const : []), ...(c.wearable ? ['wearable'] as const : [])];
 
-/** Consent choices, kept on this phone only until the worker consent endpoint exists. */
+/** The signed-in worker's consent, stored by the backend (`/api/worker/consent`). */
 function useConsent(personId: string | undefined) {
-  const read = (): Consent => { try { return { ...NONE, ...JSON.parse(localStorage.getItem(`${KEY}:${personId}`) ?? 'null') }; } catch { return NONE; } };
-  const [consent, setConsent] = useState<Consent>(read);
-  useEffect(() => { setConsent(read()); }, [personId]);
-  const save = (next: Consent) => { setConsent(next); try { localStorage.setItem(`${KEY}:${personId}`, JSON.stringify(next)); } catch { /* Private mode: this session only. */ } };
-  return [consent, save] as const;
+  const [consent, setConsent] = useState<Consent>(NONE);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    let live = true;
+    if (personId) api.consent().then(c => { if (live) setConsent(fromServer(c)); }).catch(e => { if (live) setError(e.message); });
+    return () => { live = false; };
+  }, [personId]);
+  const save = async (next: Consent, lang: string) => {
+    setError('');
+    try { setConsent(fromServer(await api.saveConsent(lang, toScopes(next)))); return true; } catch (e) { setError(e instanceof Error ? e.message : 'Could not save'); return false; }
+  };
+  const withdraw = async () => {
+    setError('');
+    try { setConsent(fromServer(await api.withdrawConsent())); } catch (e) { setError(e instanceof Error ? e.message : 'Could not withdraw'); }
+  };
+  return { consent, save, withdraw, error };
 }
 
 /** P1 · Welcome: language first (by endonym), then what to share, without pressure. */
@@ -27,7 +41,7 @@ function Welcome({ session }: ScreenProps) {
   const t = useT();
   const { lang, chosen, choose } = useWorker();
   const [step, setStep] = useState<'lang' | 'consent'>(chosen ? 'consent' : 'lang');
-  const [consent, save] = useConsent(session.person?.id);
+  const { consent, save, error } = useConsent(session.person?.id);
   const [draft, setDraft] = useState(consent);
   useEffect(() => setDraft(consent), [consent]);
   if (!session.person) return <NoCase session={session} />;
@@ -50,8 +64,9 @@ function Welcome({ session }: ScreenProps) {
       </List>
     </Section>
     <Note><T k="p1.alerts" /> <T k="p1.later" /></Note>
-    <CtaBar note="Saved on this phone only in this demo.">
-      <button type="button" className="hs-button is-primary" onClick={() => { save({ ...draft, at: new Date().toISOString() }); navigate('/worker/p2'); }}><T k="p1.save" /></button>
+    {error && <p role="alert" className="hs-error">{error}</p>}
+    <CtaBar note="Only you and occupational health see your answers.">
+      <button type="button" className="hs-button is-primary" disabled={session.busy} onClick={() => void save(draft, lang).then(ok => { if (ok) navigate('/worker/p2'); })}><T k="p1.save" /></button>
     </CtaBar>
   </div>;
 }
@@ -67,17 +82,19 @@ export function P8MyData(props: ScreenProps) {
 }
 function MyData({ session }: ScreenProps) {
   const t = useT();
-  const { lang } = useWorker();
-  const [consent, save] = useConsent(session.person?.id);
+  const { consent, withdraw, error } = useConsent(session.person?.id);
+  const [failed, setFailed] = useState('');
   const { caseView, person } = session;
   if (!caseView || !person) return <NoCase session={session} />;
   const events = caseView.story.events.filter(e => e.actorId === person.id);
-  const intervals = intervalsOf(caseView.capture, person.id);
-  const download = () => {
-    const body = { person_id: person.id, generated_at: new Date().toISOString(), language: lang, consent, recorded_actions: events.map(e => e.title), plan_intervals: intervals, note: 'What this demo case holds about you. Clinical notes are never stored in the shared operations record.' };
-    const url = URL.createObjectURL(new Blob([JSON.stringify(body, null, 2)], { type: 'application/json' }));
-    const a = document.createElement('a'); a.href = url; a.download = `heat-safe-my-data-${person.id}.json`; a.click();
-    URL.revokeObjectURL(url);
+  const download = async () => {
+    setFailed('');
+    try {
+      const body = await api.workerData();
+      const url = URL.createObjectURL(new Blob([JSON.stringify(body, null, 2)], { type: 'application/json' }));
+      const a = document.createElement('a'); a.href = url; a.download = `heat-safe-my-data-${person.id}.json`; a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) { setFailed(e instanceof Error ? e.message : 'Download failed'); }
   };
   return <div className="hs-screen">
     <Head title={<T k="p8.title" />} />
@@ -96,10 +113,11 @@ function MyData({ session }: ScreenProps) {
     </Section>
     <Section title={<T k="p8.who" />}><p className="hs-muted"><T k="p8.none" /></p></Section>
     <CtaBar>
-      <button type="button" className="hs-button is-primary" onClick={download}><T k="p8.download" /></button>
-      <HoldButton className="hs-button is-danger" onConfirm={() => save({ ...NONE })} hint={t('hold')}><T k="p8.delete" /></HoldButton>
+      <button type="button" className="hs-button is-primary" onClick={() => void download()}><T k="p8.download" /></button>
+      <HoldButton className="hs-button is-danger" onConfirm={() => void withdraw()} hint={t('hold')} disabled={!consent.checkins && !consent.wearable}><T k="p8.delete" /></HoldButton>
     </CtaBar>
+    {(error || failed) && <p role="alert" className="hs-error">{error || failed}</p>}
     <Note><T k="p8.deletebody" /></Note>
-    <Computed>Consent is saved on this phone in this demo; the worker consent service is planned.</Computed>
+    <Computed>Your export holds your consent, your own check-ins and reports, and your own plan. Clinical notes are never stored here.</Computed>
   </div>;
 }
