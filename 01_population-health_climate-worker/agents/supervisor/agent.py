@@ -154,7 +154,16 @@ def check_grounding(callback_context: CallbackContext, llm_response: LlmResponse
     parts = list(content.parts) + [types.Part(text=warning)]
     return LlmResponse(content=types.Content(role=content.role, parts=parts))
 
-
+"""
+  Define supervisor agent, tools the agent has access to:
+  - get_forecast
+  - compute_heat_stress
+  - lookup_job_profiile
+  - optimise_schedule
+  - git_site_sensor
+  - search_guidance
+  all tool functions are held in agent_tools.py 
+"""
 root_agent = Agent(
     name="supervisor_planner",
     model=Gemini(model=MODEL, client_kwargs={"vertexai": True, "project": PROJECT, "location": MODEL_LOCATION}),
@@ -165,7 +174,7 @@ root_agent = Agent(
     after_model_callback=check_grounding,
     # The output cap includes thinking tokens; a full-day table needs the headroom
     generate_content_config=types.GenerateContentConfig(
-        temperature=0.1, max_output_tokens=16384, thinking_config=types.ThinkingConfig(thinking_level="low")),
+        max_output_tokens=16384, thinking_config=types.ThinkingConfig(thinking_level="low")),
 )
 
 
