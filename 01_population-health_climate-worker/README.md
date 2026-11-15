@@ -51,12 +51,53 @@ If the separate ADC expires, renew it without touching the work one:
 CLOUDSDK_CONFIG=$HOME/.config/gcloud-heat-safe gcloud auth application-default login
 ```
 
+## Heat-Safe API
+
+`server.py` serves the agent over HTTP for any frontend. It's one FastAPI app with three layers:
+
+```bash
+uv run --env-file ../.env uvicorn server:app --reload --port 8010
+# http://localhost:8010/docs    every endpoint, its inputs and outputs, with "Try it out"
+# http://localhost:8010/dev-ui  the adk web chat page, as before
+```
+
+| Endpoint | What | LLM? |
+|---|---|---|
+| `GET /sites`, `GET /sites/{site}/conditions?date=` | Hourly heat stress, TWL zones, midday break (`agent_tools.compute_heat_stress`) | no |
+| `POST /plans` | A crew plan or a mid-shift re-plan (`agent_tools.optimise_schedule`) | no |
+| `GET /sites/{site}/sensor?date=&until=` | Site sensor vs forecast, the monitor's alerts so far (`agent_tools.get_site_sensor`) | no |
+| `GET /monitor/replay` (SSE) | The risk monitor replayed live on the synthetic feed: `plan`, `reading`, `alert` (all languages), `replan`, `done` | no |
+| `POST /agent/chat` (SSE) | The supervisor agent: `session`, `tool_call` / `tool_result`, then `done` with the answer and its grounding checks | yes |
+| `/run_sse`, `/apps/supervisor/...`, `/dev-ui`, `/health` | ADK's own routes (`get_fast_api_app`) | yes |
+
+```bash
+curl -N "localhost:8010/monitor/replay?speed=0.2&start=08:00&end=10:00"
+curl -N -X POST localhost:8010/agent/chat -H 'Content-Type: application/json' \
+     -d '{"message": "Plan steel fixers at Mussafah on 2025-08-01: 5 hours, shade available."}'
+# continue the conversation: add "session_id" from the first `session` event
+```
+
+Notes:
+- **The REST endpoints and the agent call the same functions** (`agent_tools`), so the UI and the agent
+  always show the same numbers. `heat_safe/api.py` is an `APIRouter`, so another FastAPI app can mount it
+  with `app.include_router(router)`.
+- **The chat answer arrives whole** in `done`, after the grounding check has run. Streaming it token by
+  token would show the user words before they were checked. Progress is shown instead (`tool_call`).
+- **A browser `EventSource` can only GET.** Use it for `/monitor/replay`. For `POST /agent/chat`, read the
+  stream with `fetch()` and `response.body.getReader()`.
+- **Sessions are in memory**, so there's one Cloud Run instance, and a restart forgets chats (a 404 for an
+  old `session_id`). ADK's `/run_sse` and our `/agent/chat` keep separate sessions.
+- **CORS:** `localhost:5173` (Vite) is allowed. Add a deployed frontend with
+  `HEAT_SAFE_ALLOWED_ORIGINS=https://...`.
+- **Deploy:** `infra/README.md` (the same Cloud Run service, now running `uvicorn server:app`).
+
 ## Layout
 
 | Path | What |
 |---|---|
 | `src/heat_safe/` | Risk core (TWL, rules, scheduler, grounding), guidance search (RAG) and the agent's tool wrappers; RAG reading order and learning notes in `src/heat_safe/README_RAG.md` |
 | `agents/supervisor/` | Supervisor planning agent (ADK, Gemini) |
+| `server.py`, `src/heat_safe/api.py` | The HTTP API (FastAPI): endpoints, the monitor stream, the agent chat |
 | `evals/` | Golden scenarios, scorer, runner; learning notes in `evals/README.md` |
 | `tests/` | Unit tests |
 | `tools/` | Data download, BigQuery load, corpus build (`build_corpus.py`), terminal client |
