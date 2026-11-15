@@ -10,10 +10,14 @@ The case ledger stores human observations and actions separately from solver pro
 
 If optimization returns `unknown` or a transport/server failure interrupts calculation, an operational lead (P02, P03 or C01) can POST `/api/case/retry` with `{"expected_version": <current version>}`. This runs the same recorded evidence through the graph again and adds a run record. It does not advance the case version or create a human evidence event. The case view exposes `retry_available` for the selected persona.
 
-Run the opt-in end-to-end check with a local solver running:
+`GET /api/case/conditions` (any signed-in persona) returns the hourly Thermal Work Limit for the case site (Mussafah) and the case day from the risk core's `compute_heat_stress`: the ERA5 replay for past dates, the forecast otherwise. It includes the hour matching the case clock, the day summary, the zone thresholds and citations. It is planning context, not a local measurement, and it never clears a hold. If the weather data is missing it returns `status: unavailable` rather than failing.
+
+The Planning Agent (`live_assistant.py`) has a `what_if_crew_plan` tool for supervisors and responders, not workers (`what_if.py`). It copies the case's latest solver request, marks the named workers unavailable or ready (a hypothetical readiness, labelled as such), and posts it to the solver's stateless `/v2/crew-rest/solve`. It returns the current and hypothetical plans side by side with `applied: false` and `recorded: false`. Nothing is written to the case, and the hypothetical readiness is never a recorded confirmation. Each answer saves the names of the tools it used, which the Ask screens and the trust log show.
+
+Run the opt-in end-to-end checks with a local solver running:
 
 ```sh
-RUN_LIVE_APPLICATION=1 uv run pytest -q tests/test_application_live_journey.py
+RUN_LIVE_APPLICATION=1 uv run pytest -q tests/test_application_live_journey.py tests/test_what_if.py
 ```
 
 For hosted deployment, set `STATIC_DIR` to the built frontend directory and supply PostgreSQL via `DATABASE_URL` or the `DATABASE_HOST/NAME/USER/PASSWORD` components. The app retains SQLite for local use. Shared-code access is automatically required on Cloud Run; its digests are `HEAT_ACCESS_CODE_SHA256` and `HEAT_PRESENTER_CODE_SHA256`. `GET/POST/DELETE /api/access` manages the eight-hour perimeter session; presenter APIs require the presenter role independently of the selected persona.

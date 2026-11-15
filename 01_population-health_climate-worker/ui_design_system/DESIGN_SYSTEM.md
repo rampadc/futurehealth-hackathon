@@ -196,7 +196,7 @@ Every interactive component has a real implementation (semantics, keyboard, ARIA
 | Component colours 1–4 | Heat amber, protect rose, plan blue, restart green | **Numbered ink squares**, no hue | Four extra hues collided with the band colours (restart green read as “safe”, protect rose as “stop”). Numbers already carry identity |
 | AI colour | Violet `#5B21B6` + grey tint | **No hue**: dashed edge, ◇, cool tracing paper | Removes the “grey looks disabled” problem (spec §8) and keeps colour for safety |
 | Hues | Tailwind 700-series values | RAL-derived signal colours | Domain-grounded; same or better contrast |
-| Red band at 145 W/m² (wireframe W1) | Red cell | Green **band** + red **hold** stamp | Matches `ui/DESIGN_NOTES.md`: colour is not task permission |
+| Red band at 145 W/m² (Squad Monitoring) | Red cell | Green **band** + red **hold** stamp | Matches `ui/DESIGN_NOTES.md`: colour is not task permission |
 | Rules | 1px ink everywhere | 1 / 2 / 4px hierarchy + dashed | Lets structure carry hierarchy without boxes |
 | Metric cards | Separate bordered boxes | One ruled readout band | No card-in-card |
 | Focus | 2px ink | Ink ring + yellow halo | Visible in direct sun |
@@ -270,7 +270,7 @@ The product line “Heat-Safe Crew” always stays under the company name, so a 
 5. **Tint.** Rail tint is OKLCH 0.955/0.014 (day) or 0.215/0.012 (night) at the brand hue. It is refused within 40° of the tracing-paper hue, so a tinted rail can’t pass for an AI draft.
 6. **Safety screens.** Any screen with a stop-work or emergency statement shows no brand, whatever the setting.
 
-Each guardrail produces a check (`pass`, `adjusted`, `restricted`, `off`, `enforced`) with a plain sentence. W9 lists them beside the publish button.
+Each guardrail produces a check (`pass`, `adjusted`, `restricted`, `off`, `enforced`) with a plain sentence. The branding screen lists them beside the publish button.
 
 ### Platform and mobile web are configured separately
 

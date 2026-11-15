@@ -1,4 +1,6 @@
 """Conversation storage and request scoping, without model or cloud calls."""
+import inspect
+
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 import pytest
@@ -45,6 +47,19 @@ def test_mismatched_case_never_invokes_model(client):
     client.cookies.set('actor', 'P03')
     result = client.post('/api/chat', json={'case_id': 'old-case', 'message': 'What next?'})
     assert result.status_code == 409
+
+
+@pytest.mark.parametrize('persona,has_what_if', [('P02', True), ('C01', True), ('P03', True), ('C05', False), ('C08', False)])
+def test_only_supervisors_and_responders_get_the_what_if_tool(persona, has_what_if):
+    from heat_safe.application.what_if import tools_for
+    names = [tool.__name__ for tool in tools_for(persona, lambda: {}, 'http://solver')]
+    assert names == (['what_if_crew_plan'] if has_what_if else [])
+
+
+def test_case_agent_uses_the_persona_gate_and_says_nothing_is_applied():
+    source = inspect.getsource(assistant.build_agent)
+    assert 'tools_for(actor, current, service.solver_url)' in source and '*what_if' in source
+    assert 'nothing was recorded or applied' in source
 
 
 def test_message_retries_do_not_duplicate_records(client):

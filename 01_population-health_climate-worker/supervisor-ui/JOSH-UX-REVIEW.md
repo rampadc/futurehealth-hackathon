@@ -1,5 +1,20 @@
 # Josh tutorial → supervisor UI: UX review
 
+> **Status, 15 November 2026.** This review covers the classic desktop app, now at `/classic`. The main app is the device shells built from the team wireframes (`/web`, `/site`, `/worker`, `/kiosk`; see [SCREENS.md](SCREENS.md)). They close these gaps from the table below:
+>
+> | Stage | Gap | Closed by |
+> | --- | --- | --- |
+> | 3 · heat decision | Reading source, legal versus site layer, task scope and clearance evidence together | Heat controls (web), with the risk-core site conditions alongside |
+> | 5 · worker notice and check-in | Fixed translated notice, offline queued check-in | Worker Alert and Now screens in seven languages; check-ins and reports queue offline and send on reconnect |
+> | 6 · protective response | Owner, time and status per confirmation; 11/11 headcount; overdue escalation; planning lock | Protective response (web) and site Headcount |
+> | 7 · workshop eligibility | Affected → qualified → confirmed ready → proposed funnel; permit, resources and supervision | Crew & workshop (web) |
+> | 10 · worker report and privacy | Voice check-in, red-flag branch, consent, worker-owned record | Worker Check in (voice and tap), Welcome (consent per data type) and My data |
+> | 13 · handover | Handover with decisions still open | Restart review lists the open decisions and allows handover before the review |
+> | 14 · Planning Agent | Tool-calling agent with citations, refusals and a trust log | Ask screens use the live ADK agent and list the tools behind each answer; System & trust shows its runs |
+> | 15 · restart readiness | All eight checks, freshness and midday restriction together | Restart review (web): all eight checks with named owners, latest reading freshness and the midday window |
+>
+> Still open on the new screens: a one-screen case orientation (stages 1–2), an explicit 90 vs 120 worker-minute consequence of Leila's confirmation (stage 11), and a closing proposed / recorded / still open summary (stage 16).
+
 Reviewed 13 November 2026. I clicked through all 16 stages of Josh's interactive tutorial, including the worker check-in/offline switch, missing acknowledgement, timeline scrubber, both red-flag answers, both Leila replan branches, all three Planning Agent questions, and the restart evidence checks. I compared that observed journey with the current desktop demo source and its supplied layout screenshot. This is a UX comparison, not a requirement to reproduce the tutorial's visual design or to turn a local demo into a live safety system.
 
 **Verdict:** The current app captures the central human handoffs and the held-work/crew-plan/restart separation. It is a credible role-based walkthrough, but it does not yet tell the same *causal* story as clearly. The largest issue is that its handover waits for restart review, reversing the tutorial's open-decision handover. The next most valuable changes are to expose the evidence and eligibility behind the proposals and to make the assistant's limited, local role legible.

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, Container, MenuItem, Paper, Stack, TextField, Typography } from '@mui/material';
 import { live, type CaseView } from './live';
+import { applyPreset, readingPayload, SCENARIO_PRESETS, type ReadingKind } from './scenarioPresets';
 import { timeLabel } from './Timeline';
 
 type Props = { caseView: CaseView | null; onChange: (next: CaseView | null) => Promise<void>; onReturn: () => void };
@@ -14,10 +15,13 @@ type WorkflowRun = { id: string; version: number; status: string; http_status?: 
 type ModelRun = { id: string; persona_id?: string; recorded_at?: string; status?: string; [key: string]: unknown };
 type SolverCall = { endpoint: string; http_status: number };
 
+const READING_KINDS: Array<[ReadingKind, string]> = [['valid', 'Valid, measured now'], ['fault', 'Sensor fault (invalid)'], ['stale', 'Stale (measured 10 min ago)']];
+
 export function DemoControl({ caseView, onChange, onReturn }: Props) {
   const [presenterCase, setPresenterCase] = useState<CaseView | null>(caseView);
   const [time, setTime] = useState(caseView ? timeLabel(caseView.clock) : '08:11');
   const [twl, setTwl] = useState('145');
+  const [readingKind, setReadingKind] = useState<ReadingKind>('valid');
   const [runs, setRuns] = useState<WorkflowRun[]>([]);
   const [agentRuns, setAgentRuns] = useState<ModelRun[]>([]);
   const [selectedRunId, setSelectedRunId] = useState('');
@@ -52,13 +56,28 @@ export function DemoControl({ caseView, onChange, onReturn }: Props) {
       <Stack direction="row" spacing={2}><Button variant="contained" disabled={busy || !!presenterCase} onClick={() => void execute('Case start', live.start)}>Start heat response case</Button><Button color="error" variant="outlined" disabled={busy || !presenterCase} onClick={() => void execute('Case reset', live.reset)}>Reset active case</Button></Stack>
     </Stack></Paper>
     <Paper variant="outlined" sx={{ p: 3 }}><Stack spacing={2}>
+      <Typography variant="h6" component="h2">Scenario presets</Typography>
+      <Typography variant="body2" color="text.secondary">Each preset resets the case, then sets the clock and the local reading. It does not record a person’s instruction, stop, headcount or symptom report.</Typography>
+      <Stack spacing={1.5}>{SCENARIO_PRESETS.map(preset => <Stack key={preset.id} direction="row" spacing={2} sx={{ alignItems: 'center' }}>
+        <Button variant="outlined" disabled={busy} sx={{ flexShrink: 0 }} onClick={() => void execute(preset.title, () => applyPreset(preset, live))}>{preset.title}</Button>
+        <Typography variant="body2">{preset.detail}</Typography>
+      </Stack>)}</Stack>
+    </Stack></Paper>
+    <Paper variant="outlined" sx={{ p: 3 }}><Stack spacing={2}>
       <Typography variant="h6" component="h2">Case clock · 4 Aug 2025 GST</Typography>
       <Typography variant="body2" color="text.secondary">Advance the case time to observe stale readings, recovery coverage and restart rules.</Typography>
       <Stack direction="row" spacing={2}><TextField label="New time (GST)" type="time" size="small" disabled={busy} value={time} onChange={event => setTime(event.target.value)} slotProps={{ inputLabel: { shrink: true } }} /><Button variant="contained" disabled={busy || !presenterCase || !clockValid} onClick={() => void execute('Clock advance', () => live.clock(clockAt))}>Advance clock</Button></Stack>
     </Stack></Paper>
     <Paper variant="outlined" sx={{ p: 3 }}><Stack spacing={2}>
       <Typography variant="h6" component="h2">Local reading signal</Typography>
-      <Stack direction="row" spacing={2}><TextField label="Thermal Work Limit (W/m²)" type="number" size="small" disabled={busy} value={twl} onChange={event => setTwl(event.target.value)} /><Button variant="contained" disabled={busy || !presenterCase || !Number.isFinite(Number(twl)) || Number(twl) <= 0} onClick={() => void execute('Reading signal', () => live.signal({ twl: Number(twl), sensor_id: presenterCase?.capture?.request.snapshot.readings[0]?.sensor_id ?? 't1', zone_id: presenterCase?.capture?.request.snapshot.readings[0]?.zone_id ?? 'civil_exposed', unit: 'W/m²', quality: 'valid', measured_at: presenterCase!.clock, received_at: presenterCase!.clock }))}>Inject reading</Button></Stack>
+      <Typography variant="body2" color="text.secondary">A sensor fault or a stale reading never clears a hold. Use them to show the sensor-failure and stale-evidence countercases.</Typography>
+      <Stack direction="row" spacing={2} useFlexGap sx={{ flexWrap: 'wrap' }}>
+        <TextField label="Thermal Work Limit (W/m²)" type="number" size="small" disabled={busy} value={twl} onChange={event => setTwl(event.target.value)} />
+        <TextField select label="Reading" size="small" disabled={busy} value={readingKind} onChange={event => setReadingKind(event.target.value as ReadingKind)} sx={{ minWidth: 220 }}>
+          {READING_KINDS.map(([value, label]) => <MenuItem key={value} value={value}>{label}</MenuItem>)}
+        </TextField>
+        <Button variant="contained" disabled={busy || !presenterCase || !Number.isFinite(Number(twl)) || Number(twl) <= 0 || Number(twl) >= 500} onClick={() => void execute('Reading signal', () => live.signal(readingPayload(presenterCase!, Number(twl), readingKind)))}>Inject reading</Button>
+      </Stack>
     </Stack></Paper>
     {presenterCase && <Paper variant="outlined" sx={{ p: 3 }}><Typography variant="h6" component="h2" sx={{ mb: 2 }}>Current workflow</Typography><Stack spacing={1}>{presenterCase.tasks.map(task => <Typography variant="body2" key={`${task.actor_id}:${task.action}`}>{task.actor_id} · {task.label} · {task.status}{task.reason ? ` · ${task.reason}` : ''}</Typography>)}</Stack><Box sx={{ mt: 2 }}><JsonDetails title="Solver response" value={{ status: presenterCase.capture?.http_status, provenance: presenterCase.capture?.provenance, response: presenterCase.capture?.response ?? null }} /></Box></Paper>}
     <Paper variant="outlined" sx={{ p: 3 }}><Typography variant="h6" component="h2" sx={{ mb: 2 }}>Run evidence</Typography><Stack spacing={2}>

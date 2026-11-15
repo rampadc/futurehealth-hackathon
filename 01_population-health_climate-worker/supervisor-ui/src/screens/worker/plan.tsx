@@ -6,8 +6,8 @@ import type { ScreenProps } from '../registry';
 import { En, T, useT, useWorker, WorkerFrame } from './frame';
 import { VoiceCheckIn } from './voice';
 
-/** P4 · Check in: tell the supervisor you feel unwell. Fixed red-flag question, no diagnosis. */
-export function P4CheckIn(props: ScreenProps) {
+/** Check in: tell the supervisor you feel unwell. Fixed red-flag question, no diagnosis. */
+export function CheckInScreen(props: ScreenProps) {
   return <WorkerFrame session={props.session}><CheckIn {...props} /></WorkerFrame>;
 }
 function CheckIn({ session }: ScreenProps) {
@@ -25,7 +25,7 @@ function CheckIn({ session }: ScreenProps) {
     <Statement tone="black" source={<T k="p4.rule" />}><T k="p4.sys" /></Statement>
     {queued && <Note tone="amber"><T k="p4.offline" /></Note>}
     <Note><En>Help is on the way. Stay where you are and with someone.</En></Note>
-    <CtaBar><button type="button" className="hs-button" onClick={() => navigate('/worker/p2')}><T k="p6.back" /></button></CtaBar>
+    <CtaBar><button type="button" className="hs-button" onClick={() => navigate('/worker/now')}><T k="p6.back" /></button></CtaBar>
   </div>;
   return <div className="hs-screen">
     <h1 id="hs-title"><T k="p4.title" /></h1>
@@ -57,8 +57,8 @@ function CheckIn({ session }: ScreenProps) {
   </div>;
 }
 
-/** P5 · My plan: only this worker's own work and rest times. */
-export function P5MyPlan(props: ScreenProps) {
+/** My plan: only this worker's own work and rest times. */
+export function MyPlanScreen(props: ScreenProps) {
   return <WorkerFrame session={props.session}><MyPlan {...props} /></WorkerFrame>;
 }
 function MyPlan({ session }: ScreenProps) {

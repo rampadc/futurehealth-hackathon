@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { BrandCheck, BrandPalette, BrandSettings } from '../../contract';
 import { live } from '../../live';
 import { time } from '../data';
-import { Badge, Computed, CtaBar, Draft, Empty, Head, Hero, List, Metric, Note, Row, Section, TypedConfirm } from '../kit';
+import { Badge, Computed, CtaBar, Draft, Empty, Hero, List, Metric, Note, Row, Section, TypedConfirm } from '../kit';
 import type { ScreenProps } from '../registry';
 
 const EXAMPLE: BrandPalette = { name: 'Sandline', primary: '#1F3A5F', on_primary: '#FFFFFF', logo_text: 'SANDLINE', rail_tint: false };
@@ -17,8 +17,8 @@ export function BrandMark({ palette }: { palette: BrandPalette }) {
   return <span className="hs-brandmark" style={{ background: palette.primary, color: palette.on_primary }}>{palette.logo_text}</span>;
 }
 
-/** W9 · Organisation branding: company colours on every surface without weakening a safety signal. */
-export function W9Branding({ session }: ScreenProps) {
+/** Organisation branding (an admin settings section): company colours on every surface without weakening a safety signal. */
+export function BrandingSettings({ session }: ScreenProps) {
   const admin = session.person?.id === 'P09';
   const [published, setPublished] = useState<BrandSettings | null>(null);
   const [draft, setDraft] = useState<Record<Surface, BrandPalette> | null>(null);
@@ -48,8 +48,8 @@ export function W9Branding({ session }: ScreenProps) {
     } catch (e) { setError(e instanceof Error ? e.message : 'Publishing failed'); }
   };
 
-  return <div className="hs-screen">
-    <Head kicker="Organisation" title="Organisation branding" sub="Put the company’s colours on the platform and the mobile web apps without weakening any safety signal." />
+  return <div className="hs-settings-panel">
+    <p className="hs-muted">Put the company’s colours on the platform and the mobile web apps without weakening any safety signal.</p>
     <Hero>
       <Metric label="Published" value={published?.version ? `v${published.version}` : 'None'} sub={published?.published_at ? `${time(published.published_at)} · ${published.published_by}` : 'Heat-Safe paper and ink'} />
       <Metric label="Guardrails" value={!checks ? '—' : passing ? 'All pass' : 'Failing'} sub="contrast and signal colours" tone={!checks ? undefined : passing ? 'ok' : 'red'} />
@@ -86,7 +86,7 @@ export function W9Branding({ session }: ScreenProps) {
         <List>
           <Row title="Brand bar and logo mark" detail="Every screen header." badge={<Badge tone="done">Yes</Badge>} />
           <Row title="Stamps, bands, buttons and charts" detail="Safety signals keep Heat-Safe colours." badge={<Badge tone="muted">Never</Badge>} />
-          <Row title="Stop-work and emergency screens" detail="M2 and P3 drop the brand entirely." badge={<Badge tone="muted">Never</Badge>} />
+          <Row title="Stop-work and emergency screens" detail="The stop-work instruction and the worker alert drop the brand entirely." badge={<Badge tone="muted">Never</Badge>} />
         </List>
       </Section>
       {admin ? <CtaBar note="Publishing changes every signed-in surface. Type PUBLISH to confirm.">

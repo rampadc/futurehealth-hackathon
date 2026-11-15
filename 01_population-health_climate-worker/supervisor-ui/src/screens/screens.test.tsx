@@ -14,6 +14,9 @@ let commands: Array<{ action: string; payload: Record<string, unknown> }>;
 let commandIds: string[];
 let brand: { version: number; published_at: string | null; published_by: string | null; platform: unknown; mobile: unknown };
 let brandCalls: Array<Record<string, unknown>>;
+const hourOf = (hour: string, twl: number, zone: string) => ({ hour, temperature_c: 34.4, wbgt_c: 32.2, twl_sun_wm2: twl, twl_zone_sun: zone, twl_shade_wm2: twl + 40, twl_zone_shade: 'low', band_sun: zone === 'high' ? 'red' : 'amber', midday_break_minutes: 0, withdrawal_limit: '', data_issue: '' });
+let conditions: unknown;
+let chatHistory: unknown[];
 let consent: { person_id: string; language: string; scopes: string[]; consented_at: string | null };
 const checks = (primary: string) => [{ id: 'signal', ok: primary !== '#D32F2F', label: primary === '#D32F2F' ? 'Brand colour reads as the stop signal' : 'Brand colour does not read as a safety signal' }];
 
@@ -24,7 +27,10 @@ async function makeCase(id: CaseId, story: Partial<StoryState>, tasks: Task[]): 
 const task = (action: string, actor_id: string, status: Task['status'], label = action): Task => ({ action, actor_id, label, status });
 
 beforeEach(() => {
-  person = null; commands = []; commandIds = []; currentCase = null; brandCalls = [];
+  conditions = { status: 'ok', site: 'mussafah', date: '2025-08-04', source: 'cache:era5_summer_2025.csv', kind: 'replay', clock_hour: '08:00', current: hourOf('08:00', 127, 'medium'),
+    summary: { max_temperature_c: 45.8, max_wbgt_c: 35.2, min_twl_sun_wm2: 76, worst_band: 'red', hours_high_zone_sun: 5, midday_break: '12:30-15:00', heat_programme_required: true, data_issues: 0 },
+    hourly: [hourOf('07:00', 140, 'low'), hourOf('08:00', 127, 'medium'), hourOf('12:00', 90, 'high')], zone_thresholds_wm2: { high_below: 115, low_from: 140 }, citation: [{ cite: 'ADOSH-SF TG', url: null }], rules_version: 'rules-test' };
+  person = null; commands = []; commandIds = []; currentCase = null; brandCalls = []; chatHistory = [];
   brand = { version: 0, published_at: null, published_by: null, platform: null, mobile: null };
   consent = { person_id: 'C05', language: 'en', scopes: [], consented_at: null };
   vi.stubGlobal('EventSource', undefined);
@@ -43,14 +49,19 @@ beforeEach(() => {
       if (t) t.status = 'recorded';
       return reply(currentCase);
     }
-    if (path === '/api/chat/history') return reply({ messages: [] });
+    if (path === '/api/chat/history') return reply({ messages: chatHistory });
     if (path === '/api/ready') return reply({ ok: true });
+    if (path === '/api/case/conditions') return reply(conditions);
     if (path === '/api/brand') {
       if (method === 'PUT') { brand = { version: brand.version + 1, published_at: '2025-08-04T16:40:00+04:00', published_by: 'P09', platform: body.platform, mobile: body.mobile }; brandCalls.push(body); return reply(brand); }
       return reply(brand);
     }
     if (path === '/api/brand/check') return reply({ platform: checks(body.platform.primary), mobile: checks(body.mobile.primary) });
-    if (path === '/api/trust-log') return reply([{ id: 'event-1', at: '2025-08-04T08:01:00+04:00', kind: 'command', summary: 'Maya Al Qamar: stop-work', status: 'recorded', applied: true }]);
+    if (path === '/api/trust-log') return reply([
+      { id: 'agent-1', at: '2025-08-04T08:20:00+04:00', kind: 'agent_run', summary: 'Planning Agent answered Rashid Al Wadi · tools: get_case, what_if_crew_plan', status: 'completed', applied: false },
+      { id: 'run-1', at: '2025-08-04T08:02:00+04:00', kind: 'solver_run', summary: 'Solver run for case version 2', status: 'completed', applied: false },
+      { id: 'event-1', at: '2025-08-04T08:01:00+04:00', kind: 'command', summary: 'Maya Al Qamar: stop-work', status: 'recorded', applied: true },
+    ]);
     if (path === '/api/worker/consent') {
       if (method === 'PUT') consent = { person_id: person!.id, language: body.language, scopes: body.scopes, consented_at: body.scopes.length ? '2025-08-04T07:30:00+04:00' : null };
       if (method === 'DELETE') consent = { ...consent, scopes: [], consented_at: null };
@@ -84,8 +95,8 @@ describe('every built screen', () => {
     }, 60_000);
   }
   it('explains an empty case instead of failing', async () => {
-    // Branding (W9) is organisation-wide and does not need a case.
-    for (const s of built.filter(x => x.device !== 'worker' && x.id !== 'w9')) {
+    // Branding is organisation-wide and does not need a case.
+    for (const s of built.filter(x => x.device !== 'worker' && x.id !== 'settings')) {
       const view = await open(`/${s.device}/${s.id}`, s.personas[0]);
       expect(await screen.findByText(/There is no active case/)).toBeTruthy();
       view.unmount();
@@ -96,22 +107,38 @@ describe('every built screen', () => {
 describe('stop-work', () => {
   it('Huda acknowledges from the site app', async () => {
     currentCase = await makeCase('heat_trigger', { issued: true }, [task('issue', 'P03', 'recorded'), task('acknowledge', 'C01', 'ready')]);
-    await open('/site/m2', 'C01');
+    await open('/site/stop-work', 'C01');
     await userEvent.click(await screen.findByRole('button', { name: 'Acknowledge' }));
     await waitFor(() => expect(commands).toEqual([{ action: 'acknowledge', payload: {} }]));
   });
 
-  it('only the owner can issue: Huda sees no enabled issue button on W2', async () => {
+  it('only the owner can issue: Huda sees no enabled issue button on heat controls', async () => {
     currentCase = await makeCase('heat_trigger', {}, [task('issue', 'P03', 'ready')]);
-    await open('/web/w2', 'C01');
+    await open('/web/heat-controls', 'C01');
     const button = await screen.findByRole('button', { name: 'Issue stop-work instruction' }) as HTMLButtonElement;
     expect(button.disabled).toBe(true);
     expect(screen.getByText(/Maya Al Qamar records this \(P03\)/)).toBeTruthy();
   });
 
+  it('shows replayed site conditions on heat controls without using them for clearance', async () => {
+    currentCase = await makeCase('heat_trigger', {}, [task('issue', 'P03', 'ready')]);
+    await open('/web/heat-controls', 'P03');
+    expect(await screen.findByRole('heading', { name: 'Site conditions · ERA5 replay' })).toBeTruthy();
+    expect(screen.getByText(/08:00 · TWL 127 W\/m² in sun · 167 in shade/)).toBeTruthy();
+    expect(screen.getAllByText(/never clears a hold/).length).toBeGreaterThan(0);
+    expect(screen.getByRole('list', { name: 'TWL in sun by hour' }).querySelector('[aria-current="time"]')?.textContent).toContain('08:00');
+  });
+
+  it('says conditions are unavailable and to rely on local readings', async () => {
+    conditions = { status: 'unavailable', site: 'mussafah', date: '2025-08-04', message: 'no weather data' };
+    currentCase = await makeCase('heat_trigger', {}, []);
+    await open('/web/monitoring', 'P03');
+    expect(await screen.findByText(/Conditions unavailable: no weather data/)).toBeTruthy();
+  });
+
   it('records the headcount for every affected worker at Shelter A', async () => {
     currentCase = await makeCase('heat_trigger', { stopped: true, checkedIn: true }, [task('recover', 'C01', 'ready')]);
-    await open('/site/m3', 'C01');
+    await open('/site/headcount', 'C01');
     await userEvent.click(await screen.findByRole('button', { name: /accounted for/ }));
     await waitFor(() => expect(commands[0]?.action).toBe('recover'));
     expect(commands[0].payload.zone_id).toBe('shelter_a');
@@ -122,7 +149,7 @@ describe('stop-work', () => {
 describe('assistance', () => {
   it('needs the typed word REMOVED before recording a removal', async () => {
     currentCase = await makeCase('removal_unconfirmed', { reported: true, assigned: true }, [task('incident_record', 'C01', 'recorded'), task('remove', 'C01', 'ready')]);
-    await open('/site/m6', 'C01');
+    await open('/site/action-card', 'C01');
     await userEvent.click(await screen.findByRole('button', { name: 'Confirm Bilal removed from heat' }));
     const confirm = screen.getByRole('button', { name: 'Confirm' }) as HTMLButtonElement;
     expect(confirm.disabled).toBe(true);
@@ -133,7 +160,7 @@ describe('assistance', () => {
 
   it('Bilal reports feeling unwell with press and hold', async () => {
     currentCase = await makeCase('canonical_timed', { assigned: true }, [task('report', 'C08', 'ready')]);
-    await open('/worker/p4', 'C08');
+    await open('/worker/check-in', 'C08');
     await userEvent.click(await screen.findByRole('button', { name: 'I feel unwell' }));
     await userEvent.click(screen.getByRole('button', { name: 'No' }));
     const send = screen.getByRole('button', { name: /Send to my supervisor/ });
@@ -146,7 +173,7 @@ describe('worker app languages', () => {
   it('mirrors the stop-work alert in Arabic', async () => {
     localStorage.setItem('hs-worker-lang:C05', 'ar');
     currentCase = await makeCase('heat_trigger', { issued: true }, []);
-    const { container } = await open('/worker/p3', 'C05');
+    const { container } = await open('/worker/alert', 'C05');
     await screen.findByRole('heading', { level: 1 });
     const frame = container.querySelector('.hs-worker')!;
     expect(frame.getAttribute('dir')).toBe('rtl');
@@ -158,7 +185,7 @@ describe('worker app languages', () => {
 describe('restart review', () => {
   it('lists all eight checks and keeps heavy work stopped', async () => {
     currentCase = await makeCase('restart_ready', { fresh: true, permit: true, removed: true, firstaid: true }, [task('review', 'P02', 'ready')]);
-    await open('/web/w6', 'P02');
+    await open('/web/restart-review', 'P02');
     expect(await screen.findByText('Crew readiness check')).toBeTruthy();
     expect(screen.getAllByRole('listitem').filter(li => /check|reading|removal|contact/i.test(li.textContent ?? '')).length).toBeGreaterThanOrEqual(8);
     expect(screen.getByText(/stays stopped/)).toBeTruthy();
@@ -168,11 +195,11 @@ describe('restart review', () => {
 describe('platform screens', () => {
   it('only the admin publishes branding, after typing PUBLISH', async () => {
     currentCase = await makeCase('heat_trigger', {}, []);
-    const view = await open('/web/w9', 'P02');
+    const view = await open('/web/settings', 'P02');
     expect(await screen.findByText(/No company palette yet/)).toBeTruthy();
     expect(screen.queryByRole('button', { name: /example palette/ })).toBeNull();
     view.unmount();
-    await open('/web/w9', 'P09');
+    await open('/web/branding', 'P09');
     await userEvent.click(await screen.findByRole('button', { name: /example palette/ }));
     const publish = await screen.findByRole('button', { name: 'Publish branding' }) as HTMLButtonElement;
     await waitFor(() => expect(publish.disabled).toBe(false));
@@ -184,15 +211,28 @@ describe('platform screens', () => {
     expect(await screen.findByText('Published version 1')).toBeTruthy();
   });
 
+  it('keeps branding and people under admin settings at the end of the rail', async () => {
+    currentCase = await makeCase('heat_trigger', {}, []);
+    await open('/web/settings', 'P09');
+    expect(await screen.findByRole('heading', { name: 'Admin settings' })).toBeTruthy();
+    expect(screen.getByText('Admin', { selector: '.hs-rail-group' })).toBeTruthy();
+    // Branding is no longer its own rail entry; it is a section of admin settings.
+    expect(screen.queryByRole('button', { name: 'Organisation branding' })).toBeNull();
+    expect(screen.getByRole('tab', { name: 'Organisation branding' })).toBeTruthy();
+    await userEvent.click(screen.getByRole('tab', { name: 'People and roles' }));
+    expect(await screen.findByText(/Hessa Al Qamar · HSE systems admin/)).toBeTruthy();
+    expect(screen.getByText(/not authentication/)).toBeTruthy();
+  });
+
   it('saves worker consent on the server and lets the worker withdraw it', async () => {
     localStorage.setItem('hs-worker-lang:C05', 'en');
     currentCase = await makeCase('heat_trigger', {}, []);
-    const view = await open('/worker/p1', 'C05');
+    const view = await open('/worker/welcome', 'C05');
     await userEvent.click(await screen.findByRole('switch', { name: 'Check-ins' }));
     await userEvent.click(screen.getByRole('button', { name: 'Save my choices' }));
     await waitFor(() => expect(consent.scopes).toEqual(['check_in', 'symptom_report']));
     view.unmount();
-    await open('/worker/p8', 'C05');
+    await open('/worker/my-data', 'C05');
     const withdraw = await screen.findByRole('button', { name: /Withdraw consent/ });
     await waitFor(() => expect((withdraw as HTMLButtonElement).disabled).toBe(false));
     fireEvent.keyDown(withdraw, { key: ' ' });
@@ -200,11 +240,38 @@ describe('platform screens', () => {
     localStorage.removeItem('hs-worker-lang:C05');
   });
 
-  it('shows the trust log to supervisors on W8', async () => {
+  it('shows the trust log to supervisors on system & trust', async () => {
     currentCase = await makeCase('heat_trigger', {}, []);
-    await open('/web/w8', 'P02');
+    await open('/web/trust', 'P02');
     expect(await screen.findByText('Maya Al Qamar: stop-work')).toBeTruthy();
     expect(screen.getByText('None')).toBeTruthy();
+  });
+
+  it('filters the trust log by solver, people and agent', async () => {
+    currentCase = await makeCase('heat_trigger', {}, []);
+    await open('/web/trust', 'P02');
+    await screen.findByText('Maya Al Qamar: stop-work');
+    await userEvent.click(screen.getByRole('button', { name: /^Agent · 1/ }));
+    expect(screen.getByText(/what_if_crew_plan/)).toBeTruthy();
+    expect(screen.queryByText('Maya Al Qamar: stop-work')).toBeNull();
+    await userEvent.click(screen.getByRole('button', { name: /^People · 1/ }));
+    expect(screen.getByText('Maya Al Qamar: stop-work')).toBeTruthy();
+    expect(screen.queryByText(/what_if_crew_plan/)).toBeNull();
+    await userEvent.click(screen.getByRole('button', { name: /^Solver · 1/ }));
+    expect(screen.getByText('Solver run for case version 2')).toBeTruthy();
+    await userEvent.click(screen.getByRole('button', { name: /^All · 3/ }));
+    expect(screen.getByText('Maya Al Qamar: stop-work')).toBeTruthy();
+  });
+
+  it('shows the tools behind each agent answer and marks what-if results as hypothetical', async () => {
+    currentCase = await makeCase('heat_trigger', {}, []);
+    chatHistory = [
+      { id: 'q', author: 'user', text: 'What if Rana were unavailable?' },
+      { id: 'q-answer', author: 'assistant', text: 'Draft: three workers instead of four.', tools: ['get_case', 'what_if_crew_plan'] },
+    ];
+    await open('/web/ask', 'P02');
+    expect(await screen.findByText('Used: get_case, what_if_crew_plan', { exact: false })).toBeTruthy();
+    expect(screen.getByText('Hypothetical · not recorded')).toBeTruthy();
   });
 });
 
@@ -212,7 +279,7 @@ describe('offline worker actions', () => {
   it('queues a check-in without a network and sends it once when the network returns', async () => {
     const online = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
     currentCase = await makeCase('heat_trigger', { issued: true, acknowledged: true, stopped: true }, [task('checkin', 'C05', 'ready')]);
-    await open('/worker/p6', 'C05');
+    await open('/worker/shelter', 'C05');
     const hold = await screen.findByRole('button', { name: /Check in at Shelter A/ });
     fireEvent.keyDown(hold, { key: ' ' });
     expect(await screen.findByText(/1 saved action waiting to send/, {}, { timeout: 2000 })).toBeTruthy();
@@ -230,7 +297,7 @@ describe('offline worker actions', () => {
   it('never queues supervisor decisions', async () => {
     const online = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
     currentCase = await makeCase('heat_trigger', { issued: true }, [task('acknowledge', 'C01', 'ready')]);
-    await open('/site/m2', 'C01');
+    await open('/site/stop-work', 'C01');
     await userEvent.click(await screen.findByRole('button', { name: 'Acknowledge' }));
     await waitFor(() => expect(commands).toEqual([{ action: 'acknowledge', payload: {} }]));
     expect(localStorage.getItem('hs-outbox:C01')).toBeNull();
@@ -249,7 +316,7 @@ describe('voice and badges', () => {
     }
     vi.stubGlobal('webkitSpeechRecognition', FakeRecognition);
     currentCase = await makeCase('canonical_timed', { assigned: true }, [task('report', 'C08', 'ready')]);
-    await open('/worker/p4', 'C08');
+    await open('/worker/check-in', 'C08');
     fireEvent.keyDown(await screen.findByRole('button', { name: /Hold and speak/ }), { key: ' ' });
     expect(await screen.findByText('“I feel dizzy”')).toBeTruthy();
     await userEvent.click(screen.getAllByRole('button', { name: 'I feel unwell' }).at(-1)!);
@@ -263,7 +330,7 @@ describe('voice and badges', () => {
     class FakeReader { onreading: ((e: unknown) => void) | null = null; onreadingerror = null; constructor() { reader = this; } async scan() {} }
     vi.stubGlobal('NDEFReader', FakeReader);
     currentCase = await makeCase('heat_trigger', { stopped: true }, [task('checkin', 'C05', 'ready')]);
-    await open('/kiosk/k1', 'C05');
+    await open('/kiosk/check-in', 'C05');
     await userEvent.click(await screen.findByRole('button', { name: 'Start NFC badge reader' }));
     await waitFor(() => expect(reader).toBeTruthy());
     reader!.onreading!({ message: { records: [{ recordType: 'text', encoding: 'utf-8', data: new DataView(new TextEncoder().encode('c05').buffer) }] } });
@@ -273,7 +340,7 @@ describe('voice and badges', () => {
 });
 
 describe('actions without a wireframe screen', () => {
-  it('Noura records the delivery draft from W1 at /', async () => {
+  it('Noura records the delivery draft from monitoring at /', async () => {
     currentCase = await makeCase('canonical_timed', { assigned: true }, [task('draftDelivery', 'P05', 'ready', 'Draft later delivery request')]);
     await open('/', 'P05');
     expect(await screen.findByRole('heading', { name: 'Squad Monitoring' })).toBeTruthy();

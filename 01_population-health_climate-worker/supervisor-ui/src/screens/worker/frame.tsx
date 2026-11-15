@@ -3,7 +3,7 @@ import { langOf, tr, useWorkerLanguage } from '../../i18n';
 import { live } from '../../live';
 import type { CaseSession } from '../../session';
 
-/** Language and network state for the worker app (P1–P8). */
+/** Language and network state for the worker app. */
 type WorkerContext = { lang: string; chosen: boolean; choose: (code: string) => void; online: boolean };
 const Ctx = createContext<WorkerContext>({ lang: 'en', chosen: false, choose: () => {}, online: true });
 export const useWorker = () => useContext(Ctx);
@@ -33,7 +33,7 @@ function useOnline() {
 
 /**
  * Wraps each worker screen: sets `lang` and `dir` so Arabic and Urdu mirror, and shows the
- * P7 offline banner when the phone loses its network.
+ * Offline banner when the phone loses its network.
  */
 export function WorkerFrame({ session, children, forceOffline }: { session: CaseSession; children: ReactNode; forceOffline?: boolean }) {
   const [stored, choose] = useWorkerLanguage(session.person?.id);

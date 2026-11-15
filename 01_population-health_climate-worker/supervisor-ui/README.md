@@ -1,6 +1,6 @@
 # Heat-Safe Crew app
 
-The app presents the Sandline operational case on four surfaces built from `../ui_wireframes/`: supervisor web (`/`, `/web`), site app (`/site`), worker app (`/worker`) and the Shelter A kiosk (`/kiosk`). See [SCREENS.md](SCREENS.md). The original nine-workspace desktop app stays at `/classic`. React calls the local application API; the backend owns cases, tasks, evidence, command validation, ADK execution and solver integration. Named sign-in/sign-out is local persona selection, not production authentication.
+The app presents the Sandline operational case on four surfaces built from `../ui_wireframes/`: supervisor web (`/`, `/web`), site app (`/site`), worker app (`/worker`) and the Shelter A kiosk (`/kiosk`). See [SCREENS.md](SCREENS.md). The original nine-workspace desktop app stays at `/classic`. Organisation branding and people are under Admin settings (`/web/settings`), and Squad Monitoring and Heat controls show the site's hourly heat conditions from the risk core. React calls the local application API; the backend owns cases, tasks, evidence, command validation, ADK execution and solver integration. Named sign-in/sign-out is local persona selection, not production authentication.
 
 ## Run locally
 
