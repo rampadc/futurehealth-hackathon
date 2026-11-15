@@ -34,7 +34,7 @@ Do not import `ui_design_system/components.css` globally: it restyles `body`, `*
 
 ## Status
 
-25 of 26 screens are built on live case data and real case commands. W9 (branding) is the remaining stretch screen.
+All 26 wireframe screens are built on live case data and real case commands.
 
 What is real and what is simulated:
 
@@ -43,14 +43,17 @@ What is real and what is simulated:
 | Case actions (stop-work, headcount, readiness, assignment, removal, first aid, fresh reading, checks, review, handover) | Real: `/api/case/commands`, same rules and owners as the desktop app |
 | Planning Agent (W7, M8) | Real: `/api/chat` (ADK + Gemini on the backend) |
 | Solver proposals, work/rest plan | Real solver output, shown as drafts with `applied: false` |
-| Worker language (P1) and consent (P1, P8) | Saved on the phone (`localStorage`); the consent endpoint is planned |
-| P8 download | Built in the browser from the live case; the export endpoint is planned |
+| Worker consent (P1, P8) and data export (P8) | Real: `/api/worker/consent`, `/api/worker/data` (signed-in worker only) |
+| Trust log (W8) | Real: `/api/trust-log` (supervisors; workers are refused) |
+| Branding (W9) | Real: `/api/brand`; server guardrails for contrast and signal colours; admin `P09` publishes with typed `PUBLISH`. M2 and P3 drop the brand |
+| Worker language | Chosen on the phone (`localStorage`) and saved with consent |
 | SMS preview (M2), kiosk badge taps (K1) | Display or simulated only; nothing is sent, no NFC |
 | Offline (P7) | Banner and disabled sending; no service worker or queue yet |
-| Agent telemetry (W8) | Presenter access only; a supervisor trust log is planned |
 | Voice check-in (P4) | Planned; tap answers only |
 
-Still to do: W9 with `brand.js` and an admin persona, the endpoints in `contract.ts`, self-hosted fonts, native review of translations, and pointing `/` at the web shell.
+Backend for the platform screens: `src/heat_safe/application/platform_api.py`, tests in `tests/test_platform_api.py`. Fonts (DM Sans and Noto for Arabic, Urdu, Devanagari, Malayalam and Bengali) are self-hosted from `@fontsource` and load with the device shells only.
+
+Still to do: native review of translations, an offline queue, voice check-in, and pointing `/` at the web shell.
 
 ## Ownership
 
@@ -85,6 +88,5 @@ Each slice should run end to end on a preview URL with presenter controls before
 
 ## Open decisions
 
-- **Personas.** The wireframes use five roles; the app has nine personas. W8 and W9 refer to an organisation admin (`P09`) who does not exist in `story.ts` or the backend yet, and Noura is the logistics coordinator in the app but the admin in the wireframes.
-- **Fonts.** The tokens ask for DM Sans and Noto families. The page's content security policy only allows same-origin fonts, so they must be self-hosted under `public/` or the screens fall back to system fonts.
+- **Admin persona.** W8 and W9 use a new organisation admin, Hessa Al Qamar (`P09`), because Noura is the logistics coordinator in the app but the admin in the wireframes. `P09` exists only on the backend and in the device shells; the desktop story keeps its nine personas.
 - **Retiring `/`.** Once W2–W7 cover the desktop workspaces, point `/` at the web shell and remove `src/workspaces/`.

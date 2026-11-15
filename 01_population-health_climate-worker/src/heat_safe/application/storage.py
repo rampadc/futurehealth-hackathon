@@ -139,6 +139,9 @@ def initialize(db_path: str | Path | None = None):
                 'CREATE TABLE IF NOT EXISTS chat_threads(thread_key TEXT PRIMARY KEY, session_id TEXT NOT NULL)',
                 'CREATE TABLE IF NOT EXISTS chat_messages(id TEXT PRIMARY KEY, thread_key TEXT NOT NULL, author TEXT NOT NULL, text TEXT NOT NULL, metadata TEXT NOT NULL, recorded_at TEXT NOT NULL)',
                 'CREATE TABLE IF NOT EXISTS agent_runs(id TEXT PRIMARY KEY, case_id TEXT NOT NULL, persona_id TEXT NOT NULL, recorded_at TEXT NOT NULL, detail TEXT NOT NULL)',
+                # Worker consent and branding (application/platform_api.py).
+                'CREATE TABLE IF NOT EXISTS worker_consent(person_id TEXT PRIMARY KEY, language TEXT NOT NULL, scopes TEXT NOT NULL, consented_at TEXT, updated_at TEXT NOT NULL)',
+                'CREATE TABLE IF NOT EXISTS brand(id INTEGER PRIMARY KEY CHECK (id = 1), version INTEGER NOT NULL, published_at TEXT NOT NULL, published_by TEXT NOT NULL, settings TEXT NOT NULL)',
             ):
                 db.execute(statement)
 

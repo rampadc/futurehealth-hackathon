@@ -22,6 +22,8 @@ PERSONAS = [
     ('P06','Salim Al Wadi','First aider','Sandline'), ('P01','Amal Al Nadir','Project manager','Sandline'),
     ('C01','Huda Al Nadir','Civil foreman','Dune Civil Works'), ('C05','Rana Al Nadir','Civil worker','Dune Civil Works'),
     ('C08','Bilal Al Safa','Civil worker','Dune Civil Works'),
+    # Organisation admin for the wireframe platform screens (W8, W9); owns no case actions.
+    ('P09','Hessa Al Qamar','HSE systems admin','Sandline'),
 ]
 PEOPLE = {id: {'id':id,'name':name,'role':role,'organisation':org,'description':''} for id,name,role,org in PERSONAS}
 # (owner, title, prerequisites); these names are stable UI action IDs.
