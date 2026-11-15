@@ -3,6 +3,7 @@
 import argparse
 import os
 from pathlib import Path
+import shutil
 import signal
 import socket
 import subprocess
@@ -14,6 +15,7 @@ from urllib.request import urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
 LOG_DIR = ROOT / ".local" / "logs"
+WINDOWS = os.name == "nt"
 SERVICES = (
     ("backend", 8001, "/api/health"),
     ("solver", 8765, "/health"),
@@ -21,15 +23,28 @@ SERVICES = (
 )
 
 
+def venv_python(venv: Path, windows: bool = WINDOWS) -> Path:
+    """The interpreter inside a virtual environment (Scripts/python.exe on Windows)."""
+    return venv / ("Scripts/python.exe" if windows else "bin/python")
+
+
+def npm() -> str:
+    """npm is a .cmd shim on Windows, which subprocess cannot start by bare name."""
+    found = shutil.which("npm")
+    if not found:
+        raise RuntimeError("npm not found; install Node.js 22.12 or newer")
+    return found
+
+
 def setup() -> None:
     subprocess.run(["uv", "sync", "--frozen"], cwd=ROOT, check=True)
     subprocess.run(["uv", "venv", "demo/solver/.venv"], cwd=ROOT, check=True)
     subprocess.run(
-        ["uv", "pip", "install", "--python", str(ROOT / "demo/solver/.venv/bin/python"),
+        ["uv", "pip", "install", "--python", str(venv_python(ROOT / "demo/solver/.venv")),
          "-r", "demo/solver/requirements.txt"],
         cwd=ROOT, check=True,
     )
-    subprocess.run(["npm", "ci"], cwd=ROOT / "supervisor-ui", check=True)
+    subprocess.run([npm(), "ci"], cwd=ROOT / "supervisor-ui", check=True)
 
 
 def check_ports() -> None:
@@ -55,21 +70,28 @@ def log_tail(name: str) -> str:
     return "\n".join(path.read_text(errors="replace").splitlines()[-25:]) if path.exists() else ""
 
 
+def kill_tree(process: subprocess.Popen, force: bool) -> None:
+    """Stop a service and its children (npm starts node; uvicorn may start workers)."""
+    if process.poll() is not None:
+        return
+    if WINDOWS:
+        subprocess.run(["taskkill", "/PID", str(process.pid), "/T", *(["/F"] if force else [])],
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
+        return
+    try:
+        os.killpg(process.pid, signal.SIGKILL if force else signal.SIGTERM)
+    except ProcessLookupError:
+        pass
+
+
 def stop(children: list[tuple[str, subprocess.Popen, object]]) -> None:
     for _, process, _ in reversed(children):
-        if process.poll() is None:
-            try:
-                os.killpg(process.pid, signal.SIGTERM)
-            except ProcessLookupError:
-                pass
+        kill_tree(process, force=False)
     for _, process, stream in reversed(children):
         try:
             process.wait(timeout=5)
         except subprocess.TimeoutExpired:
-            try:
-                os.killpg(process.pid, signal.SIGKILL)
-            except ProcessLookupError:
-                pass
+            kill_tree(process, force=True)
             process.wait()
         stream.close()
 
@@ -82,7 +104,7 @@ def main() -> int:
         setup()
 
     check_ports()
-    solver_python = ROOT / "demo/solver/.venv/bin/python"
+    solver_python = venv_python(ROOT / "demo/solver/.venv")
     if not solver_python.exists():
         raise RuntimeError("solver environment missing; rerun with --setup")
     if not (ROOT / "supervisor-ui/node_modules").exists():
@@ -98,7 +120,7 @@ def main() -> int:
     commands = (
         ("backend", [sys.executable, "-m", "uvicorn", "heat_safe.application.api:app", "--host", "127.0.0.1", "--port", "8001"], ROOT),
         ("solver", [str(solver_python), "-m", "uvicorn", "api:app", "--app-dir", "demo/solver", "--host", "127.0.0.1", "--port", "8765"], ROOT),
-        ("ui", ["npm", "run", "dev"], ROOT / "supervisor-ui"),
+        ("ui", [npm(), "run", "dev"], ROOT / "supervisor-ui"),
     )
     children: list[tuple[str, subprocess.Popen, object]] = []
     interrupted = False
@@ -113,8 +135,11 @@ def main() -> int:
         for name, command, cwd in commands:
             stream = (LOG_DIR / f"{name}.log").open("w")
             try:
+                # Each service gets its own process group so Ctrl+C here stops all three cleanly.
+                group = ({"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP} if WINDOWS
+                         else {"start_new_session": True})
                 process = subprocess.Popen(command, cwd=cwd, env=environment, stdout=stream,
-                                           stderr=subprocess.STDOUT, start_new_session=True)
+                                           stderr=subprocess.STDOUT, **group)
             except Exception:
                 stream.close()
                 raise

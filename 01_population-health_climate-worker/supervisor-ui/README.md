@@ -1,6 +1,6 @@
-# Heat-Safe Crew desktop app
+# Heat-Safe Crew app
 
-The desktop app presents the Sandline operational case through nine named workspaces. React calls the local application API; the backend owns cases, tasks, evidence, command validation, ADK execution and solver integration. Named sign-in/sign-out is local persona selection, not production authentication.
+The app presents the Sandline operational case on four surfaces built from `../ui_wireframes/`: supervisor web (`/`, `/web`), site app (`/site`), worker app (`/worker`) and the Shelter A kiosk (`/kiosk`). See [SCREENS.md](SCREENS.md). The original nine-workspace desktop app stays at `/classic`. React calls the local application API; the backend owns cases, tasks, evidence, command validation, ADK execution and solver integration. Named sign-in/sign-out is local persona selection, not production authentication.
 
 ## Run locally
 
@@ -11,7 +11,7 @@ uv run --env-file .env python tools/dev_local.py --setup  # first run
 uv run --env-file .env python tools/dev_local.py          # later runs
 ```
 
-The launcher starts the [desktop app](http://127.0.0.1:5174/), the application/ADK backend on port 8001 and the isolated operational solver on port 8765. Open [presenter controls](http://127.0.0.1:5174/demo-control) directly to start a case, advance the controlled clock and inspect executions. Presenter controls are separate from persona workspaces. Ctrl+C stops all three services; logs are in `.local/logs/`.
+The launcher (macOS, Linux and Windows) starts the [app](http://127.0.0.1:5174/), the application/ADK backend on port 8001 and the isolated operational solver on port 8765. Open [presenter controls](http://127.0.0.1:5174/demo-control) directly to start a case, advance the controlled clock and inspect executions. Presenter controls are separate from persona workspaces. Ctrl+C stops all three services; logs are in `.local/logs/`.
 
 See [the application setup](../README.md) for the server’s local Google configuration. Google credentials and Gemini calls stay on the backend. Browser requests go through Vite’s `/api` proxy to port 8001; the browser does not invoke ADK or Gemini directly.
 

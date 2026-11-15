@@ -14,7 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from .service import CaseError, CaseService, PEOPLE
-from . import access, storage
+from . import access, platform_api, storage
 
 
 def check_hosted_config() -> None:
@@ -38,6 +38,7 @@ app = FastAPI(title='Heat Safe case', lifespan=lifespan,
 app.state.service = CaseService()
 app.middleware('http')(access.protect)
 app.include_router(access.router)
+app.include_router(platform_api.router)
 
 
 @app.exception_handler(CaseError)

@@ -1,0 +1,80 @@
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { readChatStream } from '../AssistantChat';
+import { Computed, Draft, Head, NoCase, Note, Section } from './kit';
+import type { ScreenProps } from './registry';
+
+type Message = { id: string; author: 'user' | 'assistant'; text: string; case_clock?: string };
+const SUGGESTIONS = ['Who can work in the workshop?', 'What needs attention?', 'Can trench work restart?'];
+
+/** Live Planning Agent conversation over `/api/chat` (ADK + Gemini on the backend). */
+function Conversation({ session, compact }: ScreenProps & { compact?: boolean }) {
+  const caseId = session.caseView?.case_id;
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [draft, setDraft] = useState('');
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState('');
+  const [tools, setTools] = useState<string[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  const abort = useRef<AbortController | undefined>(undefined);
+  useEffect(() => {
+    const controller = new AbortController();
+    setMessages([]); setLoaded(false); setError('');
+    if (caseId) fetch('/api/chat/history', { signal: controller.signal })
+      .then(async r => { if (!r.ok) throw new Error('Conversation history could not be loaded.'); const body = await r.json(); setMessages(body.messages ?? []); setLoaded(true); })
+      .catch(e => { if (!controller.signal.aborted) setError(e.message); });
+    return () => { controller.abort(); abort.current?.abort(); };
+  }, [caseId, session.person?.id]);
+  const send = async (value: string) => {
+    const text = value.trim();
+    if (!text || pending || !caseId || !loaded) return;
+    const id = crypto.randomUUID();
+    setDraft(''); setPending(true); setError(''); setTools([]);
+    setMessages(m => [...m, { id, author: 'user', text }]);
+    const controller = new AbortController(); abort.current = controller;
+    let answered = false;
+    try {
+      const response = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal, body: JSON.stringify({ message: text, message_id: id, case_id: caseId }) });
+      await readChatStream(response, (kind, data) => {
+        if (kind === 'error') throw new Error(String(data.message));
+        if (kind === 'tool' && data.phase === 'started') setTools(t => [...t, String(data.name)]);
+        if (kind === 'answer') { answered = true; setMessages(m => [...m.filter(x => x.id !== String(data.id)), { id: String(data.id), author: 'assistant', text: String(data.text), case_clock: data.case_clock as string | undefined }]); }
+      });
+      if (!answered) throw new Error('The connection closed before an answer arrived.');
+    } catch (e) {
+      if (!controller.signal.aborted) setError(e instanceof Error ? e.message : 'The Planning Agent is unavailable.');
+    } finally { if (!controller.signal.aborted) setPending(false); }
+  };
+  const submit = (e: FormEvent) => { e.preventDefault(); void send(draft); };
+  return <div className="hs-chat">
+    <Section title="Conversation">
+      {messages.length === 0 && loaded && <Note>Ask about today’s heat, the plan or the rules. Answers use the live case and cite the tools they called.</Note>}
+      <div className="hs-chat" aria-live="polite">
+        {messages.map(m => m.author === 'assistant'
+          ? <Draft key={m.id} title={`Planning Agent · AI${m.case_clock ? ` · case at ${m.case_clock.slice(11, 16)}` : ''}`}><p className="hs-msg-text">{m.text}</p></Draft>
+          : <p key={m.id} className="hs-msg" data-author="user">{m.text}</p>)}
+        {pending && <p className="hs-computed" role="status">Thinking…{tools.length ? ` · tools: ${tools.join(', ')}` : ''}</p>}
+      </div>
+      {error && <p role="alert" className="hs-error">{error}</p>}
+    </Section>
+    <Section title="Suggested">
+      <div className="hs-chips">{SUGGESTIONS.map(s => <button key={s} type="button" disabled={pending || !loaded} onClick={() => void send(s)}>{s}</button>)}</div>
+    </Section>
+    <form className="hs-composer" onSubmit={submit}>
+      <input aria-label="Your question" placeholder="Ask a question" value={draft} onChange={e => setDraft(e.target.value)} autoComplete="off" disabled={!loaded} />
+      <button type="submit" className="hs-button is-primary" disabled={pending || !draft.trim() || !loaded}>Send</button>
+    </form>
+    {!compact && <Computed>Answers are AI and may be wrong. They never change the case; only people record actions. Worker ranking, discipline and diagnosis are refused.</Computed>}
+  </div>;
+}
+
+/** W7 · Ask the Planning Agent (supervisor web). */
+export function W7Ask({ session }: ScreenProps) {
+  if (!session.caseView) return <NoCase session={session} />;
+  return <div className="hs-screen"><Head kicker="Planning Agent" title="Ask the Planning Agent" sub="Cited answers from the live case, the solver and the guidance corpus." /><Conversation session={session} /></div>;
+}
+
+/** M8 · Ask (site app). */
+export function M8Ask({ session }: ScreenProps) {
+  if (!session.caseView) return <NoCase session={session} />;
+  return <div className="hs-screen"><Head kicker="Planning Agent" title="Ask" /><Conversation session={session} compact /><Computed>AI answers · only people record actions</Computed></div>;
+}

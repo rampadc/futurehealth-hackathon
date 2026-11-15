@@ -4,10 +4,8 @@ import { ACTIONS, type ActionId, type Persona } from './story';
 import { buttonLabels, taskReason } from './copy';
 import { nameOf } from './replay';
 import type { CaseView, Task } from './live';
+import { atDubai, caseWorkers, payloads, simplePayload, toIso } from './commands';
 
-const atDubai = (iso: string) => new Date(iso).toLocaleString('sv-SE', { timeZone: 'Asia/Dubai', hour12: false }).replace(' ', 'T').slice(0, 16);
-const toIso = (local: string) => `${local}:00+04:00`;
-const checkActions = new Set(['water', 'personnel', 'recovery_check', 'crew_readiness', 'permit']);
 const extraLabels: Record<string, string> = {
   incident_record: 'Record Bilal’s site incident', readiness: 'Confirm individual workshop readiness',
   activity: 'Record observed crew activity', water: 'Confirm water check',
@@ -44,22 +42,19 @@ export function EvidenceAction({ action, caseView, person, onAction, busy }: {
     setMeasured(atDubai(caseView.clock));
     setValidUntil(atDubai(new Date(Date.parse(caseView.clock) + 2 * 60 * 60_000).toISOString()));
   }, [caseView.clock, caseView.version]);
-  const workers = caseView.workers?.length ? caseView.workers : caseView.request?.snapshot.workers ?? caseView.capture?.request.snapshot.workers ?? Array.from({ length: 11 }, (_, index) => ({ person_id: `C${String(index + 2).padStart(2, '0')}` }));
-  const currentReading = caseView.request?.snapshot.readings[0] ?? caseView.capture?.request.snapshot.readings[0];
+  const known = caseWorkers(caseView);
+  const workers = known.length ? known : Array.from({ length: 11 }, (_, index) => ({ person_id: `C${String(index + 2).padStart(2, '0')}` }));
   const displayLabel = label;
   const selectedWorkers = activitySelected;
   const historyDeterminesStart = selectedWorkers.some(id => caseView.workers?.find(w => w.person_id === id)?.last_observed_at);
   const intervalStart = (personId: string) => caseView.workers?.find(w => w.person_id === personId)?.last_observed_at ?? (historyDeterminesStart ? recoveryAt : toIso(starts));
   const status = task?.status ?? 'waiting';
   const payload = (): Record<string, unknown> => {
-    if (action === 'fresh') return { reading: { sensor_id: currentReading?.sensor_id ?? 't1', zone_id: currentReading?.zone_id ?? 'civil_exposed', twl: Number(twl), unit: 'W/m²', quality: 'valid', measured_at: toIso(measured), received_at: caseView.clock } };
     if (action === 'recover') return { person_ids: workers.map(w => w.person_id), zone_id: 'shelter_a' };
-    if (action === 'assign') return { person_ids: [...new Set(caseView.capture?.response.crew_rest.intervals.filter(i => i.kind === 'work' && i.task_id === 'workshop_prep').map(i => i.person_id) ?? [])] };
-    if (action === 'readiness' || action === 'leila') return { confirmations: (action === 'leila' ? ['C09'] : selected).map(person_id => ({ person_id, status: readinessStatus, basis, valid_until: toIso(validUntil) })) };
+    if (action === 'fresh') return payloads.fresh(caseView, Number(twl), toIso(measured));
+    if (action === 'readiness' || action === 'leila') return payloads.readiness(action === 'leila' ? ['C09'] : selected, readinessStatus, basis, toIso(validUntil));
     if (action === 'activity') return { intervals: selectedWorkers.map(person_id => ({ person_id, kind, task_id: kind === 'work' ? 'workshop_prep' : null, zone_id: zone, starts_at: intervalStart(person_id), ends_at: toIso(ends), recorded_at: caseView.clock, observed: true, source: 'human_confirmation' })) };
-    if (action === 'remove') return { location_id: 'welfare' };
-    if (checkActions.has(action)) return { status: 'confirmed' };
-    return {};
+    return simplePayload(action, caseView) ?? {};
   };
   const invalid = (action === 'fresh' && (!Number.isFinite(Number(twl)) || Number(twl) <= 0 || !measured)) ||
     (action === 'readiness' && !selected.length) ||
