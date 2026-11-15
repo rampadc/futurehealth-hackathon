@@ -20,6 +20,9 @@ export const PERSONAS: Persona[] = [
 ]
 
 type Flag = 'issued' | 'acknowledged' | 'stopped' | 'checkedIn' | 'recovered' | 'assigned' | 'reported' | 'removed' | 'firstaid' | 'leila' | 'fresh' | 'permit' | 'reviewed' | 'deliveryDrafted' | 'deliveryApproved' | 'deliverySent' | 'deliveryAccepted' | 'handover' | 'costReviewed'
+/** Organisation admin for the platform screens (W8, W9). Not part of the nine-person case story. */
+export const ADMIN: Persona = { id: 'P09', name: 'Hessa Al Qamar', role: 'HSE systems admin', organisation: 'Sandline', description: 'Publishes company branding and reviews the trust log.' }
+
 export interface StoryEvent { id: string; actorId: string; title: string }
 export type StoryState = Record<Flag, boolean> & { events: StoryEvent[] }
 

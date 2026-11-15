@@ -70,3 +70,7 @@
   .hs-body { grid-template-columns: minmax(0, 1fr); }
   .hs-rail { flex-direction: row; overflow-x: auto; border-inline-end: 0; border-block-end: var(--rule-hair); }
 }
+
+.hs-bar { flex-wrap: wrap; row-gap: var(--space-half); }
+.hs-bar strong, .hs-bar span { white-space: nowrap; }
+.hs-shell[data-device='site'] .hs-bar .hs-muted, .hs-shell[data-device='worker'] .hs-bar .hs-muted { display: none; }

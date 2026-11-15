@@ -15,7 +15,7 @@ let calls: Array<{ path: string; method: string; body?: Record<string, unknown> 
 const reply = (value: unknown, status = 200) => new Response(JSON.stringify(value), { status, headers: { 'Content-Type': 'application/json' } });
 
 beforeEach(async () => {
-  window.history.replaceState(null, '', '/');
+  window.history.replaceState(null, '', '/classic');
   const capture = await loadCase('heat_trigger', { delayMs: 0 });
   const request = structuredClone(capture.request);
   request.snapshot.recovery = { recorded_at: '2025-08-04T08:04:00+04:00', person_ids: request.snapshot.workers.map(w => w.person_id), zone_id: 'shelter_a' };

@@ -6,14 +6,20 @@ How the screens in [`../ui_wireframes/`](../ui_wireframes/) (the clickable proto
 
 | Path | What |
 |---|---|
-| `/` | The current MUI desktop app (nine persona workspaces). It stays live until the web shell replaces it. |
+| `/` | The supervisor web shell (W1). Unknown paths land here too. |
+| `/classic` | The original MUI desktop app (nine persona workspaces), kept as a fallback. |
 | `/web/<id>`, `/site/<id>`, `/worker/<id>`, `/kiosk` | Device shells for the wireframe screens, e.g. `/site/m2`. A screen without a component shows a placeholder listing its contract and the live case. |
-| `src/App.tsx` | Router plus the current desktop app. |
+| `src/App.tsx` | Router plus the classic desktop app. |
 | `src/session.ts` | `useCaseSession()`: persona session, live case, the event stream and the `act()` command call. Every shell uses it. |
 | `src/workspaces/*.tsx` | One file per persona workspace of the current desktop app. |
 | `src/shared/` | Pieces shared by the current workspaces (panels, schedule, crew proposal). |
 | `src/shells/` | `DeviceShell` and its CSS. Plain CSS on the Issued Sheet tokens, no MUI. |
 | `src/screens/registry.ts` | Every wireframe screen: device, owner, slice, personas, what it reads, which commands it sends, missing backend work. |
+| `src/screens/kit.tsx`, `screens.css` | Shared Issued Sheet components: metrics, rows, badges, band swatch, hold stamp, draft (proposal) block, action button, typed confirm, press-and-hold. |
+| `src/screens/data.ts` | Read-only selectors over the live case (crew, heat and freshness, a worker's intervals, which screen handles each action). |
+| `src/commands.ts` | Command payloads, shared with the desktop app's evidence forms so both send the same shapes. |
+| `src/screens/{web,site,worker}/`, `restart.tsx`, `ask.tsx`, `kiosk.tsx` | The screens. |
+| `src/i18n/` | Worker strings. `strings.json` is generated from `../ui_wireframes/i18n.js` by `node scripts/sync-wireframe-strings.mjs`; do not edit it by hand. |
 | `src/contract.ts` | Agreed types for endpoints that do not exist yet (monitor, trust log, worker consent and data, brand). |
 | `../ui_design_system/tokens.css` | Design tokens, imported once in `main.tsx` and copied into the Cloud Run image by `Dockerfile.cloudrun`. |
 
@@ -26,6 +32,30 @@ How the screens in [`../ui_wireframes/`](../ui_wireframes/) (the clickable proto
 5. Add a test next to the screen and check it on the PR's Cloud Run preview.
 
 Do not import `ui_design_system/components.css` globally: it restyles `body`, `*` and buttons and would break the MUI desktop app. Copy the component rules you need into a scoped stylesheet, or move them under `.hs-shell` in one agreed PR.
+
+## Status
+
+All 26 wireframe screens are built on live case data and real case commands.
+
+What is real and what is simulated:
+
+| Area | State |
+|---|---|
+| Case actions (stop-work, headcount, readiness, assignment, removal, first aid, fresh reading, checks, review, handover) | Real: `/api/case/commands`, same rules and owners as the desktop app |
+| Planning Agent (W7, M8) | Real: `/api/chat` (ADK + Gemini on the backend) |
+| Solver proposals, work/rest plan | Real solver output, shown as drafts with `applied: false` |
+| Worker consent (P1, P8) and data export (P8) | Real: `/api/worker/consent`, `/api/worker/data` (signed-in worker only) |
+| Trust log (W8) | Real: `/api/trust-log` (supervisors; workers are refused) |
+| Branding (W9) | Real: `/api/brand`; server guardrails for contrast and signal colours; admin `P09` publishes with typed `PUBLISH`. M2 and P3 drop the brand |
+| Worker language | Chosen on the phone and saved with consent; a new phone picks it up from the server. Untranslated English is marked `lang="en"` |
+| Kiosk badges (K1) | Web NFC on Android Chrome (text record with the worker id); name tiles elsewhere |
+| SMS preview (M2) | Display only; nothing is sent |
+| Offline (P7) | A worker's check-in and report are queued on the phone and sent on reconnect with the same command id; supervisor decisions are never queued. A network-first service worker keeps the app shell available |
+| Voice check-in (P4) | Browser speech recognition where available; the transcript stays on the phone and leads to the same fixed red-flag question |
+
+Backend for the platform screens: `src/heat_safe/application/platform_api.py`, tests in `tests/test_platform_api.py`. Fonts (DM Sans and Noto for Arabic, Urdu, Devanagari, Malayalam and Bengali) are self-hosted from `@fontsource` and load with the device shells only.
+
+Still to do: native-speaker review of translations, and translations for Tamil, Nepali and Pashto. SMS sending needs a provider and is out of scope for the demo.
 
 ## Ownership
 
@@ -60,6 +90,5 @@ Each slice should run end to end on a preview URL with presenter controls before
 
 ## Open decisions
 
-- **Personas.** The wireframes use five roles; the app has nine personas. W8 and W9 refer to an organisation admin (`P09`) who does not exist in `story.ts` or the backend yet, and Noura is the logistics coordinator in the app but the admin in the wireframes.
-- **Fonts.** The tokens ask for DM Sans and Noto families. The page's content security policy only allows same-origin fonts, so they must be self-hosted under `public/` or the screens fall back to system fonts.
-- **Retiring `/`.** Once W2–W7 cover the desktop workspaces, point `/` at the web shell and remove `src/workspaces/`.
+- **Admin persona.** W8 and W9 use a new organisation admin, Hessa Al Qamar (`P09`), because Noura is the logistics coordinator in the app but the admin in the wireframes. `P09` exists only on the backend and in the device shells; the desktop story keeps its nine personas.
+- **Retiring `/classic`.** W1 now records the delivery and cost-review actions that had no wireframe screen. Once the team no longer needs the classic app, remove `/classic` and `src/workspaces/`.
