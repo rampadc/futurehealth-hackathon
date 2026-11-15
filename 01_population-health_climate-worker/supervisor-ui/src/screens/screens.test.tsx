@@ -271,3 +271,13 @@ describe('voice and badges', () => {
     vi.unstubAllGlobals();
   });
 });
+
+describe('actions without a wireframe screen', () => {
+  it('Noura records the delivery draft from W1 at /', async () => {
+    currentCase = await makeCase('canonical_timed', { assigned: true }, [task('draftDelivery', 'P05', 'ready', 'Draft later delivery request')]);
+    await open('/', 'P05');
+    expect(await screen.findByRole('heading', { name: 'Squad Monitoring' })).toBeTruthy();
+    await userEvent.click(screen.getByRole('button', { name: 'Draft later delivery request' }));
+    await waitFor(() => expect(commands).toEqual([{ action: 'draftDelivery', payload: {} }]));
+  });
+});
