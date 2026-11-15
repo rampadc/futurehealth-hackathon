@@ -14,6 +14,11 @@ How the screens in [`../ui_wireframes/`](../ui_wireframes/) (the clickable proto
 | `src/shared/` | Pieces shared by the current workspaces (panels, schedule, crew proposal). |
 | `src/shells/` | `DeviceShell` and its CSS. Plain CSS on the Issued Sheet tokens, no MUI. |
 | `src/screens/registry.ts` | Every wireframe screen: device, owner, slice, personas, what it reads, which commands it sends, missing backend work. |
+| `src/screens/kit.tsx`, `screens.css` | Shared Issued Sheet components: metrics, rows, badges, band swatch, hold stamp, draft (proposal) block, action button, typed confirm, press-and-hold. |
+| `src/screens/data.ts` | Read-only selectors over the live case (crew, heat and freshness, a worker's intervals, which screen handles each action). |
+| `src/commands.ts` | Command payloads, shared with the desktop app's evidence forms so both send the same shapes. |
+| `src/screens/{web,site,worker}/`, `restart.tsx`, `ask.tsx`, `kiosk.tsx` | The screens. |
+| `src/i18n/` | Worker strings. `strings.json` is generated from `../ui_wireframes/i18n.js` by `node scripts/sync-wireframe-strings.mjs`; do not edit it by hand. |
 | `src/contract.ts` | Agreed types for endpoints that do not exist yet (monitor, trust log, worker consent and data, brand). |
 | `../ui_design_system/tokens.css` | Design tokens, imported once in `main.tsx` and copied into the Cloud Run image by `Dockerfile.cloudrun`. |
 
@@ -26,6 +31,26 @@ How the screens in [`../ui_wireframes/`](../ui_wireframes/) (the clickable proto
 5. Add a test next to the screen and check it on the PR's Cloud Run preview.
 
 Do not import `ui_design_system/components.css` globally: it restyles `body`, `*` and buttons and would break the MUI desktop app. Copy the component rules you need into a scoped stylesheet, or move them under `.hs-shell` in one agreed PR.
+
+## Status
+
+25 of 26 screens are built on live case data and real case commands. W9 (branding) is the remaining stretch screen.
+
+What is real and what is simulated:
+
+| Area | State |
+|---|---|
+| Case actions (stop-work, headcount, readiness, assignment, removal, first aid, fresh reading, checks, review, handover) | Real: `/api/case/commands`, same rules and owners as the desktop app |
+| Planning Agent (W7, M8) | Real: `/api/chat` (ADK + Gemini on the backend) |
+| Solver proposals, work/rest plan | Real solver output, shown as drafts with `applied: false` |
+| Worker language (P1) and consent (P1, P8) | Saved on the phone (`localStorage`); the consent endpoint is planned |
+| P8 download | Built in the browser from the live case; the export endpoint is planned |
+| SMS preview (M2), kiosk badge taps (K1) | Display or simulated only; nothing is sent, no NFC |
+| Offline (P7) | Banner and disabled sending; no service worker or queue yet |
+| Agent telemetry (W8) | Presenter access only; a supervisor trust log is planned |
+| Voice check-in (P4) | Planned; tap answers only |
+
+Still to do: W9 with `brand.js` and an admin persona, the endpoints in `contract.ts`, self-hosted fonts, native review of translations, and pointing `/` at the web shell.
 
 ## Ownership
 

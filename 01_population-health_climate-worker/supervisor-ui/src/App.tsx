@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { lazy, Suspense, useRef, useState } from 'react';
 import { Alert, AppBar, Box, Button, Chip, CircularProgress, Divider, List, ListItemButton, ListItemText, Paper, Stack, Toolbar, Typography } from '@mui/material';
 import { nameOf } from './replay';
 import { copy } from './copy';
@@ -12,15 +12,17 @@ import { navigate, parseRoute, usePath } from './router';
 import { useCaseSession } from './session';
 import { Schedule, revisedPlanPending, revisedPlanWait } from './shared/plan';
 import { Identity, Panel, firstName, nextTask, readable } from './shared/ui';
-import { DeviceShell } from './shells/DeviceShell';
 import { Workspace, workspaceTitles } from './workspaces';
 
 type Props = { onLockAccess?: () => void };
 
+/** Wireframe screens load on demand, so the current desktop app stays small. */
+const DeviceShell = lazy(() => import('./shells/DeviceShell').then(m => ({ default: m.DeviceShell })));
+
 /** Routes between the current desktop app (`/`, `/demo-control`) and the wireframe device shells. */
 export default function App({ onLockAccess }: Props = {}) {
   const route = parseRoute(usePath());
-  if (route.kind === 'device') return <DeviceShell device={route.device} screen={route.screen} onLockAccess={onLockAccess} />;
+  if (route.kind === 'device') return <Suspense fallback={<Box sx={{ p: 5 }} role="status"><CircularProgress size={24} /> Loading…</Box>}><DeviceShell device={route.device} screen={route.screen} onLockAccess={onLockAccess} /></Suspense>;
   return <DesktopApp demoControl={route.kind === 'demo-control'} onLockAccess={onLockAccess} />;
 }
 

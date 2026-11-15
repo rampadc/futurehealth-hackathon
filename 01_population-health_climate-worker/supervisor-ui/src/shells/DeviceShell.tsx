@@ -1,3 +1,4 @@
+import { langOf, tr, useWorkerLanguage } from '../i18n';
 import { navigate } from '../router';
 import { useCaseSession } from '../session';
 import { PERSONAS } from '../story';
@@ -18,6 +19,8 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
   const screen = findScreen(device, screenId);
   const go = (target: ScreenDef) => navigate(`/${device}/${target.id}`);
   const phone = device === 'site' || device === 'worker';
+  const [workerLang] = useWorkerLanguage(device === 'worker' ? session.person?.id : undefined);
+  const lang = device === 'worker' ? workerLang ?? 'en' : 'en';
 
   if (session.initialising) return <div className="hs-shell" data-theme={info.theme} data-device={device}><p role="status" className="hs-pad">Loading case…</p></div>;
 
@@ -59,10 +62,10 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
         {Screen ? <Screen session={session} /> : <Placeholder screen={screen} session={session} />}
       </main>
     </div>
-    {tabs && <nav className="hs-tabs" aria-label="Sections">
+    {tabs && <nav className="hs-tabs" aria-label="Sections" lang={lang} dir={langOf(lang).dir}>
       {tabs.map(([id, label]) => {
         const first = screens.find(s => s.tab === id);
-        return <button key={id} type="button" disabled={!first} aria-current={screen.tab === id ? 'page' : undefined} onClick={() => first && go(first)}>{label}</button>;
+        return <button key={id} type="button" disabled={!first} aria-current={screen.tab === id ? 'page' : undefined} onClick={() => first && go(first)}>{device === 'worker' ? tr(`tab.${id}`, lang).text : label}</button>;
       })}
     </nav>}
   </div>;

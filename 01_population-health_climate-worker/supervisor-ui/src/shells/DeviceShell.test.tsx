@@ -51,14 +51,14 @@ describe('screen registry', () => {
 });
 
 describe('device shell', () => {
-  it('offers only the personas who use that device, then shows the screen placeholder', async () => {
+  it('offers only the personas who use that device, then shows the screen', async () => {
     window.history.replaceState(null, '', '/site/m2');
     render(<App />);
     expect(await screen.findByRole('heading', { name: /choose who is using this phone/i })).toBeTruthy();
     expect(screen.queryByRole('button', { name: /Amal Al Nadir/ })).toBeNull();
     await userEvent.click(screen.getByRole('button', { name: /Huda Al Nadir/ }));
     expect(await screen.findByRole('heading', { name: 'Stop-work instruction' })).toBeTruthy();
-    expect(screen.getByText(/Acknowledge stop-work instruction/)).toBeTruthy();
+    expect((screen.getByRole('button', { name: 'Acknowledge' }) as HTMLButtonElement).disabled).toBe(false);
     expect(screen.getByRole('navigation', { name: 'Sections' })).toBeTruthy();
   });
 
