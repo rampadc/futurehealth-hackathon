@@ -4,6 +4,7 @@ import { intervalsOf, kindLabel, minutes, nowAndNext, time } from '../data';
 import { Computed, CtaBar, Empty, Hero, HoldButton, List, Metric, NoCase, Note, Row, Section, Statement } from '../kit';
 import type { ScreenProps } from '../registry';
 import { En, T, useT, useWorker, WorkerFrame } from './frame';
+import { VoiceCheckIn } from './voice';
 
 /** P4 · Check in: tell the supervisor you feel unwell. Fixed red-flag question, no diagnosis. */
 export function P4CheckIn(props: ScreenProps) {
@@ -35,7 +36,7 @@ function CheckIn({ session }: ScreenProps) {
         <button type="button" className="hs-button" onClick={() => setStep('ok')}><T k="p4.water" /></button>
         <button type="button" className="hs-button" onClick={() => setStep('ok')}><T k="p4.ok" /></button>
       </div>
-      <Note>Voice check-in (hold and speak, transcribed and translated) is planned. It is not part of this demo.</Note>
+      <VoiceCheckIn onUnderstood={() => setStep('unwell')} />
     </Section>}
     {step === 'ok' && <Note><En>Noted on this phone. Drink water and keep to your rest times. Only “I feel unwell” asks your supervisor for help.</En></Note>}
     {(step === 'unwell' || step === 'emergency') && <Section title={<T k="p4.fixedq" />}>

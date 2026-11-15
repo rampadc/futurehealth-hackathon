@@ -237,3 +237,37 @@ describe('offline worker actions', () => {
     online.mockRestore();
   });
 });
+
+describe('voice and badges', () => {
+  it('turns a spoken check-in into the fixed red-flag question; the words are not sent', async () => {
+    class FakeRecognition {
+      lang = ''; interimResults = false; continuous = false;
+      onresult: ((e: { results: Array<Array<{ transcript: string }>> }) => void) | null = null;
+      onerror = null; onend: (() => void) | null = null;
+      start() { setTimeout(() => { this.onresult?.({ results: [[{ transcript: 'I feel dizzy' }]] }); this.onend?.(); }, 0); }
+      stop() {} abort() {}
+    }
+    vi.stubGlobal('webkitSpeechRecognition', FakeRecognition);
+    currentCase = await makeCase('canonical_timed', { assigned: true }, [task('report', 'C08', 'ready')]);
+    await open('/worker/p4', 'C08');
+    fireEvent.keyDown(await screen.findByRole('button', { name: /Hold and speak/ }), { key: ' ' });
+    expect(await screen.findByText('“I feel dizzy”')).toBeTruthy();
+    await userEvent.click(screen.getAllByRole('button', { name: 'I feel unwell' }).at(-1)!);
+    expect(await screen.findByText(/Are you confused/)).toBeTruthy();
+    expect(commands).toEqual([]);
+    vi.unstubAllGlobals();
+  });
+
+  it('checks a worker in from an NFC badge', async () => {
+    let reader: { onreading: ((e: unknown) => void) | null } | undefined;
+    class FakeReader { onreading: ((e: unknown) => void) | null = null; onreadingerror = null; constructor() { reader = this; } async scan() {} }
+    vi.stubGlobal('NDEFReader', FakeReader);
+    currentCase = await makeCase('heat_trigger', { stopped: true }, [task('checkin', 'C05', 'ready')]);
+    await open('/kiosk/k1', 'C05');
+    await userEvent.click(await screen.findByRole('button', { name: 'Start NFC badge reader' }));
+    await waitFor(() => expect(reader).toBeTruthy());
+    reader!.onreading!({ message: { records: [{ recordType: 'text', encoding: 'utf-8', data: new DataView(new TextEncoder().encode('c05').buffer) }] } });
+    await waitFor(() => expect(commands).toEqual([{ action: 'checkin', payload: {} }]));
+    vi.unstubAllGlobals();
+  });
+});
