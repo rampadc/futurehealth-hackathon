@@ -89,7 +89,7 @@ export function reading(caseView: CaseView | null) {
 export function heatNow(caseView: CaseView | null) {
   const r = reading(caseView);
   const assessed = r && caseView ? assessThermalReading({ twl: r.twl, at: r.measured_at }, caseView.clock, r.quality === 'valid' ? 'serviceable' : r.quality) : null;
-  const band = r ? thermalStatus(r.twl) : thermalStatus(undefined, false);
+  const band = thermalStatus(r?.twl, r?.quality === 'valid');
   const held = caseView?.capture?.response.heat.held_task_ids ?? caseView?.request?.snapshot.held_task_ids ?? [];
   return { reading: r, band, freshness: assessed?.reason ?? 'missing', ageMs: assessed?.ageMs ?? null, held, heavyHeld: held.includes('civil_heavy') || !!caseView?.story.issued };
 }
@@ -113,10 +113,10 @@ export const kindLabel = (kind: string) => kind === 'work' ? 'Work' : kind === '
 
 /** Wireframe screen that handles each case action, for inbox links. */
 export const SCREEN_FOR_ACTION: Record<string, { site?: string; web?: string }> = {
-  issue: { site: 'm2', web: 'w2' }, acknowledge: { site: 'm2', web: 'w3' }, stop: { site: 'm2', web: 'w3' },
-  recover: { site: 'm3', web: 'w3' }, personnel: { site: 'm3', web: 'w6' }, escalation_followup: { web: 'w3' },
-  readiness: { site: 'm4', web: 'w4' }, activity: { site: 'm4', web: 'w4' }, crew_readiness: { site: 'm4', web: 'w6' }, leila: { site: 'm4', web: 'w4' },
-  assign: { site: 'm5', web: 'w4' }, incident_record: { site: 'm6', web: 'w3' }, remove: { site: 'm6', web: 'w3' }, firstaid: { site: 'm6', web: 'w3' },
-  recovery_check: { site: 'm6', web: 'w6' }, fresh: { site: 'm7', web: 'w6' }, water: { site: 'm7', web: 'w6' },
-  permit: { web: 'w6' }, review: { web: 'w6' }, handover: { web: 'w6' },
+  issue: { site: 'stop-work', web: 'heat-controls' }, acknowledge: { site: 'stop-work', web: 'response' }, stop: { site: 'stop-work', web: 'response' },
+  recover: { site: 'headcount', web: 'response' }, personnel: { site: 'headcount', web: 'restart-review' }, escalation_followup: { web: 'response' },
+  readiness: { site: 'readiness', web: 'crew' }, activity: { site: 'readiness', web: 'crew' }, crew_readiness: { site: 'readiness', web: 'restart-review' }, leila: { site: 'readiness', web: 'crew' },
+  assign: { site: 'proposal', web: 'crew' }, incident_record: { site: 'action-card', web: 'response' }, remove: { site: 'action-card', web: 'response' }, firstaid: { site: 'action-card', web: 'response' },
+  recovery_check: { site: 'action-card', web: 'restart-review' }, fresh: { site: 'fresh-reading', web: 'restart-review' }, water: { site: 'fresh-reading', web: 'restart-review' },
+  permit: { web: 'restart-review' }, review: { web: 'restart-review' }, handover: { web: 'restart-review' },
 };

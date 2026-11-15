@@ -21,7 +21,7 @@ cd 01_population-health_climate-worker
 uv run --env-file .env python tools/dev_local.py --setup
 ```
 
-For subsequent runs, omit `--setup`. The launcher starts the desktop app on **http://127.0.0.1:5174/**, the application/ADK backend on port 8001 and the operational solver on port 8765. Open **http://127.0.0.1:5174/demo-control** directly to start a case and inspect executions. Named workspaces contain operational actions; presenter controls stay on their separate route.
+For subsequent runs, omit `--setup`. The launcher starts the app on **http://127.0.0.1:5174/** (supervisor web, with site, worker and kiosk screens at `/site`, `/worker` and `/kiosk`; the original desktop app is at `/classic`), the application/ADK backend on port 8001 and the operational solver on port 8765. Open **http://127.0.0.1:5174/demo-control** directly to start a case and inspect executions. Named workspaces contain operational actions; presenter controls stay on their separate route.
 
 Cases, human evidence, calculations and assistant conversations persist in ignored worktree-local SQLite files. Solver proposals are freshly calculated from the case event ledger. Live Gemini uses server-side credentials. Named persona selection is for local development; it is not production authentication.
 

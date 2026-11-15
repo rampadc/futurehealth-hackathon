@@ -74,3 +74,7 @@
 .hs-bar { flex-wrap: wrap; row-gap: var(--space-half); }
 .hs-bar strong, .hs-bar span { white-space: nowrap; }
 .hs-shell[data-device='site'] .hs-bar .hs-muted, .hs-shell[data-device='worker'] .hs-bar .hs-muted { display: none; }
+
+/* Admin group at the end of the rail. */
+.hs-rail-group { margin: var(--space-2) 0 0; padding: var(--space-1) var(--space-2) 0; border-block-start: var(--rule-hair); font-size: var(--fs-small); color: var(--color-pencil); text-transform: uppercase; letter-spacing: 0.04em; }
+.hs-shell[data-device='site'] .hs-rail-group, .hs-shell[data-device='worker'] .hs-rail-group { display: none; }

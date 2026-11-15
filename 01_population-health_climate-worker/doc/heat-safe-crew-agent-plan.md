@@ -364,7 +364,7 @@ Team target: **submit Thu 19 Nov**, keeping 20 Nov (the official deadline) as a 
 | Wed 19 | Submit; spare time for fixes only | Submitted |
 | Thu 20 | Buffer (official deadline) | |
 
-**Roadmap only (not built):** worker check-in agent and voice, offline PWA and SMS, row-level security and per-agent service accounts, Model Armor, full-summer backtest and Looker, air quality and dust, site photos. To decide by 15 Nov: which UI the demo shows (the team wireframes or the ADK dev UI), and who wires it up.
+**Roadmap only (not built):** worker check-in agent, SMS, row-level security and per-agent service accounts, Model Armor, full-summer backtest and Looker, air quality and dust, site photos. Voice check-in and offline queuing are now built in the worker app (`supervisor-ui/SCREENS.md`). **Decided:** the demo shows the team wireframe screens, not the ADK dev UI. The remaining work to make it functional is in [functional-app-plan.md](functional-app-plan.md).
 
 ```mermaid
 gantt
@@ -400,7 +400,7 @@ With a team of four or five, split it as: agent and tools; risk model, data and 
 - [x] Budget alert
 - [ ] Per-model token tracking in telemetry (tokens are logged per eval run in `telemetry.eval_results`; not yet per model for live traffic)
 - [x] `get_forecast` with replay mode for Abu Dhabi; `compute_heat_stress` (TWL + WBGT) with midday-break rule (unit-tested); `lookup_job_profile` (package `src/heat_safe`)
-- [x] Pick the replay date: **1 Aug 2025, Mussafah** (ERA5: 45 °C, peak WBGT 40 °C, TWL High zone 07:00–17:00 in sun); dust replay **4 Aug 2024** (see `data/README.md`)
+- [x] Pick the replay date: **1 Aug 2025, Mussafah** (ERA5: 45 °C, peak WBGT 40 °C, TWL High zone 07:00–17:00 in sun); dust replay **4 Aug 2024** (see `data/README.md`). The app's operational case runs on **4 Aug 2025** (decided 15 Nov); its conditions panel computes that day from `era5_summer_2025.csv`
 - [x] Agent produces a crew shift plan (with a first `optimise_schedule`); numeric grounding check in an after-model callback; purpose-limitation refusal works on the red-team prompt
 - [x] First 5 golden scenarios (`evals/golden/supervisor.yaml`); deterministic scoring (`evals/metrics.py`); results in BigQuery `telemetry.eval_results`. 15/15 runs pass (5 scenarios × 3 repeats); see `evals/README.md`
 
@@ -416,7 +416,7 @@ Exit: "Plan tomorrow for a roofing crew at site A" on the replay date returns a 
 - [ ] Pre-start note extraction; `get_site_context`
 - [ ] PII and health-data redaction before embedding and logging
 - [ ] `optimise_schedule` with rotation
-- [ ] Supervisor web app shell: site view and crew plan (aggregates only)
+- [x] Supervisor web app shell: site view and crew plan (aggregates only). Built as the supervisor web screens in `supervisor-ui/` (Squad Monitoring, Heat controls, Crew & workshop, Work/rest plan); see `supervisor-ui/SCREENS.md`
 - [ ] Talk to one site supervisor or occupational health and safety advisor working in the Gulf to sanity-check the plan output and alert wording
 - [x] RAG metrics: retrieval set of 22 with hit@k, MRR, binding-first (`evals/run_retrieval_evals.py`)
 - [ ] Golden set to 12 scenarios (11 supervisor scenarios on 7 Nov)
@@ -426,8 +426,9 @@ Exit: the new starter in heavy PPE reaches Amber before the crew, and the plan c
 ### Week 3 · 9–15 Nov · Alerts, check-ins, governance and offline
 
 - [ ] Graded alert templates in English + 3 worker languages, reviewed by native speakers; `send_alert` with allowlist and rate limit
-- [ ] Worker PWA: consent screen, alerts, voice check-in (Speech-to-Text, translation, extraction into `checkins`)
-- [ ] Offline mode: cached forecast + rule table, queued check-ins; SMS fallback
+- [x] Worker PWA: consent screen, alerts, voice check-in. Built in the worker app: consent per data type (`/api/worker/consent`), full-screen alert, and voice check-in with browser speech recognition, where the transcript stays on the phone. Not built: Chirp Speech-to-Text, translation and extraction into `checkins`
+- [ ] Offline mode: cached forecast + rule table, queued check-ins; SMS fallback. Partial: check-ins and symptom reports queue on the phone and send on reconnect, and a service worker keeps the app shell available. Not built: the on-device rule table, cached forecast and SMS
+- [x] Trust log in the app (System & trust): solver runs, people's records and agent answers with their tools, filterable by kind (`/api/trust-log`, supervisors only)
 - [ ] Red-flag escalation invariant (998 path); fail-safe
 - [ ] BigQuery row-level security and policy tags; purpose-limitation guardrail
 - [ ] Model Armor on input; SQL guard and `query_insights` on aggregate views
@@ -440,9 +441,9 @@ Exit: a Malayalam dizziness check-in triggers a Red alert and a supervisor actio
 ### Week 4 · 16–20 Nov · Backtest, document, submit
 
 - [ ] Full-summer backtest with synthetic crews → Metrics tab (lead time, false alarms, adherence, escalations, compliance, lost work time)
-- [ ] Trust tab in Looker Studio, embedded in the app
+- [ ] Trust tab in Looker Studio, embedded in the app (the in-app System & trust screen covers the demo; Looker is roadmap)
 - [ ] Stretch, only if evals are green: site photos, live dust-day replay, compliance report export
-- [ ] Documentation: README, architecture, challenge-fit table, data sources, risk model and thresholds, governance, guardrail and eval results, **assumptions and limitations**
+- [ ] Documentation: README, architecture, challenge-fit table, data sources, risk model and thresholds, governance, guardrail and eval results, **assumptions and limitations**. Done 15 Nov: [assumptions and limitations](assumptions-and-limitations.md), [challenge fit](challenge-fit.md). Still needed: an architecture diagram for the current app
 - [ ] Seed demo data; record the demo video
 - [ ] Submit the working prototype and documentation (technical documentation, assumptions and limitations) by Fri 20 Nov, the official deadline
 

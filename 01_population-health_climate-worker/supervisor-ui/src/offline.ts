@@ -1,5 +1,5 @@
 /**
- * Outbox for worker actions made without a network (wireframe P7). Only a worker's own
+ * Outbox for worker actions made without a network (worker offline state). Only a worker's own
  * check-in and "I feel unwell" report are queued: supervisor decisions are never replayed
  * later from a stale screen. Each entry keeps its command id, and the backend treats a
  * repeated command id as a replay, so a send that half-succeeded cannot record twice.

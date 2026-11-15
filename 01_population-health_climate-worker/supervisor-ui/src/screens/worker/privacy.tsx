@@ -33,8 +33,8 @@ function useConsent(personId: string | undefined) {
   return { consent, save, withdraw, error };
 }
 
-/** P1 · Welcome: language first (by endonym), then what to share, without pressure. */
-export function P1Welcome(props: ScreenProps) {
+/** Welcome: language first (by endonym), then what to share, without pressure. */
+export function WelcomeScreen(props: ScreenProps) {
   return <WorkerFrame session={props.session}><Welcome {...props} /></WorkerFrame>;
 }
 function Welcome({ session }: ScreenProps) {
@@ -66,7 +66,7 @@ function Welcome({ session }: ScreenProps) {
     <Note><T k="p1.alerts" /> <T k="p1.later" /></Note>
     {error && <p role="alert" className="hs-error">{error}</p>}
     <CtaBar note="Only you and occupational health see your answers.">
-      <button type="button" className="hs-button is-primary" disabled={session.busy} onClick={() => void save(draft, lang).then(ok => { if (ok) navigate('/worker/p2'); })}><T k="p1.save" /></button>
+      <button type="button" className="hs-button is-primary" disabled={session.busy} onClick={() => void save(draft, lang).then(ok => { if (ok) navigate('/worker/now'); })}><T k="p1.save" /></button>
     </CtaBar>
   </div>;
 }
@@ -76,8 +76,8 @@ function Toggle({ on, onChange, label }: { on: boolean; onChange: (on: boolean) 
   return <button type="button" role="switch" aria-checked={on} aria-label={label} className="hs-button" onClick={() => onChange(!on)}>{on ? t('on') : t('off')}</button>;
 }
 
-/** P8 · Me: what is shared, what is stored, and the worker's own copy. */
-export function P8MyData(props: ScreenProps) {
+/** Me: what is shared, what is stored, and the worker's own copy. */
+export function MyDataScreen(props: ScreenProps) {
   return <WorkerFrame session={props.session}><MyData {...props} /></WorkerFrame>;
 }
 function MyData({ session }: ScreenProps) {
@@ -105,7 +105,7 @@ function MyData({ session }: ScreenProps) {
     </Hero>
     <Section title={<T k="p8.consent" />}>
       <List>
-        <Row title={<T k="c.checkins" />} detail={consent.at ? t('p8.agreed', { date: time(consent.at) }) : <En>Not chosen yet.</En>} badge={<span className="hs-badge" data-tone={consent.checkins ? 'done' : 'muted'}>{consent.checkins ? t('on') : t('off')}</span>} onClick={() => navigate('/worker/p1')} />
+        <Row title={<T k="c.checkins" />} detail={consent.at ? t('p8.agreed', { date: time(consent.at) }) : <En>Not chosen yet.</En>} badge={<span className="hs-badge" data-tone={consent.checkins ? 'done' : 'muted'}>{consent.checkins ? t('on') : t('off')}</span>} onClick={() => navigate('/worker/welcome')} />
       </List>
     </Section>
     <Section title="What your supervisor saw">

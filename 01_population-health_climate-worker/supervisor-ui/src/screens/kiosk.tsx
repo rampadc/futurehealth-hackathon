@@ -5,10 +5,10 @@ import { Computed, Head, Hero, Metric, NoCase, Note } from './kit';
 import type { ScreenProps } from './registry';
 
 /**
- * K1 · Shelter A kiosk: a worker taps their badge and is checked in within three seconds,
+ * Shelter A kiosk: a worker taps their badge and is checked in within three seconds,
  * without reading. Badges are read with Web NFC where the browser has it; name tiles always work.
  */
-export function K1Kiosk({ session }: ScreenProps) {
+export function KioskScreen({ session }: ScreenProps) {
   const { caseView, person } = session;
   const [greeting, setGreeting] = useState<{ id: string; ok: boolean } | null>(null);
   const tapRef = useRef<(id: string) => void>(() => {});
@@ -45,7 +45,7 @@ export function K1Kiosk({ session }: ScreenProps) {
       {nfc.error && <p role="alert" className="hs-error">{nfc.error}</p>}
     </div>}
     <Note>{nfc.supported ? 'Badges are NFC tags holding the worker id (for example C05) as a text record. Tiles also work.' : 'This browser has no Web NFC, so tiles stand in for badge taps (Android Chrome reads real badges).'} Only {checkin ? 'Rana’s' : 'a worker’s own'} check-in is recorded in this case; Huda records the full headcount.</Note>
-    <Computed>Check-ins feed the headcount (M3) live.</Computed>
+    <Computed>Check-ins feed the site headcount live.</Computed>
   </div>;
 }
 

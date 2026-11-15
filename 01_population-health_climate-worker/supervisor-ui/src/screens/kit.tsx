@@ -82,7 +82,7 @@ export function Computed({ children = 'Computed by the site rules and solver · 
   return <p className="hs-computed">⚙ {children}</p>;
 }
 
-const BAND_TONE: Record<string, string> = { green: 'low', amber: 'caution', red: 'high', unknown: 'unknown' };
+const BAND_TONE: Record<string, string> = { green: 'low', amber: 'caution', red: 'high', emergency: 'high', unknown: 'unknown' };
 /** Environmental band: a swatch with a word, never colour alone. */
 export function Band({ band, label }: { band: string; label: string }) {
   return <span className="hs-band" data-band={BAND_TONE[band] ?? 'unknown'}><span className="hs-swatch" aria-hidden="true" />{label}</span>;

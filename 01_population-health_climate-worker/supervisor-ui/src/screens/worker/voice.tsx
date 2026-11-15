@@ -19,7 +19,7 @@ export function speechRecognition(): RecognitionCtor | null {
 }
 
 /**
- * P4 voice check-in: hold to speak, see what was understood, then confirm. The transcript stays on
+ * Voice check-in: hold to speak, see what was understood, then confirm. The transcript stays on
  * this phone and is never sent to Heat-Safe or the supervisor; only the worker's confirmed action is.
  * The browser's own speech service does the transcription, which the note says plainly.
  */

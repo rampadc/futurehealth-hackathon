@@ -34,15 +34,15 @@ describe('routes', () => {
   });
   it('parses device shells and screen ids', () => {
     expect(parseRoute('/site')).toEqual({ kind: 'device', device: 'site', screen: undefined });
-    expect(parseRoute('/worker/P4/')).toEqual({ kind: 'device', device: 'worker', screen: 'p4' });
+    expect(parseRoute('/worker/Check-In/')).toEqual({ kind: 'device', device: 'worker', screen: 'check-in' });
   });
 });
 
 describe('screen registry', () => {
   it('lists every wireframe screen once', () => {
-    const ids = SCREENS.map(s => s.id);
-    const expected = [...Array.from({ length: 9 }, (_, i) => `w${i + 1}`), ...Array.from({ length: 8 }, (_, i) => `m${i + 1}`), ...Array.from({ length: 8 }, (_, i) => `p${i + 1}`), 'k1'];
-    expect([...ids].sort()).toEqual(expected.sort());
+    const paths = SCREENS.map(s => `${s.device}/${s.id}`);
+    expect(new Set(paths).size).toBe(26);
+    for (const s of SCREENS) expect(s.id, s.name).toMatch(/^[a-z]+(-[a-z]+)*$/);
   });
   it('only names case actions the backend accepts', () => {
     const backendOnly = ['activity', 'readiness', 'incident_record', 'personnel', 'recovery_check', 'crew_readiness', 'water', 'escalation_followup'];
@@ -53,7 +53,7 @@ describe('screen registry', () => {
 
 describe('device shell', () => {
   it('offers only the personas who use that device, then shows the screen', async () => {
-    window.history.replaceState(null, '', '/site/m2');
+    window.history.replaceState(null, '', '/site/stop-work');
     render(<App />);
     expect(await screen.findByRole('heading', { name: /choose who is using this phone/i })).toBeTruthy();
     expect(screen.queryByRole('button', { name: /Amal Al Nadir/ })).toBeNull();
@@ -68,8 +68,8 @@ describe('device shell', () => {
     window.history.replaceState(null, '', '/web');
     render(<App />);
     expect(await screen.findByRole('heading', { name: 'Squad Monitoring' })).toBeTruthy();
-    await userEvent.click(screen.getByRole('button', { name: /W6 Restart review/ }));
+    await userEvent.click(screen.getByRole('button', { name: 'Restart review' }));
     expect(await screen.findByRole('heading', { name: 'Restart review' })).toBeTruthy();
-    expect(window.location.pathname).toBe('/web/w6');
+    expect(window.location.pathname).toBe('/web/restart-review');
   });
 });

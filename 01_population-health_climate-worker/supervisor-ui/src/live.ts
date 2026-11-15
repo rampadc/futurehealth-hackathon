@@ -1,6 +1,6 @@
 import type { ReplayCapture, ReplayRequest } from './replay';
 import type { Persona, StoryState } from './story';
-import type { BrandCheck, BrandPalette, BrandSettings, ConsentScope, TrustLogEntry, WorkerConsent, WorkerDataExport } from './contract';
+import type { BrandCheck, BrandPalette, BrandSettings, ConsentScope, CrewRisk, OwnRisk, SiteConditions, TrustLogEntry, WorkerConsent, WorkerDataExport } from './contract';
 
 export type Task = { action: string; actor_id: string; label: string; status: 'ready' | 'waiting' | 'recorded'; reason?: string; due_at?: string | null };
 export type Run = { id: string; version: number; status: string; error?: string | null; http_status?: number | null; graph_events?: string[]; applied?: boolean };
@@ -55,11 +55,14 @@ export const live = {
   runs: () => request<unknown>('/demo/runs'),
   demoState: () => request<CaseView | null>('/demo/state'),
   agentRuns: () => request<unknown>('/demo/agent-runs'),
-  reset: () => request<void>('/demo/reset', { method: 'POST' }),
+  reset: () => request<CaseView>('/demo/reset', { method: 'POST' }),
   consent: () => request<WorkerConsent>('/worker/consent'),
   saveConsent: (language: string, scopes: ConsentScope[]) => request<WorkerConsent>('/worker/consent', { method: 'PUT', body: json({ language, scopes }) }),
   withdrawConsent: () => request<WorkerConsent>('/worker/consent', { method: 'DELETE' }),
   workerData: () => request<WorkerDataExport>('/worker/data'),
+  conditions: () => request<SiteConditions | null>('/case/conditions'),
+  crewRisk: () => request<CrewRisk | null>('/case/crew-risk'),
+  ownRisk: () => request<OwnRisk | null>('/worker/risk'),
   trustLog: () => request<TrustLogEntry[]>('/trust-log'),
   brand: () => request<BrandSettings>('/brand'),
   checkBrand: (platform: BrandPalette, mobile: BrandPalette) => request<{ platform: BrandCheck[]; mobile: BrandCheck[] }>('/brand/check', { method: 'POST', body: json({ platform, mobile, expected_version: 0, confirm: '' }) }),

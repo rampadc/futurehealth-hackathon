@@ -3,11 +3,12 @@ import { nameOf } from '../../replay';
 import { crew, heatNow, progress, time } from '../data';
 import { ActionButton, Band, Computed, Draft, Empty, Head, Hero, Hold, List, Metric, NoCase, Note, Row, Section, taskBadge, taskLine } from '../kit';
 import type { ScreenProps } from '../registry';
+import { ConditionsPanel } from '../conditions';
 
 const FRESH_MS = 5 * 60_000;
 
-/** W2 · Heat controls: what must stop, why, and what evidence will clear it. */
-export function W2HeatControls({ session }: ScreenProps) {
+/** Heat controls: what must stop, why, and what evidence will clear it. */
+export function HeatControlsScreen({ session }: ScreenProps) {
   const { caseView } = session;
   if (!caseView) return <NoCase session={session} />;
   const heat = heatNow(caseView);
@@ -33,7 +34,7 @@ export function W2HeatControls({ session }: ScreenProps) {
         <List>
           <Row title={`Sensor ${r?.sensor_id ?? '—'} · ${r ? nameOf(r.zone_id) : 'no zone'}`} detail={r ? `Measured ${time(r.measured_at)} · received ${time(r.received_at)} · quality ${r.quality}` : 'No reading'} badge={<span className="hs-badge" data-tone={heat.freshness === 'current' ? 'done' : 'over'}>{heat.freshness === 'current' ? 'Fresh' : heat.freshness}</span>} />
           <Row title="Freshness limit" detail={`A reading older than ${FRESH_MS / 60_000} minutes cannot clear a hold.`} />
-          <Row title="Forecast" detail="Estimated from forecast · never used to clear a hold." badge={<span className="hs-badge" data-tone="muted">Not used</span>} />
+          <Row title="Forecast and replay" detail="Shown below as planning context · never used to clear a hold." badge={<span className="hs-badge" data-tone="muted">Not for clearance</span>} />
         </List>
       </Section>
       <Section title="Policy stack">
@@ -45,9 +46,10 @@ export function W2HeatControls({ session }: ScreenProps) {
       </Section>
       <Section title="Evidence needed before clearance">
         {response?.heat.clearance_blockers.length ? <List>{response.heat.clearance_blockers.map(b => <Row key={b} title={reasonLabel(b)} badge={<span className="hs-badge" data-tone="wait">Missing</span>} />)}</List>
-          : <Note>A fresh same-zone reading, the permit check and a separate restart review by the superintendent (W6).</Note>}
+          : <Note>A fresh same-zone reading, the permit check and a separate restart review by the superintendent.</Note>}
       </Section>
     </div>
+    <ConditionsPanel session={session} />
     <ActionButton session={session} action="issue" label="Issue stop-work instruction" primary />
   </div>;
 }
@@ -58,8 +60,8 @@ const LABELS: Record<string, string> = {
   escalation_followup: 'Follow up the overdue acknowledgement', incident_record: 'Record the site incident', remove: 'Confirm removal from heat and location', firstaid: 'Record first-aid contact',
 };
 
-/** W3 · Protective response: outstanding confirmations and who owns each. */
-export function W3ProtectiveResponse({ session }: ScreenProps) {
+/** Protective response: outstanding confirmations and who owns each. */
+export function ProtectiveResponseScreen({ session }: ScreenProps) {
   const { caseView, person } = session;
   if (!caseView) return <NoCase session={session} />;
   const story = caseView.story;
