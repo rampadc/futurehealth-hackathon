@@ -76,3 +76,18 @@ def test_invented_numbers_fail(text, bad):
 
 def test_numbers_without_units_are_not_checked():
     assert quoted_values("Call 998. Crew of 6 on 1 Aug 2025 at 05:00.") == []
+
+
+def test_neighbouring_hours_respect_the_rolling_limit():
+    """A full Low-zone hour straight into a Medium hour is 60+ minutes in a 45-minute window (15 Nov)."""
+    from heat_safe.forecast import get_replay
+    hs = compute_heat_stress(get_replay("2025-08-01", sites=["mussafah"]))
+    plan = optimise_schedule(hs, lookup_job_profile("steel fixer"), work_hours_needed=5, shade=True)
+    hours = {int(b["start"][:2]): b for b in plan["hours"]}
+    for h, b in hours.items():
+        prev = hours.get(h - 1)
+        if prev and b["scheduled_work_minutes"] > 0:
+            limit = 60 if b["twl_zone"] == "low" else (45 if b["twl_zone"] == "medium" else 20)
+            assert prev["scheduled_work_minutes"] <= limit, (h, prev["scheduled_work_minutes"], limit)
+    assert plan["invariants"]["within_rolling_work_limit"]
+    assert plan["shortfall_minutes"] == 300 - plan["work_minutes_scheduled"]  # anything not placed is reported

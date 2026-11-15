@@ -1,0 +1,67 @@
+name: Heat Safe preview cleanup
+
+on:
+  pull_request_target:
+    branches: [main]
+    types: [closed]
+
+permissions:
+  contents: read
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-24.04
+    environment: heat-safe-preview
+    timeout-minutes: 25
+    concurrency:
+      group: heat-safe-preview-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+      id-token: write
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      GOOGLE_CLOUD_PROJECT: ${{ vars.GCP_PROJECT_ID }}
+      CLOUD_RUN_REGION: ${{ vars.GCP_REGION }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Validate closed PR target
+        id: guard
+        run: python3 01_population-health_climate-worker/cloud/ci/verify.py closed
+      - uses: google-github-actions/auth@b7593ed2efd1c1617e1b0254da33b86225adb2a5 # v2.1.12
+        if: steps.guard.outputs.ready == 'true'
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_PREVIEW_DEPLOY_SA }}
+      - uses: google-github-actions/setup-gcloud@77e7a554d41e2ee56fc945c52dfd3f33d12def9a # v2.1.4
+        if: steps.guard.outputs.ready == 'true'
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          version: '539.0.0'
+      - name: Install Cloud SQL client tools
+        if: steps.guard.outputs.ready == 'true'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client-16
+          curl -fsSL -o /tmp/cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.28.0/cloud-sql-proxy.linux.amd64
+          echo 'c01a2dc25c5ec6441fb05fe2d23e51e5290b3c06cc56f5e9c749806f335bd82e  /tmp/cloud-sql-proxy' | sha256sum -c -
+          sudo install -m 0755 /tmp/cloud-sql-proxy /usr/local/bin/cloud-sql-proxy
+      - name: Recheck PR state before deletion
+        if: steps.guard.outputs.ready == 'true'
+        id: current
+        run: python3 01_population-health_climate-worker/cloud/ci/verify.py closed
+      - name: Delete preview resources
+        if: steps.current.outputs.ready == 'true'
+        working-directory: 01_population-health_climate-worker
+        run: python3 cloud/deploy.py cleanup-preview --pr '${{ steps.guard.outputs.pr }}'
+      - name: Mark bot comment removed
+        if: steps.current.outputs.ready == 'true'
+        env:
+          PR_NUMBER: ${{ steps.guard.outputs.pr }}
+          SOURCE_SHA: ${{ steps.current.outputs.sha }}
+        run: python3 01_population-health_climate-worker/cloud/ci/comment.py --pr "$PR_NUMBER" --status removed --sha "$SOURCE_SHA"

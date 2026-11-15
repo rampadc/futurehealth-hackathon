@@ -32,7 +32,7 @@ Each of the six "Your solution should" items maps to a concrete feature and a de
 | 3 | Worker-first governance | Opt-in consent per data type, data minimisation, BigQuery row/column-level security, retention limits, purpose-limitation guardrail that refuses disciplinary or ranking queries | Supervisor asks "who complains most?" and the agent refuses; the refusal is logged |
 | 4 | Field-ready operation | Offline-capable worker app (PWA) with an on-device rule table, SMS fallback, sensor-loss fail-safe that *raises* the risk band, stale-data detection, dust and PPE factors | Network cut mid-shift; the app still warns from cached forecast and rules; data syncs later |
 | 5 | Supervisor decision support | Crew/site dashboard: risk by crew and hour, recommended breaks, rotation and task timing; individuals shown only as "needs rest now", never with vitals or symptoms | Morning plan moves roofing to 05:30–10:00 and adds a rotation |
-| 6 | Safety and productivity measures | Metrics computed in BigQuery from a full-summer backtest with synthetic crews: lead time, false alarms, adherence, symptoms/incidents, escalations, compliance, lost work time | Metrics tab next to the Trust tab |
+| 6 | Safety and productivity measures | **Built (15 Nov):** a replay-day comparison of one crew under no plan, the morning plan, and Heat-Safe, judged against measured heat: minutes over the ADOSH-SF work limit, work by zone, midday-break and withdrawal compliance, detection delay, faults caught, false withdrawals, work delivered, shortfall, minutes cut and moved, alerts (`doc/metrics_replay_2025-08-01.md`). Full-summer backtest: roadmap | The comparison table |
 
 ## Architecture
 
@@ -114,6 +114,7 @@ Status as of 30 Oct 2026.
 | `extract_symptoms` | Gemini structured extraction of symptoms, hours worked and water intake | Worker agent | LLM, schema-checked | Must | Week 3 |
 | `log_checkin` | Writes extracted check-in fields to BigQuery (worker-scoped table) | Worker agent | Yes | Must | Week 3 |
 | `send_alert` | Sends a pre-translated template alert to an allowlisted worker or supervisor; rate-limited; level-gated | Monitor; worker agent for red-flag escalation only | Yes, side effect | Must | Week 3 |
+| `get_site_sensor` | What the site sensor measured per hour against the forecast (worst TWL, how much worse), faulty readings excluded; with the crew, the risk monitor's alerts and whether it recommends a re-plan. `optimise_schedule(replan_from, use_site_sensor)` then re-plans from the next whole hour. SYNTHETIC sensor for the 1 Aug 2025 replay only | Supervisor agent | Yes | Must | Built 14 Nov: `sensor.py`, `spike.py`, `agent_tools.py`; evals `spike_replan`, `sensor_fault_not_heat` |
 | `query_insights` | Read-only SQL over **aggregated** analytics views only (crew/site, never per-worker health) | Supervisor agent | Yes, SQL-guarded | Should | Week 3 |
 
 ### Code layout
@@ -163,6 +164,8 @@ Thresholds live in versioned code (`rules.py`, `RULES_VERSION`) and are unit-tes
 **Band, reminder, alert (decided 7 Nov):** the band is a state and is shown, not pushed. Planned controls (work/rest, fluids) arrive as scheduled reminders. Alerts fire only on a deviation from the stored plan: band above the planned band, a new risk factor, a withdrawal limit, a lost input, or a red flag (Emergency, never rate-limited). Otherwise a planned Red day would alert every 15 minutes. Spec: `src/heat_safe/README_WORKER_RISK.md`.
 
 Alert text comes from **fixed templates translated in advance and reviewed by native speakers**. The LLM can explain why an alert fired, but it never writes the safety instruction in a language nobody on the team can check.
+
+**Built 14 Nov** (`src/heat_safe/alert_templates.yaml`, `alerts.py`): `tighten`, `rest_now`, `sensor_fault`, `withdraw` and `emergency` (998, not yet triggered automatically), for the worker in English, Mandarin, Hindi, Urdu, Malayalam and Bengali, plus a crew-level English line for the supervisor with no health detail. Each language records its review status, which decides how it is sent. English is the source. **Mandarin: reviewed by a native speaker on the team (14 Nov), sent alone. Hindi, Urdu, Malayalam, Bengali: AI drafts back-translated with Google Translate and cross-checked with a second translation tool (meaning confirmed), not yet native-reviewed, so always sent together with the English text.** Any future unchecked language is a draft: marked in demo mode, refused in production (English instead). Alerts are logged, not sent (SMS, push and voice are on the roadmap).
 
 ### Unstructured inputs
 
@@ -219,7 +222,9 @@ The worker app and the alert path must work without the LLM and without the netw
 
 ## Safety and productivity measures
 
-All metrics are computed in BigQuery views and shown in a Looker Studio Metrics tab. For the prototype they come from a **backtest over a full past Abu Dhabi summer (Jun–Sep) with synthetic crews**. The synthetic heat-illness events come from a documented simulation, and we label them that way.
+**Built for the prototype (15 Nov): one replayed day, not a backtest.** `tools/replay_metrics.py` compares the same crew (steel fixers in shade, 5 h) under A. no plan, B. the morning plan only and C. Heat-Safe, judged against the measured (synthetic) sensor heat, and writes `doc/metrics_replay_2025-08-01.md`. Result: minutes worked over the ADOSH-SF work limit A 280, B 20, C 0; C delivers 255 of 300 minutes, and the 45 it does not deliver is reported as a shortfall, not squeezed into unsafe heat. No illness is simulated, so the safety measure is limit exceedance, not illness prevented. Adherence, symptoms and escalations need the worker app (roadmap).
+
+*Original target (roadmap):* all metrics computed in BigQuery views and shown in a Looker Studio Metrics tab, from a **backtest over a full past Abu Dhabi summer (Jun–Sep) with synthetic crews**, with synthetic heat-illness events from a documented simulation, labelled as such.
 
 | Metric | Definition (prototype) |
 |---|---|
@@ -324,12 +329,14 @@ The UAE [National Center of Meteorology](https://www.ncm.gov.ae/) is the officia
 | Wearable signals (HR, skin temp) | Per-worker streams driven by workload and site TWL; consent flags | `compute_worker_risk` | Week 2 |
 | Pre-start notes, site photos | Written / photographed for the demo | `get_site_context` | Week 2 |
 | Contractor heat plan, accommodation/transport note, emergency plan | Written for the demo | RAG corpus | Week 2 |
-| Alert templates | Four levels in English + 3 worker languages, reviewed by native speakers | `send_alert`, offline rule table | Week 3 |
+| Alert templates | Five actions in English + Mandarin (native-reviewed), Hindi, Urdu, Malayalam, Bengali (back-translated, sent with English) | `alerts.py`, offline rule table | Done; native review of 4 languages pending |
 | Voice check-ins | Recorded by the team in 2–3 of: Arabic, Hindi, Urdu, Malayalam, Bengali, Tagalog | Check-in flow, extraction evals | Week 3 |
 | Incident narratives, symptom events | Written / simulated with a documented model | Incident retrieval, backtest metrics | Week 3–4 |
 | Golden eval scenarios | Written by the team | Evals | From Week 1 |
 
 #### Data limitations
+
+- Hindi, Urdu, Malayalam and Bengali alert texts are machine-checked (back-translation), not native-reviewed; they are always sent with the English text until a native speaker reviews them. Right-to-left display of Urdu with numbers is untested on real phones.
 
 - ERA5 and CAMS are 10–40 km grids: no site microclimate (roof surfaces, reflected heat, urban heat island). Mussafah and Abu Dhabi city fall in the same air-quality cell, so their values are identical.
 - ERA5 has no UV index; it exists only in the forecast and CAMS data.
@@ -341,7 +348,23 @@ The UAE [National Center of Meteorology](https://www.ncm.gov.ae/) is the officia
 
 ## Build plan
 
-Four build weeks, from 25 Oct to a submission on Thu 19 Nov, one day before the 20 Nov deadline. The core loop is due by 1 Nov and features freeze on 15 Nov. All times are Gulf Standard Time (UTC+4); confirm the organiser's deadline time zone. Register the team now: registration closes 10 Nov.
+Four build weeks, from 25 Oct to the official deadline: **working prototype and documentation due Fri 20 Nov**. Only the hackathon's own dates are deadlines (hack2skill timeline: registration 15 Oct – 10 Nov, prototypes due 20 Nov, evaluation 20–30 Nov, awards at GITEX 7–11 Dec); the weekly split below is a working guide, not a deadline. All times are Gulf Standard Time (UTC+4); confirm the organiser's deadline time zone.
+
+### Revised schedule from 14 Nov (supersedes the remaining week 3–4 items)
+
+Team target: **submit Thu 19 Nov**, keeping 20 Nov (the official deadline) as a one-day buffer. Build only on what works; everything else goes on the roadmap slide.
+
+| Day | Focus | Done when |
+|---|---|---|
+| Fri 14 | Connect the site sensor to the agent: `get_site_sensor` tool, re-plan parameters on `optimise_schedule`, instruction rule, 2 eval scenarios (spike re-plan, sensor fault) | A grounded re-plan in `adk web` after "the sensor shows a spike" |
+| Sat 15 | Alerts (req. 2): fixed templates (tighten, rest now, sensor fault, withdraw, emergency 998) in English + one worker language; `send_alert` that logs, connected to the fast loop | The replay prints worker alert text in two languages |
+| Sun 16 | Metrics (req. 6), kept small: one-day replay metrics table, labelled synthetic. Full eval run, 3 repeats each; fix failures | Metrics table and eval pass rates recorded |
+| Mon 17 | Documentation: README, architecture (two loops; team diagram with the health-records arrow fixed), assumptions and limitations, honest challenge-fit table. Refresh the Cloud Run deploy | Team has reviewed the docs |
+| Tue 18 | Demo: rehearse on the replay day, record the video plus a backup | Final video |
+| Wed 19 | Submit; spare time for fixes only | Submitted |
+| Thu 20 | Buffer (official deadline) | |
+
+**Roadmap only (not built):** worker check-in agent and voice, offline PWA and SMS, row-level security and per-agent service accounts, Model Armor, full-summer backtest and Looker, air quality and dust, site photos. To decide by 15 Nov: which UI the demo shows (the team wireframes or the ADK dev UI), and who wires it up.
 
 ```mermaid
 gantt
@@ -351,13 +374,13 @@ gantt
   Wk1 Foundations + core risk loop      :w1, 2026-10-25, 2026-11-01
   Wk2 Worker risk, RAG, supervisor view :w2, 2026-11-02, 2026-11-08
   Wk3 Alerts, check-ins, governance, offline :w3, 2026-11-09, 2026-11-15
-  Wk4 Backtest metrics, docs, submit    :w4, 2026-11-16, 2026-11-19
+  Wk4 Backtest metrics, docs, submit    :w4, 2026-11-16, 2026-11-20
   section Ongoing
-  Evals + Trust tab                      :2026-10-28, 2026-11-19
+  Evals + Trust tab                      :2026-10-28, 2026-11-20
   section Milestones
   Registration closes                    :milestone, 2026-11-10, 0d
-  Feature freeze                         :milestone, 2026-11-15, 0d
   Prototype due                          :milestone, 2026-11-20, 0d
+  Winners announced                      :milestone, 2026-11-30, 0d
 ```
 
 With a team of four or five, split it as: agent and tools; risk model, data and BigQuery; guardrails, governance and evals; worker app, supervisor UI and demo.
@@ -411,18 +434,17 @@ Exit: the new starter in heavy PPE reaches Amber before the crew, and the plan c
 - [x] Citation check (6 Nov: every page reference must match a `search_guidance` result, `grounding.py`)
 - [ ] "No safe to continue" invariant (a regex check in `exit_roofing_plan` for now); medical-advice boundary (first aid comes only from ADOSH-SF TG, after 998; not yet a code check)
 - [ ] Golden set to 20–25, including red-team, purpose-limitation, offline and extraction cases
-- [ ] Feature freeze Sun 15 Nov
 
 Exit: a Malayalam dizziness check-in triggers a Red alert and a supervisor action; "rank workers by complaints" is refused and logged; airplane mode still produces a local alert.
 
-### Week 4 · 16–19 Nov · Backtest, document, submit
+### Week 4 · 16–20 Nov · Backtest, document, submit
 
 - [ ] Full-summer backtest with synthetic crews → Metrics tab (lead time, false alarms, adherence, escalations, compliance, lost work time)
 - [ ] Trust tab in Looker Studio, embedded in the app
 - [ ] Stretch, only if evals are green: site photos, live dust-day replay, compliance report export
 - [ ] Documentation: README, architecture, challenge-fit table, data sources, risk model and thresholds, governance, guardrail and eval results, **assumptions and limitations**
 - [ ] Seed demo data; record the demo video
-- [ ] Submit prototype and documentation on Thu 19 Nov
+- [ ] Submit the working prototype and documentation (technical documentation, assumptions and limitations) by Fri 20 Nov, the official deadline
 
 After submission: if the team makes the top three (announced by 30 Nov), use early December to rehearse the live demo and pitch for GITEX on 7–11 Dec.
 
@@ -483,7 +505,7 @@ The biggest risk is scope, which grew to cover all six challenge requirements. P
 
 | Risk | Mitigation |
 |---|---|
-| Scope too large for four weeks | Must items done by the 15 Nov freeze; Should items only once core evals pass |
+| Scope too large for four weeks | Must items first; Should items only once core evals pass; leave enough time before 20 Nov for documentation and the demo recording |
 | TWL, WBGT or strain estimate disputed by judges | Say it is estimated from forecast data, cite the method, show unit tests against reference values, keep the "never lowers risk" rule |
 | Sun TWL too pessimistic (sits at the 60 W/m² floor midday) and plans become all-stop | Plan on shade TWL where shade exists; compare against measured TWL or published Gulf field data; record the calibration as a limitation |
 | Synthetic metrics look made-up | Publish the simulation assumptions; report metrics as "prototype backtest", not field results |
@@ -496,6 +518,11 @@ The biggest risk is scope, which grew to cover all six challenge requirements. P
 **Cut order if behind:** site photos → dust replay → compliance report → `query_insights` and SQL guard → citation check → wearable physiology (keep environment + workload risk). **Never cut:** grounding check, midday-break and escalation invariants, fail-safe, offline rule table, consent and access rules, telemetry.
 
 **Production roadmap (one slide):** real wearables via consented device integration; on-site TWL meters; acclimatisation tracking per worker; formal privacy review against UAE PDPL and Abu Dhabi DoH standards with worker representatives; multi-site rollout with per-site thresholds; logistics and industrial sites; climate projection planning for long-term rostering; field validation during a summer pilot against on-site TWL and occupational health records.
+
+## Changes on 14 Nov
+
+- **Deadlines:** only the hackathon's official dates are deadlines (prototype and documentation due 20 Nov). The 15 Nov feature freeze is removed. The team targets submission on 19 Nov as a one-day buffer.
+- **Revised schedule:** the remaining days focus on the sensor-to-agent connection, alert templates, a small metrics table, evals, documentation and the demo (see Build plan).
 
 ## Changes from the 25 Oct plan
 

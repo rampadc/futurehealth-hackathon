@@ -1,0 +1,147 @@
+name: Heat Safe preview deploy
+
+on:
+  workflow_run:
+    workflows: [Heat Safe CI]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: read
+    outputs:
+      kind: ${{ steps.guard.outputs.kind }}
+      sha: ${{ steps.guard.outputs.sha }}
+      run_id: ${{ steps.guard.outputs.run_id }}
+      pr: ${{ steps.guard.outputs.pr }}
+      ready: ${{ steps.guard.outputs.ready }}
+      trusted_sha: ${{ steps.guard.outputs.trusted_sha }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Validate successful run and current PR or main head
+        id: guard
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          TRUSTED_SHA="$(git rev-parse HEAD)"
+          export TRUSTED_SHA
+          python3 01_population-health_climate-worker/cloud/ci/verify.py run
+
+  deploy:
+    needs: validate
+    if: needs.validate.outputs.kind == 'preview' && needs.validate.outputs.ready == 'true'
+    runs-on: ubuntu-24.04
+    environment: heat-safe-preview
+    timeout-minutes: 40
+    concurrency:
+      group: heat-safe-preview-${{ needs.validate.outputs.pr }}
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: read
+      issues: write
+      id-token: write
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      GOOGLE_CLOUD_PROJECT: ${{ vars.GCP_PROJECT_ID }}
+      CLOUD_RUN_REGION: ${{ vars.GCP_REGION }}
+      SOURCE_SHA: ${{ needs.validate.outputs.sha }}
+      RUN_ID: ${{ needs.validate.outputs.run_id }}
+      PR_NUMBER: ${{ needs.validate.outputs.pr }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ needs.validate.outputs.trusted_sha }}
+          persist-credentials: false
+      - name: Revalidate source before retrieving artifact
+        env:
+          TRUSTED_SHA: ${{ needs.validate.outputs.trusted_sha }}
+        run: python3 01_population-health_climate-worker/cloud/ci/verify.py run
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: heat-safe-image-${{ needs.validate.outputs.sha }}
+          run-id: ${{ needs.validate.outputs.run_id }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/image-artifact
+      - name: Validate OCI archive metadata and contents
+        run: python3 01_population-health_climate-worker/cloud/ci/verify_artifact.py '${{ runner.temp }}/image-artifact' "$SOURCE_SHA" "$RUN_ID"
+      - uses: google-github-actions/auth@b7593ed2efd1c1617e1b0254da33b86225adb2a5 # v2.1.12
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_PREVIEW_DEPLOY_SA }}
+      - uses: google-github-actions/setup-gcloud@77e7a554d41e2ee56fc945c52dfd3f33d12def9a # v2.1.4
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          version: '539.0.0'
+      - name: Install Cloud SQL client tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client-16
+          curl -fsSL -o /tmp/cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.28.0/cloud-sql-proxy.linux.amd64
+          echo 'c01a2dc25c5ec6441fb05fe2d23e51e5290b3c06cc56f5e9c749806f335bd82e  /tmp/cloud-sql-proxy' | sha256sum -c -
+          sudo install -m 0755 /tmp/cloud-sql-proxy /usr/local/bin/cloud-sql-proxy
+      - name: Import OCI data and push only to private Artifact Registry
+        id: image
+        run: |
+          set -euo pipefail
+          target="${CLOUD_RUN_REGION}-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/heat-safe-previews/pr-${PR_NUMBER}/app:sha-${SOURCE_SHA}"
+          anonymous_manifest="https://${CLOUD_RUN_REGION}-docker.pkg.dev/v2/${GOOGLE_CLOUD_PROJECT}/heat-safe-previews/pr-${PR_NUMBER}/app/manifests/sha-${SOURCE_SHA}"
+          status="$(curl -sS -o /dev/null -w '%{http_code}' "$anonymous_manifest")"
+          if test "$status" = 200; then
+            gcloud artifacts docker images delete "$target" --delete-tags --quiet >/dev/null 2>&1 || true
+            after="$(curl -sS -o /dev/null -w '%{http_code}' "$anonymous_manifest" || true)"
+            echo "::error::Existing image was anonymously retrievable; attempted deletion. Anonymous HTTP after deletion: $after"
+            exit 1
+          fi
+          if test "$status" != 401 && test "$status" != 403; then
+            echo "::error::Private registry probe returned HTTP $status"
+            exit 1
+          fi
+          gcloud auth configure-docker "${CLOUD_RUN_REGION}-docker.pkg.dev" --quiet
+          docker load -i '${{ runner.temp }}/image-artifact/image.tar'
+          label="$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "heat-safe-ci:$SOURCE_SHA")"
+          test "$label" = "$SOURCE_SHA"
+          docker tag "heat-safe-ci:$SOURCE_SHA" "$target"
+          push_output="$(docker push "$target")"
+          digest="$(printf '%s\n' "$push_output" | sed -nE 's/^.*digest: (sha256:[0-9a-f]{64}).*$/\1/p' | tail -1)"
+          test -n "$digest"
+          anonymous_manifest="https://${CLOUD_RUN_REGION}-docker.pkg.dev/v2/${GOOGLE_CLOUD_PROJECT}/heat-safe-previews/pr-${PR_NUMBER}/app/manifests/${digest}"
+          status="$(curl -sS -o /dev/null -w '%{http_code}' "$anonymous_manifest")"
+          if test "$status" = 200; then
+            gcloud artifacts docker images delete "${target%:*}@$digest" --delete-tags --quiet >/dev/null 2>&1 || true
+            after="$(curl -sS -o /dev/null -w '%{http_code}' "$anonymous_manifest" || true)"
+            echo "::error::Pushed image was anonymously retrievable; attempted deletion. Anonymous HTTP after deletion: $after"
+            exit 1
+          fi
+          if test "$status" != 401 && test "$status" != 403; then
+            echo "::error::Private image probe returned HTTP $status"
+            exit 1
+          fi
+          echo "image=${target%:*}@$digest" >> "$GITHUB_OUTPUT"
+      - name: Revalidate immediately before cloud deployment
+        env:
+          TRUSTED_SHA: ${{ needs.validate.outputs.trusted_sha }}
+        run: python3 01_population-health_climate-worker/cloud/ci/verify.py run
+      - name: Deploy by private image digest
+        id: release
+        working-directory: 01_population-health_climate-worker
+        env:
+          IMAGE: ${{ steps.image.outputs.image }}
+        run: |
+          set -euo pipefail
+          python3 cloud/deploy.py deploy-preview --pr "$PR_NUMBER" --image "$IMAGE" --sha "$SOURCE_SHA"
+      - name: Update one PR preview comment
+        env:
+          PREVIEW_URL: ${{ steps.release.outputs.url }}
+        run: python3 01_population-health_climate-worker/cloud/ci/comment.py --pr "$PR_NUMBER" --status deployed --sha "$SOURCE_SHA" --url "$PREVIEW_URL"

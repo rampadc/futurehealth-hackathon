@@ -81,3 +81,117 @@ There were two ways to make it pass:
 
 We took the second. **When a model keeps doing arithmetic, give it the answer instead.** It is the
 same principle as moving thresholds out of the prompt: anything code can compute, code should.
+
+### 3. A heat spike runs two loops at different speeds (13–14 Nov)
+
+A forecast describes each hour with one value. A sensor on site can show it is hotter than that, so
+the plan has to change during the shift. That needs two loops:
+
+```
+sensor reading ─► sensor.measured_twl ─► spike.adjust_for_observation   FAST: every reading, no LLM
+                                            continue / tighten / rest_now / sensor_fault / withdraw + alert
+             └──► sensor.apply_measurements ─► schedule.optimise_schedule(from_hour, already_worked_minutes)
+                                                                         SLOW: re-plan the rest of the day
+```
+
+| File | Role |
+|---|---|
+| `spike.py` | Fast loop. A pure function: one reading and a small state in, one decision out. Only ever stricter than the plan |
+| `sensor.py` | Measured TWL (same model as the forecast), conversion of readings for the fast loop, forecast correction, synthetic feed, `replay_fast_loop` |
+| `schedule.py` | `from_hour` and `already_worked_minutes`: re-plan without touching past hours or exceeding the acclimatisation share |
+| `tools/replay_heat_spike.py` | The demo: morning plan, then the alerts during the spike, then the re-plan |
+| `rules.py` | `STEP_DOWN_AFTER_MINUTES`, `SENSOR_MAX_CHANGE_C_PER_MIN` and `SENSOR_BIAS_FADE_HOURS`: design choices, not ADOSH-SF |
+
+What the replay day taught us:
+- **An hourly forecast is not the whole hour.** Even without the synthetic spike, the shade sensor
+  drifts into High during the 10:00 hour as the air heats towards 11:00, while the forecast says
+  Medium (122.8). That is the case for site sensors in the pitch.
+- **The spike had to be placed with care.** In the sun, 07:00–17:00 is already High (the TWL floor), so
+  a spike changes nothing there. After 10:00 a +3 °C spike crosses the 44 °C withdrawal limit. The demo
+  spike is 08:15–09:15 for a crew in shade, where the plan assumed Medium.
+- **Raise fast, lower slowly; a bad input moves toward safety.** A stricter zone applies from the first
+  reading and is lifted only after 30 minutes of better readings (15 until 14 Nov; see `rules.py`). An implausible jump is a fault: it
+  raises the zone by one and alerts, but it never triggers a withdrawal and never relaxes anything.
+- **The correction is one-sided.** Hotter than forecast lowers the next hours' TWL (fading over 3 hours).
+  A cooler reading never raises it.
+
+**Connected to the agent (14 Nov).** `get_site_sensor` gives the agent what the sensor measured per hour
+against the forecast, the faulty readings it excluded, and (given the crew) what the risk monitor already
+told the crew plus whether it recommends a re-plan (`sensor.replan_recommendation`: measured worse than
+the plan for 30 min, or a withdrawal). `optimise_schedule(replan_from, use_site_sensor)` then re-plans
+from the next whole hour. Eval scenarios: `spike_replan`, `sensor_fault_not_heat`.
+
+What connecting it taught us:
+- **The re-plan nearly used a faulty reading.** It dropped only self-reported faults, so the sun-struck
+  70 °C would have become an hour's "worst TWL". Now both loops use one check (`spike.reading_fault`).
+- **Hold back deviations, not the plan's own changes.** The fast loop first held the plan's High zone
+  (07:00) into its Medium hour (08:00) and sent a "tighten" before any spike. "Lower slowly" now applies
+  only while a deviation is in force.
+- **The synthetic feed must match the forecast's assumptions** (each hour's values held, shade globe =
+  air temperature). Otherwise its own drift fires alerts and the spike is no longer the only cause.
+- **Give numbers in the form people say them.** The agent wrote "the remaining 150 minutes" (its own
+  subtraction), "115 W/m² (High)" (114.96 rounded up across the threshold) and "19 W/m² worse" (the tool
+  had -19). Fixed in the tools, not the guardrail: `work_still_needed_hm`, `rules.display_twl` (rounds
+  down, so the number always agrees with its zone) and positive `worse_than_forecast_wm2`.
+- **The first eval failure was the eval.** `within_acclimatisation_share` only applies to a
+  reduced-share worker; the scenario's crew was acclimatised.
+
+**Rolling 60-minute work limit (15 Nov).** The fast loop first reset "minutes worked" at each clock
+hour, so a crew could work 08:00-08:30, rest 30 minutes and work again from 09:00: 50 minutes in 80
+under a "20 min work / 40 min rest" cycle. Now work counts over the last 60 minutes, and the alert gives
+how long the crew can work **in one stretch** from now (`sensor.available_work_minutes`): earlier
+minutes drop out of the window as the stretch goes on, so after 08:00-08:30 the answer is 0 until 09:10
+and then a full 20. A first version reported "20 minus what is in the window" (5 minutes at 09:15), which
+was correct for that instant but told a crew to stop after 5 minutes they did not need to stop.
+A supervisor's question about one alert found this.
+
+**The monitor follows the plan in force (15 Nov).** The demo's monitor kept following the morning plan
+after the 09:00 re-plan, so at 09:10 it told the crew "work 20 minutes" while the re-plan had moved
+that work to the afternoon. Now `replay_fast_loop(replans=...)` switches to a re-plan from its first
+hour, an alert never offers more minutes than the plan in force still schedules, and "tighten" /
+"rest now" are held back while the plan has the crew resting (sent when work resumes, if they still
+apply). Sensor faults and withdrawals always alert. Two loops that act on the same crew must read the
+same plan.
+
+### 4. Alert text is reviewed data, not generated text (14 Nov)
+
+`alert_templates.yaml` holds what a worker receives for each fast-loop action, in English, Mandarin,
+Hindi, Urdu, Malayalam and Bengali, and a crew-level line for the supervisor. `alerts.py` only fills in
+values code computed (`{minutes}`, `{time}`, `{crew}`, `{zone}`); the agent quotes `worker_message`
+and never writes or translates alert text.
+
+- **Languages follow the workforce.** Abu Dhabi crews are mostly South Asian (Indian, especially from
+  Kerala; Pakistani; Bangladeshi), and Chinese contractors bring Chinese crews. Spoken Hindi reaches Urdu
+  speakers, but written alerts need both scripts.
+- **Review status is recorded, and decides how a text is sent.** `reviewed` (a native speaker, name and
+  date required): sent alone. `back_translated` (Google Translate back to English matched; who and when
+  required): always sent together with the English text. `draft`: marked in demo mode, refused in
+  production (English instead). State on 14 Nov: Mandarin reviewed by a native speaker on the team;
+  Hindi, Urdu, Malayalam and Bengali back-translated, still waiting for native-speaker review.
+- **Back-translation is not a review.** It catches large meaning errors, not unnatural or ambiguous
+  wording. So those texts never travel without the English original, and the docs never call them
+  reviewed.
+- **The checks run when the file loads, not mid-shift:** every action exists in every language, and every
+  translation fills the same values as the English. A translation that drops `{minutes}` fails at start-up.
+- **Short, literal sentences** ("Stop work now. Rest in the shade. Drink water.") translate more reliably
+  and suit workers with limited literacy.
+
+### 5. Measuring it on the replay day (15 Nov)
+
+`metrics.py` and `tools/replay_metrics.py` compare one crew under no plan, the morning plan, and
+Heat-Safe, judged against measured heat (`doc/metrics_replay_2025-08-01.md`). Headline: minutes worked
+over the ADOSH-SF work limit, A 280, B 20, C 0, with C's shortfall reported as the cost of protection.
+
+Building the measure found three real problems, each now fixed and tested:
+- **Our own planner broke the limit.** It placed a full Low-zone hour (60 min) straight before a Medium hour
+  (45 per 60). Even with no spike, following the plan gave 45 minutes over. `optimise_schedule` now caps
+  the earlier hour when the next one has work (`within_rolling_work_limit` invariant).
+- **The withdrawal limit flapped.** At 44 °C plus sensor noise the crew got 5 "withdraw" alerts in an
+  hour. A withdrawal now holds until the readings are below the limits for 30 minutes, and the zone's
+  step-down clock runs during it, so the two waits do not stack.
+- **The re-plan assumed the morning plan was followed.** The fast loop had cut 15 minutes, so the
+  assumption hid a 15-minute shortfall. The replay now re-plans with the minutes actually worked
+  (`replay_fast_loop`'s `worked_now`).
+- And one in the metric itself: its window was one 5-minute block too wide (65 minutes), so even
+  continuous Low-zone work looked "over". A wrong number that favours you is still wrong; check the
+  measure before you believe it.
