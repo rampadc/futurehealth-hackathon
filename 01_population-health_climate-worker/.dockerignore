@@ -4,6 +4,7 @@
 !README.md
 !pyproject.toml
 !uv.lock
+!server.py
 !src/
 !src/heat_safe/
 !src/heat_safe/**
