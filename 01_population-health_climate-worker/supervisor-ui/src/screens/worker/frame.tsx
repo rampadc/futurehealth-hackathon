@@ -50,6 +50,7 @@ export function WorkerFrame({ session, children, forceOffline }: { session: Case
   return <Ctx.Provider value={{ lang, chosen: !!stored, choose, online }}>
     <div lang={lang} dir={meta.dir} className="hs-worker" data-script={lang}>
       {!online && <p className="hs-offline" role="status">{tr('p2.offline', lang).text}</p>}
+      {session.outbox.length > 0 && <p className="hs-offline" role="status"><span lang="en" dir="ltr">{session.outbox.length} saved action{session.outbox.length === 1 ? '' : 's'} waiting to send</span></p>}
       {children}
     </div>
   </Ctx.Provider>;

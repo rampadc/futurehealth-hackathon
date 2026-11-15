@@ -17,10 +17,12 @@ function CheckIn({ session }: ScreenProps) {
   if (!caseView || !person) return <NoCase session={session} />;
   const report = caseView.tasks.find(x => x.action === 'report' && x.actor_id === person.id);
   const sent = report?.status === 'recorded';
-  const canSend = report?.status === 'ready' && online && !session.busy;
-  if (sent) return <div className="hs-screen">
+  const queued = session.outbox.some(e => e.action === 'report');
+  const canSend = report?.status === 'ready' && !session.busy && !queued;
+  if (sent || queued) return <div className="hs-screen">
     <h1 id="hs-title"><T k="p4.title" /></h1>
     <Statement tone="black" source={<T k="p4.rule" />}><T k="p4.sys" /></Statement>
+    {queued && <Note tone="amber"><T k="p4.offline" /></Note>}
     <Note><En>Help is on the way. Stay where you are and with someone.</En></Note>
     <CtaBar><button type="button" className="hs-button" onClick={() => navigate('/worker/p2')}><T k="p6.back" /></button></CtaBar>
   </div>;

@@ -11,6 +11,7 @@ const reply = (value: unknown, status = 200) => new Response(JSON.stringify(valu
 let currentCase: CaseView | null;
 let person: typeof PERSONAS[number] | null;
 let commands: Array<{ action: string; payload: Record<string, unknown> }>;
+let commandIds: string[];
 let brand: { version: number; published_at: string | null; published_by: string | null; platform: unknown; mobile: unknown };
 let brandCalls: Array<Record<string, unknown>>;
 let consent: { person_id: string; language: string; scopes: string[]; consented_at: string | null };
@@ -23,7 +24,7 @@ async function makeCase(id: CaseId, story: Partial<StoryState>, tasks: Task[]): 
 const task = (action: string, actor_id: string, status: Task['status'], label = action): Task => ({ action, actor_id, label, status });
 
 beforeEach(() => {
-  person = null; commands = []; currentCase = null; brandCalls = [];
+  person = null; commands = []; commandIds = []; currentCase = null; brandCalls = [];
   brand = { version: 0, published_at: null, published_by: null, platform: null, mobile: null };
   consent = { person_id: 'C05', language: 'en', scopes: [], consented_at: null };
   vi.stubGlobal('EventSource', undefined);
@@ -37,7 +38,7 @@ beforeEach(() => {
     }
     if (path === '/api/case') return reply(currentCase);
     if (path === '/api/case/commands') {
-      commands.push({ action: body.action, payload: body.payload });
+      commands.push({ action: body.action, payload: body.payload }); commandIds.push(body.command_id);
       const t = currentCase?.tasks.find(x => x.action === body.action);
       if (t) t.status = 'recorded';
       return reply(currentCase);
@@ -204,5 +205,35 @@ describe('platform screens', () => {
     await open('/web/w8', 'P02');
     expect(await screen.findByText('Maya Al Qamar: stop-work')).toBeTruthy();
     expect(screen.getByText('None')).toBeTruthy();
+  });
+});
+
+describe('offline worker actions', () => {
+  it('queues a check-in without a network and sends it once when the network returns', async () => {
+    const online = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    currentCase = await makeCase('heat_trigger', { issued: true, acknowledged: true, stopped: true }, [task('checkin', 'C05', 'ready')]);
+    await open('/worker/p6', 'C05');
+    const hold = await screen.findByRole('button', { name: /Check in at Shelter A/ });
+    fireEvent.keyDown(hold, { key: ' ' });
+    expect(await screen.findByText(/1 saved action waiting to send/, {}, { timeout: 2000 })).toBeTruthy();
+    expect(commands).toEqual([]);
+    expect(JSON.parse(localStorage.getItem('hs-outbox:C05')!)).toHaveLength(1);
+    const queuedId = JSON.parse(localStorage.getItem('hs-outbox:C05')!)[0].command_id;
+    online.mockReturnValue(true);
+    window.dispatchEvent(new Event('online'));
+    await waitFor(() => expect(commands).toEqual([{ action: 'checkin', payload: {} }]));
+    expect(commandIds).toEqual([queuedId]);
+    await waitFor(() => expect(localStorage.getItem('hs-outbox:C05')).toBeNull());
+    online.mockRestore();
+  });
+
+  it('never queues supervisor decisions', async () => {
+    const online = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    currentCase = await makeCase('heat_trigger', { issued: true }, [task('acknowledge', 'C01', 'ready')]);
+    await open('/site/m2', 'C01');
+    await userEvent.click(await screen.findByRole('button', { name: 'Acknowledge' }));
+    await waitFor(() => expect(commands).toEqual([{ action: 'acknowledge', payload: {} }]));
+    expect(localStorage.getItem('hs-outbox:C01')).toBeNull();
+    online.mockRestore();
   });
 });
