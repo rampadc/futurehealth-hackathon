@@ -148,3 +148,4 @@ button.hs-row-body:hover { background: var(--color-base); }
 .hs-preview-bar { display: flex; align-items: center; gap: var(--space-1); padding: var(--space-1); background: var(--color-sheet); border: var(--rule-hair); }
 .hs-shell fieldset.hs-form { border: 0; padding: 0; margin: 0; }
 .hs-shell input[type='color'] { min-block-size: var(--target-touch); padding: 2px; inline-size: 100%; }
+.hs-untranslated { unicode-bidi: isolate; }

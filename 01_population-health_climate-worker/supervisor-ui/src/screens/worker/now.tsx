@@ -2,7 +2,7 @@ import { navigate } from '../../router';
 import { heatNow, intervalsOf, kindLabel, nowAndNext, taskFor, time } from '../data';
 import { Band, Computed, CtaBar, Empty, Hero, HoldButton, List, Metric, NoCase, Note, Row, Section, Statement } from '../kit';
 import type { ScreenProps } from '../registry';
-import { T, useT, useWorker, WorkerFrame } from './frame';
+import { En, T, useT, useWorker, WorkerFrame } from './frame';
 
 /** Worker's own status: working, resting or excluded. Never shows other workers or health detail. */
 function statusOf(session: ScreenProps['session']) {
@@ -32,16 +32,16 @@ function Now({ session }: ScreenProps) {
     <h1 id="hs-title"><T k="p2.title" /></h1>
     {story.issued && !story.stopped && <button type="button" className="hs-button is-danger" onClick={() => navigate('/worker/p3')}><T k="stopwork" /> · {t('p2.stop.d')}</button>}
     <Hero>
-      <Metric label={<T k="p2.status" />} value={excluded ? 'Rest now' : current ? kindLabel(current.kind) : recovering ? t('p2.inrec') : 'Work as briefed'} sub={excluded ? 'Stay with the site support team' : recovering ? t('shelterA') : undefined} tone={excluded ? 'red' : recovering ? 'ok' : undefined} />
-      <Metric label={<T k="p2.heat" />} value={heat.reading ? `${heat.reading.twl} W/m²` : '—'} sub={<><Band band={heat.band.band} label={heat.band.label} />{heat.heavyHeld && <> · {t('p2.heatq')}</>}</>} />
-      <Metric label={<T k="p2.next" />} value={next ? `${kindLabel(next.kind)} ${time(next.starts_at)}` : '—'} sub={next ? (next.kind === 'work' ? t('workshop') : t('shelterA')) : 'Wait for your foreman'} />
+      <Metric label={<T k="p2.status" />} value={excluded ? <En>Rest now</En> : current ? <En>{kindLabel(current.kind)}</En> : recovering ? t('p2.inrec') : <En>Work as briefed</En>} sub={excluded ? <En>Stay with the site support team</En> : recovering ? t('shelterA') : undefined} tone={excluded ? 'red' : recovering ? 'ok' : undefined} />
+      <Metric label={<T k="p2.heat" />} value={heat.reading ? `${heat.reading.twl} W/m²` : '—'} sub={<><En><Band band={heat.band.band} label={heat.band.label} /></En>{heat.heavyHeld && <> · {t('p2.heatq')}</>}</>} />
+      <Metric label={<T k="p2.next" />} value={next ? <><En>{kindLabel(next.kind)}</En> {time(next.starts_at)}</> : '—'} sub={next ? (next.kind === 'work' ? t('workshop') : t('shelterA')) : <En>Wait for your foreman</En>} />
     </Hero>
     <Section title={<T k="p2.msgs" />}>
       <List>
         {story.issued && <Row title={<T k="stopwork" />} detail={<T k="p2.stop.d" />} badge={<span className="hs-badge" data-tone="over">■</span>} onClick={() => navigate('/worker/p3')} />}
-        {recovering && <Row title={<T k="p2.water" />} detail="One cup now, then every 15 minutes." badge={<span className="hs-badge" data-tone="muted"><T k="reminder" /></span>} />}
-        {person.id === 'C05' && <Row title={<T k="p2.ci" />} detail={checkedIn ? 'Checked in. Your rest time has started.' : 'Not checked in yet.'} badge={checkedIn ? <span className="hs-badge" data-tone="done">✓</span> : undefined} onClick={checkedIn ? undefined : () => navigate('/worker/p6')} />}
-        {story.assigned && <Row title={<T k="p2.plan" />} detail={current ? `${kindLabel(current.kind)} until ${time(current.ends_at)}` : 'See My plan'} onClick={() => navigate('/worker/p5')} />}
+        {recovering && <Row title={<T k="p2.water" />} detail={<En>One cup now, then every 15 minutes.</En>} badge={<span className="hs-badge" data-tone="muted"><T k="reminder" /></span>} />}
+        {person.id === 'C05' && <Row title={<T k="p2.ci" />} detail={checkedIn ? <T k="p2.ci.d" /> : <En>Not checked in yet.</En>} badge={checkedIn ? <span className="hs-badge" data-tone="done">✓</span> : undefined} onClick={checkedIn ? undefined : () => navigate('/worker/p6')} />}
+        {story.assigned && <Row title={<T k="p2.plan" />} detail={<En>{current ? `${kindLabel(current.kind)} until ${time(current.ends_at)}` : 'See My plan'}</En>} onClick={() => navigate('/worker/p5')} />}
       </List>
       {!story.issued && !story.assigned && <Empty><T k="p2.empty" /></Empty>}
     </Section>
@@ -63,14 +63,14 @@ function Alert({ session }: ScreenProps) {
   const t = useT();
   const { caseView } = session;
   if (!caseView) return <NoCase session={session} />;
-  if (!caseView.story.issued) return <div className="hs-screen"><h1 id="hs-title"><T k="stopwork" /></h1><Empty>No stop-work notice is active.</Empty></div>;
+  if (!caseView.story.issued) return <div className="hs-screen"><h1 id="hs-title"><T k="stopwork" /></h1><Empty><En>No stop-work notice is active.</En></Empty></div>;
   return <div className="hs-screen">
     <h1 id="hs-title" className="hs-label"><T k="stopwork" /> · {time(caseView.clock)}</h1>
     <Statement tone="red" source={<T k="alert.fixed" />}><T k="alert.stop" /></Statement>
     <div className="hs-pictos" aria-hidden="true">
       <span><b>✋</b>{t('pic.stop')}</span><span><b>⌂</b>{t('pic.shelter')}</span><span><b>💧</b>{t('pic.water')}</span><span><b>✚</b>{t('pic.help')}</span>
     </div>
-    <Note>This notice is a fixed template. Your supervisor sees that it was shown, not anything you say.</Note>
+    <Note><En>This notice is a fixed template. Your supervisor sees that it was shown, not anything you say.</En></Note>
     <CtaBar><button type="button" className="hs-button is-primary" onClick={() => navigate(session.person?.id === 'C05' ? '/worker/p6' : '/worker/p2')}><T k="alert.go" /></button></CtaBar>
   </div>;
 }
@@ -90,8 +90,8 @@ function Shelter({ session }: ScreenProps) {
     <h1 id="hs-title"><T k="p6.title" /></h1>
     {done ? <Statement tone="black"><T k="kiosk.checked" /> · {time(caseView.clock)}</Statement>
       : <Statement source={<T k="p6.qr" />}><T k="p6.hold" /></Statement>}
-    {!task && <Note>Only Rana’s check-in is part of this demo case. Your foreman records everyone else at the shelter.</Note>}
-    {task && !done && task.status !== 'ready' && <Note tone="amber">Check-in opens once your foreman confirms the stop.</Note>}
+    {!task && <Note><En>Only Rana’s check-in is part of this demo case. Your foreman records everyone else at the shelter.</En></Note>}
+    {task && !done && task.status !== 'ready' && <Note tone="amber"><En>Check-in opens once your foreman confirms the stop.</En></Note>}
     <CtaBar>
       {done ? <button type="button" className="hs-button" onClick={() => navigate('/worker/p2')}><T k="p6.back" /></button>
         : <HoldButton disabled={!task || task.status !== 'ready' || session.busy || !online} onConfirm={() => void session.act('checkin', {})} hint={t('hold')}><T k="p6.cta" /></HoldButton>}

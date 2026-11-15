@@ -3,7 +3,7 @@ import { navigate } from '../../router';
 import { intervalsOf, kindLabel, minutes, nowAndNext, time } from '../data';
 import { Computed, CtaBar, Empty, Hero, HoldButton, List, Metric, NoCase, Note, Row, Section, Statement } from '../kit';
 import type { ScreenProps } from '../registry';
-import { T, useT, useWorker, WorkerFrame } from './frame';
+import { En, T, useT, useWorker, WorkerFrame } from './frame';
 
 /** P4 · Check in: tell the supervisor you feel unwell. Fixed red-flag question, no diagnosis. */
 export function P4CheckIn(props: ScreenProps) {
@@ -21,7 +21,7 @@ function CheckIn({ session }: ScreenProps) {
   if (sent) return <div className="hs-screen">
     <h1 id="hs-title"><T k="p4.title" /></h1>
     <Statement tone="black" source={<T k="p4.rule" />}><T k="p4.sys" /></Statement>
-    <Note>Help is on the way. Stay where you are and with someone.</Note>
+    <Note><En>Help is on the way. Stay where you are and with someone.</En></Note>
     <CtaBar><button type="button" className="hs-button" onClick={() => navigate('/worker/p2')}><T k="p6.back" /></button></CtaBar>
   </div>;
   return <div className="hs-screen">
@@ -35,7 +35,7 @@ function CheckIn({ session }: ScreenProps) {
       </div>
       <Note>Voice check-in (hold and speak, transcribed and translated) is planned. It is not part of this demo.</Note>
     </Section>}
-    {step === 'ok' && <Note>Noted on this phone. Drink water and keep to your rest times. Only “I feel unwell” asks your supervisor for help.</Note>}
+    {step === 'ok' && <Note><En>Noted on this phone. Drink water and keep to your rest times. Only “I feel unwell” asks your supervisor for help.</En></Note>}
     {(step === 'unwell' || step === 'emergency') && <Section title={<T k="p4.fixedq" />}>
       <Statement><T k="p4.q" /></Statement>
       <div className="hs-form-row">
@@ -46,7 +46,7 @@ function CheckIn({ session }: ScreenProps) {
       <Note><T k="p1.sees" /></Note>
     </Section>}
     {!online && <Note tone="amber"><T k="p4.offline" /></Note>}
-    {!report && (step === 'unwell' || step === 'emergency') && <Note tone="amber">In this demo only Bilal’s report reaches the case. Tell your foreman in person.</Note>}
+    {!report && (step === 'unwell' || step === 'emergency') && <Note tone="amber"><En>In this demo only Bilal’s report reaches the case. Tell your foreman in person.</En></Note>}
     {(step === 'unwell' || step === 'emergency') && <CtaBar>
       <HoldButton disabled={!canSend} onConfirm={() => void session.act('report', {})} hint={t('hold')}><T k="p4.send" /></HoldButton>
     </CtaBar>}
@@ -70,7 +70,7 @@ function MyPlan({ session }: ScreenProps) {
   const nextRest = mine.find(i => i.kind === 'recovery' && Date.parse(i.starts_at) >= Date.parse(caseView.clock));
   return <div className="hs-screen">
     <h1 id="hs-title"><T k="p5.title" /></h1>
-    {!mine.length ? <Empty>{pending ? 'Your times are being updated after a report on your crew. Stay in recovery.' : story.assigned ? 'You have no work assigned in this plan. Stay in recovery.' : 'Your foreman has not confirmed the plan yet.'}</Empty> : <>
+    {!mine.length ? <Empty><En>{pending ? 'Your times are being updated after a report on your crew. Stay in recovery.' : story.assigned ? 'You have no work assigned in this plan. Stay in recovery.' : 'Your foreman has not confirmed the plan yet.'}</En></Empty> : <>
       <Hero>
         <Metric label={<T k="p5.now" />} value={current ? kindLabel(current.kind) : '—'} sub={current ? `until ${time(current.ends_at)}` : next ? `next at ${time(next.starts_at)}` : undefined} tone={current?.kind === 'recovery' ? 'ok' : undefined} />
         <Metric label={<T k="p5.nextrest" />} value={nextRest ? `${time(nextRest.starts_at)}–${time(nextRest.ends_at)}` : '—'} sub={t('shelterA')} />
