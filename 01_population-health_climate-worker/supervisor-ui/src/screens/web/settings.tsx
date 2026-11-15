@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ADMIN, PERSONAS } from '../../story';
-import { Badge, Head, List, Note, Row, Section } from '../kit';
+import { Badge, Head, List, Note, Row, Section, Avatar } from '../kit';
 import type { ScreenProps } from '../registry';
 import { BrandingSettings } from './branding';
 
@@ -28,7 +28,7 @@ function PeopleAndRoles() {
   return <div className="hs-settings-panel">
     <Section title="People in this demo" hint={`${PERSONAS.length + 1} named roles`}>
       <List label="People and roles">
-        {[...PERSONAS, ADMIN].map(p => <Row key={p.id} title={`${p.name} · ${p.role}`} detail={`${p.organisation} · ${p.description}`} badge={p.id === ADMIN.id ? <Badge tone="done">Admin</Badge> : undefined} />)}
+        {[...PERSONAS, ADMIN].map(p => <Row key={p.id} lead={<Avatar id={p.id} size="md" />} title={`${p.name} · ${p.role}`} detail={`${p.organisation} · ${p.description}`} badge={p.id === ADMIN.id ? <Badge tone="done">Admin</Badge> : undefined} />)}
       </List>
     </Section>
     <Note>Sign-in is demo persona selection, not authentication. Who may record each case action is fixed by the case rules on the server, not edited here.</Note>

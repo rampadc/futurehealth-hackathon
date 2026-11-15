@@ -11,7 +11,8 @@ import { SignIn } from './SignIn';
 import { navigate, parseRoute, usePath } from './router';
 import { useCaseSession } from './session';
 import { Schedule, revisedPlanPending, revisedPlanWait } from './shared/plan';
-import { Identity, Panel, firstName, nextTask, readable } from './shared/ui';
+import { Identity, Panel, PersonAvatar, firstName, nextTask, readable } from './shared/ui';
+import { usePhotoSync } from './people';
 import { Workspace, workspaceTitles } from './workspaces';
 
 type Props = { onLockAccess?: () => void };
@@ -36,6 +37,7 @@ function DesktopApp({ onLockAccess, demoControl }: Props & { demoControl: boolea
     onSignedOut: () => { setAssistantOpen(false); setDetailsOpen(false); },
   });
   const { person, caseView, initialising, busy, error, feedback, setFeedback, refreshCase, act, retryCalculation } = session;
+  usePhotoSync(!!person, caseView?.version);
 
   if (initialising) return <Box sx={{ p: 5 }} role="status"><CircularProgress size={24} /> Loading case…</Box>;
   if (demoControl) return <DemoControl caseView={caseView} onReturn={() => navigate('/classic')} onChange={async next => { if (person) await refreshCase(); else session.setCaseView(next); setFeedback(''); }} />;
@@ -82,7 +84,7 @@ function DesktopApp({ onLockAccess, demoControl }: Props & { demoControl: boolea
             <Paper variant="outlined" sx={{ px: 2.5, py: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, borderLeft: '4px solid', borderLeftColor: story.issued ? 'error.main' : 'warning.main' }}>
               <Box><Typography variant="subtitle2">{story.stopped ? copy.stoppedTitle : story.issued ? copy.instructionTitle : copy.pendingTitle}</Typography><Typography variant="body2" color="text.secondary">{story.stopped ? copy.stoppedDetail : story.issued ? copy.instructionDetail : copy.pendingDetail}</Typography></Box><Chip label={story.stopped ? copy.stoppedStatus : story.issued ? 'Stop-work active' : person.id === 'P03' ? 'Safety review due' : 'Awaiting safety review'} color={story.issued ? 'error' : 'warning'} size="small" />
             </Paper>
-            {!worker && next && next.actor_id !== person.id && <Stack direction="row" spacing={2} sx={{ alignItems: 'center', px: 1 }}><Typography variant="subtitle2" component="h2" sx={{ flexShrink: 0 }}>Next handoff</Typography><Divider orientation="vertical" flexItem /><Typography variant="body2" color="text.secondary">{nameOf(next.actor_id)} · {next.label}</Typography></Stack>}
+            {!worker && next && next.actor_id !== person.id && <Stack direction="row" spacing={2} sx={{ alignItems: 'center', px: 1 }}><Typography variant="subtitle2" component="h2" sx={{ flexShrink: 0 }}>Next handoff</Typography><Divider orientation="vertical" flexItem /><PersonAvatar id={next.actor_id} size={3} /><Typography variant="body2" color="text.secondary">{nameOf(next.actor_id)} · {next.label}</Typography></Stack>}
             {view === 'activity' ? <Activity story={story} /> : view === 'plan' ? <Panel title={worker ? 'Your schedule' : 'Crew schedule'}>{revisedPlanPending(story) ? <Alert severity="info">{revisedPlanWait(story)}</Alert> : story.assigned ? <Schedule capture={capture} personId={worker ? person.id : undefined} /> : <Typography color="text.secondary">The workshop assignment is waiting for the crew response and Huda’s confirmation.</Typography>}</Panel> : <Workspace story={story} person={person} capture={capture} caseView={caseView} onAction={act} busy={busy} />}
           </>}
         </Stack></Box>

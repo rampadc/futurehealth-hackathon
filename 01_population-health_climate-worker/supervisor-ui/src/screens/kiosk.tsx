@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { langOf, preferredLanguage, tr } from '../i18n';
 import { crew, time } from './data';
-import { Computed, Head, Hero, Metric, NoCase, Note } from './kit';
+import { Computed, Head, Hero, Metric, NoCase, Note, Avatar } from './kit';
 import type { ScreenProps } from './registry';
 
 /**
@@ -37,7 +37,7 @@ export function KioskScreen({ session }: ScreenProps) {
     {g && <p className="hs-statusline" role="status" lang={gl} dir={langOf(gl).dir}>{greeting!.ok ? `✓ ${tr('kiosk.checked', gl).text} · ${g.name.split(' ')[0]}` : `${g.name.split(' ')[0]}: please see Huda`}</p>}
     <ul className="hs-tiles" aria-label="Badges">{people.map(p => <li key={p.id}>
       <button type="button" data-in={arrived.has(p.id) || undefined} disabled={session.busy} onClick={() => tap(p.id)} aria-label={`${p.name}${arrived.has(p.id) ? ', checked in' : ''}`}>
-        <span aria-hidden="true">{arrived.has(p.id) ? '✓' : '◯'}</span>{p.name.split(' ')[0]}<small>{p.id}</small>
+        <Avatar id={p.id} size="lg" /><span aria-hidden="true">{arrived.has(p.id) ? '✓ ' : ''}{p.name.split(' ')[0]}</span><small>{p.id}</small>
       </button></li>)}
     </ul>
     {nfc.supported && <div className="hs-form-row">

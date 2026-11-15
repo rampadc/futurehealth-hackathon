@@ -23,6 +23,8 @@ const riskInputs = { hour: '08:00', site: 'mussafah', weather: 'ok', local_readi
 const ownRisk = { inputs: riskInputs, person_id: 'C05', band: 'amber', twl_wm2: 138, zone: 'medium', factors: ['Cloth coveralls over a shirt lower your work limit to 138 W/m² (medium zone; work wear is low)'],
   missing_inputs: [], special_controls: false, may_work_here: true, work_rest: '45 min work / 15 min rest (paced work)', action: 'Paced work: 45 min work / 15 min rest (paced work). Drink 1.0-1.2 light; >1.2 heavy L an hour.' };
 let consent: { person_id: string; language: string; scopes: string[]; consented_at: string | null };
+let photos: Record<string, string>;
+let photoCalls: Array<{ method: string; image?: string }>;
 const checks = (primary: string) => [{ id: 'signal', ok: primary !== '#D32F2F', label: primary === '#D32F2F' ? 'Brand colour reads as the stop signal' : 'Brand colour does not read as a safety signal' }];
 
 async function makeCase(id: CaseId, story: Partial<StoryState>, tasks: Task[]): Promise<CaseView> {
@@ -43,6 +45,7 @@ beforeEach(() => {
   person = null; commands = []; commandIds = []; currentCase = null; brandCalls = []; chatHistory = [];
   brand = { version: 0, published_at: null, published_by: null, platform: null, mobile: null };
   consent = { person_id: 'C05', language: 'en', scopes: [], consented_at: null };
+  photos = {}; photoCalls = [];
   vi.stubGlobal('EventSource', undefined);
   vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const path = String(input);
@@ -79,6 +82,12 @@ beforeEach(() => {
       if (method === 'DELETE') consent = { ...consent, scopes: [], consented_at: null };
       return reply(consent);
     }
+    if (path === '/api/people/photos') return reply({ photos });
+    if (path === '/api/people/me/photo') {
+      photoCalls.push({ method, image: body?.image });
+      if (method === 'PUT') { photos = { ...photos, [person!.id]: '2025-08-04T16:45:00.000+00:00' }; return reply({ person_id: person!.id, updated_at: photos[person!.id] }); }
+      const { [person!.id]: _gone, ...rest } = photos; photos = rest; return reply({ person_id: person!.id, updated_at: null });
+    }
     if (path.startsWith('/api/demo/')) return reply({ detail: 'Presenter access required' }, 403);
     return reply({ detail: `Unexpected ${method} ${path}` }, 404);
   }));
@@ -107,8 +116,8 @@ describe('every built screen', () => {
     }, 60_000);
   }
   it('explains an empty case instead of failing', async () => {
-    // Branding is organisation-wide and does not need a case.
-    for (const s of built.filter(x => x.device !== 'worker' && x.id !== 'settings')) {
+    // Branding is organisation-wide and the account page is personal: neither needs a case.
+    for (const s of built.filter(x => x.device !== 'worker' && x.id !== 'settings' && x.group !== 'account')) {
       const view = await open(`/${s.device}/${s.id}`, s.personas[0]);
       expect(await screen.findByText(/There is no active case/)).toBeTruthy();
       view.unmount();
@@ -382,6 +391,55 @@ describe('voice and badges', () => {
     reader!.onreading!({ message: { records: [{ recordType: 'text', encoding: 'utf-8', data: new DataView(new TextEncoder().encode('c05').buffer) }] } });
     await waitFor(() => expect(commands).toEqual([{ action: 'checkin', payload: {} }]));
     vi.unstubAllGlobals();
+  });
+});
+
+describe('crew photos and the account page', () => {
+  it('shows each person’s photo beside their name and opens My account from the title bar', async () => {
+    currentCase = await makeCase('heat_trigger', {}, [task('issue', 'P03', 'ready')]);
+    const { container } = await open('/web/monitoring', 'P03');
+    expect(await screen.findByRole('heading', { name: 'Squad Monitoring' })).toBeTruthy();
+    // Issued photos are bundled; the photo is decorative because the name is written beside it.
+    const maya = container.querySelector('.hs-bar [data-person="P03"]')!;
+    expect(maya.getAttribute('aria-hidden')).toBe('true');
+    expect(maya.querySelector('img')!.getAttribute('src')).toMatch(/P03.*\.webp/);
+    await userEvent.click(screen.getByRole('button', { name: 'My account: Maya Al Qamar' }));
+    expect(await screen.findByRole('heading', { level: 1, name: 'Maya Al Qamar' })).toBeTruthy();
+    expect(screen.getByText('Replace my photo')).toBeTruthy();
+  });
+
+  it('draws initials when someone has no photo yet', async () => {
+    currentCase = await makeCase('heat_trigger', {}, []);
+    const { container } = await open('/web/account', 'P04');
+    await screen.findByRole('heading', { level: 1, name: 'Tariq Al Safa' });
+    // P04 has an issued photo; Lina (P07) does not, so a crew row would show "LQ".
+    expect(container.querySelector('[data-person="P04"] img')).toBeTruthy();
+    const { initialsOf, photoUrl } = await import('../people');
+    expect(photoUrl('P07')).toBeNull();
+    expect(initialsOf('P07')).toBe('LQ');
+  });
+
+  it('rejects a file that is not a photo and sends nothing', async () => {
+    currentCase = null;
+    await open('/worker/account', 'C05');
+    await screen.findByRole('heading', { level: 1, name: 'Rana Al Nadir' });
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    fireEvent.change(input, { target: { files: [new File(['%PDF'], 'scan.pdf', { type: 'application/pdf' })] } });
+    expect((await screen.findByRole('alert')).textContent).toMatch(/JPEG, PNG or WebP/);
+    expect(photoCalls).toEqual([]);
+  });
+
+  it('uploads, then removes, only the signed-in person’s own photo', async () => {
+    const people = await import('../people');
+    currentCase = null;
+    await open('/site/account', 'C01');
+    await screen.findByRole('heading', { level: 1, name: 'Huda Al Nadir' });
+    await people.uploadOwnPhoto('C01', 'data:image/webp;base64,UklGRg==');
+    expect(photoCalls).toEqual([{ method: 'PUT', image: 'data:image/webp;base64,UklGRg==' }]);
+    await waitFor(() => expect(document.querySelector('[data-person="C01"] img')!.getAttribute('src')).toBe('/api/people/C01/photo?v=2025-08-04T16%3A45%3A00.000%2B00%3A00'));
+    await userEvent.click(await screen.findByRole('button', { name: 'Use issued photo' }));
+    await waitFor(() => expect(photoCalls.at(-1)).toEqual({ method: 'DELETE', image: undefined }));
+    expect(await screen.findByText('Back to the photo issued with your account.')).toBeTruthy();
   });
 });
 

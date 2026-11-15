@@ -4,7 +4,7 @@ import { EvidenceAction } from '../../EvidenceAction';
 import { reasonLabel } from '../../copy';
 import { navigate } from '../../router';
 import { assignedIds, crew, intervalsOf, kindLabel, time, who, type CrewMember } from '../data';
-import { ActionButton, Choice, Computed, CtaBar, Draft, Empty, Head, Hero, List, Metric, NoCase, Note, Row, Section, Statement, taskBadge } from '../kit';
+import { ActionButton, Choice, Computed, CtaBar, Draft, Empty, Head, Hero, List, Metric, NoCase, Note, Row, Section, Statement, taskBadge, Avatar, Person } from '../kit';
 import type { ScreenProps } from '../registry';
 
 const BASES = [
@@ -37,7 +37,7 @@ export function ReadinessScreen({ session }: ScreenProps) {
     const p = all.find(x => x.id === selected)!;
     const validUntil = toIso(atDubai(new Date(Date.parse(caseView.clock) + Number(hours) * 3_600_000).toISOString()));
     return <div className="hs-screen">
-      <Head kicker="Confirm readiness · Workshop preparation" title={who(p.id)} sub={p.qualifications.length ? `Qualified: ${p.qualifications.map(reasonLabel).join(', ')}` : 'Qualification not on record'} />
+      <Head kicker="Confirm readiness · Workshop preparation" title={<Person id={p.id} size="lg">{who(p.id)}</Person>} sub={p.qualifications.length ? `Qualified: ${p.qualifications.map(reasonLabel).join(', ')}` : 'Qualification not on record'} />
       <Note>Time in shelter is not readiness. Confirm only after speaking with the worker.</Note>
       <form className="hs-form" onSubmit={e => { e.preventDefault(); void session.act('readiness', payloads.readiness([p.id], 'ready', basis, validUntil)).then(() => setSelected(null)); }}>
         <Choice legend="Assessment basis" value={basis} options={BASES.map(([id, label]) => [id, label])} onChange={setBasis} />
@@ -59,7 +59,7 @@ export function ReadinessScreen({ session }: ScreenProps) {
       <Metric label="Workshop places" value={workshop ? `${workshop.capacity - fixed.length} of ${workshop.capacity}` : '—'} sub={fixed.length ? `${fixed.length} fixed occupants` : undefined} />
     </Hero>
     <Section title="Affected workers" hint={canConfirm ? 'Tap a worker to confirm' : undefined}>
-      <List>{list.map(p => <Row key={p.id} title={who(p.id)} detail={`${p.qualifications.map(reasonLabel).join(', ') || 'No qualification on record'} · ${p.readiness === 'ready' ? `ready${p.readinessUntil ? ` until ${time(p.readinessUntil)}` : ''}` : p.reason ?? 'no readiness confirmation yet'}`} badge={readinessBadge(p)} onClick={canConfirm && !p.excluded && p.readiness !== 'ready' ? () => setSelected(p.id) : undefined} />)}</List>
+      <List>{list.map(p => <Row key={p.id} lead={<Avatar id={p.id} size="md" excluded={p.excluded} />} title={who(p.id)} detail={`${p.qualifications.map(reasonLabel).join(', ') || 'No qualification on record'} · ${p.readiness === 'ready' ? `ready${p.readinessUntil ? ` until ${time(p.readinessUntil)}` : ''}` : p.reason ?? 'no readiness confirmation yet'}`} badge={readinessBadge(p)} onClick={canConfirm && !p.excluded && p.readiness !== 'ready' ? () => setSelected(p.id) : undefined} />)}</List>
     </Section>
     <Section title="Other confirmations">
       <ActionButton session={session} action="leila" label="Confirm Leila’s workshop readiness" />
@@ -96,7 +96,7 @@ export function ProposalScreen({ session }: ScreenProps) {
       <p className="hs-small">Solver {plan.solver_status ?? '—'}{plan.optimal ? ' · optimal' : ''} · policy {plan.policy_id ?? 'none'} · {plan.useful_worker_minutes ?? 0} useful worker-minutes</p>
     </Draft>
     <Section title="Proposed workers">
-      {ids.length ? <List>{ids.map(id => { const iv = intervalsOf(capture, id); return <Row key={id} title={who(id)} detail={iv.slice(0, 3).map(i => `${kindLabel(i.kind)} ${time(i.starts_at)}–${time(i.ends_at)}`).join(', ')} badge={caseView.story.assigned ? <span className="hs-badge" data-tone="done">✓ Assigned</span> : <span className="hs-badge" data-tone="plan">Proposed</span>} />; })}</List>
+      {ids.length ? <List>{ids.map(id => { const iv = intervalsOf(capture, id); return <Row key={id} lead={<Avatar id={id} size="md" />} title={who(id)} detail={iv.slice(0, 3).map(i => `${kindLabel(i.kind)} ${time(i.starts_at)}–${time(i.ends_at)}`).join(', ')} badge={caseView.story.assigned ? <span className="hs-badge" data-tone="done">✓ Assigned</span> : <span className="hs-badge" data-tone="plan">Proposed</span>} />; })}</List>
         : <Empty>No productive assignment is available yet.</Empty>}
     </Section>
     <Computed>Solver proposal · applied: false until you record it</Computed>

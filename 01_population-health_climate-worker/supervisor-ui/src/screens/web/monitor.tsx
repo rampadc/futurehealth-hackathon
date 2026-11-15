@@ -5,7 +5,7 @@ import { nameOf } from '../../replay';
 import { navigate } from '../../router';
 import { crew, heatNow, SCREEN_FOR_ACTION, time, who } from '../data';
 import { nextHandoff } from '../../story';
-import { ActionButton, Badge, Band, Computed, Empty, Head, Hero, Hold, List, Metric, NoCase, Note, Row, Section, taskBadge } from '../kit';
+import { ActionButton, Badge, Band, Computed, Empty, Head, Hero, Hold, List, Metric, NoCase, Note, Row, Section, taskBadge, Avatar, Avatars, Person } from '../kit';
 import type { ScreenProps } from '../registry';
 import { ConditionsPanel } from '../conditions';
 import { CrewRiskPanel } from '../risk';
@@ -28,18 +28,18 @@ export function SquadMonitoringScreen({ session }: ScreenProps) {
   return <div className="hs-screen">
     <Head kicker={`Squad Monitoring · Civil area · ${time(caseView.clock)} GST`} title="Squad Monitoring" />
     <Hero>
-      <Metric label="Needs action now" value={String(needsHelp.length + overdue.length)} sub={needsHelp.length ? `${needsHelp.map(p => who(p.id)).join(', ')} needs rest now` : overdue.length ? `${overdue.length} overdue` : 'Nothing urgent'} tone={needsHelp.length || overdue.length ? 'red' : 'ok'} />
+      <Metric label="Needs action now" value={String(needsHelp.length + overdue.length)} sub={needsHelp.length ? <><Avatars ids={needsHelp.map(p => p.id)} size="sm" /> {`${needsHelp.map(p => who(p.id)).join(', ')} needs rest now`}</> : overdue.length ? `${overdue.length} overdue` : 'Nothing urgent'} tone={needsHelp.length || overdue.length ? 'red' : 'ok'} />
       <Metric label="Stop-work" value={story.issued ? 'Active' : 'None'} sub={story.issued ? 'Heavy exposed civil work' : 'No heat controls recorded'} tone={story.issued ? 'red' : undefined} />
       <Metric label="Accounted for" value={`${accounted} / ${people.length}`} sub="Shelter A" />
     </Hero>
     <p className="hs-statusline"><Band band={heat.band.band} label={heat.reading ? `TWL ${heat.reading.twl} W/m² · ${heat.band.label}` : 'No reading'} /> · {heat.reading ? `sensor ${heat.reading.sensor_id} · ${time(heat.reading.measured_at)}` : ''} {heat.heavyHeld && <Hold />}</p>
     <div className="hs-grid">
       <Section title="Your actions" hint="Overdue first">
-        {actions.length ? <List>{actions.filter(t => SCREEN_FOR_ACTION[t.action]?.web).map(t => <Row key={t.action} title={t.label} detail={`${nameOf(t.actor_id)}${t.due_at ? ` · due ${time(t.due_at)}` : ''}`} badge={taskBadge(session, t.action)} onClick={() => navigate(`/web/${SCREEN_FOR_ACTION[t.action].web}`)} />)}</List>
+        {actions.length ? <List>{actions.filter(t => SCREEN_FOR_ACTION[t.action]?.web).map(t => <Row key={t.action} lead={<Avatar id={t.actor_id} size="md" />} title={t.label} detail={`${nameOf(t.actor_id)}${t.due_at ? ` · due ${time(t.due_at)}` : ''}`} badge={taskBadge(session, t.action)} onClick={() => navigate(`/web/${SCREEN_FOR_ACTION[t.action].web}`)} />)}</List>
           : <Empty>Nothing waiting for you.</Empty>}
         {/* Actions with no dedicated wireframe screen (delivery, cost review) are recorded here. */}
         {actions.filter(t => !SCREEN_FOR_ACTION[t.action]?.web).map(t => <ActionButton key={t.action} session={session} action={t.action} label={t.label} />)}
-        <p className="hs-statusline">Next site handoff: {handoff.actorId ? `${nameOf(handoff.actorId)} · ${handoff.title}` : handoff.title}</p>
+        <p className="hs-statusline">Next site handoff: {handoff.actorId ? <Person id={handoff.actorId} size="sm">{`${nameOf(handoff.actorId)} · ${handoff.title}`}</Person> : handoff.title}</p>
       </Section>
       <Section title="Crew by location" hint="Aggregates only · no health data">
         <List>{[...byLocation.entries()].map(([where, n]) => <Row key={where} title={nameOf(where)} badge={<Badge tone="muted">{n}</Badge>} />)}</List>

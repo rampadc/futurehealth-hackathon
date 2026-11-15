@@ -66,5 +66,8 @@ export const live = {
   trustLog: () => request<TrustLogEntry[]>('/trust-log'),
   brand: () => request<BrandSettings>('/brand'),
   checkBrand: (platform: BrandPalette, mobile: BrandPalette) => request<{ platform: BrandCheck[]; mobile: BrandCheck[] }>('/brand/check', { method: 'POST', body: json({ platform, mobile, expected_version: 0, confirm: '' }) }),
+  photos: () => request<{ photos: Record<string, string> }>('/people/photos'),
+  uploadPhoto: (image: string) => request<{ person_id: string; updated_at: string }>('/people/me/photo', { method: 'PUT', body: json({ image }) }),
+  removePhoto: () => request<{ person_id: string; updated_at: null }>('/people/me/photo', { method: 'DELETE' }),
   publishBrand: (platform: BrandPalette, mobile: BrandPalette, expected_version: number, confirm: string) => request<BrandSettings>('/brand', { method: 'PUT', body: json({ platform, mobile, expected_version, confirm }) }),
 };
