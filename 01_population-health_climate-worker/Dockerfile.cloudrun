@@ -3,6 +3,7 @@ WORKDIR /build/ui
 COPY supervisor-ui/package.json supervisor-ui/package-lock.json ./
 RUN npm ci
 COPY supervisor-ui/ ./
+COPY ui_design_system/tokens.css /build/ui_design_system/tokens.css
 COPY demo/cross-scenario/personnel.json /build/demo/cross-scenario/personnel.json
 COPY demo/solver/operational-results.json /build/demo/solver/operational-results.json
 RUN npm run build

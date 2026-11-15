@@ -22,6 +22,8 @@
 !supervisor-ui/src/**
 !supervisor-ui/public/
 !supervisor-ui/public/**
+!ui_design_system/
+!ui_design_system/tokens.css
 !demo/
 !demo/*/
 !demo/*/*.json
