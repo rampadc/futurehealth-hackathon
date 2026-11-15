@@ -1,0 +1,240 @@
+name: Heat Safe CI
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: heat-safe-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  APP: 01_population-health_climate-worker
+  SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  security:
+    name: Security
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.12'
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: semgrep/semgrep-rules
+          ref: a5ad1714f00c9f7fde980cab0ea1d6dc6d414fd2
+          path: semgrep-rules
+          sparse-checkout: |
+            python/lang/security
+            javascript/lang/security
+            typescript/lang/security
+          persist-credentials: false
+      - name: Semgrep CE with reviewed local rules
+        env:
+          SEMGREP_SEND_METRICS: 'off'
+          SEMGREP_ENABLE_VERSION_CHECK: '0'
+        run: |
+          python -m pip install semgrep==1.176.0
+          # This audit heuristic flags safe subprocess argv lists in tests and the trusted controller.
+          rm semgrep-rules/python/lang/security/audit/dangerous-subprocess-use-audit.yaml
+          semgrep scan --config semgrep-rules/python/lang/security --config semgrep-rules/javascript/lang/security --config semgrep-rules/typescript/lang/security --config .github/security/semgrep.yml --severity ERROR --error --strict --metrics=off --disable-version-check "$APP"
+      - name: Install pinned Trivy
+        run: |
+          curl -fsSL -o /tmp/trivy.tar.gz https://github.com/aquasecurity/trivy/releases/download/v0.75.0/trivy_0.75.0_Linux-64bit.tar.gz
+          echo 'c6e65abddb348e25f10549df887045629cf28cc72453cd1c63acb717316b3f3f  /tmp/trivy.tar.gz' | sha256sum -c -
+          tar -xzf /tmp/trivy.tar.gz -C /tmp trivy
+          sudo install -m 0755 /tmp/trivy /usr/local/bin/trivy
+      - name: Fixable library vulnerabilities in locked dependencies
+        run: |
+          set -euo pipefail
+          cd "$APP"
+          test -f uv.lock
+          locks=(uv.lock)
+          if test -f supervisor-ui/package-lock.json; then
+            locks+=(supervisor-ui/package-lock.json)
+          elif test -f ui/package-lock.json; then
+            locks+=(ui/package-lock.json)
+          else
+            echo 'No frontend dependency lockfile' >&2
+            exit 1
+          fi
+          if test -f demo/solver/requirements.lock; then locks+=(demo/solver/requirements.lock); fi
+          for lock in "${locks[@]}"; do
+            if test "$lock" = demo/solver/requirements.lock; then
+              trivy fs --scanners vuln --pkg-types library --file-patterns 'pip:requirements.lock' --include-dev-deps --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "$lock"
+            else
+              trivy fs --scanners vuln --pkg-types library --include-dev-deps --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "$lock"
+            fi
+          done
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres:16.10
+        env:
+          POSTGRES_USER: heat_safe_test
+          POSTGRES_PASSWORD: heat_safe_test
+          POSTGRES_DB: heat_safe_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U heat_safe_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      TEST_DATABASE_URL: postgresql://heat_safe_test:heat_safe_test@127.0.0.1:5432/heat_safe_test
+      POSTGRES_TEST_URL: postgresql://heat_safe_test:heat_safe_test@127.0.0.1:5432/heat_safe_test
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22.23.5'
+      - name: Root Python and PostgreSQL integration tests
+        run: |
+          python -m pip install uv==0.12.19
+          cd "$APP"
+          uv run --locked pytest -q
+      - name: CI trust-boundary unit tests
+        run: python -B -m unittest discover -s "$APP/cloud/ci" -p 'test_*.py'
+      - name: Supervisor UI tests and build
+        run: |
+          if test -f "$APP/supervisor-ui/package-lock.json"; then
+            cd "$APP/supervisor-ui"
+          else
+            cd "$APP/ui"
+          fi
+          npm ci
+          npm test
+          npm run build
+      - name: Solver tests with locked dependencies
+        run: |
+          set -euo pipefail
+          cd "$APP/demo/solver"
+          if test -f requirements.lock; then
+            python -m venv .solverenv
+            .solverenv/bin/pip install -r requirements.lock
+            .solverenv/bin/pip install pytest==9.2.0
+            .solverenv/bin/python -m pytest -q .
+          fi
+      - name: Supervisor application journey against solver
+        run: |
+          set -euo pipefail
+          cd "$APP"
+          if test -f src/heat_safe/application/api.py; then
+            demo/solver/.solverenv/bin/python -m uvicorn api:app --app-dir demo/solver --host 127.0.0.1 --port 8765 > /tmp/solver.log 2>&1 &
+            solver_pid=$!
+            trap 'kill "$solver_pid" 2>/dev/null || true' EXIT
+            for attempt in {1..30}; do
+              if curl -fsS http://127.0.0.1:8765/health >/dev/null; then echo "Solver ready after $attempt checks"; break; fi
+              sleep 1
+            done
+            curl -fsS http://127.0.0.1:8765/health >/dev/null
+            RUN_LIVE_APPLICATION=1 uv run --locked pytest -q tests/test_application_live_journey.py
+          fi
+
+  image:
+    name: Build OCI
+    needs: [security, tests]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          persist-credentials: false
+      - name: Detect deployable app
+        id: app
+        run: |
+          if test -f "$APP/Dockerfile.cloudrun" && test -f "$APP/src/heat_safe/application/api.py" && test -f "$APP/supervisor-ui/package-lock.json"; then
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'No deployable supervisor application in this commit.'
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Build image without cloud credentials
+        if: steps.app.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          cd "$APP"
+          docker build --pull --file Dockerfile.cloudrun --label "org.opencontainers.image.revision=$SOURCE_SHA" --tag "heat-safe-ci:$SOURCE_SHA" .
+      - name: Smoke test the bundled app and PostgreSQL
+        if: steps.app.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          cd "$APP"
+          network="heat-safe-ci-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          db="${network}-db"
+          app="${network}-app"
+          cleanup() {
+            docker rm -f "$app" "$db" >/dev/null 2>&1 || true
+            docker network rm "$network" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          docker network create "$network" >/dev/null
+          docker run -d --name "$db" --network "$network" \
+            -e POSTGRES_USER=heat_safe_smoke -e POSTGRES_PASSWORD=heat_safe_smoke \
+            -e POSTGRES_DB=heat_safe_smoke postgres:16.10 >/dev/null
+          for attempt in {1..30}; do
+            if docker exec "$db" pg_isready -h 127.0.0.1 -U heat_safe_smoke -d heat_safe_smoke >/dev/null 2>&1; then
+              echo "PostgreSQL ready after $attempt checks"
+              break
+            fi
+            sleep 1
+          done
+          docker exec "$db" pg_isready -h 127.0.0.1 -U heat_safe_smoke -d heat_safe_smoke >/dev/null
+          access_hash="$(printf %s ci-viewer-fixture | sha256sum | cut -d' ' -f1)"
+          presenter_hash="$(printf %s ci-presenter-fixture | sha256sum | cut -d' ' -f1)"
+          docker run -d --name "$app" --network "$network" -p 127.0.0.1:8088:8080 \
+            -e K_SERVICE=ci -e PORT=8080 -e STATIC_DIR=/app/static \
+            -e "DATABASE_URL=postgresql://heat_safe_smoke:heat_safe_smoke@${db}:5432/heat_safe_smoke" \
+            -e "HEAT_ACCESS_CODE_SHA256=$access_hash" \
+            -e "HEAT_PRESENTER_CODE_SHA256=$presenter_hash" \
+            "heat-safe-ci:$SOURCE_SHA" >/dev/null
+          if ! python3 cloud/ci/smoke.py; then
+            docker logs --tail 100 "$app"
+            exit 1
+          fi
+      - name: Package tested image archive
+        if: steps.app.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          cd "$APP"
+          mkdir -p image-artifact
+          docker save "heat-safe-ci:$SOURCE_SHA" -o image-artifact/image.tar
+          python - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          sha = os.environ['SOURCE_SHA']
+          archive = Path('image-artifact/image.tar')
+          digest = hashlib.file_digest(archive.open('rb'), 'sha256').hexdigest()
+          Path('image-artifact/image.json').write_text(json.dumps({'sha': sha, 'run_id': os.environ['GITHUB_RUN_ID'], 'tag': f'heat-safe-ci:{sha}', 'sha256': digest}))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: steps.app.outputs.ready == 'true'
+        with:
+          name: heat-safe-image-${{ env.SOURCE_SHA }}
+          path: ${{ env.APP }}/image-artifact/
+          retention-days: 2
+          overwrite: true
+          if-no-files-found: error
