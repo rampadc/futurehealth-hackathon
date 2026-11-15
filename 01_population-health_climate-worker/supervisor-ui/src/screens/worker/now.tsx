@@ -81,20 +81,21 @@ export function P6Shelter(props: ScreenProps) {
 }
 function Shelter({ session }: ScreenProps) {
   const t = useT();
-  const { online } = useWorker();
   const { caseView, person } = session;
   if (!caseView || !person) return <NoCase session={session} />;
   const task = caseView.tasks.find(t => t.action === 'checkin' && t.actor_id === person.id);
-  const done = task?.status === 'recorded';
+  const queued = session.outbox.some(e => e.action === 'checkin');
+  const done = task?.status === 'recorded' || queued;
   return <div className="hs-screen">
     <h1 id="hs-title"><T k="p6.title" /></h1>
-    {done ? <Statement tone="black"><T k="kiosk.checked" /> · {time(caseView.clock)}</Statement>
+    {queued ? <Statement tone="black"><En>Saved on this phone · sends when the network returns</En></Statement>
+      : done ? <Statement tone="black"><T k="kiosk.checked" /> · {time(caseView.clock)}</Statement>
       : <Statement source={<T k="p6.qr" />}><T k="p6.hold" /></Statement>}
     {!task && <Note><En>Only Rana’s check-in is part of this demo case. Your foreman records everyone else at the shelter.</En></Note>}
     {task && !done && task.status !== 'ready' && <Note tone="amber"><En>Check-in opens once your foreman confirms the stop.</En></Note>}
     <CtaBar>
       {done ? <button type="button" className="hs-button" onClick={() => navigate('/worker/p2')}><T k="p6.back" /></button>
-        : <HoldButton disabled={!task || task.status !== 'ready' || session.busy || !online} onConfirm={() => void session.act('checkin', {})} hint={t('hold')}><T k="p6.cta" /></HoldButton>}
+        : <HoldButton disabled={!task || task.status !== 'ready' || session.busy} onConfirm={() => void session.act('checkin', {})} hint={t('hold')}><T k="p6.cta" /></HoldButton>}
     </CtaBar>
   </div>;
 }

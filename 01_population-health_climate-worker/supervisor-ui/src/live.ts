@@ -45,8 +45,8 @@ export const live = {
   signIn: (persona_id: string) => request<{ person: Persona }>('/session', { method: 'POST', body: json({ persona_id }) }),
   signOut: () => request<void>('/session', { method: 'DELETE' }),
   case: () => request<CaseView | null>('/case'),
-  command: (caseView: CaseView, action: string, payload: Record<string, unknown>) => request<CaseView | null>('/case/commands', {
-    method: 'POST', body: json({ command_id: crypto.randomUUID(), expected_version: caseView.version, action, payload }),
+  command: (caseView: CaseView, action: string, payload: Record<string, unknown>, command_id: string = crypto.randomUUID()) => request<CaseView | null>('/case/commands', {
+    method: 'POST', body: json({ command_id, expected_version: caseView.version, action, payload }),
   }),
   retry: (expected_version: number) => request<CaseView>('/case/retry', { method: 'POST', body: json({ expected_version }) }),
   start: () => request<CaseView>('/demo/start', { method: 'POST', body: json({ scenario: 'heat_response' }) }),

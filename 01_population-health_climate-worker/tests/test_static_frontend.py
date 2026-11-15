@@ -10,6 +10,7 @@ def test_spa_and_assets_do_not_swallow_api_or_publish_the_guide(tmp_path):
     (tmp_path / 'index.html').write_text('<html>product</html>')
     (tmp_path / 'assets').mkdir()
     (tmp_path / 'assets/app-a1.js').write_text('console.log("product")')
+    (tmp_path / 'sw.js').write_text('self.addEventListener("fetch", () => {})')
     app = FastAPI()
     serve_frontend(str(tmp_path), app)
     with TestClient(app) as client:
@@ -17,6 +18,8 @@ def test_spa_and_assets_do_not_swallow_api_or_publish_the_guide(tmp_path):
         assert client.get('/demo-control').text == '<html>product</html>'
         assert 'no-cache' in client.get('/').headers['cache-control']
         assert 'immutable' in client.get('/assets/app-a1.js').headers['cache-control']
+        assert 'addEventListener' in client.get('/sw.js').text
+        assert client.get('/web/w1').text == '<html>product</html>'
         for path in ('/api/missing', '/guide', '/guide/file.jpg', '/missing.js', '/openapi.json/missing.js'):
             response = client.get(path)
             assert response.status_code == 404
