@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, Container, MenuItem, Paper, Stack, TextField, Typography } from '@mui/material';
 import { live, type CaseView } from './live';
 import { applyPreset, readingPayload, SCENARIO_PRESETS, type ReadingKind } from './scenarioPresets';
@@ -29,13 +29,16 @@ export function DemoControl({ caseView, onChange, onReturn }: Props) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const loadSequence = useRef(0);
   const loadRuns = async () => {
-    try { setPresenterCase(await live.demoState()); } catch (cause) { setError(cause instanceof Error ? cause.message : 'Unable to load presenter case'); }
-    try { const value = await live.runs(); setRuns(Array.isArray(value) ? value as WorkflowRun[] : []); } catch (cause) { setError(cause instanceof Error ? cause.message : 'Unable to load workflow runs'); }
-    try { const value = await live.agentRuns(); setAgentRuns(Array.isArray(value) ? value as ModelRun[] : []); } catch (cause) { setError(cause instanceof Error ? cause.message : 'Unable to load model runs'); }
+    const sequence = ++loadSequence.current;
+    try { const value = await live.demoState(); if (sequence === loadSequence.current) setPresenterCase(value); } catch (cause) { if (sequence === loadSequence.current) setError(cause instanceof Error ? cause.message : 'Unable to load presenter case'); }
+    try { const value = await live.runs(); if (sequence === loadSequence.current) setRuns(Array.isArray(value) ? value as WorkflowRun[] : []); } catch (cause) { if (sequence === loadSequence.current) setError(cause instanceof Error ? cause.message : 'Unable to load workflow runs'); }
+    try { const value = await live.agentRuns(); if (sequence === loadSequence.current) setAgentRuns(Array.isArray(value) ? value as ModelRun[] : []); } catch (cause) { if (sequence === loadSequence.current) setError(cause instanceof Error ? cause.message : 'Unable to load model runs'); }
   };
   useEffect(() => { void loadRuns(); }, [caseView?.version]);
   const execute = async (label: string, operation: () => Promise<unknown>) => {
+    loadSequence.current++;
     setBusy(true); setError(''); setMessage('');
     try { const next = await operation(); setPresenterCase(next as CaseView | null); await onChange(next as CaseView | null); await loadRuns(); setMessage(`${label} complete.`); }
     catch (cause) { setError(cause instanceof Error ? cause.message : `${label} failed`); }
