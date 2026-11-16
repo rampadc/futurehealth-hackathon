@@ -13,7 +13,7 @@
 .sync[data-state="failed"] { border-color: var(--color-signal-red); color: var(--color-signal-red); }
 .sync[data-state="offline"] { background: var(--color-ink); color: var(--color-on-ink); }
 button.sync { cursor: pointer; min-block-size: var(--target); }
-button.sync:hover { box-shadow: inset 0 -4px 0 var(--color-signal-yellow); }
+button.sync:hover { box-shadow: var(--rail-hover); }
 
 /* ── Sync queue: every unsent record, its state, and what to do next ── */
 .queue { list-style: none; margin: 0; padding: 0; border-block-start: var(--rule-structure); }
@@ -21,9 +21,9 @@ button.sync:hover { box-shadow: inset 0 -4px 0 var(--color-signal-yellow); }
 .queue__mark { inline-size: 1.75rem; block-size: 1.75rem; border: 2px solid var(--color-ink); display: grid; place-items: center; font-size: var(--fs-label); font-weight: var(--weight-bold); }
 .queue__item[data-state="saved"] .queue__mark { border-style: dashed; }
 .queue__item[data-state="sending"] .queue__mark { background: var(--hatch-unknown); background-size: 200% 100%; animation: scan var(--dur-scan) linear infinite; }
-.queue__item[data-state="sent"] .queue__mark { background: var(--color-ink); color: var(--color-on-ink); }
-.queue__item[data-state="failed"] .queue__mark { border-color: var(--color-signal-red); color: var(--color-signal-red); }
-.queue__item[data-state="conflict"] .queue__mark { background: var(--color-signal-yellow); color: var(--color-on-caution); }
+/* Sent, failed and conflict show the status icon itself (tick, red X, yellow triangle), so the box goes. */
+.queue__item:is([data-state="sent"], [data-state="failed"], [data-state="conflict"]) .queue__mark { border: 0; background: none; }
+.queue__mark .si { inline-size: 1.5rem; block-size: 1.5rem; }
 .queue__body { min-inline-size: 0; display: grid; }
 .queue__title { font-size: var(--fs-small); font-weight: var(--weight-bold); }
 .queue__meta { font-size: var(--fs-label); color: var(--color-graphite); }
@@ -59,7 +59,7 @@ button.sync:hover { box-shadow: inset 0 -4px 0 var(--color-signal-yellow); }
 .capture { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); gap: var(--gap-touch); }
 .capture__tile { position: relative; display: grid; justify-items: center; align-content: center; gap: var(--space-1); min-block-size: 7rem; padding: var(--space-2); border: 2px dashed var(--color-ink); background: var(--color-base); color: var(--color-ink); font-weight: var(--weight-bold); font-size: var(--fs-small); text-align: center; cursor: pointer; }
 .capture__tile .icon { inline-size: 2rem; block-size: 2rem; }
-.capture__tile:hover { box-shadow: inset 0 -4px 0 var(--color-signal-yellow); }
+.capture__tile:hover { box-shadow: var(--rail-hover); }
 .capture__tile:focus-within, .capture__tile:focus-visible { box-shadow: var(--focus-ring); }
 .capture__tile input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; inline-size: 100%; }
 .capture__tile[data-state="recording"] { border-style: solid; border-color: var(--color-signal-red); background: var(--color-signal-red); color: var(--color-on-signal); }
@@ -70,7 +70,7 @@ button.sync:hover { box-shadow: inset 0 -4px 0 var(--color-signal-yellow); }
 .yesno { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap-touch); }
 .yesno__opt { min-block-size: var(--target-glove); border: 2px solid var(--color-ink); background: var(--color-base); color: var(--color-ink); font-size: var(--fs-body); font-weight: var(--weight-bold); }
 .yesno__opt[aria-pressed="true"] { background: var(--color-ink); color: var(--color-on-ink); }
-.yesno__opt:hover:not([aria-pressed="true"]) { box-shadow: inset 0 -4px 0 var(--color-signal-yellow); }
+.yesno__opt:hover:not([aria-pressed="true"]) { box-shadow: var(--rail-hover); }
 
 /* ── Zone plan: actions anchored to places, never people tracked ──── */
 .plan { display: grid; grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr); border: var(--rule-structure); }

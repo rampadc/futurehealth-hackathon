@@ -123,8 +123,8 @@ describe('every built screen', () => {
     }, 60_000);
   }
   it('explains an empty case instead of failing', async () => {
-    // Branding is organisation-wide and the account page is personal: neither needs a case.
-    for (const s of built.filter(x => x.device !== 'worker' && x.id !== 'settings' && x.group !== 'account')) {
+    // Branding and site setup are organisation-wide and the account page is personal: none needs a case.
+    for (const s of built.filter(x => x.device !== 'worker' && x.id !== 'settings' && x.id !== 'site-setup' && x.group !== 'account')) {
       const view = await open(`/${s.device}/${s.id}`, s.personas[0]);
       expect(await screen.findByText(/There is no active case/)).toBeTruthy();
       view.unmount();
@@ -590,7 +590,8 @@ describe('platform screens', () => {
     currentCase = await makeCase('heat_trigger', {}, []);
     await open('/web/trust', 'P02');
     expect(await screen.findByText('Maya Al Qamar: stop-work')).toBeTruthy();
-    expect(screen.getByText('None')).toBeTruthy();
+    // Nothing is applied on site by software: the solver shows as proposals only.
+    expect(screen.getByText('Proposals only')).toBeTruthy();
   });
 
   it('filters the trust log by solver, people and agent', async () => {

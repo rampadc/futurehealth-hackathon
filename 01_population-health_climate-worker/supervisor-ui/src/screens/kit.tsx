@@ -5,6 +5,7 @@ import type { CaseSession } from '../session';
 import { progress, taskFor, time } from './data';
 import { nameOf } from '../replay';
 import { initialsOf, photoUrl, usePhotos } from '../people';
+import { Icon, iconFor, StatusIcon, type IconName } from '../shared/icons';
 import './screens.css';
 
 /**
@@ -34,11 +35,12 @@ export function Metric({ label, value, sub, tone }: { label: ReactNode; value: R
   </div>;
 }
 
-export function Section({ title, hint, children, id }: { title: ReactNode; hint?: ReactNode; children: ReactNode; id?: string }) {
+export function Section({ title, hint, children, id, icon }: { title: ReactNode; hint?: ReactNode; children: ReactNode; id?: string; icon?: IconName }) {
   const auto = useId();
   const heading = id ?? auto;
+  const glyph = icon ?? iconFor(title);
   return <section className="hs-section" aria-labelledby={heading}>
-    <div className="hs-section-head"><h2 id={heading}>{title}</h2>{hint && <span className="hs-small hs-muted">{hint}</span>}</div>
+    <div className="hs-section-head"><h2 id={heading}>{glyph && <Icon name={glyph} />}{title}</h2>{hint && <span className="hs-small hs-muted">{hint}</span>}</div>
     {children}
   </section>;
 }
@@ -58,7 +60,7 @@ export function Row({ title, detail, badge, onClick, lead }: { title: ReactNode;
 
 export type BadgeTone = 'done' | 'wait' | 'over' | 'muted' | 'plan';
 export function Badge({ tone, children }: { tone: BadgeTone; children: ReactNode }) {
-  return <span className="hs-badge" data-tone={tone}>{tone === 'done' ? '✓ ' : tone === 'over' ? '■ ' : ''}{children}</span>;
+  return <span className="hs-badge" data-tone={tone}>{children}</span>;
 }
 
 export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -117,7 +119,7 @@ export function Band({ band, label }: { band: string; label: string }) {
 
 /** Task hold: a prohibition stamp, separate from the environmental band. */
 export function Hold({ children = 'Heavy-work hold' }: { children?: ReactNode }) {
-  return <span className="hs-hold">■ {children}</span>;
+  return <span className="hs-hold">{children}</span>;
 }
 
 export function Empty({ children, action }: { children: ReactNode; action?: ReactNode }) {
@@ -175,7 +177,7 @@ export function ActionButton({ session, action, label, payload, primary, danger,
     void session.act(action, body);
   };
   const className = `hs-button${primary ? ' is-primary' : ''}${danger ? ' is-danger' : ''}`;
-  if (state.status === 'recorded') return <p className="hs-statusline">✓ {label} · recorded</p>;
+  if (state.status === 'recorded') return <p className="hs-statusline"><StatusIcon status="ok" /> {label} · recorded</p>;
   const off = !ready || session.busy || disabled;
   return <div className="hs-action">
     {hold ? <HoldButton className={className} disabled={off} onConfirm={run} hint={hold}>{label}</HoldButton>

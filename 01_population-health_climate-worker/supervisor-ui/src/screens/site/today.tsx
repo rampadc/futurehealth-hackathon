@@ -49,7 +49,7 @@ export function StopWorkScreen({ session }: ScreenProps) {
     <Statement tone="red" source={<>Sandline heat plan · TWL {heat.reading?.twl ?? '—'} W/m² at {time(heat.reading?.measured_at)} · site rule ≤ 150 holds heavy work · <Band band={heat.band.band} label={heat.band.label} /> does not release it</>}>
       Stop heavy exposed civil work. Move the crew to Shelter A.
     </Statement>
-    {story.issued && !story.acknowledged && <Note tone={overdue ? 'red' : 'amber'}>{overdue ? '■ Acknowledgement overdue. Rashid has been asked to follow up.' : '▲ Escalates to Rashid if not acknowledged within 2 minutes.'}</Note>}
+    {story.issued && !story.acknowledged && <Note tone={overdue ? 'red' : 'amber'}>{overdue ? 'Acknowledgement overdue. Rashid has been asked to follow up.' : '▲ Escalates to Rashid if not acknowledged within 2 minutes.'}</Note>}
     <Section title="Recipients">
       <List>
         <Row title="Huda (C01) · Dune foreman" detail={`Stop and account for ${people.length} affected workers.`} badge={taskBadge(session, story.acknowledged ? 'stop' : 'acknowledge')} />

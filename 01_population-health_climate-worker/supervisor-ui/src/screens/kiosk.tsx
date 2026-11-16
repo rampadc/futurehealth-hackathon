@@ -3,6 +3,7 @@ import { langOf, preferredLanguage, tr } from '../i18n';
 import { assessmentCapture, assignedIds, crew, time } from './data';
 import { Computed, Head, Hero, Metric, NoCase, Note, Avatar } from './kit';
 import type { ScreenProps } from './registry';
+import { StatusIcon } from '../shared/icons';
 
 /**
  * Shelter A kiosk: a worker taps their badge and is checked in within three seconds,
@@ -35,10 +36,10 @@ export function KioskScreen({ session }: ScreenProps) {
       <Metric label="Next" value={ownApprovedWorkshop ? 'Workshop' : 'Follow foreman'} sub="your foreman will call you" />
     </Hero>
     {greeting && !g && <p className="hs-statusline" role="status">Badge {greeting.id} is not on this crew. Please see Huda.</p>}
-    {g && <p className="hs-statusline" role="status" lang={gl} dir={langOf(gl).dir}>{greeting!.ok ? `✓ ${tr('kiosk.checked', gl).text} · ${g.name.split(' ')[0]}` : `${g.name.split(' ')[0]}: please see Huda`}</p>}
+    {g && <p className="hs-statusline" role="status" lang={gl} dir={langOf(gl).dir}>{greeting!.ok ? <><StatusIcon status="ok" /> {tr('kiosk.checked', gl).text} · {g.name.split(' ')[0]}</> : `${g.name.split(' ')[0]}: please see Huda`}</p>}
     <ul className="hs-tiles" aria-label="Badges">{people.map(p => <li key={p.id}>
       <button type="button" data-in={arrived.has(p.id) || undefined} disabled={session.busy} onClick={() => tap(p.id)} aria-label={`${p.name}${arrived.has(p.id) ? ', checked in' : ''}`}>
-        <Avatar id={p.id} size="lg" /><span aria-hidden="true">{arrived.has(p.id) ? '✓ ' : ''}{p.name.split(' ')[0]}</span><small>{p.id}</small>
+        <Avatar id={p.id} size="lg" /><span aria-hidden="true">{arrived.has(p.id) && <><StatusIcon status="ok" /> </>}{p.name.split(' ')[0]}</span><small>{p.id}</small>
       </button></li>)}
     </ul>
     {nfc.supported && <div className="hs-form-row">

@@ -9,9 +9,11 @@ import { ActionButton, Badge, Band, Computed, Empty, Head, Hero, Hold, List, Met
 import type { ScreenProps } from '../registry';
 import { ConditionsPanel } from '../conditions';
 import { CrewRiskPanel } from '../risk';
+import { bandOf, OtherSquadScreen, SquadItems, SquadPicker, squadsFor, useSquad, SENSORS } from '../squads';
 
 /** Squad Monitoring: within five seconds, does anyone need action now? */
 export function SquadMonitoringScreen({ session }: ScreenProps) {
+  const [squadId] = useSquad();
   const { caseView, person } = session;
   if (!caseView) return <NoCase session={session} />;
   if (person?.id === 'P01') return <div className="hs-screen">
@@ -34,13 +36,19 @@ export function SquadMonitoringScreen({ session }: ScreenProps) {
   for (const p of people) { const where = p.excluded ? 'welfare' : p.inRecovery ? 'shelter_a' : p.location ?? 'unknown'; byLocation.set(where, (byLocation.get(where) ?? 0) + 1); }
   const handoff = nextHandoff(story);
   const actions = [...open].sort((a, b) => Number(!!b.due_at && overdue.includes(b)) - Number(!!a.due_at && overdue.includes(a)));
+  /* No summary readouts: a squad selector with each squad's alerts and warnings. */
+  const squads = squadsFor(caseView);
+  const sq = squads.find(q => q.id === squadId) ?? squads[0];
+  const lines = (q: typeof sq) => q.live
+    ? [q.status, bandOf(q), <>Headcount <b>{accounted} / {caseView.headcount?.expected_count ?? people.length}</b></>, caseView.headcount?.confirmed_at ? `Huda confirmed at ${time(caseView.headcount.confirmed_at)}` : 'Awaiting Huda’s confirmation']
+    : [q.status, bandOf(q), <>Headcount <b>{q.headcount}</b></>];
+  if (!sq.live) return <OtherSquadScreen title="Squad Monitoring" squad={sq} squads={squads} lines={lines}>
+    <Section title="Needs action"><SquadItems squad={sq} /></Section>
+    <Section title="Crew by location" hint="Aggregates only · no health data"><List><Row title={`${sq.loc} · ${sq.headcount} workers`} detail={`${sq.status}. Recovery: ${sq.shelter}.`} badge={<Badge tone="muted">{sq.hold ? 'Hold' : 'Working'}</Badge>} /></List></Section>
+  </OtherSquadScreen>;
   return <div className="hs-screen">
-    <Head kicker={`Squad Monitoring · Civil area · ${time(caseView.clock)} GST`} title="Squad Monitoring" />
-    <Hero>
-      <Metric label="Needs action now" value={String(needsHelp.length + overdue.length)} sub={needsHelp.length ? <><Avatars ids={needsHelp.map(p => p.id)} size="sm" /> {`${needsHelp.map(p => who(p.id)).join(', ')} needs rest now`}</> : overdue.length ? `${overdue.length} overdue` : 'Nothing urgent'} tone={needsHelp.length || overdue.length ? 'red' : 'ok'} />
-      <Metric label="Stop-work" value={story.issued ? 'Active' : 'None'} sub={story.issued ? 'Heavy exposed civil work' : 'No heat controls recorded'} tone={story.issued ? 'red' : undefined} />
-      <Metric label="Accounted for" value={`${accounted} / ${caseView.headcount?.expected_count ?? people.length}`} sub={caseView.headcount?.confirmed_at ? `Huda confirmed at ${time(caseView.headcount.confirmed_at)}` : 'Awaiting Huda’s confirmation'} />
-    </Hero>
+    <Head kicker={`Squad Monitoring · Civil crew · ${time(caseView.clock)} GST`} title="Squad Monitoring" />
+    <SquadPicker squads={squads} lines={lines} />
     <p className="hs-statusline"><Band band={heat.band.band} label={heat.reading ? `TWL ${heat.reading.twl} W/m² · ${heat.band.label}` : 'No reading'} /> · {heat.reading ? `sensor ${heat.reading.sensor_id} · ${time(heat.reading.measured_at)}` : ''} {heat.heavyHeld && <Hold />}</p>
     <div className="hs-grid">
       <Section title="Your actions" hint="Overdue first">
@@ -88,11 +96,20 @@ export function SystemTrustScreen({ session }: ScreenProps) {
   const shown = (log ?? []).filter(e => filter === 'all' || e.kind === filter);
   return <div className="hs-screen">
     <Head kicker="System & trust" title="System & trust" sub="Every solver run and agent answer is a proposal. People record every action." />
-    <Hero>
-      <Metric label="Services" value={ready === null ? '…' : ready ? 'Ready' : 'Degraded'} sub="database and solver" tone={ready === false ? 'red' : ready ? 'ok' : undefined} />
-      <Metric label="Proposals" value={String(counts('solver_run') + counts('agent_run'))} sub={`${counts('solver_run')} solver · ${counts('agent_run')} agent`} />
-      <Metric label="Applied on site by software" value={appliedOnSite ? 'Yes' : 'None'} sub="every proposal carries applied: false" tone={appliedOnSite ? 'red' : 'ok'} />
-    </Hero>
+    <Section title="System map" hint="What feeds Heat-Safe, the rules it runs and its agents">
+      {/* The system map as a list of lists: one list per lane. */}
+      <ul className="hs-syslist">
+        <li><h3>Inputs</h3><ul>{SENSORS.filter(x => !x.id.startsWith('k')).map(x => <li key={x.id}><span><b>{x.id.toUpperCase()} · {x.type}</b><small>{x.loc} · {x.relay}</small></span><Badge tone={x.off ? 'over' : 'done'}>{x.off ? 'Offline' : 'Live'}</Badge></li>)}
+          <li><span><b>Weather forecast</b><small>Hourly, Mussafah · planning context only</small></span><Badge tone="muted">Context</Badge></li></ul></li>
+        <li><h3>Rules (no AI)</h3><ul>
+          <li><span><b>Risk monitor and heat rules</b><small>Bands, holds and escalations · deterministic</small></span><Badge tone={ready === false ? 'over' : 'done'}>{ready === null ? 'Checking' : ready ? 'Ready' : 'Degraded'}</Badge></li>
+          <li><span><b>Operational solver</b><small>{counts('solver_run')} runs this case · every result applied: false</small></span><Badge tone={appliedOnSite ? 'over' : 'done'}>{appliedOnSite ? 'Applied' : 'Proposals only'}</Badge></li>
+          <li><span><b>Case database</b><small>Commands, events and evidence</small></span><Badge tone={ready === false ? 'over' : 'done'}>{ready === false ? 'Degraded' : 'Ready'}</Badge></li></ul></li>
+        <li><h3>Agents</h3><ul>
+          <li><span><b>Planning Agent · AI</b><small>{counts('agent_run')} answers this case · explains and drafts, never writes</small></span><Badge tone="done">Ready</Badge></li>
+          <li><span><b>Worker Aid Agent · AI</b><small>Check-ins in the worker’s language</small></span><Badge tone="muted">Planned</Badge></li></ul></li>
+      </ul>
+    </Section>
     <Section title="Trust log" hint="Newest first · people’s records and system proposals">
       <div className="hs-chips" role="group" aria-label="Show entries">
         {TRUST_FILTERS.map(([id, label]) => <button key={id} type="button" aria-pressed={filter === id} onClick={() => setFilter(id)}>{label}{log && ` · ${id === 'all' ? log.length : counts(id)}`}</button>)}

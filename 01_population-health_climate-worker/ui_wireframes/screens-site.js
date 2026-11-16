@@ -293,10 +293,10 @@ screen('m8', {
   empty: { text: 'Ask about today’s heat, the plan or the rules. Answers cite their sources and use computed numbers only.', cta: 'Ask: “Plan tomorrow for the civil crew at Mussafah”', act: 'asktomorrow' },
   error: { text: "■ The Planning Agent didn't respond within 20 seconds. Your question is saved." },
   render({ v }) {
-    const { hero, cards, sugg } = askRender(v, true);
+    const { cards, sugg } = askRender(v, true);
     return {
       nav: { title: 'Ask', sub: 'Planning Agent', clock: '08:20' }, overflow: ASK_OVERFLOW,
-      hero, body: [section('Conversation', `<div style="display:flex;flex-direction:column;gap:16px">${cards}</div>`), section('Suggested', sugg)],
+      body: [section('AI Planning Agent', agentIntro() + `<div class="convo">${cards}</div>`), section('Suggested', sugg)],
       cta: { html: `<form class="composer" onsubmit="event.preventDefault();runAct('send')"><input aria-label="Your question" placeholder="Ask a question" autocomplete="off"><button type="button" class="iconbtn" style="width:56px;height:56px" data-act="ptt" aria-label="Hold to talk">🎙</button></form>` },
     };
   },

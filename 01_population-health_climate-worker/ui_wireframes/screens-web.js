@@ -32,19 +32,21 @@ screen('w1', {
   empty: { text: 'No crew on this site yet. Import the Dune Civil Works roster and the site’s locations to start monitoring.', cta: 'Import crew roster', msg: 'Opens site setup · not in this prototype' },
   error: { text: "■ Couldn't reach Heat-Safe in 20 seconds. Showing the last update from 08:04." },
   render({ v }) {
-    const nav = { title: 'Squad Monitoring · Civil area · 08:18', back: null, updated: '08:18' };
+    const q = squad();
+    const nav = { title: `Squad Monitoring · ${q.name} · 08:18`, back: null, updated: '08:18' };
+    /* No summary readouts: a squad selector with each squad's alerts and warnings. */
+    const picker = squadPicker(x => [x.status, band(x.band, 'TWL ' + x.twl + (x.est ? ' · est.' : ''))]);
+    if (q.id !== 'civil') {
+      return { nav, filters: ['All squads', 'Alerts only', 'Holds only'], overflow: [{ label: 'Export shift log' }],
+        body: [picker, section('Needs action', squadItems(q)), section('Crew by location', list([row({ t: `${q.loc} · ${q.headcount} workers`, d: `${q.status}. Recovery: ${q.shelter}.`, b: B.plain(q.hold ? 'Hold' : 'Working'), static: true })]), 'Aggregates only · no health data'), section('Hourly band · today', bandStrip() + computed())],
+        detail: `<h2 class="h2">${q.name}</h2><dl class="kv"><dt>Foreman</dt><dd>${av(q.foreman)} ${who(q.foreman)}</dd><dt>Location</dt><dd>${q.loc}</dd><dt>TWL</dt><dd>${band(q.band, q.twl + ' W/m²' + (q.est ? ' · estimated' : ''))}</dd><dt>Sensor</dt><dd>${q.sensor}</dd><dt>Recovery</dt><dd>${q.shelter}</dd></dl>${computed()}` };
+    }
     const filters = ['All crews', 'Civil crew', 'Light task', 'Holds only', 'Task: heavy exposed', { label: 'Shift summary view', v: 'summary', checked: v === 'summary' }];
     const overflow = [{ label: 'Export shift log' }, { label: 'Reassign action owner' }, { label: 'View audit history' }];
     if (v === 'noevents') {
-      return { nav: { ...nav, title: 'Squad Monitoring · Civil area · 07:50' }, filters, overflow,
-        hero: [metric('Needs action now', '0', 'Nothing waiting', true), metric('Stop-work', 'None', 'No heat controls active'), metric('Accounted for', '—', 'No headcount needed')],
-        body: [`<div class="statusline">${band('low', 'TWL 152 W/m²')} · no holds · last reading 07:45</div>${computed()}`, section('Hourly band · today', bandStrip())] };
+      return { nav: { ...nav, title: 'Squad Monitoring · Civil crew · 07:50' }, filters, overflow,
+        body: [picker, `<div class="statusline">${band('low', 'TWL 152 W/m²')} · no holds · last reading 07:45</div>${computed()}`, section('Hourly band · today', bandStrip())] };
     }
-    const hero = [
-      metric('Needs action now', '1', 'Bilal (C08) needs rest now', 'red'),
-      metric('Stop-work', 'Active', 'Heavy exposed civil work since 08:01'),
-      metric('Accounted for', '11 / 11', 'Shelter A, 08:04'),
-    ];
     if (v === 'summary') {
       const ev = [
         ['08:01', 'Stop-work issued · heavy exposed civil work', 'Maya → Huda · TWL 145 ≤ 150', B.stop()],
@@ -53,8 +55,8 @@ screen('w1', {
         ['08:18', 'Unplanned rest: Bilal (C08)', 'Worker report → needs rest now', B.red()],
         ['Open', 'Restart decision · heavy exposed civil work', 'Owner: Rashid · 8 checks', B.wait('Open')],
       ];
-      return { nav: { ...nav, title: 'Shift summary · Civil area · 4 Aug' }, filters, overflow, hero,
-        body: [section('Shift recap', list(ev.map(([t, a, d, b]) => row({ t: `${t} · ${a}`, d, b, static: true }))), 'For the 08:30 handover'), computed()],
+      return { nav: { ...nav, title: 'Shift summary · Civil crew · 4 Aug' }, filters, overflow,
+        body: [picker, section('Shift recap', list(ev.map(([t, a, d, b]) => row({ t: `${t} · ${a}`, d, b, static: true }))), 'For the 08:30 handover'), computed()],
         cta: { label: 'Export shift log', act: 'toast', msg: 'Shift log exported (PDF + CSV)' } };
     }
     const sel = App.sel.w1 || 'a1';
@@ -81,8 +83,9 @@ screen('w1', {
       <div class="flex"><button class="btn" data-go="${a.open.go}"${attr('data-v', a.open.v)}>${a.open.l} →</button></div>
       <button class="link" data-go="w7" data-prefill="${a.id === 'a1' ? 'bilal' : a.id === 'a4' ? 'restart13' : 'trench'}">◇ Explain this with the Planning Agent</button>`;
     return {
-      nav, filters, overflow, hero,
+      nav, filters, overflow,
       body: [
+        picker,
         section('Needs action', list(actions), 'Sorted: Emergency → Red → overdue → waiting → info'),
         section('Crew by location', list(locs), 'Aggregates only · no health data'),
         section('Hourly band · today', bandStrip() + computed()),
@@ -109,18 +112,18 @@ screen('w2', {
   render({ v }) {
     const shade = App.f.w2shade;
     const drop = v === 'dropout';
-    const hero = [
-      drop ? metric('TWL now', '145 W/m²', `${band('caution')} · <b>raised one level</b> · sensor t1 not reporting since 07:52 · ${B.hold()}`, 'red')
-           : metric('TWL now', '145 W/m²', `${band('low')} · sensor t1 · measured 08:00 · ${B.hold()}`, 'red'),
-      metric('Site rule', '≤ 150', 'Stop heavy work · Sandline heat plan'),
-      metric('Legal zone', 'Low (≥ 140)', 'ADOSH-SF CoP 11.0'),
-    ];
+    /* TWL per squad in small text; no big readouts. */
+    const twl = `<table class="t sq-twl"><thead><tr><th>Squad</th><th>Location</th><th>TWL W/m²</th><th>Band</th><th>Source</th><th>Heavy exposed work</th></tr></thead><tbody>
+      ${SQUADS.map(q => { const civ = q.id === 'civil'; const b = civ && drop ? 'caution' : q.band;
+        return `<tr><td>${av(q.foreman, { size: 'xs' })} <b>${q.name}</b></td><td>${q.loc}</td><td>${civ ? 145 : q.twl}</td><td>${band(b)}${civ && drop ? ' · raised one level' : ''}</td><td>${civ && drop ? 'Forecast · t1 offline since 07:52' : q.est ? 'Forecast · ' + q.sensor + ' offline' : 'Sensor ' + q.sensor}</td><td>${civ ? '■ Stop-work' : q.hold ? '■ Hold' : '— No hold'}</td></tr>`; }).join('')}
+      </tbody><tfoot><tr><td colspan="6">${COMPUTED} · 08:00</td></tr></tfoot></table>`;
     const tasks = list([
       row({ lead: marker(1), t: 'Heavy exposed civil work', d: 'TWL reached the heavy-work limit.', b: B.stop('Stop-work', 'Stop-work required, heavy exposed civil work'), static: true }),
       row({ lead: marker(1), t: 'Light civil work', d: 'Below heavy-work scope.', b: B.plain('— No hold'), static: true }),
       row({ lead: marker(1), t: 'Workshop preparation', d: 'Covered task.', b: B.plain('— No hold'), static: true }),
     ]);
-    const policy = `<table class="t"><thead><tr><th>Layer</th><th>Rule</th><th>Result at 08:00</th></tr></thead><tbody>
+    const policy = `<div class="policy-row"><span><b>Site rule</b> TWL ≤ 150 · stop heavy work · Sandline heat plan</span><span><b>Legal zone</b> Low (≥ 140) · ADOSH-SF CoP 11.0</span></div>
+      <table class="t"><thead><tr><th>Layer</th><th>Rule</th><th>Result at 08:00</th></tr></thead><tbody>
       <tr><td>Legal floor</td><td>ADOSH-SF CoP 11.0 · Low zone at TWL ≥ 140: work with controls</td><td>No stop</td></tr>
       <tr><td class="applied">Site rule</td><td class="applied">Sandline heat plan · TWL ≤ 150: stop heavy exposed work</td><td class="applied">■ Stop-work · Stricter rule applied</td></tr>
       <tr><td>Midday break</td><td>MoHRE · 12:30–15:00, no outdoor work (15 Jun–15 Sep)</td><td>Not active</td></tr>
@@ -142,9 +145,9 @@ screen('w2', {
       filters: ['Zone: Civil trench', 'Zone: Laydown yard', 'Task: heavy exposed', 'Task: all'],
       overflow: [{ label: 'Download hourly table (CSV)' }, { label: 'View rule history' }, { label: 'Compare with the forecast' },
         { label: 'Unlink sensor t1…', danger: true, fn: () => confirmModal({ title: 'Unlink sensor t1 from the civil trench?', body: 'Readings will fall back to the forecast and the band will rise one level.', btn: 'Unlink', verb: 'to unlink', onOk: () => toast('Sensor t1 unlinked · forecast in use') }) }],
-      hero,
       body: [
-        section(compname(1) + ' · Task controls', tasks + `<div style="margin-top:8px">${computed()}</div>`),
+        section('TWL by squad', twl),
+        section(compname(1) + ' · Task controls · Civil crew', tasks + `<div style="margin-top:8px">${computed()}</div>`),
         section('Policy stack', policy),
         section('Reading source', source),
         section('Evidence needed before clearance', evidence),
@@ -176,14 +179,23 @@ screen('w3', {
     const headcount = `<table class="t"><thead><tr><th>Worker</th><th>Arrived</th><th>Source</th></tr></thead><tbody>
       ${AFFECTED.map((k, i) => `<tr><td>${who(k)}</td><td>08:0${i < 4 ? 3 : 4}</td><td>Shelter A kiosk</td></tr>`).join('')}
       <tr><td>C13, C14</td><td>—</td><td>Separate supervised light task</td></tr></tbody></table>`;
+    /* Overview of every squad's actions, responses and headcount; pick one for its detail. */
+    const overview = (civilOpen, civilHead) => squadPicker(q => q.id === 'civil'
+      ? [`Actions <b>${civilOpen}</b> open`, `Responses <b>${civilOpen ? 4 - civilOpen : 4} / 4</b>`, `Headcount <b>${civilHead}</b> · ${q.shelter}`]
+      : [`Actions <b>${q.actions.open}</b> open · ${q.actions.done} done`, `Responses <b>${q.responses.done} / ${q.responses.total}</b>`, `Headcount <b>${q.headcount}</b> · ${q.shelter}`]);
+    const q = squad();
+    if (q.id !== 'civil') {
+      return { nav: { title: `Protective response · ${q.name}`, back: 'w1', clock: '08:04' }, filters, overflow,
+        body: [overview(0, '11 / 11'), section(`${q.name} · Required actions`, squadItems(q)), section('Headcount · ' + q.shelter, `<div class="statusline"><span class="si" data-status="ok" aria-hidden="true"></span> ${q.headcount} accounted for · ${q.loc}</div>`, 'From the kiosk (K2) and phones')] };
+    }
     if (v === 'incident') {
       const r1 = App.f.w3removed, r2 = App.f.w3firstaid;
       const n = (r1 ? 0 : 1) + (r2 ? 0 : 1);
       const rowx = (t, d, done, act, l) => `<div class="row static nolead"><span><span class="t" style="display:block">${t}</span><span class="d">${d}</span></span><span class="rt" style="flex-direction:row;align-items:center;gap:8px">${done ? B.done() : B.wait()}${done ? '' : `<button class="btn solid" data-act="${act}">${l}</button>`}</span></div>`;
       return {
         nav: { title: 'Protective response · 08:18', back: 'w1', clock: '08:18' }, filters, overflow,
-        hero: [metric('Outstanding', String(n), n ? 'planning blocked' : 'all confirmed', n ? 'red' : true), metric('Headcount', '11 / 11', 'Shelter A'), metric('Crew planning', n ? 'Locked' : 'Unlocked', n ? 'until both actions are confirmed' : 'replan available')],
         body: [
+          overview(n, '11 / 11'),
           section(compname(2) + ' · Confirm before replanning', `<div class="list">${rowx('Confirm Bilal (C08) removed from heat and where he is now', r1 ? 'Recorded ' + r1 + ' by Huda · Workshop → Shelter A' : 'Owner: Huda · due 08:28', r1, 'removed', 'Confirm removal')}${rowx('Record first-aid contact with Salim (P06)', r2 ? 'Recorded ' + r2 + ' · Salim arrived' : 'Salim notified 08:18 · owner: Huda', r2, 'firstaid', 'Record contact')}</div>`),
           `<div class="statusline">${n ? '■ Crew planning locked until both actions are confirmed' : '✓ Both confirmed · crew planning unlocked'}<span class="age" style="margin-left:auto">⚙ Escalation rule · not AI</span></div>`,
           n ? '' : `<div><button class="btn solid" data-go="w5" data-v="replan">Open replan →</button></div>`,
@@ -204,8 +216,8 @@ screen('w3', {
     const n = overdue && !ack ? 2 : 0;
     return {
       nav: { title: 'Protective response · ' + (overdue ? '08:03' : '08:04'), back: 'w1', clock: overdue ? '08:03' : '08:04' }, filters, overflow,
-      hero: [metric('Outstanding', String(n), n ? 'planning blocked' : 'all confirmed', n ? 'red' : true), metric('Headcount', n ? '0 / 11' : '11 / 11', 'Shelter A'), metric('Crew planning', n ? 'Locked' : 'Unlocked')],
       body: [
+        overview(n, n ? '0 / 11' : '11 / 11'),
         section(compname(2) + ' · Required actions', list(rows) + `<div style="margin-top:8px">${computed('escalation after 2 min')}</div>`),
         section('Headcount · Shelter A', headcount, 'From the kiosk (K1) and phones'),
       ],
@@ -246,7 +258,15 @@ screen('w4', {
     const crew = W4_CREW.map(c => noone && c.s === 'ready' ? { ...c, s: 'unconf', r: 'No readiness confirmation.' } : c)
       .filter(c => f === 'all' || (f === 'q' && c.q) || (f === 'r' && c.s === 'ready'));
     const bdg = s => s === 'ready' ? B.done('Ready') : s === 'unconf' ? B.wait('Unconfirmed') : s === 'expired' ? B.over('Expired') : B.muted('○ Recovery');
-    const rows = crew.map(c => `<div class="row static" tabindex="0" data-id="${c.k}"><span class="lead">${av(c.k)}</span><span style="min-width:0"><span class="t" style="display:block">${who(c.k)}</span><span class="d">${c.q ? 'Qualified. ' : ''}${c.r}</span></span><span class="rt" style="flex-direction:row;align-items:center;gap:8px">${bdg(c.s)}<button class="iconbtn" data-act="rowmenu" data-id="${c.k}" aria-label="More for ${who(c.k)}">⋯</button></span></div>`);
+    /* The crew as a grid of people, not a list. */
+    const card = (k, status, note) => `<div class="crew-card" tabindex="0" data-id="${k}">${av(k, { size: 'lg' })}<b>${who(k)}</b>${status}<span class="d">${note}</span><button class="iconbtn" data-act="rowmenu" data-id="${k}" aria-label="More for ${who(k)}">⋯</button></div>`;
+    const rows = crew.map(c => card(c.k, bdg(c.s), (c.q ? 'Qualified. ' : '') + c.r));
+    const q = squad();
+    const picker = squadPicker(x => x.id === 'civil' ? [`${noone ? 0 : 4} eligible · 4 of 6 workshop places free`] : [`${x.loc} · ${x.size} workers`]);
+    if (q.id !== 'civil') {
+      return { nav: { title: `Crew & workshop · ${q.name}`, back: 'w1', clock: '08:10' }, filters: ['Readiness: all'], overflow: [{ label: 'View qualification matrix' }],
+        body: [picker, section(`Crew · ${q.name}`, `<div class="crew-grid">${q.members.map(k => card(k, q.hold ? B.muted('○ Recovery') : B.done('Working'), `${q.loc}. ${q.status}.`)).join('')}</div>`)] };
+    }
     const assigned = App.f.assigned;
     const seats = ['lina', 'omar'].map(k => `<div class="seat fixed">${av(k)}${PEOPLE[k].n} · fixed</div>`).join('') +
       (noone ? '<div class="seat free">Free</div>'.repeat(4) : ['rana', 'yusuf', 'dana', 'bilal'].map(k => `<div class="seat ${assigned ? '' : 'prop'}">${av(k)}${PEOPLE[k].n} · ${assigned ? 'assigned' : 'proposed'}</div>`).join(''));
@@ -263,8 +283,8 @@ screen('w4', {
       nav: { title: 'Crew & workshop · 08:10', back: 'w1', clock: '08:10' },
       filters: ['Qualification: workshop preparation', 'Readiness: confirmed', 'Readiness: unconfirmed'],
       overflow: [{ label: 'View qualification matrix' }, { label: 'Export allocation' }],
-      hero: [metric('Eligible now', noone ? '0' : '4', 'qualified and confirmed ready', noone ? 'red' : true), metric('Workshop places', '4 free of 6', 'Lina, Omar fixed'), metric('Useful work', '4 people', 'demand for workshop preparation')],
       body: [
+        picker,
         section(compname(3) + ' · Proposal', proposal),
         section('Eligibility', `<div class="funnel" role="group" aria-label="Eligibility funnel">
           <button class="${f === 'all' ? 'on' : ''}" data-act="f" data-id="all"><b>11</b>affected</button>
@@ -276,13 +296,13 @@ screen('w4', {
           row({ t: 'Resources', d: 'Pipe racks, gloves, cooled workshop', b: B.done('Pass'), static: true }),
           row({ t: 'Supervision', d: 'Huda, external · uses no place', b: B.done('Pass'), static: true }),
         ])),
-        section('Crew · ' + (f === 'all' ? 'all affected' : f === 'q' ? 'qualified' : 'confirmed ready'), `<div class="list">${rows.join('')}</div>`),
+        section('Crew · ' + (f === 'all' ? 'all affected' : f === 'q' ? 'qualified' : 'confirmed ready'), `<div class="crew-grid">${rows.join('')}</div>`),
       ],
       cta: noone ? { label: 'Record assignment', disabled: true, note: 'Nobody is eligible yet.' }
         : assigned ? { label: 'Open work/rest plan →', go: 'w5' } : { label: 'Record assignment', act: 'assign' },
     };
   },
-  keys: { a: () => { const r = document.activeElement && document.activeElement.closest('.row[data-id]'); if (!r) return toast('Focus a crew row first'); const c = W4_CREW.find(x => x.k === r.dataset.id); toast(c.s === 'ready' ? `${PEOPLE[c.k].n} is already in the proposal` : `${PEOPLE[c.k].n} can’t be added: no valid readiness confirmation`); } },
+  keys: { a: () => { const r = document.activeElement && document.activeElement.closest('.row[data-id], .crew-card[data-id]'); if (!r) return toast('Focus a crew row first'); const c = W4_CREW.find(x => x.k === r.dataset.id); toast(c.s === 'ready' ? `${PEOPLE[c.k].n} is already in the proposal` : `${PEOPLE[c.k].n} can’t be added: no valid readiness confirmation`); } },
   actions: {
     f: el => { App.sel.w4f = el.dataset.id; refresh(); },
     assign: () => { App.f.assigned = true; refresh(); toast('08:11 · Assignment recorded by Huda'); },
@@ -319,7 +339,12 @@ function gantt(pl) {
   const span = pl.end - pl.start, pct = t => ((t - pl.start) / span * 100).toFixed(2) + '%';
   const ticks = []; for (let t = pl.start; t <= pl.end; t += 15) ticks.push(`<span style="inset-inline-start:${pct(t)}">${tstr(t)}</span>`);
   const clip = iv => iv.map(([k, a, b, l]) => [k, Math.max(a, pl.start), Math.min(b, pl.end), l]).filter(([, a, b]) => b > a);
-  const rows = Object.entries(pl.p).map(([n, iv]) => `<div class="g-row"><div class="g-lab">${n}</div><div class="g-track">${clip(iv).map(([k, a, b, l]) =>
+  /* Each row leads with the person's crew photo; the grouped row shows a few of the others. */
+  const inPlan = Object.keys(pl.p).map(n => n.toLowerCase());
+  const others = AFFECTED.filter(k => !inPlan.includes(k));
+  const lab = n => PEOPLE[n.toLowerCase()] ? `<span class="person">${av(n.toLowerCase(), { size: 'sm' })}<span>${n}</span></span>`
+    : /others/.test(n) ? `<span class="person"><span class="avatars">${others.slice(0, 3).map(k => av(k, { size: 'xs' })).join('')}</span><span>${n}</span></span>` : n;
+  const rows = Object.entries(pl.p).map(([n, iv]) => `<div class="g-row"><div class="g-lab">${lab(n)}</div><div class="g-track">${clip(iv).map(([k, a, b, l]) =>
     `<div class="g-bar ${k === 'w' ? 'g-work' : k === 'r' ? 'g-rest' : 'g-excl'}" style="inset-inline-start:${pct(a)};width:calc(${pct(b)} - ${pct(a)})" title="${n} ${tstr(a)}–${tstr(b)}">${k === 'w' ? 'Work' : k === 'x' ? l : ''}</div>`).join('')}</div></div>`).join('');
   const cur = App.sel.w5t !== undefined ? App.sel.w5t : tmin('08:35') - pl.start;
   return `<div class="gantt" id="gantt"${timeDir()}><div class="g-ticks"><div style="border-inline-end:1px solid var(--ink)"></div><div class="tk">${ticks.join('')}</div></div>${rows}
@@ -344,10 +369,15 @@ screen('w5', {
     const overflow = [{ label: 'Export intervals (crew_rest.intervals JSON)' }, { label: 'Compare with the previous plan' }, { label: 'Edit policy' },
       { label: 'Delete draft…', danger: true, fn: () => confirmModal({ title: 'Delete draft shift plan “Civil crew · 4 Aug, v2”?', body: 'The draft and its intervals will be removed. The sent plan v1 is not affected.', onOk: () => toast('Draft v2 deleted') }) }];
     const filters = ['Worker: all', 'Worker: Rana', 'Location: Workshop', 'Location: Shelter A'];
+    const q = squad();
+    const picker = squadPicker(x => x.id === 'civil' ? [v === 'infeasible' ? 'Plan infeasible' : 'Plan feasible · 08:11–09:11'] : [x.hold ? 'Plan needed' : 'No plan needed · no heat hold']);
+    if (q.id !== 'civil') {
+      return { nav: { title: `Work/rest plan · ${q.name}`, back: 'w1', clock: '08:11' }, overflow, filters,
+        body: [picker, `<div class="statusline"><span class="si" data-status="ok" aria-hidden="true"></span> No work/rest plan needed: the ${q.name.toLowerCase()} has no heat hold. ${q.status}.</div>${computed()}`] };
+    }
     if (v === 'infeasible') {
       return { nav: { title: 'Work/rest plan · 08:11–09:11', back: 'w1', clock: '08:11' }, overflow, filters,
-        hero: [metric('Useful work', '0 worker-min', '—'), metric('Unmet', '240 worker-min', 'demand 240'), metric('Status', 'Infeasible', 'rule result, not an error', 'red')],
-        body: [`<div class="statusline signal">■ No schedule satisfies the work and recovery limits: recovery shelters are unavailable.</div>${computed('optimise_schedule')}`],
+        body: [picker, `<div class="statusline signal">■ No schedule satisfies the work and recovery limits: recovery shelters are unavailable.</div>${computed('optimise_schedule')}`],
         cta: { label: 'Send plan to crew phones', disabled: true, note: 'Nothing to send. Restore a recovery location to replan.' } };
     }
     const replan = v === 'replan';
@@ -361,15 +391,17 @@ screen('w5', {
     const sent = App.f['w5sent' + (replan ? 'r' : '')];
     return {
       nav: { title: 'Work/rest plan · ' + (replan ? '08:18–09:18' : '08:11–09:11'), back: 'w1', clock: replan ? '08:18' : '08:11' }, overflow, filters,
-      hero: [metric('Useful work', work + ' worker-min', replan ? (leila ? '4 × 30 · Leila replaces Bilal' : '3 × 30') : '4 × 30', true), metric('Unmet', (240 - work) + ' worker-min', 'demand 240'), metric('Status', 'Feasible', 'valid, not proven optimal')],
       body: [
+        picker,
         replan ? `<div class="between"><div class="seg" role="group" aria-label="Branch"><button class="${leila ? '' : 'on'}" data-act="br" data-id="un">Leila unconfirmed</button><button class="${leila ? 'on' : ''}" data-act="br" data-id="confirmed">Leila confirmed 08:18</button></div><span class="age">Replan after Bilal’s report · 08:18</span></div>` : '',
-        section(compname(3) + ' · Timeline', gantt(pl), `<button class="badge" data-act="policy" style="cursor:pointer">Fictional test policy · 6 min initial recovery · ≤ 15 min continuous work · 15 min between</button>`),
-        aiBlock(replan
-          ? { key: 'w5r', conf: 'High', text: 'Bilal is excluded from work and keeps cooled recovery through 09:33. ' + (leila ? 'With Leila confirmed at 08:18, she takes the fourth place from 08:26, so useful work stays at 120 worker-minutes.' : 'Without Leila, three workers cover 90 worker-minutes; 150 stay unmet.'), tools: ['optimise_schedule'], inputs: ['Unplanned rest: Bilal 08:18', 'Readiness records (' + (leila ? 4 : 3) + ' valid)', 'Check-in history 08:04–08:18'], acts: [{ l: 'Edit plan', go: 'w4' }, { l: 'Discard summary', act: 'discard' }] }
-          : { key: 'w5', conf: 'High', text: 'Seven recorded recovery minutes already meet the six-minute requirement, so the four can start at once. Each works two 15-minute blocks with 15 minutes of cooled recovery between.', tools: ['optimise_schedule'], inputs: ['Check-in history 08:04–08:11 (Shelter A)', 'Policy: 6 min initial recovery, ≤ 15 min work, 15 min between', 'Workshop places 4 free of 6'], acts: [{ l: 'Edit plan', go: 'w4' }, { l: 'Discard summary', act: 'discard' }] }),
+        section(compname(3) + ' · Timeline', gantt(pl) + `<p class="age" style="margin:8px 0 0">${work} worker-min useful work · ${240 - work} unmet of 240 · feasible, not proven optimal · <button class="link" data-act="policy" style="min-height:0;font-weight:500">Fictional test policy</button></p>`),
         section('Intervals', list(rows) + `<div style="margin-top:8px">${computed('optimise_schedule')}</div>`, ivs.length > 10 ? `Showing 10 of ${ivs.length}` : ''),
       ],
+      /* The AI Planning Agent sits in the right-hand sidebar, beside the plan it explains. */
+      detail: `<div class="agent-side"><h2 class="h2">${icon('ai')} AI Planning Agent</h2>` + aiBlock(replan
+          ? { key: 'w5r', conf: 'High', text: 'Bilal is excluded from work and keeps cooled recovery through 09:33. ' + (leila ? 'With Leila confirmed at 08:18, she takes the fourth place from 08:26, so useful work stays at 120 worker-minutes.' : 'Without Leila, three workers cover 90 worker-minutes; 150 stay unmet.'), tools: ['optimise_schedule'], inputs: ['Unplanned rest: Bilal 08:18', 'Readiness records (' + (leila ? 4 : 3) + ' valid)', 'Check-in history 08:04–08:18'], acts: [{ l: 'Edit plan', go: 'w4' }, { l: 'Discard summary', act: 'discard' }] }
+          : { key: 'w5', conf: 'High', text: 'Seven recorded recovery minutes already meet the six-minute requirement, so the four can start at once. Each works two 15-minute blocks with 15 minutes of cooled recovery between.', tools: ['optimise_schedule'], inputs: ['Check-in history 08:04–08:11 (Shelter A)', 'Policy: 6 min initial recovery, ≤ 15 min work, 15 min between', 'Workshop places 4 free of 6'], acts: [{ l: 'Edit plan', go: 'w4' }, { l: 'Discard summary', act: 'discard' }] })
+        + `<button class="link" data-go="w7">Ask the Planning Agent about this plan →</button></div>`,
       cta: sent ? { label: `✓ Sent ${replan ? '08:19' : '08:11'} · ${replan ? (leila ? 5 : 4) : 4} of ${replan ? (leila ? 5 : 4) : 4} delivered`, disabled: true } : { label: 'Send plan to crew phones', act: 'send' },
       mount() {
         const inp = $('#scr'), out = $('#scrout'), cur = $('#gcur'); if (!inp) return;
@@ -415,9 +447,18 @@ screen('w6', {
       const stale = blocked && i === 1;
       return `<div class="row static" ><span class="lead">${marker(4)}</span><span style="min-width:0"><span class="t" style="display:block">${i + 1}. ${c[0]}</span><span class="d">${c[1]}</span></span><span class="rt" style="flex-direction:row;align-items:center;gap:8px">${c[2]}${stale ? '<button class="btn" data-go="m7">Request fresh reading</button>' : ''}</span></div>`;
     });
+    /* Per squad: latest reading, status, the midday break and readiness checks done. */
+    const q = squad();
+    const civilRow = { v: blocked ? 145 : (fresh || 175), at: blocked ? '08:00 · stale' : '15:06 · fresh', status: done ? 'Restart recorded · 15:08' : blocked ? 'Stop-work · restart blocked' : 'Stop-work · ready for review', checks: blocked ? 6 : 8 };
+    const squadTable = `<table class="t sq-twl"><thead><tr><th>Squad</th><th>Latest reading</th><th>Current status</th><th>Break starts</th><th>Break ends · forecast</th><th>Readiness checks</th></tr></thead><tbody>
+      ${SQUADS.map(x => { const c = x.id === 'civil'; const rd = c ? civilRow : { v: x.reading.v, at: x.reading.fresh ? x.reading.at + ' · fresh' : 'forecast · sensor offline', status: x.status, checks: x.checks.done };
+        const tot = x.checks.total; const st = !tot ? '' : rd.checks === tot ? 'ok' : 'warn';
+        return `<tr class="${x.id === q.id ? 'on' : ''}" data-act="squad" data-id="${x.id}" tabindex="0"><td>${av(x.foreman, { size: 'xs' })} <b>${x.name}</b></td><td><b>${rd.v} W/m²</b> · ${rd.at}</td><td>${rd.status}</td><td>${x.brk.start}</td><td>${x.brk.end}${x.brk.end !== '—' ? ' · TWL ' + (x.twl + 14) + ' forecast' : ''}</td><td>${tot ? `${st ? `<span class="si" data-status="${st}" aria-hidden="true"></span> ` : ''}<b>${rd.checks} of ${tot}</b>` : '—'}</td></tr>`; }).join('')}
+      </tbody><tfoot><tr><td colspan="6">${COMPUTED} · MoHRE midday break 12:30–15:00 · select a squad for its checks</td></tr></tfoot></table>`;
     const isRashid = App.role === 'super';
     let cta;
-    if (done) cta = { label: '✓ Restart recorded · Rashid 15:08', disabled: true };
+    if (q.id !== 'civil') cta = null;
+    else if (done) cta = { label: '✓ Restart recorded · Rashid 15:08', disabled: true };
     else if (blocked) cta = { label: 'Record restart decision', disabled: true, note: 'Resolve the 2 failing checks first.' };
     else if (!isRashid) cta = { label: 'Record restart decision', disabled: true, note: 'Only Rashid (superintendent) can record a restart decision. Switch role in the left panel.' };
     else cta = { label: 'Record restart decision', act: 'restart' };
@@ -426,15 +467,11 @@ screen('w6', {
       filters: [{ label: 'Show all checks', fn: () => { App.sel.w6f = 'all'; refresh(); } }, { label: 'Show passed', fn: () => { App.sel.w6f = 'pass'; refresh(); } }, { label: 'Show failed', fn: () => { App.sel.w6f = 'fail'; refresh(); } }],
       overflow: [{ label: 'Decision history' }, { label: 'Export for Dune–Sandline cost review (Amal)' },
         ...(done ? [{ label: 'Withdraw restart decision…', danger: true, fn: () => confirmModal({ title: 'Withdraw the 15:08 restart decision?', body: 'This immediately re-raises the stop-work on every board.', btn: 'Withdraw', verb: 'to withdraw', onOk: () => { App.f.restarted = false; refresh(); toast('Restart withdrawn · stop-work re-raised'); } }) }] : [])],
-      hero: [
-        done ? metric('Result', 'Restart recorded', 'Rashid · 15:08 · human decision', true)
-          : blocked ? metric('Result', 'Blocked', '2 checks missing', 'red') : metric('Result', '<span style="font-size:24px">ready_for_human_review</span>', '8 of 8 checks pass', true),
-        blocked ? metric('Latest reading', '145 W/m²', '<b>stale</b> · 08:00 · sensor t1') : metric('Latest reading', (fresh || '175') + ' W/m²', 'fresh · sensor t1'),
-        metric('Midday break', '12:30–15:00', blocked ? '<b>13:00 is inside the window</b>' : 'outside window'),
-      ],
       body: [
-        section(compname(4) + ' · Eight checks', `<div class="list">${rows.join('')}</div><div style="margin-top:8px">${computed()}</div>`, 'Each human check needs an evidence reference and a named confirmer'),
-        blocked ? aiBlock({ key: 'w6', conf: 'High', text: '13:00 falls inside the MoHRE midday break (12:30–15:00), so outdoor work cannot restart then. The heat reading is also older than five minutes; a fresh reading from sensor t1 is needed.', tools: ['compute_heat_stress (midday-break minutes)', 'search_guidance'], inputs: ['Proposed restart 13:00', 'Latest reading 08:00, sensor t1'], cites: ['MoHRE Ministerial Resolution · midday break 12:30–15:00, 15 June–15 September'], acts: [{ l: 'Discard', act: 'discard' }] }) : '',
+        section('Restart status by squad', squadTable),
+        q.id !== 'civil' ? `<div class="statusline"><span class="si" data-status="ok" aria-hidden="true"></span> No restart review for the ${q.name.toLowerCase()}: it has no stop-work. ${q.status}.</div>` : '',
+        q.id !== 'civil' ? '' : section(compname(4) + ' · Eight checks · Civil crew', `<div class="list">${rows.join('')}</div><div style="margin-top:8px">${computed()}</div>`, 'Each human check needs an evidence reference and a named confirmer'),
+        q.id === 'civil' && blocked ? aiBlock({ key: 'w6', conf: 'High', text: '13:00 falls inside the MoHRE midday break (12:30–15:00), so outdoor work cannot restart then. The heat reading is also older than five minutes; a fresh reading from sensor t1 is needed.', tools: ['compute_heat_stress (midday-break minutes)', 'search_guidance'], inputs: ['Proposed restart 13:00', 'Latest reading 08:00, sensor t1'], cites: ['MoHRE Ministerial Resolution · midday break 12:30–15:00, 15 June–15 September'], acts: [{ l: 'Discard', act: 'discard' }] }) : '',
         `<div class="note">Software never lifts the stop-work. The button records Rashid’s human decision.</div>`,
       ],
       cta,
@@ -468,20 +505,34 @@ function askState() {
   if (App.f.prefill) { const p = App.f.prefill; delete App.f.prefill; if (!App.f.asked.includes(p)) App.f.asked.push(p); }
   return App.f.asked;
 }
+/* A friendly face for the agent, with a callout saying what it can help with. */
+function agentIntro() {
+  return `<div class="agent-intro">
+    <svg class="agent-face" viewBox="0 0 64 64" role="img" aria-label="Planning Agent">
+      <circle cx="32" cy="36" r="22" fill="#FFD27A" stroke="currentColor" stroke-width="2"/>
+      <path d="M10 30a22 22 0 0 1 44 0z" fill="#F2A900" stroke="currentColor" stroke-width="2"/><path d="M6 30h52v5H6z" fill="#F2A900" stroke="currentColor" stroke-width="2"/><path d="M28 9h8v10h-8z" fill="#F2A900" stroke="currentColor" stroke-width="2"/>
+      <circle cx="24" cy="42" r="2.6" fill="currentColor"/><circle cx="40" cy="42" r="2.6" fill="currentColor"/>
+      <path d="M22 49c5 6 15 6 20 0" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+      <circle cx="17" cy="48" r="3" fill="#F4A3A3" opacity=".6"/><circle cx="47" cy="48" r="3" fill="#F4A3A3" opacity=".6"/>
+    </svg>
+    <div class="callout"><b>Hi, I’m the Planning Agent.</b> Ask me in plain words. I can:
+      <ul><li>explain why work stopped, or which rule applies to a squad</li><li>check whether a restart time is allowed</li><li>draft a work/rest plan for a squad</li><li>sum up a squad’s actions, readiness or headcount</li></ul>
+      <small>I cite my sources and use computed numbers only. I never change a plan or a record; people do.</small></div>
+  </div>`;
+}
 function askRender(v, mobile) {
   let asked = askState().slice();
   if (v === 'refusal') asked = ['complain'];
   if (v === 'grounding') asked = ['temp9'];
   if (!asked.length && v === 'default') asked = ['trench'];
   const last = QA[asked[asked.length - 1]];
-  const hero = [
-    metric('Last answer · confidence', last.refused ? 'Refused' : last.conf, last.refused ? 'purpose limitation · logged' : { High: 'all figures and claims grounded', Medium: 'relies on a stated assumption', Low: 'grounding check flagged a value' }[last.conf], last.conf === 'Low' ? 'red' : true),
-    metric('Sources', (last.cites.length || 0) + ' cited', last.cites.length ? last.cites.map(c => c.split(' · ')[0]).join(' · ') : '—'),
-    metric('Checks', last.warn ? '▲ 1 value' : 'Grounded ✓', last.warn ? 'did not match a tool output' : 'every figure matched a tool output'),
-  ];
-  const cards = asked.map((k, i) => qaCard(k, i, mobile)).join('');
+  /* The conversation is the screen. The latest answer's sources sit in one small row
+     at its base, above the suggested questions; no summary readouts. */
+  const cites = (last.cites || []);
+  const sources = `<div class="src-row" aria-label="Sources for the latest answer"><span class="src-k">Sources</span>${cites.length ? cites.map(c => `<span class="src">${c}</span>`).join('') : `<span class="src none">${last.refused ? 'None · request refused' : 'None cited'}</span>`}</div>`;
+  const cards = asked.map((k, i) => qaCard(k, i, mobile)).join('') + sources;
   const sugg = `<div class="sugg">${SUGGESTED.map(k => `<button data-act="ask" data-id="${k}">${QA[k].q}</button>`).join('')}</div>`;
-  return { hero, cards, sugg };
+  return { cards, sugg };
 }
 function askSubmit(text) {
   const k = Object.keys(QA).find(k => QA[k].q.toLowerCase() === text.toLowerCase().trim()) ||
@@ -507,11 +558,11 @@ screen('w7', {
   empty: { text: 'Ask about today’s heat, the plan or the rules. Answers cite their sources and use computed numbers only.', cta: 'Ask: “Plan tomorrow for the civil crew at Mussafah”', act: 'asktomorrow' },
   error: { text: "■ The Planning Agent didn't respond within 20 seconds. Your question is saved." },
   render({ v }) {
-    const { hero, cards, sugg } = askRender(v, false);
+    const { cards, sugg } = askRender(v, false);
     return {
       nav: { title: 'Ask the Planning Agent', back: 'w1' },
       filters: ['Only my questions', 'All supervisors'], overflow: ASK_OVERFLOW,
-      hero, body: [section('Conversation', `<div style="display:flex;flex-direction:column;gap:16px">${cards}</div>`), section('Suggested questions', sugg)],
+      body: [section('AI Planning Agent', agentIntro() + `<div class="convo">${cards}</div>`), section('Suggested questions', sugg)],
       footer: `<form class="composer" onsubmit="event.preventDefault();runAct('send')"><label class="sr" for="askin" style="position:absolute;left:-9999px">Your question</label><input id="askin" placeholder="Ask about heat, the plan or the rules" autocomplete="off"><button class="btn solid" type="submit" style="min-width:120px">Send</button></form>`,
     };
   },
@@ -543,15 +594,16 @@ screen('w8', {
   empty: { text: 'Telemetry starts after the first agent run.', cta: 'Run the eval smoke set' },
   render() {
     const sel = App.sel.w8 || 'bs2';
-    const map = NODES.map(n => n.length === 1 ? `<div class="lane">${n[0]}</div>` :
-      `<button class="node ${sel === n[0] ? 'sel' : ''} ${n[6] ? 'off' : ''}" data-act="node" data-id="${n[0]}"><span class="nt">${n[1]}</span>${n[6] ? B.red('Offline') : n[2] === 'Planned' || n[2] === 'Diagram only' ? B.muted(n[2]) : B.plain(n[2])}<span class="age">${n[3]}</span></button>`).join('');
+    /* The system map as a list of lists: one list per lane. */
+    const lanes = []; NODES.forEach(n => { if (n.length === 1) lanes.push({ name: n[0], items: [] }); else lanes[lanes.length - 1].items.push(n); });
+    const map = `<ul class="syslist">${lanes.map(l => `<li><h4>${l.name}</h4><ul>${l.items.map(n =>
+      `<li><button class="node ${sel === n[0] ? 'sel' : ''} ${n[6] ? 'off' : ''}" data-act="node" data-id="${n[0]}"><span class="nt">${n[1]}</span><span class="age">${n[3]}</span>${n[6] ? B.red('Offline') : n[2] === 'Planned' || n[2] === 'Diagram only' ? B.muted(n[2]) : B.plain(n[2])}</button></li>`).join('')}</ul></li>`).join('')}</ul>`;
     const n = NODES.find(x => x[0] === sel);
     return {
       nav: { title: 'System & trust', back: 'w1', clock: '09:00' },
       filters: ['Today', 'Last 7 days', 'Last 30 days'], overflow: [{ label: 'Download raw telemetry' }, { label: 'Open eval report' }],
-      hero: [metric('Inputs live', '5 / 6', 'base station 2 offline', 'red'), metric('Guardrail trips', '3 today', '1 purpose-limitation refusal'), metric('Eval pass rate', '15 / 15', 'smoke set · 08:00')],
       body: [
-        section('System map', `<div class="sysmap">${map}</div>`, 'Select a part for details'),
+        section('System map', map, 'Select a part for details'),
         section('Events', list([
           row({ t: 'Purpose-limitation refusal', d: 'Planning Agent refused “Which workers complain most?” at 08:41.', b: B.plain('Logged'), static: true }),
           row({ t: 'Grounding check flagged a value', d: '147 W/m² did not match any tool output at 09:02. Answer shown with Low confidence.', b: B.plain('Logged'), static: true }),

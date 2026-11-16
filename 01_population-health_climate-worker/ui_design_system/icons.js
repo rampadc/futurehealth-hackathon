@@ -33,6 +33,12 @@ const ICONS = {
   sync:      { d: '<path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3"/><polyline points="18 3 18 7 14 7"/><polyline points="6 21 6 17 10 17"/>' },
   pin:       { d: '<path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><path d="M10 9h4"/>' },
   undo:      { dir: 1, d: '<polyline points="9 5 4 10 9 15"/><path d="M4 10h11a5 5 0 0 1 0 10h-3"/>' },
+  /* Section headings */
+  people:    { d: '<circle cx="9" cy="8" r="3.5"/><path d="M2 20v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1"/><path d="M15 4.5a3.5 3.5 0 0 1 0 7M18 14a5 5 0 0 1 4 5v1"/>' },
+  list:      { d: '<path d="M10 6h10M10 12h10M10 18h10"/><path d="M4 5h3v3H4zM4 11h3v3H4zM4 17h3v3H4z"/>' },
+  message:   { d: '<path d="M3 4h18v13H10l-5 4v-4H3z"/>' },
+  calendar:  { d: '<path d="M3 5h18v16H3z"/><path d="M3 10h18M8 3v4M16 3v4"/>' },
+  settings:  { d: '<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><path d="M15 4v4M9 10v4M17 16v4"/>' },
 };
 
 (function buildSprite() {

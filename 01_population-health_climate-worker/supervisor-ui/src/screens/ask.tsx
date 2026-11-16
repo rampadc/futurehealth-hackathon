@@ -3,19 +3,24 @@ import { readChatStream } from '../AssistantChat';
 import { apiFetch } from '../live';
 import { Computed, Draft, Head, NoCase, Note, Section } from './kit';
 import type { ScreenProps } from './registry';
+import { AgentIntro } from './squads';
 
 type Message = { id: string; author: 'user' | 'assistant'; text: string; case_clock?: string; tools?: string[] };
 const SUGGESTIONS = ['Who can work in the workshop?', 'What needs attention?', 'Can trench work restart?', 'What if Rana were unavailable?'];
 const HYPOTHETICAL = new Set(['what_if_crew_plan']);
 
-/** The tools behind one answer. A what-if result is a solver draft that was never recorded. */
-function ToolsUsed({ tools }: { tools?: string[] }) {
-  if (!tools?.length) return null;
-  return <p className="hs-computed">Used: {tools.join(', ')}{tools.some(t => HYPOTHETICAL.has(t)) && <> · <span className="hs-badge" data-tone="wait">Hypothetical · not recorded</span></>}</p>;
+/** A what-if answer is a solver draft that was never recorded; it says so on the answer itself. */
+function Hypothetical({ tools }: { tools?: string[] }) {
+  return tools?.some(t => HYPOTHETICAL.has(t)) ? <p><span className="hs-badge" data-tone="wait">Hypothetical · not recorded</span></p> : null;
+}
+
+/** The latest answer's sources: one small row at the base of the conversation, above the suggestions. */
+function Sources({ tools }: { tools?: string[] }) {
+  return <p className="hs-src-row" aria-label="Sources for the latest answer"><span className="hs-src-k">Sources</span>{tools?.length ? `Used: ${tools.join(', ')}` : 'None cited'}</p>;
 }
 
 /** Live Planning Agent conversation over `/api/chat` (ADK + Gemini on the backend). */
-function Conversation({ session, compact }: ScreenProps & { compact?: boolean }) {
+export function Conversation({ session, compact }: ScreenProps & { compact?: boolean }) {
   const caseId = session.caseView?.case_id;
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState('');
@@ -54,15 +59,18 @@ function Conversation({ session, compact }: ScreenProps & { compact?: boolean })
     } finally { if (!controller.signal.aborted) setPending(false); }
   };
   const submit = (e: FormEvent) => { e.preventDefault(); void send(draft); };
+  const latest = [...messages].reverse().find(m => m.author === 'assistant');
   return <div className="hs-chat">
-    <Section title="Conversation">
+    <Section title={compact ? 'Conversation' : 'AI Planning Agent'} icon="ai">
+      {!compact && <AgentIntro />}
       {messages.length === 0 && loaded && <Note>Ask about today’s heat, the plan or the rules. Answers use the live case and cite the tools they called.</Note>}
       <div className="hs-chat" aria-live="polite">
         {messages.map(m => m.author === 'assistant'
-          ? <Draft key={m.id} title={`Planning Agent · AI${m.case_clock ? ` · case at ${m.case_clock.slice(11, 16)}` : ''}`}><p className="hs-msg-text">{m.text}</p><ToolsUsed tools={m.tools} /></Draft>
+          ? <Draft key={m.id} title={`Planning Agent · AI${m.case_clock ? ` · case at ${m.case_clock.slice(11, 16)}` : ''}`}><p className="hs-msg-text">{m.text}</p><Hypothetical tools={m.tools} /></Draft>
           : <p key={m.id} className="hs-msg" data-author="user">{m.text}</p>)}
         {pending && <p className="hs-computed" role="status">Thinking…{tools.length ? ` · tools: ${tools.join(', ')}` : ''}</p>}
       </div>
+      {latest && <Sources tools={latest.tools} />}
       {error && <p role="alert" className="hs-error">{error}</p>}
     </Section>
     <Section title="Suggested">
