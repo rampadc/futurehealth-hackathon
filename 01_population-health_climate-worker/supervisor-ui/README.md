@@ -11,7 +11,18 @@ uv run --env-file .env python tools/dev_local.py --setup  # first run
 uv run --env-file .env python tools/dev_local.py          # later runs
 ```
 
-The launcher (macOS, Linux and Windows) starts the [app](http://127.0.0.1:5174/), the application/ADK backend on port 8001 and the isolated operational solver on port 8765. Open [presenter controls](http://127.0.0.1:5174/demo-control) directly to start a case, advance the controlled clock and inspect executions. Presenter controls are separate from persona workspaces. Ctrl+C stops all three services; logs are in `.local/logs/`.
+The launcher (macOS, Linux and Windows) starts the [app](http://127.0.0.1:5174/), the application/ADK backend on port 8001 and the isolated operational solver on port 8765. Open [presenter controls](http://127.0.0.1:5174/demo-control) to start or reset a case and inspect executions. Presenter controls are separate from persona workspaces. The case clock advances automatically with real elapsed time; it cannot be manually advanced. Ctrl+C stops all three services; logs are in `.local/logs/`.
+
+## Live elapsed case
+
+Start a fresh case in Demo controls. It begins at **08:00 GST, 4 August 2025** and runs for 150 real minutes, ending at **10:30 GST**. The clock continues while you work or change browser tabs. Use separate tabs for the people in the walkthrough; each tab has its own persona selection. For example, use Maya (P03) in a web tab, Huda (C01) in a site tab, Rana (C05) in a worker tab, and Mina (P10) in another web tab. You can open the main app in each tab and choose the persona there.
+
+1. In Maya’s tab, issue the stop-work instruction. In Huda’s tab, acknowledge it, confirm heavy work has stopped, record Rana’s shelter check-in, and confirm the affected crew’s recovery headcount.
+2. In Mina’s tab, open **Heat and rest coverage** (`/web/heat-rest`). Verify the C02–C12 employer roster, enter the basis or any unresolved item, and record the review. This is an employer coverage record; it does not authorize work or replace the foreman’s safety actions.
+3. In Huda’s tab, confirm individual worker readiness after speaking with each person. Record observed activity through the current case time, including who is working and who remains in recovery. The solver needs this current, human-observed activity before it can make a crew proposal.
+4. Review the solver’s workshop schedule in **Proposal review** (`/site/proposal`). The schedule is a proposal. Confirm the supervised assignment separately, then wait for the proposed workshop start time to arrive. At that time, Huda must confirm the observed recovery and prerequisites and record the actual start of work. A proposal or assignment alone does not mean anyone has started working; heavy trench work remains held.
+
+The scenario advances at one case minute per real minute. An alert not acknowledged within two case minutes is escalated automatically. The clock is not controlled from Demo controls, and resetting the active case starts a new 08:00 rehearsal.
 
 See [the application setup](../README.md) for the server’s local Google configuration. Google credentials and Gemini calls stay on the backend. Browser requests go through Vite’s `/api` proxy to port 8001; the browser does not invoke ADK or Gemini directly.
 
