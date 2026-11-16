@@ -22,7 +22,8 @@ class OperationalModel(ClosedModel):
         names = {'decision_at','measured_at','received_at','issued_at',
                  'acknowledged_at','confirmed_at','recorded_at','reported_at','removed_at',
                  'first_aid_contacted_at','starts_at','ends_at','observed_at','proposed_at',
-                 'due_at','horizon_end','recovery_reservation_end','earliest_rest_complete_at','valid_until'}
+                 'due_at','horizon_end','recovery_reservation_end','earliest_rest_complete_at','valid_until',
+                 'work_not_before'}
         if info.field_name in names and value is not None and not isinstance(value, datetime):
             return timestamp_string(value)
         return value
@@ -183,6 +184,7 @@ class PlanningOptions(OperationalModel):
     policy_id: StrictStr | None = None
     starts_at: AwareDatetime
     horizon_minutes: StrictInt = Field(ge=1,le=120)
+    work_not_before: AwareDatetime | None = None
 
 
 class Request(OperationalModel):

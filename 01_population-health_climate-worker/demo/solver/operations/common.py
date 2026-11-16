@@ -93,6 +93,8 @@ def effective_timing_policy(req):
 
 def metadata(req):
     payload = req.model_dump(mode='json')
+    if req.planning is not None and 'work_not_before' not in req.planning.model_fields_set:
+        payload['planning'].pop('work_not_before')
     snapshot = req.snapshot
     evidence = [*snapshot.readings, *snapshot.activity_history, *snapshot.incidents]
     evidence += [item for item in (snapshot.instruction, snapshot.cessation, snapshot.recovery) if item is not None]
@@ -260,6 +262,12 @@ def validate_request(req):
         require(req.planning.starts_at == rounded, 'plan must start at the current or next minute boundary')
         require(req.planning.starts_at.second == 0 and req.planning.starts_at.microsecond == 0,
                 'planning start must be minute-aligned')
+        if req.planning.work_not_before is not None:
+            _time(req.planning.work_not_before)
+            require(req.planning.work_not_before.second == 0 and req.planning.work_not_before.microsecond == 0,
+                    'work_not_before must be minute-aligned')
+            require(req.planning.work_not_before >= req.planning.starts_at,
+                    'work_not_before must not precede planning start')
         policy = effective_timing_policy(req)
         tail = max(policy.initial_recovery_minutes,policy.between_work_recovery_minutes) if policy else 0
         _time(req.planning.starts_at + timedelta(minutes=req.planning.horizon_minutes+tail))
