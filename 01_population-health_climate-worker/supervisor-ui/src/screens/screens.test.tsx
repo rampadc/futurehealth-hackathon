@@ -215,14 +215,26 @@ describe('stop-work', () => {
     expect(screen.getByText(/Your supervisor sees your band and action, never the reasons/)).toBeTruthy();
   });
 
-  it('records the headcount for every affected worker at Shelter A', async () => {
+  it('records the full foreman headcount after one personal arrival', async () => {
     currentCase = await makeCase('heat_trigger', { stopped: true, checkedIn: true }, [task('recover', 'C01', 'ready')]);
-    currentCase.headcount = { expected_count: 11, checked_in_count: 11, confirmed_count: 0, confirmed_at: null, arrivals: Array.from({ length: 11 }, (_, i) => ({ person_id: `C${String(i + 2).padStart(2, '0')}`, checked_in_at: currentCase!.clock })) };
+    currentCase.headcount = { expected_count: 11, checked_in_count: 1, confirmed_count: 0, confirmed_at: null, arrivals: [{ person_id: 'C05', checked_in_at: currentCase.clock }] };
     await open('/site/headcount', 'C01');
-    await userEvent.click(await screen.findByRole('button', { name: /accounted for/ }));
+    expect(await screen.findByText('1 / 11')).toBeTruthy();
+    const confirm = await screen.findByRole('button', { name: /Confirm 11 workers accounted for/ }) as HTMLButtonElement;
+    expect(confirm.disabled).toBe(true);
+    await userEvent.click(screen.getByRole('checkbox', { name: /personally accounted for all affected workers/ }));
+    await userEvent.click(confirm);
     await waitFor(() => expect(commands[0]?.action).toBe('recover'));
     expect(commands[0].payload.zone_id).toBe('shelter_a');
-    expect((commands[0].payload.person_ids as string[]).length).toBe(currentCase!.request!.snapshot.workers.length);
+    expect(commands[0].payload.person_ids).toEqual(currentCase!.request!.snapshot.workers.map(w => w.person_id));
+  });
+
+  it('distinguishes a Welfare location from cooled recovery in the confirmed headcount', async () => {
+    currentCase = await makeCase('incident_substitute', { stopped: true, recovered: true, reported: true, removed: true }, [task('recover', 'C01', 'recorded')]);
+    currentCase.headcount = { expected_count: 11, checked_in_count: 1, confirmed_count: 11, cooled_recovery_count: 10, welfare_count: 1, confirmed_at: currentCase.clock, arrivals: [{ person_id: 'C05', checked_in_at: currentCase.clock }] };
+    await open('/site/headcount', 'C01');
+    expect(await screen.findByText('10 cooled · 1 Welfare')).toBeTruthy();
+    expect(screen.getByText('11 / 11')).toBeTruthy();
   });
 });
 

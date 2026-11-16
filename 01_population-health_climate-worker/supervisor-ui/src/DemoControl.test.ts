@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { applyPreset, readingPayload, SCENARIO_PRESETS } from './scenarioPresets';
 import type { CaseView } from './live';
 
-const view = { clock: '2025-08-04T08:30:00+04:00', capture: null } as unknown as CaseView;
+const view = { case_id: 'case-1', clock: '2025-08-04T08:30:00+04:00', capture: null } as unknown as CaseView;
 
 describe('presenter reading signal', () => {
   it('sends a valid reading measured at the case clock', () => {
@@ -23,7 +23,7 @@ describe('scenario presets', () => {
     const at = () => ({ ...view, clock }) as CaseView;
     await applyPreset(SCENARIO_PRESETS.find(p => p.id === id)!, {
       reset: async () => { calls.push(['reset', null]); clock = '2025-08-04T08:00:00+04:00'; return at(); },
-      signal: async (payload: Record<string, unknown>) => { calls.push(['signal', payload]); return at(); },
+      signal: async (caseId: string, payload: Record<string, unknown>) => { calls.push(['signal', { caseId, payload }]); return at(); },
     });
     return calls;
   };
@@ -37,10 +37,10 @@ describe('scenario presets', () => {
   it('06 injects a sensor fault at the current time', async () => {
     const calls = await run('06');
     expect(calls.map(c => c[0])).toEqual(['reset', 'signal']);
-    expect(calls[1][1]).toMatchObject({ quality: 'invalid', received_at: '2025-08-04T08:00:00+04:00' });
+    expect(calls[1][1]).toMatchObject({ caseId: 'case-1', payload: { quality: 'invalid', received_at: '2025-08-04T08:00:00+04:00' } });
   });
   it('09 injects an improved reading measured ten minutes before 08:10', async () => {
     const calls = await run('09');
-    expect(calls[1][1]).toMatchObject({ twl: 175, quality: 'valid', measured_at: '2025-08-04T07:50:00+04:00', received_at: '2025-08-04T08:00:00+04:00' });
+    expect(calls[1][1]).toMatchObject({ caseId: 'case-1', payload: { twl: 175, quality: 'valid', measured_at: '2025-08-04T07:50:00+04:00', received_at: '2025-08-04T08:00:00+04:00' } });
   });
 });

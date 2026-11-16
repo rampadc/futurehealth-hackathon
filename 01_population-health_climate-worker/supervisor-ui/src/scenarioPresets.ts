@@ -31,12 +31,12 @@ export const SCENARIO_PRESETS: ScenarioPreset[] = [
 
 type PresetApi = {
   reset: () => Promise<CaseView>;
-  signal: (payload: Record<string, unknown>) => Promise<CaseView>;
+  signal: (case_id: string, payload: Record<string, unknown>) => Promise<CaseView>;
 };
 
 /** Reset, then the preset’s clock and reading, in that order. Returns the case after the last step. */
 export async function applyPreset(preset: ScenarioPreset, api: PresetApi): Promise<CaseView> {
   let next = await api.reset();
-  if (preset.reading) next = await api.signal(readingPayload(next, preset.reading.twl, preset.reading.kind));
+  if (preset.reading) next = await api.signal(next.case_id, readingPayload(next, preset.reading.twl, preset.reading.kind));
   return next;
 }

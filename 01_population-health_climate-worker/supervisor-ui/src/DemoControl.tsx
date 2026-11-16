@@ -69,7 +69,7 @@ export function DemoControl({ caseView, onChange, onReturn }: Props) {
         <TextField select label="Reading" size="small" disabled={busy} value={readingKind} onChange={event => setReadingKind(event.target.value as ReadingKind)} sx={{ minWidth: 220 }}>
           {READING_KINDS.map(([value, label]) => <MenuItem key={value} value={value}>{label}</MenuItem>)}
         </TextField>
-        <Button variant="contained" disabled={busy || !presenterCase || !Number.isFinite(Number(twl)) || Number(twl) <= 0 || Number(twl) >= 500} onClick={() => void execute('Reading signal', () => live.signal(readingPayload(presenterCase!, Number(twl), readingKind)))}>Inject reading</Button>
+        <Button variant="contained" disabled={busy || !presenterCase || !Number.isFinite(Number(twl)) || Number(twl) <= 0 || Number(twl) >= 500} onClick={() => void execute('Reading signal', () => live.signal(presenterCase!.case_id, readingPayload(presenterCase!, Number(twl), readingKind)))}>Inject reading</Button>
       </Stack>
     </Stack></Paper>
     {presenterCase && <Paper variant="outlined" sx={{ p: 3 }}><Typography variant="h6" component="h2" sx={{ mb: 2 }}>Current workflow</Typography><Stack spacing={1}>{presenterCase.tasks.map(task => <Typography variant="body2" key={`${task.actor_id}:${task.action}`}>{task.actor_id} · {task.label} · {task.status}{task.reason ? ` · ${task.reason}` : ''}</Typography>)}</Stack><Box sx={{ mt: 2 }}><JsonDetails title="Solver response" value={{ status: presenterCase.capture?.http_status, provenance: presenterCase.capture?.provenance, response: presenterCase.capture?.response ?? null }} /></Box></Paper>}

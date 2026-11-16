@@ -80,7 +80,7 @@ describe('live supervisor workspace', () => {
     render(<App />); await signIn('Maya');
     await userEvent.setup().click(screen.getByRole('button', { name: 'Stop heavy trench work' }));
     expect(await screen.findByText('Stop-work instruction issued')).toBeTruthy();
-    expect(calls.find(c => c.path === '/api/case/commands')?.body).toMatchObject({ expected_version: 1, action: 'issue', payload: {} });
+    expect(calls.find(c => c.path === '/api/case/commands')?.body).toMatchObject({ case_id: 'case-1', expected_version: 1, action: 'issue', payload: {} });
     expect(calls.find(c => c.path === '/api/case/commands')?.body?.command_id).toBeTruthy();
     expect(calls.filter(c => c.path === '/api/case').length).toBeGreaterThan(1);
   });
@@ -204,7 +204,7 @@ describe('live supervisor workspace', () => {
     expect(screen.getByText(/The crew planner could not establish a reliable result/)).toBeTruthy();
     await userEvent.setup().click(screen.getByRole('button', { name: 'Retry calculation' }));
     await waitFor(() => expect(calls.some(call => call.path === '/api/case/retry')).toBe(true));
-    expect(calls.find(call => call.path === '/api/case/retry')?.body).toEqual({ expected_version: 1 });
+    expect(calls.find(call => call.path === '/api/case/retry')?.body).toEqual({ case_id: 'case-1', expected_version: 1 });
     expect(calls.some(call => call.path === '/api/case/commands')).toBe(false);
     expect(screen.getByText('Heavy trench work is stopped')).toBeTruthy();
   });

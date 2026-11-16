@@ -1,5 +1,6 @@
 import { reasonLabel } from '../../copy';
 import { nameOf } from '../../replay';
+import { navigate } from '../../router';
 import { crew, heatNow, progress, time } from '../data';
 import { ActionButton, Band, Computed, Draft, Empty, Head, Hero, Hold, List, Metric, NoCase, Note, Row, Section, taskBadge, taskLine, Person } from '../kit';
 import type { ScreenProps } from '../registry';
@@ -70,7 +71,8 @@ export function ProtectiveResponseScreen({ session }: ScreenProps) {
   const rows = relevant.map(action => ({ action, ...progress(caseView, action) }));
   const outstanding = rows.filter(r => r.status !== 'recorded');
   const people = crew(caseView);
-  const accounted = people.filter(p => p.inRecovery).length;
+  const accounted = caseView.headcount?.confirmed_count ?? 0;
+  const expected = caseView.headcount?.expected_count ?? people.length;
   const protective = caseView.capture?.response.protective_response;
   const locked = (protective?.planning_blockers.length ?? 0) > 0 || !caseView.story.recovered;
   const mine = caseView.tasks.filter(t => RESPONSE_ACTIONS.includes(t.action) && t.actor_id === person?.id && t.status === 'ready');
@@ -78,14 +80,14 @@ export function ProtectiveResponseScreen({ session }: ScreenProps) {
     <Head kicker={`Protective response · ${time(caseView.clock)} GST`} title="Protective response" sub="People act first; these records follow. Crew planning stays locked until they are complete." />
     <Hero>
       <Metric label="Outstanding" value={String(outstanding.length)} sub={outstanding.length ? 'confirmations open' : 'all confirmed'} tone={outstanding.length ? 'red' : 'ok'} />
-      <Metric label="Headcount" value={`${accounted} / ${people.length}`} sub="Shelter A" />
+      <Metric label="Foreman headcount" value={`${accounted} / ${expected}`} sub={caseView.headcount?.welfare_count ? `${caseView.headcount.cooled_recovery_count ?? 0} cooled · ${caseView.headcount.welfare_count} Welfare` : 'Physical roster confirmation'} />
       <Metric label="Crew planning" value={locked ? 'Locked' : 'Unlocked'} sub={locked ? (protective?.planning_blockers.map(reasonLabel).join(', ') || 'until the headcount is recorded') : 'proposals can be reviewed'} tone={locked ? 'amber' : 'ok'} />
     </Hero>
     <Section title="Required confirmations" hint="Owner · status · due">
       <List>{rows.map(r => <Row key={r.action} title={LABELS[r.action] ?? r.action} detail={taskLine(session, r.action)} badge={taskBadge(session, r.action)} />)}</List>
     </Section>
     {mine.length > 0 && <Section title="Record yours">
-      {mine.map(t => <ActionButton key={t.action} session={session} action={t.action} label={t.label} primary
+      {mine.map(t => t.action === 'recover' ? <button key={t.action} type="button" className="hs-button is-primary" onClick={() => navigate('/site/headcount')}>Open physical headcount</button> : <ActionButton key={t.action} session={session} action={t.action} label={t.label} primary
         confirm={t.action === 'remove' ? { word: 'REMOVED', title: 'Confirm the worker is out of the heat', body: 'This records your human confirmation for the protective response. Software cannot record it for you.' } : undefined} />)}
     </Section>}
     {protective && protective.actions.length > 0 && <Section title="Solver’s protective actions" hint="Proposals · applied: false">

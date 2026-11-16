@@ -25,7 +25,7 @@ export function useCaseSession({ onSignedIn, onSignedOut }: Options = {}) {
   const [outbox, setOutbox] = useState<Queued[]>([]);
   const flushing = useRef(false);
 
-  const refreshCase = async () => {
+  const refreshCase = async (expectedCaseId?: string) => {
     const current = ++requestNumber.current;
     const expectedPersonId = activePersonId.current;
     try {
@@ -38,7 +38,7 @@ export function useCaseSession({ onSignedIn, onSignedOut }: Options = {}) {
         return false;
       }
       if (current === requestNumber.current) { setCaseView(next); setError(''); }
-      return true;
+      return !expectedCaseId || next?.case_id === expectedCaseId;
     } catch (cause) {
       if (current !== requestNumber.current || expectedPersonId !== activePersonId.current) return false;
       if (cause instanceof ApiError && cause.status === 401) { activePersonId.current = null; setPerson(null); setCaseView(null); }
@@ -170,11 +170,10 @@ export function useCaseSession({ onSignedIn, onSignedOut }: Options = {}) {
     setBusy(true); setError(''); setFeedback('');
     try {
       await live.command(caseView, action, payload, command_id);
-      if (await refreshCase()) setFeedback(`${caseView.tasks.find(task => task.action === action)?.label ?? action}.`);
+      if (await refreshCase(caseView.case_id)) setFeedback(`${caseView.tasks.find(task => task.action === action)?.label ?? action}.`);
     } catch (cause) {
       if (QUEUEABLE.has(action) && isNetworkError(cause)) { queue({ command_id, case_id: caseView.case_id, action, payload, queued_at: new Date().toISOString() }); return; }
-      await refreshCase();
-      setError(cause instanceof Error ? cause.message : 'The action could not be recorded');
+      if (await refreshCase(caseView.case_id)) setError(cause instanceof Error ? cause.message : 'The action could not be recorded');
     } finally { setBusy(false); }
   };
 
@@ -182,11 +181,10 @@ export function useCaseSession({ onSignedIn, onSignedOut }: Options = {}) {
     if (!caseView?.retry_available || busy) return;
     setBusy(true); setError(''); setFeedback('');
     try {
-      await live.retry(caseView.version);
-      if (await refreshCase()) setFeedback('Calculation retried. Review the latest solver status.');
+      await live.retry(caseView.case_id, caseView.version);
+      if (await refreshCase(caseView.case_id)) setFeedback('Calculation retried. Review the latest solver status.');
     } catch (cause) {
-      await refreshCase();
-      setError(cause instanceof Error ? cause.message : 'The calculation could not be retried');
+      if (await refreshCase(caseView.case_id)) setError(cause instanceof Error ? cause.message : 'The calculation could not be retried');
     } finally { setBusy(false); }
   };
 

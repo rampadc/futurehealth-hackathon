@@ -18,7 +18,7 @@ export type CaseView = {
   runs?: Run[];
   viewer_id?: string;
   time?: { mode: 'elapsed' | 'legacy'; server_now: string; started_at: string; ends_at: string; status: 'running' | 'ended' | 'historical' };
-  headcount?: { expected_count: number; checked_in_count: number; confirmed_count: number; confirmed_at: string | null; arrivals: Array<{ person_id: string; checked_in_at: string }> };
+  headcount?: { expected_count: number; checked_in_count: number; confirmed_count: number; cooled_recovery_count?: number; welfare_count?: number; confirmed_at: string | null; arrivals: Array<{ person_id: string; checked_in_at: string }> };
   plan_assessment?: { id: string; assessed_at: string; observed_through: string; approval_deadline: string; status: 'proposed' | 'approved' | 'expired' | 'awaiting_observations' | 'blocked'; approved_at?: string | null; started_worker_ids?: string[]; request: ReplayRequest; response: ReplayCapture['response']; check?: unknown } | null;
 };
 
@@ -55,11 +55,11 @@ export const live = {
   signOut: () => request<void>('/session', { method: 'DELETE' }),
   case: () => request<CaseView | null>('/case'),
   command: (caseView: CaseView, action: string, payload: Record<string, unknown>, command_id: string = crypto.randomUUID()) => request<CaseView | null>('/case/commands', {
-    method: 'POST', body: json({ command_id, expected_version: caseView.version, action, payload }),
+    method: 'POST', body: json({ command_id, case_id: caseView.case_id, expected_version: caseView.version, action, payload }),
   }),
-  retry: (expected_version: number) => request<CaseView>('/case/retry', { method: 'POST', body: json({ expected_version }) }),
+  retry: (case_id: string, expected_version: number) => request<CaseView>('/case/retry', { method: 'POST', body: json({ case_id, expected_version }) }),
   start: () => request<CaseView>('/demo/start', { method: 'POST', body: json({ scenario: 'heat_response' }) }),
-  signal: (payload: Record<string, unknown>) => request<CaseView>('/demo/signals', { method: 'POST', body: json({ kind: 'reading', payload }) }),
+  signal: (case_id: string, payload: Record<string, unknown>) => request<CaseView>('/demo/signals', { method: 'POST', body: json({ case_id, kind: 'reading', payload }) }),
   runs: () => request<unknown>('/demo/runs'),
   demoState: () => request<CaseView | null>('/demo/state'),
   agentRuns: () => request<unknown>('/demo/agent-runs'),

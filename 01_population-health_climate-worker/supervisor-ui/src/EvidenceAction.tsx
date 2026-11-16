@@ -25,10 +25,12 @@ export function EvidenceAction({ action, caseView, person, onAction, busy }: {
   const [readinessStatus, setReadinessStatus] = useState<'ready' | 'not_ready'>('ready');
   const [validUntil, setValidUntil] = useState(atDubai(new Date(Date.parse(caseView.clock) + 2 * 60 * 60_000).toISOString()));
   const [selected, setSelected] = useState<string[]>([]);
+  const [accounted, setAccounted] = useState(false);
   const [activity, setActivity] = useState<Record<string, 'work' | 'recovery'>>({});
   const [observed, setObserved] = useState(false);
   useEffect(() => {
     setObserved(false);
+    setAccounted(false);
     setActivity({});
     setValidUntil(atDubai(new Date(Date.parse(caseView.clock) + 2 * 60 * 60_000).toISOString()));
   }, [caseView.clock, caseView.version]);
@@ -45,6 +47,7 @@ export function EvidenceAction({ action, caseView, person, onAction, busy }: {
     return simplePayload(action, caseView) ?? {};
   };
   const invalid = (action === 'fresh' && (!Number.isFinite(Number(twl)) || Number(twl) <= 0)) ||
+    (action === 'recover' && (!accounted || workers.length !== (caseView.headcount?.expected_count ?? 11))) ||
     (action === 'readiness' && !selected.length) ||
     ((action === 'readiness' || action === 'leila') && (!basis.trim() || !validUntil)) ||
     (action === 'activity' && (activeWorkers.some(w => !activity[w.person_id]) || !observed));
@@ -55,7 +58,7 @@ export function EvidenceAction({ action, caseView, person, onAction, busy }: {
       {status === 'recorded' ? <Typography color="success.main" variant="caption">Recorded</Typography> : <Button variant="contained" disabled={status !== 'ready' || busy || invalid} onClick={() => void onAction(action, payload())} aria-label={displayLabel}>{buttonLabels[action as ActionId] ?? 'Record'}</Button>}
     </Stack>
     {status === 'ready' && action === 'fresh' && <Stack direction="row" spacing={2} sx={{ mt: 2 }}><TextField label="Local TWL (W/m²)" type="number" value={twl} onChange={e => setTwl(e.target.value)} size="small" /><Typography variant="caption">Measured now</Typography></Stack>}
-    {status === 'ready' && action === 'recover' && <Typography variant="caption" color="text.secondary">Confirm {caseView.headcount?.checked_in_count ?? 0} arrivals against {caseView.headcount?.expected_count ?? 11} expected workers in Shelter A.</Typography>}
+    {status === 'ready' && action === 'recover' && <Stack sx={{ mt: 2 }}><Typography variant="caption" color="text.secondary">{caseView.headcount?.checked_in_count ?? 0} personal arrivals are recorded. Huda confirms the full {caseView.headcount?.expected_count ?? 11}-person roster from direct observation, including anyone in Welfare.</Typography><FormControlLabel control={<Checkbox checked={accounted} onChange={e => setAccounted(e.target.checked)} />} label="I personally accounted for all affected workers at their current safe locations" /></Stack>}
     {status === 'ready' && (action === 'readiness' || action === 'leila') && <Stack spacing={1.5} sx={{ mt: 2 }}>
       {action === 'readiness' && <Box><Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}><Typography variant="caption">Select workers whose readiness you personally confirmed:</Typography>{caseView.workers?.some(w => w.readiness === 'unknown') && <Button size="small" onClick={() => setSelected(caseView.workers!.filter(w => w.readiness === 'unknown').map(w => w.person_id))}>Select unconfirmed workers</Button>}</Stack><Stack direction="row" useFlexGap sx={{ flexWrap: 'wrap' }}>{workers.map(w => <FormControlLabel key={w.person_id} control={<Checkbox size="small" checked={selected.includes(w.person_id)} onChange={e => setSelected(old => e.target.checked ? [...old, w.person_id] : old.filter(id => id !== w.person_id))} />} label={nameOf(w.person_id)} />)}</Stack></Box>}
       <TextField select label="Readiness status" value={readinessStatus} onChange={e => setReadinessStatus(e.target.value as 'ready' | 'not_ready')} size="small"><MenuItem value="ready">Ready</MenuItem><MenuItem value="not_ready">Not ready</MenuItem></TextField>

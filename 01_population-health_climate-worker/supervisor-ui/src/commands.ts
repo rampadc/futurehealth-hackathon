@@ -17,7 +17,7 @@ export function caseWorkers(caseView: CaseView): WorkerRef[] {
 }
 
 export const payloads = {
-  recover: (caseView: CaseView) => ({ person_ids: caseView.headcount?.arrivals.map(a => a.person_id) ?? [], zone_id: 'shelter_a' }),
+  recover: (caseView: CaseView) => ({ person_ids: (caseView.request?.snapshot.workers ?? caseView.capture?.request.snapshot.workers ?? caseView.workers ?? []).map(w => w.person_id), zone_id: 'shelter_a' }),
   assign: (caseView: CaseView) => ({ assessment_id: caseView.plan_assessment?.id }),
   remove: () => ({ location_id: 'welfare' }),
   check: () => ({ status: 'confirmed' }),
