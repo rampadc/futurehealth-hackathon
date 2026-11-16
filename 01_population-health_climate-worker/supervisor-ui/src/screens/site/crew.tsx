@@ -3,7 +3,7 @@ import { atDubai, payloads, toIso } from '../../commands';
 import { EvidenceAction } from '../../EvidenceAction';
 import { reasonLabel } from '../../copy';
 import { navigate } from '../../router';
-import { assignedIds, crew, intervalsOf, kindLabel, time, who, type CrewMember } from '../data';
+import { assessmentCapture, assignedIds, crew, intervalsOf, kindLabel, time, who, type CrewMember } from '../data';
 import { ActionButton, Choice, Computed, CtaBar, Draft, Empty, Head, Hero, List, Metric, NoCase, Note, Row, Section, Statement, taskBadge, Avatar, Person } from '../kit';
 import type { ScreenProps } from '../registry';
 
@@ -62,7 +62,7 @@ export function ReadinessScreen({ session }: ScreenProps) {
       <List>{list.map(p => <Row key={p.id} lead={<Avatar id={p.id} size="md" excluded={p.excluded} />} title={who(p.id)} detail={`${p.qualifications.map(reasonLabel).join(', ') || 'No qualification on record'} · ${p.readiness === 'ready' ? `ready${p.readinessUntil ? ` until ${time(p.readinessUntil)}` : ''}` : p.reason ?? 'no readiness confirmation yet'}`} badge={readinessBadge(p)} onClick={canConfirm && !p.excluded && p.readiness !== 'ready' ? () => setSelected(p.id) : undefined} />)}</List>
     </Section>
     <Section title="Other confirmations">
-      <ActionButton session={session} action="leila" label="Confirm Leila’s workshop readiness" />
+      <div className="hs-mui"><EvidenceAction action="leila" caseView={caseView} person={person} onAction={session.act} busy={session.busy} /></div>
       <ActionButton session={session} action="crew_readiness" label="Confirm crew readiness check for restart" />
     </Section>
     {caseView.tasks.some(t => t.action === 'activity' && t.actor_id === person.id && t.status === 'ready') && <Section title="Observed activity" hint="Record only what you saw">
@@ -76,13 +76,22 @@ export function ReadinessScreen({ session }: ScreenProps) {
 /** Proposal review: the solver's crew proposal, recorded by the foreman. */
 export function ProposalScreen({ session }: ScreenProps) {
   const { caseView } = session;
+  const [recoveryConfirmed, setRecoveryConfirmed] = useState(false);
+  const [prerequisitesConfirmed, setPrerequisitesConfirmed] = useState(false);
+  const [returnIds, setReturnIds] = useState<string[]>([]);
   if (!caseView) return <NoCase session={session} />;
-  const capture = caseView.capture;
+  const capture = assessmentCapture(caseView);
   const plan = capture?.response.crew_rest;
   const ids = assignedIds(capture);
   const people = crew(caseView);
   if (!plan) return <div className="hs-screen"><Head title="Proposal" /><Empty>No proposal yet. Planning unlocks when the headcount and confirmations are complete.</Empty></div>;
   const planned = plan.planning_status === 'planned';
+  const assessment = caseView.plan_assessment;
+  const now = Date.parse(caseView.clock);
+  const workNow = [...new Set(plan.intervals.filter(i => i.kind === 'work' && Date.parse(i.starts_at) <= now && now < Date.parse(i.ends_at)).map(i => i.person_id))];
+  const canStart = assessment?.status === 'approved' && workNow.length > 0 && caseView.tasks.some(t => t.action === 'start_work' && t.status === 'ready');
+  const working = (caseView.request?.snapshot.workers ?? caseView.capture?.request.snapshot.workers ?? []).filter(w => w.location_id === 'workshop' && !(w.person_id === 'C08' && caseView.story.reported)).map(w => w.person_id);
+  const canReturn = caseView.tasks.some(t => t.action === 'start_recovery' && t.status === 'ready');
   return <div className="hs-screen">
     <Head kicker={`Proposal · ${time(caseView.clock)} GST`} title="Proposal review" />
     <Hero>
@@ -93,17 +102,28 @@ export function ProposalScreen({ session }: ScreenProps) {
     <Draft>
       <p><b>{planned ? `${ids.length} workers meet every requirement for workshop preparation.` : `Planning is ${plan.planning_status.replaceAll('_', ' ')}.`}</b></p>
       {plan.blockers.length > 0 && <p>Waiting for: {plan.blockers.map(reasonLabel).join(', ')}.</p>}
-      <p className="hs-small">Solver {plan.solver_status ?? '—'}{plan.optimal ? ' · optimal' : ''} · policy {plan.policy_id ?? 'none'} · {plan.useful_worker_minutes ?? 0} useful worker-minutes</p>
+      <p className="hs-small">Assessed {time(assessment?.assessed_at)} · review by {time(assessment?.approval_deadline)} · {assessment?.status ?? 'historical'}</p><p className="hs-small">Solver {plan.solver_status ?? '—'}{plan.optimal ? ' · optimal' : ''} · policy {plan.policy_id ?? 'none'} · {plan.useful_worker_minutes ?? 0} proposed worker-minutes</p>
     </Draft>
     <Section title="Proposed workers">
       {ids.length ? <List>{ids.map(id => { const iv = intervalsOf(capture, id); return <Row key={id} lead={<Avatar id={id} size="md" />} title={who(id)} detail={iv.slice(0, 3).map(i => `${kindLabel(i.kind)} ${time(i.starts_at)}–${time(i.ends_at)}`).join(', ')} badge={caseView.story.assigned ? <span className="hs-badge" data-tone="done">✓ Assigned</span> : <span className="hs-badge" data-tone="plan">Proposed</span>} />; })}</List>
         : <Empty>No productive assignment is available yet.</Empty>}
     </Section>
-    <Computed>Solver proposal · applied: false until you record it</Computed>
-    <CtaBar note="Recording the assignment does not send anything to phones in this demo.">
-      <ActionButton session={session} action="assign" label="Record assignment" primary />
+    <Computed>Proposed work is not observed activity or permission to start work.</Computed>
+    <CtaBar note="Approval binds this exact assessed proposal. Work starts only after a separate confirmation.">
+      <ActionButton session={session} action="assign" label="Approve assessed proposal" primary disabled={assessment?.status !== 'proposed'} />
       {taskBadge(session, 'assign')}
     </CtaBar>
+    {assessment?.status === 'approved' && <Section title="Start approved workshop work">
+      <p>Current approved work interval: {workNow.length ? workNow.map(who).join(', ') : 'none now'}.</p>
+      <label className="hs-field"><input type="checkbox" checked={recoveryConfirmed} onChange={e => setRecoveryConfirmed(e.target.checked)} /> I observed the required recovery through now.</label>
+      <label className="hs-field"><input type="checkbox" checked={prerequisitesConfirmed} onChange={e => setPrerequisitesConfirmed(e.target.checked)} /> I confirmed workshop permit, resources, supervision and readiness.</label>
+      <button type="button" className="hs-button is-primary" disabled={!canStart || !recoveryConfirmed || !prerequisitesConfirmed || session.busy} onClick={() => void session.act('start_work', { assessment_id: assessment.id, person_ids: workNow, observed_recovery: true, prerequisites_confirmed: true })}>Confirm start of work for {workNow.length} workers</button>
+    </Section>}
+    {canReturn && <Section title="Stop workshop work and return to recovery">
+      <p>Choose workers you saw stop work and return to cooled shelter. This records actual work through now.</p>
+      {working.map(id => <label className="hs-field" key={id}><input type="checkbox" checked={returnIds.includes(id)} onChange={e => setReturnIds(old => e.target.checked ? [...old, id] : old.filter(x => x !== id))} /> {who(id)}</label>)}
+      <button type="button" className="hs-button is-primary" disabled={!returnIds.length || session.busy} onClick={() => void session.act('start_recovery', { person_ids: returnIds, zone_id: 'shelter_a', observed_work: true }).then(() => setReturnIds([]))}>Confirm work stopped and return to recovery</button>
+    </Section>}
   </div>;
 }
 

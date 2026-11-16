@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { readChatStream } from '../AssistantChat';
+import { apiFetch } from '../live';
 import { Computed, Draft, Head, NoCase, Note, Section } from './kit';
 import type { ScreenProps } from './registry';
 
@@ -26,7 +27,7 @@ function Conversation({ session, compact }: ScreenProps & { compact?: boolean })
   useEffect(() => {
     const controller = new AbortController();
     setMessages([]); setLoaded(false); setError('');
-    if (caseId) fetch('/api/chat/history', { signal: controller.signal })
+    if (caseId) apiFetch('/api/chat/history', { signal: controller.signal })
       .then(async r => { if (!r.ok) throw new Error('Conversation history could not be loaded.'); const body = await r.json(); setMessages(body.messages ?? []); setLoaded(true); })
       .catch(e => { if (!controller.signal.aborted) setError(e.message); });
     return () => { controller.abort(); abort.current?.abort(); };
@@ -41,7 +42,7 @@ function Conversation({ session, compact }: ScreenProps & { compact?: boolean })
     let answered = false;
     const used: string[] = [];
     try {
-      const response = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal, body: JSON.stringify({ message: text, message_id: id, case_id: caseId }) });
+      const response = await apiFetch('/api/chat', { method: 'POST', signal: controller.signal, body: JSON.stringify({ message: text, message_id: id, case_id: caseId }) });
       await readChatStream(response, (kind, data) => {
         if (kind === 'error') throw new Error(String(data.message));
         if (kind === 'tool' && data.phase === 'started') { setTools(t => [...t, String(data.name)]); if (!used.includes(String(data.name))) used.push(String(data.name)); }

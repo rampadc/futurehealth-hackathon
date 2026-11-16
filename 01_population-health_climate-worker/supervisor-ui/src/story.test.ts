@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest'
 import { ACTIONS, PERSONAS, applyAction, canAct, initialStory, nextHandoff, type ActionId } from './story'
 
 describe('local walkthrough handoffs', () => {
-  it('has nine distinct accounts and starts without recorded actions', () => {
-    expect(PERSONAS).toHaveLength(9)
-    expect(new Set(PERSONAS.map((person) => person.id)).size).toBe(9)
+  it('has ten distinct accounts and starts without recorded actions', () => {
+    expect(PERSONAS).toHaveLength(10)
+    expect(new Set(PERSONAS.map((person) => person.id)).size).toBe(10)
     expect(initialStory().events).toEqual([])
     expect(nextHandoff(initialStory())).toEqual({ actorId: 'P03', title: ACTIONS.issue.label })
   })

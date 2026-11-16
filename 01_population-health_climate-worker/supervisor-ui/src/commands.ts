@@ -17,8 +17,8 @@ export function caseWorkers(caseView: CaseView): WorkerRef[] {
 }
 
 export const payloads = {
-  recover: (caseView: CaseView) => ({ person_ids: caseWorkers(caseView).map(w => w.person_id), zone_id: 'shelter_a' }),
-  assign: (caseView: CaseView) => ({ person_ids: [...new Set(caseView.capture?.response.crew_rest.intervals.filter(i => i.kind === 'work' && i.task_id === 'workshop_prep').map(i => i.person_id) ?? [])] }),
+  recover: (caseView: CaseView) => ({ person_ids: caseView.headcount?.arrivals.map(a => a.person_id) ?? [], zone_id: 'shelter_a' }),
+  assign: (caseView: CaseView) => ({ assessment_id: caseView.plan_assessment?.id }),
   remove: () => ({ location_id: 'welfare' }),
   check: () => ({ status: 'confirmed' }),
   readiness: (personIds: string[], status: 'ready' | 'not_ready', basis: string, validUntilIso: string) => ({
@@ -26,7 +26,7 @@ export const payloads = {
   }),
   fresh: (caseView: CaseView, twl: number, measuredIso: string) => {
     const current = caseView.request?.snapshot.readings[0] ?? caseView.capture?.request.snapshot.readings[0];
-    return { reading: { sensor_id: current?.sensor_id ?? 't1', zone_id: current?.zone_id ?? 'civil_exposed', twl, unit: 'W/m²', quality: 'valid', measured_at: measuredIso, received_at: caseView.clock } };
+    return { reading: { sensor_id: current?.sensor_id ?? 't1', zone_id: current?.zone_id ?? 'civil_exposed', twl, unit: 'W/m²', quality: 'valid', measured_now: true } };
   },
 };
 
@@ -36,6 +36,6 @@ export function simplePayload(action: string, caseView: CaseView): Record<string
   if (action === 'assign') return payloads.assign(caseView);
   if (action === 'remove') return payloads.remove();
   if (CHECK_ACTIONS.has(action)) return payloads.check();
-  if (action === 'fresh' || action === 'readiness' || action === 'leila' || action === 'activity') return null;
+  if (action === 'fresh' || action === 'readiness' || action === 'leila' || action === 'activity' || action === 'start_work' || action === 'start_recovery' || action === 'coverage_review') return null;
   return {};
 }

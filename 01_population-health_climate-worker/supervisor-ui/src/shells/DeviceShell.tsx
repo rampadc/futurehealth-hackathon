@@ -12,6 +12,7 @@ import { Avatar } from '../screens/kit';
 import { usePhotoSync } from '../people';
 import './fonts';
 import './shell.css';
+import { LiveClock } from '../LiveClock';
 
 type Props = { device: Device; screen?: string; onLockAccess?: () => void };
 
@@ -23,7 +24,7 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
   const session = useCaseSession();
   const info = DEVICE_INFO[device];
   const screens = screensFor(device);
-  const screen = findScreen(device, screenId);
+  const screen = !screenId && session.person ? screens.find(s => !s.group && s.personas.includes(session.person!.id)) ?? findScreen(device) : findScreen(device, screenId);
   const go = (target: ScreenDef) => navigate(`/${device}/${target.id}`);
   const phone = device === 'site' || device === 'worker';
   const [workerLang] = useWorkerLanguage(device === 'worker' ? session.person?.id : undefined);
@@ -51,8 +52,11 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
     </div>;
   }
 
+  const allowed = screens.filter(s => !s.personas.length || s.personas.includes(session.person!.id));
+  const ownScreen = allowed.find(s => !s.group) ?? allowed[0];
+  const permitted = allowed.includes(screen);
   const railButton = (s: ScreenDef) => <button key={s.id} type="button" aria-current={s.id === screen.id ? 'page' : undefined} onClick={() => go(s)}>{s.name}{!s.component && <small> · planned</small>}</button>;
-  const Screen = screen.component;
+  const Screen = permitted ? screen.component : undefined;
   const tabs = info.tabs;
   return <div className="hs-shell" data-theme={info.theme} data-device={device}>
     <a href="#hs-main" className="skip-link">Skip to screen</a>
@@ -60,6 +64,7 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
       {showBrand && <BrandMark palette={brand} />}
       <strong>Heat-Safe Crew</strong>
       <span className="hs-muted">{info.name}</span>
+      {session.caseView && <span className="hs-muted"><LiveClock view={session.caseView} /></span>}
       <span className="hs-grow" />
       {account
         ? <button type="button" className="hs-me" aria-current={screen.id === 'account' ? 'page' : undefined} aria-label={`My account: ${session.person.name}`} onClick={() => go(account)}><Avatar id={session.person.id} size={phone ? 'md' : undefined} /><span>{session.person.name}</span></button>
@@ -69,30 +74,30 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
     </header>
     <div className="hs-body">
       <nav className="hs-rail" aria-label={`${info.name} screens`} style={showBrand && brand.rail_tint ? { borderInlineStart: `4px solid ${brand.primary}` } : undefined}>
-        {screens.filter(s => !s.group).map(railButton)}
-        {screens.some(s => s.group === 'admin') && <p className="hs-rail-group">Admin</p>}
-        {screens.filter(s => s.group === 'admin').map(railButton)}
-        <DeviceSwitch current={device} />
+        {allowed.filter(s => !s.group).map(railButton)}
+        {allowed.some(s => s.group === 'admin') && <p className="hs-rail-group">Admin</p>}
+        {allowed.filter(s => s.group === 'admin').map(railButton)}
+        <DeviceSwitch current={device} personId={session.person.id} />
       </nav>
       <main id="hs-main" tabIndex={-1} className="hs-main">
         {session.error && <p role="alert" className="hs-error">{session.error} <button type="button" className="hs-link" onClick={() => void session.refreshCase()}>Retry</button></p>}
         {session.feedback && <p role="status" className="hs-ok">{session.feedback}</p>}
-        {Screen ? <Screen session={session} /> : <Placeholder screen={screen} session={session} />}
+        {!permitted ? <section className="hs-screen"><h1>This screen belongs to another role</h1>{device === 'site' && screen.id === 'headcount' && session.person.id === 'C05' && <p>Your own arrival is {session.caseView?.headcount?.arrivals.some(a => a.person_id === 'C05') ? 'recorded' : 'not yet recorded'}. Huda confirms the full crew headcount.</p>}<button type="button" className="hs-button" onClick={() => ownScreen ? go(ownScreen) : navigate(session.person?.id.startsWith('C') ? '/worker/now' : '/web/monitoring')}>Go to my screen</button></section> : Screen ? <Screen session={session} /> : <Placeholder screen={screen} session={session} />}
       </main>
     </div>
     {tabs && <nav className="hs-tabs" aria-label="Sections" lang={lang} dir={langOf(lang).dir}>
       {tabs.map(([id, label]) => {
-        const first = screens.find(s => s.tab === id);
+        const first = allowed.find(s => s.tab === id);
         return <button key={id} type="button" disabled={!first} aria-current={screen.tab === id ? 'page' : undefined} onClick={() => first && go(first)}>{device === 'worker' ? tr(`tab.${id}`, lang).text : label}</button>;
       })}
     </nav>}
   </div>;
 }
 
-function DeviceSwitch({ current }: { current: Device }) {
+function DeviceSwitch({ current, personId }: { current: Device; personId?: string }) {
   return <p className="hs-switch">
-    {(Object.keys(DEVICE_INFO) as Device[]).filter(d => d !== current).map(d => <button key={d} type="button" className="hs-link" onClick={() => navigate(`/${d}`)}>{DEVICE_INFO[d].name}</button>)}
-    <button type="button" className="hs-link" onClick={() => navigate('/classic')}>Classic desktop app</button>
+    {(Object.keys(DEVICE_INFO) as Device[]).filter(d => d !== current && (!personId || screensFor(d).some(s => s.personas.includes(personId)))).map(d => <button key={d} type="button" className="hs-link" onClick={() => navigate(`/${d}`)}>{DEVICE_INFO[d].name}</button>)}
+    {(!personId || personId === 'C01' || (!personId.startsWith('C0') && personId !== 'P10' && personId !== 'P09')) && <button type="button" className="hs-link" onClick={() => navigate('/classic')}>Classic desktop app</button>}
   </p>;
 }
 

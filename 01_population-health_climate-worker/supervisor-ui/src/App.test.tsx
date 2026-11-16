@@ -11,7 +11,7 @@ let currentPerson: typeof PERSONAS[number] | null;
 let failCommand = false;
 let rejectCase = false;
 let demoRuns: unknown[];
-let calls: Array<{ path: string; method: string; body?: Record<string, unknown> }>;
+let calls: Array<{ path: string; method: string; body?: Record<string, unknown>; tabId?: string }>;
 const reply = (value: unknown, status = 200) => new Response(JSON.stringify(value), { status, headers: { 'Content-Type': 'application/json' } });
 
 beforeEach(async () => {
@@ -33,7 +33,7 @@ beforeEach(async () => {
     const path = String(input);
     const method = init?.method ?? 'GET';
     const body = init?.body ? JSON.parse(String(init.body)) : undefined;
-    calls.push({ path, method, body });
+    calls.push({ path, method, body, tabId: (init?.headers as Record<string, string> | undefined)?.['X-Heat-Tab-ID'] });
     if (path === '/api/session') {
       if (method === 'POST') { currentPerson = PERSONAS.find(p => p.id === body.persona_id)!; return reply({ person: currentPerson }); }
       if (method === 'DELETE') { currentPerson = null; return reply(null); }
@@ -73,6 +73,7 @@ describe('live supervisor workspace', () => {
     expect(screen.queryByRole('button', { name: 'Start heat response case' })).toBeNull();
     expect(calls.some(c => c.path === '/api/session' && c.method === 'GET')).toBe(true);
     expect(calls.some(c => c.path === '/api/case')).toBe(true);
+    expect(calls.filter(c => c.path.startsWith('/api/')).every(c => !!c.tabId)).toBe(true);
   });
 
   it('records a ready action through the versioned command API and reloads the server case', async () => {
@@ -96,16 +97,16 @@ describe('live supervisor workspace', () => {
   it('keeps worker actions private and offers an observed activity form only to its owner', async () => {
     const user = userEvent.setup(); render(<App />); await signIn('Huda');
     expect(screen.getByRole('button', { name: 'Record observed crew activity' })).toBeTruthy();
-    expect(screen.getByText(/Planned work and rest times do not become observations automatically/)).toBeTruthy();
+    expect(screen.getByText(/proposal is not evidence of activity/)).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'Stop heavy trench work' })).toBeNull();
     const button = screen.getByRole('button', { name: 'Record observed crew activity' }) as HTMLButtonElement;
     expect(button.disabled).toBe(true);
-    await user.click(screen.getByRole('checkbox', { name: 'All 11 crew members' }));
-    await user.click(screen.getByRole('checkbox', { name: /I observed this activity/ }));
+    await user.click(screen.getByRole('button', { name: /Choose recovery for all after observing/ }));
+    await user.click(screen.getByRole('checkbox', { name: /I observed all 11 active workers/ }));
     expect(button.disabled).toBe(false);
     await user.click(button);
-    await waitFor(() => expect(calls.find(c => c.path === '/api/case/commands')?.body).toMatchObject({ action: 'activity', payload: { intervals: expect.arrayContaining([expect.objectContaining({ person_id: 'C05', kind: 'recovery', observed: true, source: 'human_confirmation' })]) } }));
-    expect((calls.find(c => c.path === '/api/case/commands')?.body?.payload as { intervals: unknown[] }).intervals).toHaveLength(currentCase!.capture!.request.snapshot.workers.length);
+    await waitFor(() => expect(calls.find(c => c.path === '/api/case/commands')?.body).toMatchObject({ action: 'activity', payload: { through_now: true, observed: true, groups: [{ person_ids: expect.arrayContaining(['C05']), kind: 'recovery', zone_id: 'shelter_a' }] } }));
+    expect((calls.find(c => c.path === '/api/case/commands')?.body?.payload as { groups: Array<{ person_ids: string[] }> }).groups[0].person_ids).toHaveLength(currentCase!.capture!.request.snapshot.workers.length);
     await user.click(screen.getByRole('button', { name: 'Sign out' }));
     await screen.findByRole('heading', { name: 'Sign in to your workspace' });
     expect(calls.some(c => c.path === '/api/session' && c.method === 'DELETE')).toBe(true);
@@ -128,6 +129,14 @@ describe('live supervisor workspace', () => {
     expect(screen.queryByText('New heat finding at the civil trench')).toBeNull();
   });
 
+  it('clears a persona if the case is scoped to a different viewer', async () => {
+    currentPerson = PERSONAS.find(p => p.id === 'C05')!;
+    currentCase!.viewer_id = 'C08';
+    render(<App />);
+    expect(await screen.findByRole('heading', { name: 'Sign in to your workspace' })).toBeTruthy();
+    expect(screen.getByText(/tab identity changed/)).toBeTruthy();
+  });
+
   it('keeps observed activity available when the current solver response is rejected', async () => {
     const user = userEvent.setup();
     currentCase!.clock = '2025-08-04T08:19:00+04:00';
@@ -137,17 +146,14 @@ describe('live supervisor workspace', () => {
     render(<App />); await signIn('Huda');
     expect(screen.getByText(/Observed history ends before current clock/)).toBeTruthy();
     expect(screen.getByText('New heat finding at the civil trench')).toBeTruthy();
-    expect((screen.getByLabelText('From (GST)') as HTMLInputElement).value).toBe('2025-08-04T08:18');
-    await user.click(screen.getByRole('checkbox', { name: 'All 11 crew members' }));
     expect(screen.queryByLabelText('From (GST)')).toBeNull();
-    expect(screen.getByText(/Rana Al Nadir · 2025-08-04 08:17–2025-08-04 08:19 GST/)).toBeTruthy();
-    await user.click(screen.getByRole('checkbox', { name: /I observed this activity/ }));
+    await user.click(screen.getByRole('button', { name: /Choose recovery for all after observing/ }));
+    await user.click(screen.getByRole('checkbox', { name: /I observed all 11 active workers/ }));
     await user.click(screen.getByRole('button', { name: 'Record observed crew activity' }));
     await waitFor(() => expect(calls.some(c => c.path === '/api/case/commands')).toBe(true));
-    const intervals = (calls.find(c => c.path === '/api/case/commands')!.body!.payload as { intervals: Array<{ starts_at: string; ends_at: string }> }).intervals;
-    expect(intervals).toHaveLength(11);
-    expect(intervals[3]).toMatchObject({ starts_at: '2025-08-04T08:17:00+04:00', ends_at: '2025-08-04T08:19:00+04:00' });
-    expect(intervals.filter(i => i.starts_at === '2025-08-04T08:18:00+04:00')).toHaveLength(10);
+    const groups = (calls.find(c => c.path === '/api/case/commands')!.body!.payload as { through_now: boolean; groups: Array<{ person_ids: string[] }> });
+    expect(groups.through_now).toBe(true);
+    expect(groups.groups[0].person_ids).toHaveLength(11);
   });
 
   it('withholds the revised productive plan until removal and first aid are recorded', async () => {

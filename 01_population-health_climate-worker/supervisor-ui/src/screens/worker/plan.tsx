@@ -84,6 +84,7 @@ function MyPlan({ session }: ScreenProps) {
       </Section>
     </>}
     <Note><T k="p5.midday" /></Note>
+    {person.id === 'C05' && <button type="button" className="hs-button" onClick={() => navigate('/worker/heat-rest')}>View my heat and rest coverage</button>}
     <Computed><T k="p5.own" /></Computed>
   </div>;
 }

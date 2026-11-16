@@ -17,6 +17,7 @@ export const PERSONAS: Persona[] = [
   { id: 'C01', name: 'Huda Al Nadir', role: 'Civil foreman', organisation: 'Dune Civil Works', description: 'Accounts for the crew and supervises the workshop move.' },
   { id: 'C05', name: 'Rana Al Nadir', role: 'Civil worker', organisation: 'Dune Civil Works', description: 'Checks in to cooled recovery after heavy trench work stops.' },
   { id: 'C08', name: 'Bilal Al Safa', role: 'Civil worker', organisation: 'Dune Civil Works', description: 'Reports dizziness and follows the first aid route.' },
+  { id: 'P10', name: 'Mina Rahman', role: 'Employer contract manager', organisation: 'Dune Civil Works', description: 'Reviews heat and rest coverage for the contracted crew.' },
 ]
 
 type Flag = 'issued' | 'acknowledged' | 'stopped' | 'checkedIn' | 'recovered' | 'assigned' | 'reported' | 'removed' | 'firstaid' | 'leila' | 'fresh' | 'permit' | 'reviewed' | 'deliveryDrafted' | 'deliveryApproved' | 'deliverySent' | 'deliveryAccepted' | 'handover' | 'costReviewed'

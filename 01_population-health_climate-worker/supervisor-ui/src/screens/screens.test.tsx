@@ -56,6 +56,7 @@ beforeEach(() => {
       return reply({ person });
     }
     if (path === '/api/case') return reply(currentCase);
+    if (path === '/api/case/heat-rest') return reply({ policy_id: 'heat-rest-schedule-v1', title: 'Heat Rest Schedule', source: 'Dune Civil Works policy', scope: 'C02–C12', case_id: currentCase?.case_id, coverage_review: null, records: { stop: null, headcount: currentCase?.headcount, arrivals: currentCase?.headcount?.arrivals ?? [], observed_time: [] }, review_queue: { status: 'pending', policy_id: 'heat-rest-schedule-v1', expected_count: 11, confirmed_count: currentCase?.headcount?.confirmed_count ?? 0 } });
     if (path === '/api/case/commands') {
       commands.push({ action: body.action, payload: body.payload }); commandIds.push(body.command_id);
       const t = currentCase?.tasks.find(x => x.action === body.action);
@@ -83,6 +84,7 @@ beforeEach(() => {
       return reply(consent);
     }
     if (path === '/api/people/photos') return reply({ photos });
+    if (path.startsWith('/api/people/') && path.includes('/photo?v=')) return new Response(new Uint8Array([82, 73, 70, 70]), { headers: { 'Content-Type': 'image/webp' } });
     if (path === '/api/people/me/photo') {
       photoCalls.push({ method, image: body?.image });
       if (method === 'PUT') { photos = { ...photos, [person!.id]: '2025-08-04T16:45:00.000+00:00' }; return reply({ person_id: person!.id, updated_at: photos[person!.id] }); }
@@ -126,6 +128,27 @@ describe('every built screen', () => {
 });
 
 describe('stop-work', () => {
+  it('shows Rana only her arrival when she opens Huda’s headcount route', async () => {
+    currentCase = await makeCase('heat_trigger', { stopped: true }, []);
+    currentCase.headcount = { expected_count: 11, checked_in_count: 1, confirmed_count: 0, confirmed_at: null, arrivals: [{ person_id: 'C05', checked_in_at: currentCase.clock }] };
+    await open('/site/headcount', 'C05');
+    expect(await screen.findByText(/Your own arrival is recorded/)).toBeTruthy();
+    expect(screen.queryByText(/Bilal \(C08\)/)).toBeNull();
+    expect(screen.queryByRole('button', { name: /Confirm 11 workers/ })).toBeNull();
+  });
+
+  it('records Mina’s coverage decision against the policy and verified roster', async () => {
+    currentCase = await makeCase('heat_trigger', {}, [task('coverage_review', 'P10', 'ready')]);
+    await open('/web/heat-rest', 'P10');
+    const user = userEvent.setup();
+    expect(await screen.findByRole('heading', { name: 'Heat and rest coverage review' })).toBeTruthy();
+    await user.click(screen.getByRole('checkbox', { name: /I verified the C02–C12 crew roster/ }));
+    await user.type(screen.getByRole('textbox', { name: 'Basis or unresolved item' }), 'Checked employer roster');
+    await user.click(screen.getByRole('button', { name: 'Record employer coverage review' }));
+    await waitFor(() => expect(commands[0]).toMatchObject({ action: 'coverage_review', payload: { policy_id: 'heat-rest-schedule-v1', status: 'confirmed', roster_verified: true, note: 'Checked employer roster' } }));
+    expect(commands[0].payload.crew_ids).toEqual(Array.from({ length: 11 }, (_, i) => `C${String(i + 2).padStart(2, '0')}`));
+  });
+
   it('Huda acknowledges from the site app', async () => {
     currentCase = await makeCase('heat_trigger', { issued: true }, [task('issue', 'P03', 'recorded'), task('acknowledge', 'C01', 'ready')]);
     await open('/site/stop-work', 'C01');
@@ -136,9 +159,8 @@ describe('stop-work', () => {
   it('only the owner can issue: Huda sees no enabled issue button on heat controls', async () => {
     currentCase = await makeCase('heat_trigger', {}, [task('issue', 'P03', 'ready')]);
     await open('/web/heat-controls', 'C01');
-    const button = await screen.findByRole('button', { name: 'Issue stop-work instruction' }) as HTMLButtonElement;
-    expect(button.disabled).toBe(true);
-    expect(screen.getByText(/Maya Al Qamar records this \(P03\)/)).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: 'This screen belongs to another role' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Issue stop-work instruction' })).toBeNull();
   });
 
   it('shows replayed site conditions on heat controls without using them for clearance', async () => {
@@ -193,11 +215,41 @@ describe('stop-work', () => {
 
   it('records the headcount for every affected worker at Shelter A', async () => {
     currentCase = await makeCase('heat_trigger', { stopped: true, checkedIn: true }, [task('recover', 'C01', 'ready')]);
+    currentCase.headcount = { expected_count: 11, checked_in_count: 11, confirmed_count: 0, confirmed_at: null, arrivals: Array.from({ length: 11 }, (_, i) => ({ person_id: `C${String(i + 2).padStart(2, '0')}`, checked_in_at: currentCase!.clock })) };
     await open('/site/headcount', 'C01');
     await userEvent.click(await screen.findByRole('button', { name: /accounted for/ }));
     await waitFor(() => expect(commands[0]?.action).toBe('recover'));
     expect(commands[0].payload.zone_id).toBe('shelter_a');
     expect((commands[0].payload.person_ids as string[]).length).toBe(currentCase!.request!.snapshot.workers.length);
+  });
+});
+
+describe('assessed workshop plan', () => {
+  it('binds approval to the current assessment and disables expired proposals', async () => {
+    currentCase = await makeCase('incident_substitute', { stopped: true, recovered: true }, [task('assign', 'C01', 'ready')]);
+    const capture = currentCase.capture!;
+    currentCase.plan_assessment = { id: 'assessment-1', assessed_at: currentCase.clock, observed_through: currentCase.clock, approval_deadline: currentCase.clock, status: 'expired', request: capture.request, response: capture.response };
+    const view = await open('/site/proposal', 'C01');
+    expect((await screen.findByRole('button', { name: 'Approve assessed proposal' }) as HTMLButtonElement).disabled).toBe(true);
+    view.unmount();
+    currentCase.plan_assessment.status = 'proposed';
+    await open('/site/proposal', 'C01');
+    await userEvent.click(await screen.findByRole('button', { name: 'Approve assessed proposal' }));
+    await waitFor(() => expect(commands[0]).toMatchObject({ action: 'assign', payload: { assessment_id: 'assessment-1' } }));
+  });
+
+  it('requires Huda to choose the working group before recording their return to recovery', async () => {
+    currentCase = await makeCase('incident_substitute', { stopped: true, assigned: true }, [task('start_recovery', 'C01', 'ready')]);
+    const capture = currentCase.capture!;
+    currentCase.request!.snapshot.workers[0].location_id = 'workshop';
+    currentCase.request!.snapshot.workers[1].location_id = 'workshop';
+    currentCase.plan_assessment = { id: 'assessment-1', assessed_at: currentCase.clock, observed_through: currentCase.clock, approval_deadline: currentCase.clock, status: 'approved', request: capture.request, response: capture.response };
+    await open('/site/proposal', 'C01');
+    const button = await screen.findByRole('button', { name: 'Confirm work stopped and return to recovery' }) as HTMLButtonElement;
+    expect(button.disabled).toBe(true);
+    await userEvent.click(screen.getByRole('checkbox', { name: /C02/ }));
+    await userEvent.click(button);
+    await waitFor(() => expect(commands[0]).toMatchObject({ action: 'start_recovery', payload: { person_ids: ['C02'], zone_id: 'shelter_a', observed_work: true } }));
   });
 });
 
@@ -436,10 +488,20 @@ describe('crew photos and the account page', () => {
     await screen.findByRole('heading', { level: 1, name: 'Huda Al Nadir' });
     await people.uploadOwnPhoto('C01', 'data:image/webp;base64,UklGRg==');
     expect(photoCalls).toEqual([{ method: 'PUT', image: 'data:image/webp;base64,UklGRg==' }]);
-    await waitFor(() => expect(document.querySelector('[data-person="C01"] img')!.getAttribute('src')).toBe('/api/people/C01/photo?v=2025-08-04T16%3A45%3A00.000%2B00%3A00'));
+    await waitFor(() => expect(document.querySelector('[data-person="C01"] img')!.getAttribute('src')).toBe('data:image/webp;base64,UklGRg=='));
     await userEvent.click(await screen.findByRole('button', { name: 'Use issued photo' }));
     await waitFor(() => expect(photoCalls.at(-1)).toEqual({ method: 'DELETE', image: undefined }));
     expect(await screen.findByText('Back to the photo issued with your account.')).toBeTruthy();
+  });
+
+  it('loads uploaded photos with the tab header before using them as image data', async () => {
+    photos = { C01: 'v1' };
+    currentCase = null;
+    await open('/site/account', 'C01');
+    await waitFor(() => expect(document.querySelector('[data-person="C01"] img')?.getAttribute('src')).toBe('data:image/webp;base64,UklGRg=='));
+    const calls = vi.mocked(fetch).mock.calls;
+    const photo = calls.find(([path]) => String(path).startsWith('/api/people/C01/photo?v='));
+    expect(photo?.[1]?.headers).toMatchObject({ 'X-Heat-Tab-ID': expect.any(String) });
   });
 });
 

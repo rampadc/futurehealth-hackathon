@@ -3,6 +3,7 @@ import { Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, Cont
 import { live, type CaseView } from './live';
 import { applyPreset, readingPayload, SCENARIO_PRESETS, type ReadingKind } from './scenarioPresets';
 import { timeLabel } from './Timeline';
+import { LiveClock } from './LiveClock';
 
 type Props = { caseView: CaseView | null; onChange: (next: CaseView | null) => Promise<void>; onReturn: () => void };
 const pretty = (value: unknown) => JSON.stringify(value, null, 2);
@@ -19,7 +20,6 @@ const READING_KINDS: Array<[ReadingKind, string]> = [['valid', 'Valid, measured 
 
 export function DemoControl({ caseView, onChange, onReturn }: Props) {
   const [presenterCase, setPresenterCase] = useState<CaseView | null>(caseView);
-  const [time, setTime] = useState(caseView ? timeLabel(caseView.clock) : '08:11');
   const [twl, setTwl] = useState('145');
   const [readingKind, setReadingKind] = useState<ReadingKind>('valid');
   const [runs, setRuns] = useState<WorkflowRun[]>([]);
@@ -41,8 +41,6 @@ export function DemoControl({ caseView, onChange, onReturn }: Props) {
     catch (cause) { setError(cause instanceof Error ? cause.message : `${label} failed`); }
     finally { setBusy(false); }
   };
-  const clockAt = `2025-08-04T${time}:00+04:00`;
-  const clockValid = /^\d\d:\d\d$/.test(time) && (!presenterCase || Date.parse(clockAt) > Date.parse(presenterCase.clock));
   const selectedRun = runs.find(run => run.id === selectedRunId) ?? runs[0];
   const selectedModelRun = agentRuns.find(run => run.id === selectedModelRunId) ?? agentRuns[0];
   const solverCalls = (selectedRun?.response as { solver_calls?: SolverCall[] } | null)?.solver_calls ?? [];
@@ -52,21 +50,16 @@ export function DemoControl({ caseView, onChange, onReturn }: Props) {
     {error && <Alert severity="error" role="alert">{error}</Alert>}{message && <Alert severity="success" role="status">{message}</Alert>}
     <Paper variant="outlined" sx={{ p: 3 }}><Stack spacing={2}>
       <Typography variant="h6" component="h2">Case</Typography>
-      <Typography variant="body2">{presenterCase ? `Active case ${presenterCase.case_id} · version ${presenterCase.version} · ${timeLabel(presenterCase.clock)} GST` : 'No active case'}</Typography>
+      <Typography variant="body2">{presenterCase ? <>Active case {presenterCase.case_id} · version {presenterCase.version} · <LiveClock view={presenterCase} /></> : 'No active case'}</Typography>
       <Stack direction="row" spacing={2}><Button variant="contained" disabled={busy || !!presenterCase} onClick={() => void execute('Case start', live.start)}>Start heat response case</Button><Button color="error" variant="outlined" disabled={busy || !presenterCase} onClick={() => void execute('Case reset', live.reset)}>Reset active case</Button></Stack>
     </Stack></Paper>
     <Paper variant="outlined" sx={{ p: 3 }}><Stack spacing={2}>
       <Typography variant="h6" component="h2">Scenario presets</Typography>
-      <Typography variant="body2" color="text.secondary">Each preset resets the case, then sets the clock and the local reading. It does not record a person’s instruction, stop, headcount or symptom report.</Typography>
+      <Typography variant="body2" color="text.secondary">Each preset resets the case, then sets a local reading. It does not record a person’s instruction, stop, headcount or symptom report.</Typography>
       <Stack spacing={1.5}>{SCENARIO_PRESETS.map(preset => <Stack key={preset.id} direction="row" spacing={2} sx={{ alignItems: 'center' }}>
         <Button variant="outlined" disabled={busy} sx={{ flexShrink: 0 }} onClick={() => void execute(preset.title, () => applyPreset(preset, live))}>{preset.title}</Button>
         <Typography variant="body2">{preset.detail}</Typography>
       </Stack>)}</Stack>
-    </Stack></Paper>
-    <Paper variant="outlined" sx={{ p: 3 }}><Stack spacing={2}>
-      <Typography variant="h6" component="h2">Case clock · 4 Aug 2025 GST</Typography>
-      <Typography variant="body2" color="text.secondary">Advance the case time to observe stale readings, recovery coverage and restart rules.</Typography>
-      <Stack direction="row" spacing={2}><TextField label="New time (GST)" type="time" size="small" disabled={busy} value={time} onChange={event => setTime(event.target.value)} slotProps={{ inputLabel: { shrink: true } }} /><Button variant="contained" disabled={busy || !presenterCase || !clockValid} onClick={() => void execute('Clock advance', () => live.clock(clockAt))}>Advance clock</Button></Stack>
     </Stack></Paper>
     <Paper variant="outlined" sx={{ p: 3 }}><Stack spacing={2}>
       <Typography variant="h6" component="h2">Local reading signal</Typography>

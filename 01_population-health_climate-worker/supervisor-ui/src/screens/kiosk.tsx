@@ -14,9 +14,9 @@ export function KioskScreen({ session }: ScreenProps) {
   const tapRef = useRef<(id: string) => void>(() => {});
   const nfc = useNfcBadges(id => tapRef.current(id));
   if (!caseView || !person) return <NoCase session={session} />;
-  const people = crew(caseView);
+  const people = crew(caseView).filter(p => p.id === person.id);
   const checkin = caseView.tasks.find(t => t.action === 'checkin');
-  const arrived = new Set(people.filter(p => p.inRecovery).map(p => p.id));
+  const arrived = new Set(caseView.headcount?.arrivals.filter(a => a.person_id === person.id).map(a => a.person_id) ?? []);
   if (checkin?.status === 'recorded') arrived.add(checkin.actor_id);
   const tap = (id: string) => {
     const own = checkin && checkin.actor_id === id && checkin.status === 'ready';
@@ -29,7 +29,7 @@ export function KioskScreen({ session }: ScreenProps) {
   return <div className="hs-screen">
     <Head kicker={`Shelter A · ${time(caseView.clock)}`} title={<>{tr('kiosk.tap', 'en').text} · <span lang="ar" dir="rtl">{tr('kiosk.tap', 'ar').text}</span></>} />
     <Hero>
-      <Metric label={<>In shelter · <span lang="ar">في الملجأ</span></>} value={String(arrived.size)} sub={`of ${people.length}`} tone="ok" />
+      <Metric label={<>My arrival · <span lang="ar">في الملجأ</span></>} value={arrived.size ? 'Recorded' : 'Not recorded'} tone="ok" />
       <Metric label={<>Water · <span lang="ar">ماء</span></>} value="💧" sub="Cooler checked by Maya" />
       <Metric label="Next" value={caseView.story.assigned ? 'Workshop' : 'Rest'} sub="your foreman will call you" />
     </Hero>
@@ -44,7 +44,7 @@ export function KioskScreen({ session }: ScreenProps) {
       <button type="button" className="hs-button" disabled={nfc.state === 'listening'} onClick={() => void nfc.start()}>{nfc.state === 'listening' ? '◉ NFC reader on · tap a badge' : 'Start NFC badge reader'}</button>
       {nfc.error && <p role="alert" className="hs-error">{nfc.error}</p>}
     </div>}
-    <Note>{nfc.supported ? 'Badges are NFC tags holding the worker id (for example C05) as a text record. Tiles also work.' : 'This browser has no Web NFC, so tiles stand in for badge taps (Android Chrome reads real badges).'} Only {checkin ? 'Rana’s' : 'a worker’s own'} check-in is recorded in this case; Huda records the full headcount.</Note>
+    <Note>{nfc.supported ? 'Your badge can be read here. Your tile also works.' : 'Tap your tile to check in.'} Huda records the full crew headcount.</Note>
     <Computed>Check-ins feed the site headcount live.</Computed>
   </div>;
 }

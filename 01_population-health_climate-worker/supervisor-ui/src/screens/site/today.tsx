@@ -13,7 +13,7 @@ export function TodayScreen({ session }: ScreenProps) {
   const story = caseView.story;
   const heat = heatNow(caseView);
   const people = crew(caseView);
-  const accounted = people.filter(p => p.inRecovery).length;
+  const accounted = caseView.headcount?.checked_in_count ?? 0;
   const mine = tasksOf(caseView, person?.id).sort((a, b) => order[a.status] - order[b.status]);
   const first = mine.find(t => t.status === 'ready');
   const open = (action: string) => { const target = SCREEN_FOR_ACTION[action]?.site; if (target) navigate(`/site/${target}`); };
@@ -21,7 +21,7 @@ export function TodayScreen({ session }: ScreenProps) {
     <Head kicker={`Today · ${time(caseView.clock)} GST`} title="Your actions" />
     <Hero>
       <Metric label="Stop-work" value={story.issued ? 'Heavy work' : 'None yet'} sub={story.issued ? (story.stopped ? 'Stopped and confirmed' : 'Instruction issued') : 'Awaiting safety review'} tone={story.issued ? 'red' : undefined} />
-      <Metric label="Accounted" value={`${accounted} / ${people.length}`} sub="Shelter A" tone={people.length && accounted === people.length ? 'ok' : undefined} />
+      <Metric label="Arrived" value={`${accounted} / ${caseView.headcount?.expected_count ?? 11}`} sub="Shelter A" tone={accounted === (caseView.headcount?.expected_count ?? 11) ? 'ok' : undefined} />
       <Metric label="TWL" value={heat.reading ? `${heat.reading.twl} W/m²` : '—'} sub={<><Band band={heat.band.band} label={heat.band.label} /> · {heat.reading?.sensor_id ?? 'no sensor'} · {time(heat.reading?.measured_at)}</>} />
     </Hero>
     <Section title="Actions" hint="Tap to open">
@@ -91,21 +91,22 @@ export function HeadcountScreen({ session }: ScreenProps) {
   const { caseView } = session;
   if (!caseView) return <NoCase session={session} />;
   const people = crew(caseView);
-  const accounted = people.filter(p => p.inRecovery);
-  const missing = people.filter(p => !p.inRecovery);
-  const recoveredAt = caseView.request?.snapshot.recovery?.recorded_at ?? caseView.capture?.request.snapshot.recovery?.recorded_at;
+  const arrivals = new Map(caseView.headcount?.arrivals.map(a => [a.person_id, a.checked_in_at]) ?? []);
+  const accounted = people.filter(p => arrivals.has(p.id));
+  const missing = people.filter(p => !arrivals.has(p.id));
+  const headcount = caseView.headcount;
   return <div className="hs-screen">
     <Head kicker={`Headcount · ${time(caseView.clock)} GST`} title="Headcount · Shelter A" />
     <Hero>
-      <Metric label="Accounted" value={`${accounted.length} / ${people.length}`} sub={missing.length ? 'not complete' : 'all affected workers'} tone={missing.length ? 'red' : 'ok'} />
+      <Metric label="Arrived" value={`${headcount?.checked_in_count ?? accounted.length} / ${headcount?.expected_count ?? 11}`} sub={missing.length ? 'headcount incomplete' : 'all affected workers'} tone={missing.length ? 'red' : 'ok'} />
       <Metric label="Not yet recorded" value={String(missing.length)} sub={missing.map(p => p.name.split(' ')[0]).join(', ') || 'none'} />
-      <Metric label="Recorded" value={time(recoveredAt)} sub="Shelter A" />
+      <Metric label="Foreman confirmed" value={`${headcount?.confirmed_count ?? 0} / ${headcount?.expected_count ?? 11}`} sub={headcount?.confirmed_at ? time(headcount.confirmed_at) : 'not yet'} />
     </Hero>
     <Section title="Affected workers" hint="Kiosk and phone check-ins appear live">
-      <List>{people.map(p => <Row key={p.id} lead={<Avatar id={p.id} size="md" excluded={p.excluded} />} title={who(p.id)} detail={p.inRecovery ? `In cooled recovery · Shelter A` : `Last known: ${p.location ?? 'unknown'}`} badge={p.inRecovery ? <span className="hs-badge" data-tone="done">✓ Arrived</span> : <span className="hs-badge" data-tone="wait">Not recorded</span>} />)}</List>
+      <List>{people.map(p => <Row key={p.id} lead={<Avatar id={p.id} size="md" excluded={p.excluded} />} title={who(p.id)} detail={arrivals.has(p.id) ? `Arrived ${time(arrivals.get(p.id))} · Shelter A` : `Last known: ${p.location ?? 'unknown'}`} badge={arrivals.has(p.id) ? <span className="hs-badge" data-tone="done">✓ Arrived</span> : <span className="hs-badge" data-tone="wait">Not recorded</span>} />)}</List>
     </Section>
     <CtaBar note="Confirm only after you have seen each worker in Shelter A.">
-      <ActionButton session={session} action="recover" label={`Confirm all ${people.length} accounted for`} primary />
+      <ActionButton session={session} action="recover" label={`Confirm ${headcount?.expected_count ?? 11} workers accounted for`} primary disabled={(headcount?.checked_in_count ?? 0) !== (headcount?.expected_count ?? 11)} />
       <ActionButton session={session} action="personnel" label="Confirm personnel check for restart" />
     </CtaBar>
   </div>;

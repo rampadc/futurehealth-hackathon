@@ -13,6 +13,7 @@ import { CheckInScreen, MyPlanScreen } from './worker/plan';
 import { WelcomeScreen, MyDataScreen } from './worker/privacy';
 import { KioskScreen } from './kiosk';
 import { AccountScreen } from './account';
+import { HeatRestScreen } from './heatRest';
 
 export type Device = 'web' | 'site' | 'worker' | 'kiosk';
 export type Owner = 'A' | 'B' | 'C';
@@ -50,6 +51,7 @@ const s = (id: string, def: Omit<ScreenDef, 'id'>): ScreenDef => ({ id, ...def }
 export const SCREENS: ScreenDef[] = [
   // Supervisor web · owner A
   s('monitoring', { device: 'web', name: 'Squad Monitoring', clock: '08:18', slice: 4, owner: 'A', personas: ['C01', 'P03', 'P02', 'P04', 'P05', 'P06', 'P01'], reads: ['workers', 'capture.response.heat', 'capture.response.crew_rest', 'tasks'], commands: ['draftDelivery', 'approveDelivery', 'sendDelivery', 'acceptDelivery', 'costReview'], needs: 'Optional GET /api/case/monitor summary if CaseView is too heavy' , component: SquadMonitoringScreen }),
+  s('heat-rest', { device: 'web', name: 'Heat and rest coverage', clock: '08:18', slice: 4, owner: 'A', personas: ['P10', 'P01', 'C01'], reads: ['GET /api/case/heat-rest', 'headcount', 'plan_assessment'], commands: ['coverage_review'], component: HeatRestScreen }),
   s('heat-controls', { device: 'web', name: 'Heat controls', clock: '08:00', slice: 1, owner: 'A', personas: ['P03'], reads: ['capture.request.snapshot.readings', 'capture.response.heat.controls', 'capture.response.decision_at'], commands: ['issue'] , component: HeatControlsScreen }),
   s('response', { device: 'web', name: 'Protective response', clock: '08:04', slice: 1, owner: 'A', personas: ['C01', 'P02', 'P06'], reads: ['story', 'tasks', 'capture.response.protective_response'], commands: ['acknowledge', 'stop', 'recover', 'escalation_followup'] , component: ProtectiveResponseScreen }),
   s('crew', { device: 'web', name: 'Crew & workshop', clock: '08:10', slice: 2, owner: 'A', personas: ['C01'], reads: ['capture.request.snapshot', 'capture.request.locations', 'capture.response.crew_rest'], commands: ['readiness', 'activity', 'assign', 'leila'] , component: CrewWorkshopScreen }),
@@ -63,8 +65,9 @@ export const SCREENS: ScreenDef[] = [
   s('today', { device: 'site', tab: 'today', name: 'Today (alert inbox)', clock: '08:00', slice: 1, owner: 'B', personas: ['C01', 'P03', 'P06'], reads: ['tasks', 'story'], commands: [] , component: TodayScreen }),
   s('stop-work', { device: 'site', tab: 'today', name: 'Stop-work instruction', clock: '08:01', slice: 1, owner: 'B', personas: ['P03', 'C01'], reads: ['story', 'capture.response.heat.controls'], commands: ['issue', 'acknowledge', 'stop'], needs: 'SMS part count is display-only; nothing is sent' , component: StopWorkScreen }),
   s('headcount', { device: 'site', tab: 'crew', name: 'Headcount', clock: '08:04', slice: 1, owner: 'B', personas: ['C01'], reads: ['workers', 'capture.request.snapshot.workers'], commands: ['recover', 'personnel'] , component: HeadcountScreen }),
+  s('heat-rest', { device: 'site', tab: 'crew', name: 'Heat and rest coverage', clock: '08:18', slice: 4, owner: 'B', personas: ['C01'], reads: ['GET /api/case/heat-rest', 'headcount'], commands: [], component: HeatRestScreen }),
   s('readiness', { device: 'site', tab: 'crew', name: 'Readiness confirmation', clock: '08:10', slice: 2, owner: 'B', personas: ['C01'], reads: ['workers'], commands: ['readiness', 'activity', 'crew_readiness'] , component: ReadinessScreen }),
-  s('proposal', { device: 'site', tab: 'plan', name: 'Proposal review', clock: '08:11', slice: 2, owner: 'B', personas: ['C01'], reads: ['capture.response.crew_rest'], commands: ['assign'] , component: ProposalScreen }),
+  s('proposal', { device: 'site', tab: 'plan', name: 'Proposal review', clock: '08:11', slice: 2, owner: 'B', personas: ['C01'], reads: ['plan_assessment', 'workers'], commands: ['assign', 'start_work', 'start_recovery'] , component: ProposalScreen }),
   s('action-card', { device: 'site', tab: 'today', name: 'Worker action card', clock: '08:18', slice: 2, owner: 'B', personas: ['C01', 'P06'], reads: ['story', 'tasks'], commands: ['incident_record', 'remove', 'firstaid'] , component: ActionCardScreen }),
   s('fresh-reading', { device: 'site', tab: 'today', name: 'Fresh reading', clock: '15:06', slice: 3, owner: 'B', personas: ['P03'], reads: ['capture.request.snapshot.readings'], commands: ['fresh', 'water'] , component: FreshReadingScreen }),
   s('ask', { device: 'site', tab: 'ask', name: 'Ask (Planning Agent)', clock: '08:20', slice: 4, owner: 'B', personas: ['C01', 'P03'], reads: ['GET /api/chat/history'], commands: [], needs: 'Uses existing POST /api/chat' , component: SiteAskScreen }),
@@ -75,6 +78,7 @@ export const SCREENS: ScreenDef[] = [
   s('alert', { device: 'worker', name: 'Alert (full screen)', clock: '08:01', slice: 1, owner: 'B', personas: ['C05', 'C08'], reads: ['story'], commands: [] , component: AlertScreen }),
   s('check-in', { device: 'worker', tab: 'check', name: 'Check in (voice and tap)', clock: '08:18', slice: 2, owner: 'B', personas: ['C05', 'C08'], reads: ['story'], commands: ['checkin', 'report'] , component: CheckInScreen }),
   s('my-plan', { device: 'worker', tab: 'plan', name: 'My plan', clock: '08:12', slice: 2, owner: 'B', personas: ['C05', 'C08'], reads: ['capture.response.crew_rest.intervals'], commands: [] , component: MyPlanScreen }),
+  s('heat-rest', { device: 'worker', tab: 'plan', name: 'My heat and rest coverage', clock: '08:18', slice: 4, owner: 'B', personas: ['C05'], reads: ['GET /api/case/heat-rest'], commands: [], component: HeatRestScreen }),
   s('shelter', { device: 'worker', tab: 'now', name: 'Shelter check-in', clock: '08:04', slice: 1, owner: 'B', personas: ['C05'], reads: ['story'], commands: ['checkin'] , component: ShelterScreen }),
   s('offline', { device: 'worker', name: 'Offline state', clock: '08:04', slice: 5, owner: 'B', personas: ['C05', 'C08'], reads: [], commands: [], needs: 'Check-ins and reports queue on the phone; supervisor decisions are never queued', component: OfflineScreen }),
   s('my-data', { device: 'worker', tab: 'me', name: 'Me: privacy and my data', clock: '17:10', slice: 4, owner: 'B', personas: ['C05', 'C08'], reads: ['GET /api/worker/data'], commands: [], needs: 'GET /api/worker/data, DELETE /api/worker/consent' , component: MyDataScreen }),

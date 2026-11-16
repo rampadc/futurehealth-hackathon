@@ -4,12 +4,13 @@ import { ApiError, live, type CaseView } from './live';
 import type { Persona } from './story';
 import { isReady } from './shared/ui';
 import { isNetworkError, isOffline, QUEUEABLE, readOutbox, writeOutbox, type Queued } from './offline';
+import { establishTabId, rotateTabId } from './tabSession';
 
 type Options = { onSignedIn?: () => void; onSignedOut?: () => void };
 
 /**
  * Persona session and live case state, shared by every shell (desktop, site, worker, kiosk).
- * Subscribes to `/api/case/events` while signed in and polls every 10 s as a fallback.
+ * Polls the live case while signed in; every request carries this tab's identity.
  */
 export function useCaseSession({ onSignedIn, onSignedOut }: Options = {}) {
   const [person, setPerson] = useState<Persona | null>(null);
@@ -19,17 +20,27 @@ export function useCaseSession({ onSignedIn, onSignedOut }: Options = {}) {
   const [error, setError] = useState('');
   const [feedback, setFeedback] = useState('');
   const requestNumber = useRef(0);
+  const activePersonId = useRef<string | null>(null);
   const [outbox, setOutbox] = useState<Queued[]>([]);
   const flushing = useRef(false);
 
   const refreshCase = async () => {
     const current = ++requestNumber.current;
+    const expectedPersonId = activePersonId.current;
     try {
       const next = await live.case();
+      if (current !== requestNumber.current || expectedPersonId !== activePersonId.current) return false;
+      if (next?.viewer_id && activePersonId.current && next.viewer_id !== activePersonId.current) {
+        await rotateTabId();
+        activePersonId.current = null; setPerson(null); setCaseView(null);
+        setError('This tab identity changed. Choose your persona again.');
+        return false;
+      }
       if (current === requestNumber.current) { setCaseView(next); setError(''); }
       return true;
     } catch (cause) {
-      if (cause instanceof ApiError && cause.status === 401) { setPerson(null); setCaseView(null); }
+      if (current !== requestNumber.current || expectedPersonId !== activePersonId.current) return false;
+      if (cause instanceof ApiError && cause.status === 401) { activePersonId.current = null; setPerson(null); setCaseView(null); }
       if (current === requestNumber.current) setError(cause instanceof Error ? cause.message : copy.loadError);
       return false;
     }
@@ -39,9 +50,14 @@ export function useCaseSession({ onSignedIn, onSignedOut }: Options = {}) {
     let active = true;
     (async () => {
       try {
+        await establishTabId();
         const session = await live.session();
+        activePersonId.current = session.person?.id ?? null;
         const currentCase = session.person ? await live.case() : null;
-        if (active) { setPerson(session.person); setCaseView(currentCase); setError(''); }
+        if (currentCase?.viewer_id && session.person && currentCase.viewer_id !== session.person.id) {
+          await rotateTabId(); activePersonId.current = null;
+          if (active) { setPerson(null); setCaseView(null); setError('This tab identity changed. Choose your persona again.'); }
+        } else if (active) { setPerson(session.person); setCaseView(currentCase); setError(''); }
       } catch (cause) {
         if (active) setError(cause instanceof Error ? cause.message : copy.loadError);
       } finally { if (active) setInitialising(false); }
@@ -51,16 +67,18 @@ export function useCaseSession({ onSignedIn, onSignedOut }: Options = {}) {
 
   useEffect(() => {
     if (!person) return;
-    const events = typeof EventSource === 'undefined' ? null : new EventSource('/api/case/events', { withCredentials: true });
-    if (events) events.onmessage = () => { void refreshCase(); };
-    const polling = window.setInterval(() => { void refreshCase(); }, 10_000);
-    return () => { events?.close(); window.clearInterval(polling); };
+    const polling = window.setInterval(() => { void refreshCase(); }, 5_000);
+    const focus = () => { void refreshCase(); };
+    window.addEventListener('focus', focus);
+    return () => { window.clearInterval(polling); window.removeEventListener('focus', focus); };
   }, [person?.id]);
 
   const signIn = async (selected: Persona) => {
+    requestNumber.current++;
     setBusy(true); setError('');
     try {
       const result = await live.signIn(selected.id);
+      activePersonId.current = result.person.id;
       setPerson(result.person); onSignedIn?.();
       await refreshCase();
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'Unable to sign in'); }
@@ -68,10 +86,11 @@ export function useCaseSession({ onSignedIn, onSignedOut }: Options = {}) {
   };
 
   const signOut = async () => {
+    requestNumber.current++;
     setBusy(true); setError('');
     try {
       await live.signOut();
-      requestNumber.current++; setPerson(null); setCaseView(null); setFeedback(''); onSignedOut?.();
+      requestNumber.current++; activePersonId.current = null; setPerson(null); setCaseView(null); setFeedback(''); onSignedOut?.();
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'Unable to sign out'); }
     finally { setBusy(false); }
   };
