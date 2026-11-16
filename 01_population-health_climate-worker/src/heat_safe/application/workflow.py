@@ -43,8 +43,9 @@ async def run_graph(request: dict, base_url: str) -> tuple[int, dict, list[str]]
         state = ctx.state
         statuses = [state.get(f'{key}_status',0) for key in ('heat','protective','plan','restart')]
         if statuses[0] != 200 or statuses[1] != 200 or statuses[3] != 200:
-            status = next((s for s in statuses if s != 200),500)
-            body = next((state[f'{key}_response'] for key in ('heat','protective','restart') if state.get(f'{key}_status') == status), {'error':'solver call failed'})
+            failed=next((key for key in ('heat','protective','restart') if state.get(f'{key}_status') != 200),None)
+            status=state.get(f'{failed}_status',500)
+            body=state.get(f'{failed}_response',{'error':'solver call failed'})
             route = 'solver_error'
         else:
             heat, protective, restart = (state[f'{key}_response'] for key in ('heat','protective','restart'))

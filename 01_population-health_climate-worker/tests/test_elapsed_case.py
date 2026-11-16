@@ -1,5 +1,6 @@
 """Elapsed case state keeps evidence time and proposed work separate."""
 import asyncio
+import copy
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -241,3 +242,109 @@ def test_employer_case_view_has_no_clinical_or_solver_records(setup_case):
     assert not any(key in view['story'] for key in ('reported','removed','firstaid','assigned'))
     assert [task['action'] for task in view['tasks']]==['coverage_review']
     assert case.heat_rest('P10')['records']['headcount']['confirmed_count']==11
+
+
+def test_incident_first_headcount_keeps_removed_worker_in_welfare(setup_case):
+    case,_=setup_case
+    command(case,'P03','issue')
+    command(case,'C01','acknowledge')
+    command(case,'C01','stop')
+    command(case,'C05','checkin')
+    command(case,'C08','report')
+    with pytest.raises(module.CaseError,match='welfare location'):
+        command(case,'C01','recover',{'person_ids':[f'C{i:02}' for i in range(2,13)],'zone_id':'shelter_a'})
+    command(case,'C01','incident_record')
+    command(case,'C01','remove',{'location_id':'welfare'})
+    command(case,'P06','firstaid')
+    view=command(case,'C01','recover',{'person_ids':[f'C{i:02}' for i in range(2,13)],'zone_id':'shelter_a'})
+    assert (view['headcount']['confirmed_count'],view['headcount']['cooled_recovery_count'],
+            view['headcount']['welfare_count'])==(11,10,1)
+    snap=view['request']['snapshot']
+    assert len(snap['recovery']['person_ids'])==10 and 'C08' not in snap['recovery']['person_ids']
+    assert next(w for w in snap['workers'] if w['person_id']=='C08')['location_id']=='welfare'
+    sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'demo/solver'))
+    from operations.contracts import Request
+    from operations.common import validate_request
+    validate_request(Request.model_validate(view['capture']['request']))
+
+
+def test_repeated_work_start_does_not_call_solver_again(setup_case,monkeypatch):
+    case,clock=setup_case
+    assessment=observed(case,clock)['plan_assessment']
+    command(case,'C01','assign',{'assessment_id':assessment['id']})
+    clock.advance(minutes=4)
+    payload={'assessment_id':assessment['id'],'person_ids':['C05'],
+             'observed_recovery':True,'prerequisites_confirmed':True}
+    command(case,'C01','start_work',payload)
+    version=case.read_case()['version']
+    async def failed_graph(_request,_url):
+        raise AssertionError('idempotent retry must not invoke solver')
+    monkeypatch.setattr(module,'run_graph',failed_graph)
+    command(case,'C01','start_work',payload)
+    assert case.read_case()['version']==version
+
+
+def test_signal_is_closed_for_historical_and_ended_cases(setup_case):
+    case,clock=setup_case
+    reading=copy.deepcopy(module.SEED['snapshot']['readings'][0])
+    with case._conn() as db:
+        db.execute('UPDATE cases SET started_at=NULL')
+    with pytest.raises(module.CaseError) as historical:
+        run(case.signal('reading',reading))
+    assert historical.value.status==409
+    run(case.reset())
+    clock.advance(hours=2,minutes=30)
+    with pytest.raises(module.CaseError) as ended:
+        run(case.signal('reading',reading))
+    assert ended.value.status==409
+
+
+def test_case_id_binds_commands_retries_and_signals_across_reset(setup_case):
+    case,_=setup_case
+    old=case.read_case()['case_id']
+    run(case.reset())
+    new=case.read_case()
+    assert new['version']==0 and new['case_id']!=old
+    with pytest.raises(module.CaseError) as command_error:
+        run(case.command('P03',{'case_id':old,'command_id':'old','expected_version':0,
+                                'action':'issue','payload':{}}))
+    assert command_error.value.status==409
+    with pytest.raises(module.CaseError) as retry_error:
+        run(case.retry('P03',0,case_id=old))
+    assert retry_error.value.status==409
+    with pytest.raises(module.CaseError) as signal_error:
+        run(case.signal('reading',copy.deepcopy(module.SEED['snapshot']['readings'][0]),case_id=old))
+    assert signal_error.value.status==409
+
+
+def test_actual_workshop_occupancy_blocks_new_cohort(setup_case,monkeypatch):
+    case,clock=setup_case
+    first=observed(case,clock)['plan_assessment']
+    command(case,'C01','assign',{'assessment_id':first['id']})
+    clock.advance(minutes=4)
+    command(case,'C01','start_work',{'assessment_id':first['id'],'person_ids':['C05'],
+        'observed_recovery':True,'prerequisites_confirmed':True})
+    replacements=['C06','C07','C09','C10']
+    command(case,'C01','readiness',{'confirmations':[{'person_id':pid,'status':'ready',
+        'basis':'Observed cooled recovery','valid_until':'2025-08-04T09:00:00+04:00'} for pid in replacements]},key='new-readiness')
+    async def next_graph(request,_url):
+        plan=request.get('planning')
+        intervals=[]
+        if plan:
+            start=datetime.fromisoformat(request['decision_at'])+timedelta(minutes=4)
+            intervals=[{'person_id':pid,'kind':'work','task_id':'workshop_prep','zone_id':'workshop',
+                'starts_at':start.isoformat(),'ends_at':(start+timedelta(minutes=10)).isoformat()} for pid in replacements]
+        return 200,{'crew_rest':{'planning_status':'planned' if plan else 'blocked','intervals':intervals},
+                    'plan_check':{'accepted':bool(plan)},'protective_response':{'excluded_worker_ids':[]},
+                    'restart':{'status':'blocked'}},['stub']
+    monkeypatch.setattr(module,'run_graph',next_graph)
+    clock.advance(minutes=1)
+    remaining=[f'C{i:02}' for i in range(2,13) if i!=5]
+    new=command(case,'C01','activity',{'through_now':True,'observed':True,'groups':[
+        {'person_ids':['C05'],'kind':'work','zone_id':'workshop'},
+        {'person_ids':remaining,'kind':'recovery','zone_id':'shelter_a'}]},key='activity-new-cohort')['plan_assessment']
+    command(case,'C01','assign',{'assessment_id':new['id']},key='assign-new-cohort')
+    clock.advance(minutes=4)
+    with pytest.raises(module.CaseError,match='occupancy'):
+        command(case,'C01','start_work',{'assessment_id':new['id'],'person_ids':replacements,
+            'observed_recovery':True,'prerequisites_confirmed':True},key='start-new-cohort')

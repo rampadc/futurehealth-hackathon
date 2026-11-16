@@ -170,7 +170,8 @@ class CaseService:
         return c.execute(f"SELECT * FROM runs WHERE case_id=? AND version=? AND status='completed' AND applied=1 ORDER BY {self._run_order} DESC LIMIT 1",(case_id,version)).fetchone()
 
     def _assessment(self, c, case, events):
-        rows=c.execute(f"SELECT * FROM runs WHERE case_id=? AND status='completed' AND applied=1 ORDER BY {self._run_order} DESC",(case['id'],)).fetchall()
+        rows=c.execute(f"SELECT * FROM runs WHERE case_id=? AND status='completed' AND applied=1 AND response LIKE ? ORDER BY {self._run_order} DESC",
+                       (case['id'],'%"planning_status":"planned"%')).fetchall()
         current=at(case['clock'])
         for row in rows:
             request=json.loads(row['request']); response=json.loads(row['response'] or '{}')
@@ -218,7 +219,7 @@ class CaseService:
             elif a == 'checkin':
                 next(w for w in snap['workers'] if w['person_id']=='C05')['location_id'] = p.get('zone_id','shelter_a')
             elif a == 'recover':
-                ids = p['person_ids']
+                ids = [pid for pid in p['person_ids'] if next(w for w in snap['workers'] if w['person_id']==pid)['availability']=='available']
                 snap['recovery'] = {'evidence_id':eid,'recorded_at':t,'actor_id':'C01','person_ids':ids,'zone_id':p['zone_id']}
                 for w in snap['workers']:
                     if w['person_id'] in ids: w['location_id'] = p['zone_id']
@@ -318,7 +319,7 @@ class CaseService:
         plan=json.loads(capture_row['response']).get('crew_rest',{})
         return plan.get('planning_status') in {'unknown','model_invalid'} or plan.get('solver_status') in {'UNKNOWN','MODEL_INVALID'}
 
-    async def retry(self, actor: str | None, expected_version: int):
+    async def retry(self, actor: str | None, expected_version: int, case_id: str | None = None):
         if actor is None: raise CaseError(401,'Choose a local persona')
         if actor not in {'P02','P03','C01'}: raise CaseError(403,'Calculation retry belongs to an operational lead')
         async with self._retry_lock:
@@ -326,6 +327,7 @@ class CaseService:
                 if self._postgres: c.execute('BEGIN IMMEDIATE')
                 case=self._active(c)
                 if not case: raise CaseError(404,'No active case')
+                if case_id is not None and case_id!=case['id']: raise CaseError(409,'Case changed')
                 if expected_version!=case['version']: raise CaseError(409,'Case version changed')
                 latest_run=c.execute(f'SELECT * FROM runs WHERE case_id=? AND version=? ORDER BY {self._run_order} DESC LIMIT 1',
                                      (case['id'],case['version'])).fetchone()
@@ -345,6 +347,16 @@ class CaseService:
         p = body.get('payload') or {}
         if not isinstance(p,dict): raise CaseError(422,'payload must be an object')
         self._validate_payload(action,p)
+        with self._conn() as c:
+            active=self._active(c)
+            if active:
+                if body.get('case_id') is not None and body['case_id']!=active['id']: raise CaseError(409,'Case changed')
+                prior=c.execute('SELECT action,actor_id,payload,command_payload FROM events WHERE case_id=? AND command_id=?',
+                                (active['id'],command_id)).fetchone()
+                if prior:
+                    if prior['action']!=action or prior['actor_id']!=actor or (prior['command_payload'] or prior['payload'])!=encoded(p):
+                        raise CaseError(409,'command_id already used')
+                    return self.read_case(actor)
         if action in {'start_work','review'}:
             await self._refresh_now()
         repeated = False
@@ -352,6 +364,7 @@ class CaseService:
             c.execute('BEGIN IMMEDIATE')
             case = self._active(c)
             if not case: raise CaseError(404,'No active case')
+            if body.get('case_id') is not None and body['case_id']!=case['id']: raise CaseError(409,'Case changed')
             prior = c.execute('SELECT action,actor_id,payload,command_payload FROM events WHERE case_id=? AND command_id=?',(case['id'],command_id)).fetchone()
             if prior:
                 if prior['action'] != action or prior['actor_id'] != actor or (prior['command_payload'] or prior['payload']) != encoded(p): raise CaseError(409,'command_id already used')
@@ -392,6 +405,8 @@ class CaseService:
         if action in {'readiness','leila'} and any(at(i['valid_until'])<=at(case['clock']) for i in p['confirmations']): raise CaseError(422,'Readiness must remain valid after confirmation')
         if action=='activity': self._validate_activity_continuity(case,self._events(c,case['id']),p['intervals'])
         done = {r['action'] for r in c.execute('SELECT action FROM events WHERE case_id=?',(case['id'],))}
+        if action=='recover' and 'report' in done and 'remove' not in done:
+            raise CaseError(409,"Confirm Bilal's welfare location with removal before the complete headcount")
         if action in done and action not in {'activity','readiness','fresh','coverage_review','assign','start_work','start_recovery',*RESTART_ACTIONS}: raise CaseError(409,'Action already recorded')
         if not all(prereq in done for prereq in ACTIONS[action][2]): raise CaseError(409,'Prerequisite evidence missing')
         if action == 'review':
@@ -420,6 +435,13 @@ class CaseService:
             if set(p['person_ids']) & set(current_response.get('protective_response',{}).get('excluded_worker_ids',[])) or 'workshop_prep' in current_response.get('heat',{}).get('held_task_ids',[]):
                 raise CaseError(409,'Current protective controls block workshop work')
             snap=self._project(case,self._events(c,case['id']))['snapshot']
+            workshop={w['person_id'] for w in snap['workers'] if w['location_id']=='workshop'}
+            window=next((w for w in snap['zone_windows'] if w['zone_id']=='workshop' and at(w['starts_at'])<=at(case['clock'])<at(w['ends_at']) and w['status']=='available'),None)
+            room=next(l for l in assessment['request']['locations'] if l['id']=='workshop')
+            staffing=snap['workshop']['staffing_demand']
+            count=len(workshop|set(p['person_ids']))
+            if not window or count<staffing['minimum'] or count>staffing['maximum'] or count+len(window['fixed_occupant_ids'])>room['capacity']:
+                raise CaseError(409,'Actual workshop occupancy or staffing limit blocks this start')
             for worker in snap['workers']:
                 if worker['person_id'] in p['person_ids']:
                     rd=worker['readiness']
@@ -604,13 +626,16 @@ class CaseService:
             if await self.recompute(*changed): self._notify(*changed)
         return bool(changed)
 
-    async def signal(self, kind: str, payload: dict):
+    async def signal(self, kind: str, payload: dict, case_id: str | None = None):
         if kind!='reading': raise CaseError(422,'Unsupported signal')
         self._validate_payload('fresh',{'reading':payload})
         with self._conn() as c:
             c.execute('BEGIN IMMEDIATE')
             case=self._active(c)
             if not case: raise CaseError(404,'No active case')
+            if case_id is not None and case_id!=case['id']: raise CaseError(409,'Case changed')
+            if not case.get('started_at'): raise CaseError(409,'Historical case is read only; reset to start a live case')
+            if at(case['clock'])>=END: raise CaseError(409,'The scenario window has ended')
             if at(payload['received_at'])>at(case['clock']): raise CaseError(422,'Reading has not arrived at case clock')
             version=case['version']+1
             c.execute('INSERT INTO events(case_id,command_id,actor_id,action,occurred_at,payload) VALUES (?,?,?,?,?,?)',(case['id'],f'signal-{uuid.uuid4()}','sensor','sensor_reading',case['clock'],encoded({'reading':payload})))
@@ -801,6 +826,8 @@ class CaseService:
         recover=next((e for e in events if e['action']=='recover'),None)
         headcount={'expected_count':11,'checked_in_count':1 if checkin else 0,
                    'confirmed_count':11 if recover else 0,'confirmed_at':recover['occurred_at'] if recover else None,
+                   'cooled_recovery_count':sum(w['location_id'] in {'shelter_a','shelter_b'} for w in current_snapshot['workers']) if recover else 0,
+                   'welfare_count':sum(w['location_id']=='welfare' for w in current_snapshot['workers']) if recover else 0,
                    'arrivals':[{'person_id':'C05','checked_in_at':checkin['occurred_at']}] if checkin else []}
         if persona_id in {'C05','C08'}:
             headcount['arrivals']=[item for item in headcount['arrivals'] if item['person_id']==persona_id]
@@ -836,6 +863,7 @@ class CaseService:
             if event['action']=='start_work': intervals.extend(event['payload'].get('recovery_intervals',[]))
             if event['action']=='start_recovery': intervals.extend(event['payload']['work_intervals'])
         arrivals=[{'person_id':'C05','checked_in_at':checkin['occurred_at']}] if checkin else []
+        snapshot=self._project(case,events)['snapshot']
         if actor in {'C05','C08'}:
             arrivals=[item for item in arrivals if item['person_id']==actor]
             intervals=[item for item in intervals if item['person_id']==actor]
@@ -847,7 +875,9 @@ class CaseService:
         records={'instruction':{'issued_at':issue['occurred_at'],'acknowledged_at':ack['occurred_at'] if ack else None} if issue else None,
                  'stop':{'confirmed_at':stop['occurred_at']} if stop else None,
                  'headcount':{'expected_count':11,'checked_in_count':1 if checkin else 0,'confirmed_count':11 if recover else 0,
-                              'confirmed_at':recover['occurred_at'] if recover else None},
+                              'confirmed_at':recover['occurred_at'] if recover else None,
+                              'cooled_recovery_count':sum(w['location_id'] in {'shelter_a','shelter_b'} for w in snapshot['workers']) if recover else 0,
+                              'welfare_count':sum(w['location_id']=='welfare' for w in snapshot['workers']) if recover else 0},
                  'arrivals':arrivals,'observed_time':intervals}
         result={'policy_id':'heat-rest-schedule-v1','title':'Fictional Sandline–Dune Heat Rest Schedule',
                 'case_id':case['id'],'source':'demo/cross-scenario/HEAT_REST_SCHEDULE.md',
