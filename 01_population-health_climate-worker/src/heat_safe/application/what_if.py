@@ -66,6 +66,11 @@ def make_tool(read_view: Callable[[], dict], solver_url: str, post: Post = http_
             return {'status': 'error', 'message': 'Name at least one worker to change.'}
         view = read_view()
         capture = (view or {}).get('capture') or {}
+        assessment = (view or {}).get('plan_assessment')
+        if assessment is not None:
+            if assessment.get('status') not in {'proposed', 'approved'}:
+                return {'status': 'error', 'message': 'Confirm current observed activity before calculating a new what-if plan.'}
+            capture = assessment
         request = capture.get('request')
         if not request:
             return {'status': 'error', 'message': 'There is no calculated case evidence to change yet.'}
@@ -88,4 +93,4 @@ def make_tool(read_view: Callable[[], dict], solver_url: str, post: Post = http_
 def tools_for(actor: str, read_view: Callable[[], dict], solver_url: str) -> list:
     """Workers only see their own plan, so a crew-wide what-if is for supervisors and responders."""
     from heat_safe.application.platform_api import WORKERS
-    return [] if actor in WORKERS else [make_tool(read_view, solver_url)]
+    return [] if actor in WORKERS or actor == 'P10' else [make_tool(read_view, solver_url)]

@@ -28,8 +28,27 @@ check_hosted_config()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     access.initialize()
+    access.initialize_tabs(app.state.service)
     await app.state.service.replay_unfinished()
-    yield
+    await app.state.service.catch_up()
+    async def monitor_time():
+        while True:
+            await asyncio.sleep(1)
+            try:
+                await app.state.service.catch_up()
+            except Exception:
+                # Reads and commands also catch up; a transient DB/solver failure must not stop the monitor.
+                import logging
+                logging.getLogger(__name__).exception('Case time update failed')
+    monitor = asyncio.create_task(monitor_time())
+    try:
+        yield
+    finally:
+        monitor.cancel()
+        try:
+            await monitor
+        except asyncio.CancelledError:
+            pass
 
 app = FastAPI(title='Heat Safe case', lifespan=lifespan,
               docs_url=None if access.required() else '/docs',
@@ -53,6 +72,7 @@ class SessionInput(BaseModel):
 
 
 class CommandInput(BaseModel):
+    case_id: str = Field(min_length=1, max_length=128)
     command_id: str
     expected_version: int
     action: str
@@ -60,6 +80,7 @@ class CommandInput(BaseModel):
 
 
 class RetryInput(BaseModel):
+    case_id: str = Field(min_length=1, max_length=128)
     expected_version: int
 
 
@@ -72,6 +93,7 @@ class ClockInput(BaseModel):
 
 
 class SignalInput(BaseModel):
+    case_id: str = Field(min_length=1, max_length=128)
     kind: str
     payload: dict
 
@@ -100,42 +122,53 @@ async def personas():
 
 @app.get('/api/session')
 async def session(request: Request):
-    actor=app.state.service.actor_from_request(request)
+    actor=request.app.state.service.actor_from_request(request)
     return {'person':PEOPLE.get(actor)}
 
 
 @app.post('/api/session')
 async def choose_session(body: SessionInput, request: Request):
-    token,person=app.state.service.create_session(body.persona_id)
-    access.bind_persona(request, token)
-    response=JSONResponse({'person':person})
-    response.set_cookie('heat_persona',token,httponly=True,samesite='lax',secure=access.required())
-    return response
+    if body.persona_id not in PEOPLE:
+        raise CaseError(422, 'Unknown persona')
+    access.select_persona(request, request.app.state.service, body.persona_id)
+    return {'person': PEOPLE[body.persona_id]}
 
 
 @app.delete('/api/session')
 async def leave_session(request: Request):
-    app.state.service.delete_session(request.cookies.get('heat_persona'))
-    response=JSONResponse({'person':None})
-    response.delete_cookie('heat_persona')
-    return response
+    access.clear_persona(request, request.app.state.service)
+    return {'person': None}
 
 
 @app.get('/api/case')
 async def get_case(request: Request):
-    actor=app.state.service.actor_from_request(request)
+    service = request.app.state.service
+    await service.catch_up()
+    actor=service.actor_from_request(request)
     if actor is None: raise CaseError(401,'Choose a local persona')
-    return app.state.service.read_case(actor)
+    return service.read_case(actor)
+
+
+@app.get('/api/case/heat-rest')
+async def heat_rest(request: Request):
+    service = request.app.state.service
+    await service.catch_up()
+    actor = service.actor_from_request(request)
+    if actor is None:
+        raise CaseError(401, 'Choose your account')
+    return service.heat_rest(actor)
 
 
 @app.post('/api/case/commands')
 async def command(request: Request, body: CommandInput):
-    return await app.state.service.command(app.state.service.actor_from_request(request),body.model_dump())
+    service = request.app.state.service
+    return await service.command(service.actor_from_request(request),body.model_dump())
 
 
 @app.post('/api/case/retry')
 async def retry(request: Request, body: RetryInput):
-    return await app.state.service.retry(app.state.service.actor_from_request(request),body.expected_version)
+    service = request.app.state.service
+    return await service.retry(service.actor_from_request(request),body.expected_version,case_id=body.case_id)
 
 
 @app.get('/api/case/events')
@@ -167,12 +200,12 @@ async def start(body: StartInput):
 
 @app.post('/api/demo/clock')
 async def clock(body: ClockInput):
-    return await app.state.service.advance_clock(body.at)
+    raise CaseError(409, 'Case time runs automatically. Start a new rehearsal instead of changing its clock.')
 
 
 @app.post('/api/demo/signals')
 async def signal(body: SignalInput):
-    return await app.state.service.signal(body.kind,body.payload)
+    return await app.state.service.signal(body.kind,body.payload,case_id=body.case_id)
 
 
 @app.get('/api/demo/runs')

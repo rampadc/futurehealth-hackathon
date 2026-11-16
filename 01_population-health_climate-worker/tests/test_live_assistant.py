@@ -31,6 +31,12 @@ def test_history_requires_signed_in_persona(client):
     assert client.post('/api/chat', json={'case_id': 'case-1', 'message': 'Hello'}).status_code == 401
 
 
+def test_employer_review_cannot_open_operational_chat(client):
+    client.cookies.set('actor', 'P10')
+    assert client.get('/api/chat/history').status_code == 403
+    assert client.post('/api/chat', json={'case_id': 'case-1', 'message': 'Show the crew risks'}).status_code == 403
+
+
 def test_history_is_persistent_and_scoped_by_case_and_persona(client):
     assistant.save_message('case-1:P03', 'first', 'assistant', 'Maya’s answer', {'sources': []})
     assistant.save_message('case-1:C05', 'second', 'assistant', 'Rana’s answer')
@@ -60,6 +66,22 @@ def test_case_agent_uses_the_persona_gate_and_says_nothing_is_applied():
     source = inspect.getsource(assistant.build_agent)
     assert 'tools_for(actor, current, service.solver_url)' in source and '*what_if' in source
     assert 'nothing was recorded or applied' in source
+
+
+def test_plan_tool_uses_checked_assessment_and_current_worker_locations():
+    view = {'case_id': 'case-1', 'clock': '2025-08-04T08:10:01+04:00',
+            'capture': {'response': {'crew_rest': {'planning_status': 'blocked'}}},
+            'request': {'snapshot': {'workers': [{'person_id': 'C05', 'location_id': 'workshop'}]}},
+            'plan_assessment': {'status': 'approved', 'assessed_at': '2025-08-04T08:05:00+04:00',
+                'approval_deadline': '2025-08-04T08:10:00+04:00',
+                'response': {'crew_rest': {'planning_status': 'planned', 'useful_worker_minutes': 120,
+                    'intervals': [{'person_id': 'C05', 'kind': 'work'}]}}}}
+    result = assistant.plan_evidence(view, {'C05': 'Rana'})
+    assert result['crew_rest']['useful_worker_minutes'] == 120
+    assert result['workers'][0]['location_id'] == 'workshop'
+    assert result['crew_rest']['intervals'][0]['person_name'] == 'Rana'
+    view['plan_assessment']['status'] = 'expired'
+    assert assistant.plan_evidence(view, {'C05': 'Rana'})['crew_rest'] is None
 
 
 def test_message_retries_do_not_duplicate_records(client):
