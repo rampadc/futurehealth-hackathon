@@ -27,13 +27,19 @@ function Now({ session }: ScreenProps) {
   if (!caseView || !person) return <NoCase session={session} />;
   const { story, excluded, current, next, recovering } = statusOf(session);
   const heat = heatNow(caseView);
+  const location = caseView.request?.snapshot.workers.find(worker => worker.person_id === person.id)?.location_id;
+  const inShelter = location === 'shelter_a' || location === 'shelter_b';
+  const actualCurrent = current?.kind === 'work' && location !== 'workshop' ? null : current;
+  const stopOrdered = story.issued && !story.stopped;
+  const goToShelter = story.stopped && !story.recovered && !inShelter && location !== 'welfare';
+  const workingNow = location === 'workshop' && !stopOrdered && !excluded;
   const checkin = taskFor(caseView, 'checkin');
   const checkedIn = person.id === 'C05' ? checkin?.status === 'recorded' : story.checkedIn;
   return <div className="hs-screen">
     <h1 id="hs-title"><T k="p2.title" /></h1>
     {story.issued && !story.stopped && <button type="button" className="hs-button is-danger" onClick={() => navigate('/worker/alert')}><T k="stopwork" /> · {t('p2.stop.d')}</button>}
     <Hero>
-      <Metric label={<T k="p2.status" />} value={excluded ? <En>Rest now</En> : current ? <En>{kindLabel(current.kind)}</En> : recovering ? t('p2.inrec') : <En>Work as briefed</En>} sub={excluded ? <En>Stay with the site support team</En> : recovering ? t('shelterA') : undefined} tone={excluded ? 'red' : recovering ? 'ok' : undefined} />
+      <Metric label={<T k="p2.status" />} value={excluded ? <En>Rest now</En> : stopOrdered ? <En>Stop heavy work</En> : goToShelter ? <En>Go to shelter</En> : workingNow ? <En>Workshop work</En> : actualCurrent ? <En>{kindLabel(actualCurrent.kind)}</En> : recovering ? t('p2.inrec') : heat.heavyHeld ? <En>Hold heavy work</En> : <En>Work as briefed</En>} sub={excluded ? <En>Stay with the site support team</En> : stopOrdered || goToShelter ? <En>Go to Shelter A</En> : workingNow ? <En>Cooled workshop preparation</En> : recovering ? t('shelterA') : undefined} tone={excluded || stopOrdered ? 'red' : goToShelter || heat.heavyHeld && !recovering ? 'amber' : recovering && !workingNow ? 'ok' : undefined} />
       <Metric label={<T k="p2.heat" />} value={heat.reading ? `${heat.reading.twl} W/m²` : '—'} sub={<><En><Band band={heat.band.band} label={heat.band.label} /></En>{heat.heavyHeld && <> · {t('p2.heatq')}</>}</>} />
       <Metric label={<T k="p2.next" />} value={next ? <><En>{kindLabel(next.kind)}</En> {time(next.starts_at)}</> : '—'} sub={next ? (next.kind === 'work' ? t('workshop') : t('shelterA')) : <En>Wait for your foreman</En>} />
     </Hero>
@@ -93,7 +99,7 @@ function Shelter({ session }: ScreenProps) {
     {queued ? <Statement tone="black"><En>Saved on this phone · sends when the network returns</En></Statement>
       : done ? <Statement tone="black"><T k="kiosk.checked" /> · {time(caseView.clock)}</Statement>
       : <Statement source={<T k="p6.qr" />}><T k="p6.hold" /></Statement>}
-    {!task && <Note><En>Only Rana’s check-in is part of this demo case. Your foreman records everyone else at the shelter.</En></Note>}
+    {!task && <Note><En>Your foreman confirms the crew’s physical headcount. Follow the shelter instruction.</En></Note>}
     {task && !done && task.status !== 'ready' && <Note tone="amber"><En>Check-in opens once your foreman confirms the stop.</En></Note>}
     <CtaBar>
       {done ? <button type="button" className="hs-button" onClick={() => navigate('/worker/now')}><T k="p6.back" /></button>

@@ -20,6 +20,10 @@ export function EvidenceAction({ action, caseView, person, onAction, busy }: {
 }) {
   const task: Task | undefined = caseView.tasks.find(item => item.action === action && item.actor_id === person.id);
   const label = ACTIONS[action as ActionId]?.label ?? extraLabels[action] ?? task?.label ?? action.replaceAll('_', ' ');
+  const known = caseWorkers(caseView);
+  const workers = known.length ? known : Array.from({ length: 11 }, (_, index) => ({ person_id: `C${String(index + 2).padStart(2, '0')}` }));
+  const activeWorkers = workers.filter(w => !(w.person_id === 'C08' && caseView.story.reported));
+  const rosterKey = activeWorkers.map(worker => worker.person_id).join(',');
   const [twl, setTwl] = useState('145');
   const [basis, setBasis] = useState('Foreman checked the worker in person');
   const [readinessStatus, setReadinessStatus] = useState<'ready' | 'not_ready'>('ready');
@@ -32,11 +36,9 @@ export function EvidenceAction({ action, caseView, person, onAction, busy }: {
     setObserved(false);
     setAccounted(false);
     setActivity({});
+    setSelected([]);
     setValidUntil(atDubai(new Date(Date.parse(caseView.clock) + 2 * 60 * 60_000).toISOString()));
-  }, [caseView.clock, caseView.version]);
-  const known = caseWorkers(caseView);
-  const workers = known.length ? known : Array.from({ length: 11 }, (_, index) => ({ person_id: `C${String(index + 2).padStart(2, '0')}` }));
-  const activeWorkers = workers.filter(w => !(w.person_id === 'C08' && caseView.story.reported));
+  }, [caseView.case_id, action, rosterKey]);
   const displayLabel = label;
   const status = task?.status ?? 'waiting';
   const payload = (): Record<string, unknown> => {

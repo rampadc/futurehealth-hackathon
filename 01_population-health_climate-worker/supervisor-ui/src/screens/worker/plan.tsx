@@ -49,7 +49,7 @@ function CheckIn({ session }: ScreenProps) {
       <Note><T k="p1.sees" /></Note>
     </Section>}
     {!online && <Note tone="amber"><T k="p4.offline" /></Note>}
-    {!report && (step === 'unwell' || step === 'emergency') && <Note tone="amber"><En>In this demo only Bilal’s report reaches the case. Tell your foreman in person.</En></Note>}
+    {!report && (step === 'unwell' || step === 'emergency') && <Note tone="amber"><En>Tell your foreman in person so the site support team can help you.</En></Note>}
     {(step === 'unwell' || step === 'emergency') && <CtaBar>
       <HoldButton disabled={!canSend} onConfirm={() => void session.act('report', {})} hint={t('hold')}><T k="p4.send" /></HoldButton>
     </CtaBar>}

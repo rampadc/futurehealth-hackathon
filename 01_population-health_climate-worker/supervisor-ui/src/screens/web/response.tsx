@@ -22,7 +22,7 @@ export function HeatControlsScreen({ session }: ScreenProps) {
     <Head kicker={`Heat controls · Civil trench · ${time(caseView.clock)} GST`} title="Heat controls" sub="The environmental band and the site’s heavy-work hold are separate decisions." />
     <Hero>
       <Metric label="TWL now" value={r ? `${r.twl} W/m²` : '—'} sub={<><Band band={heat.band.band} label={heat.band.label} /> · sensor {r?.sensor_id ?? '—'} · {time(r?.measured_at)} {heat.heavyHeld && <Hold />}</>} tone={heat.heavyHeld ? 'red' : undefined} />
-      <Metric label="Site rule" value="≤ 150" sub="Stop heavy work · Sandline heat plan (fictional)" />
+      <Metric label="Site rule" value="≤ 150" sub="Stop heavy work · Sandline heat plan" />
       <Metric label="Legal zone" value={heat.band.label} sub="ADOSH display bands" />
     </Hero>
     <div className="hs-grid">

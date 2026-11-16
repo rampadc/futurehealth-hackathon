@@ -98,9 +98,12 @@ export const assignedIds = (capture: ReplayCapture | null | undefined) =>
   [...new Set(capture?.response.crew_rest.intervals.filter(i => i.kind === 'work' && i.task_id === 'workshop_prep').map(i => i.person_id) ?? [])];
 
 /** The assessed proposal is a distinct, reviewable snapshot, independent of later captures. */
-export const assessmentCapture = (caseView: CaseView): ReplayCapture | null => caseView.plan_assessment && caseView.capture
-  ? { ...caseView.capture, request: caseView.plan_assessment.request, response: caseView.plan_assessment.response }
-  : caseView.capture;
+export const assessmentCapture = (caseView: CaseView): ReplayCapture | null => {
+  if (!caseView.capture) return null;
+  if (!caseView.plan_assessment) return caseView.capture;
+  const { request, response } = caseView.plan_assessment;
+  return request && response ? { ...caseView.capture, request, response } : null;
+};
 
 export const intervalsOf = (capture: ReplayCapture | null | undefined, personId: string): Interval[] =>
   (capture?.response.crew_rest.intervals ?? []).filter(i => i.person_id === personId).sort((a, b) => a.starts_at.localeCompare(b.starts_at));

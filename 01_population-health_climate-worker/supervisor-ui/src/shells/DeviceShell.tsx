@@ -44,7 +44,7 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
       <main className="hs-signin">
         <p className="hs-label">Heat-Safe Crew · {info.name}</p>
         <h1>Choose who is using this {phone ? 'phone' : device === 'kiosk' ? 'kiosk' : 'workspace'}</h1>
-        <p className="hs-muted">Named sign-in is demo persona selection, not authentication.</p>
+        <p className="hs-muted">Choose your named role to see its site actions and records.</p>
         <ul className="hs-people">{people.map(p => <li key={p.id}><button type="button" className="hs-btn" disabled={session.busy} onClick={() => void session.signIn(p)}><Avatar id={p.id} size="md" /><span><b>{p.name}</b><span>{p.role} · {p.organisation}</span></span></button></li>)}</ul>
         {session.error && <p role="alert" className="hs-error">{session.error}</p>}
         <DeviceSwitch current={device} />

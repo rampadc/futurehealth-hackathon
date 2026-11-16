@@ -42,7 +42,7 @@ function DesktopApp({ onLockAccess, demoControl }: Props & { demoControl: boolea
   if (initialising) return <Box sx={{ p: 5 }} role="status"><CircularProgress size={24} /> Loading case…</Box>;
   if (demoControl) return <DemoControl caseView={caseView} onReturn={() => navigate('/classic')} onChange={async next => { if (person) await refreshCase(); else session.setCaseView(next); setFeedback(''); }} />;
   if (!person) return <><SignIn caseView={caseView} onSignIn={selected => { void session.signIn(selected); }} />{error && <Alert severity="error" role="alert" sx={{ position: 'fixed', bottom: 24, right: 24 }}>{error}</Alert>}</>;
-  if (person.id === 'C05' || person.id === 'C08' || person.id === 'P10' || person.id === 'P09') return <Box component="main" sx={{ p: 4 }}><Typography variant="h5">Your workspace is on the current app</Typography><Button onClick={() => navigate(person.id === 'P10' ? '/web/heat-rest' : person.id === 'P09' ? '/web/settings' : '/worker/now')}>Open my screen</Button></Box>;
+  if (person.id === 'C05' || person.id === 'C08' || person.id === 'P10' || person.id === 'P09' || person.id === 'P01') return <Box component="main" sx={{ p: 4 }}><Typography variant="h5">Your workspace is on the current app</Typography><Button onClick={() => navigate(person.id === 'P10' || person.id === 'P01' ? '/web/heat-rest' : person.id === 'P09' ? '/web/settings' : '/worker/now')}>Open my screen</Button></Box>;
   const story = caseView?.story;
   const capture = caseView?.capture ?? undefined;
   const worker = person.id === 'C05' || person.id === 'C08';

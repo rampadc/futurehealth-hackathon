@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from '../App';
 import { loadCase, type CaseId } from '../replay';
@@ -27,6 +27,7 @@ const ownRisk = { inputs: riskInputs, person_id: 'C05', band: 'amber', twl_wm2: 
 let consent: { person_id: string; language: string; scopes: string[]; consented_at: string | null };
 let photos: Record<string, string>;
 let photoCalls: Array<{ method: string; image?: string }>;
+let heatRestOverride: unknown = null;
 const checks = (primary: string) => [{ id: 'signal', ok: primary !== '#D32F2F', label: primary === '#D32F2F' ? 'Brand colour reads as the stop signal' : 'Brand colour does not read as a safety signal' }];
 
 async function makeCase(id: CaseId, story: Partial<StoryState>, tasks: Task[]): Promise<CaseView> {
@@ -47,7 +48,7 @@ beforeEach(() => {
   person = null; commands = []; commandIds = []; currentCase = null; brandCalls = []; chatHistory = [];
   brand = { version: 0, published_at: null, published_by: null, platform: null, mobile: null };
   consent = { person_id: 'C05', language: 'en', scopes: [], consented_at: null };
-  photos = {}; photoCalls = [];
+  photos = {}; photoCalls = []; heatRestOverride = null;
   vi.stubGlobal('EventSource', undefined);
   vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const path = String(input);
@@ -58,7 +59,7 @@ beforeEach(() => {
       return reply({ person });
     }
     if (path === '/api/case') return reply(currentCase);
-    if (path === '/api/case/heat-rest') return reply({ policy_id: 'heat-rest-schedule-v1', title: 'Heat Rest Schedule', source: 'Dune Civil Works policy', scope: 'C02–C12', case_id: currentCase?.case_id, coverage_review: null, records: { stop: null, headcount: currentCase?.headcount, arrivals: currentCase?.headcount?.arrivals ?? [], observed_time: [] }, review_queue: { status: 'pending', policy_id: 'heat-rest-schedule-v1', expected_count: 11, confirmed_count: currentCase?.headcount?.confirmed_count ?? 0 } });
+    if (path === '/api/case/heat-rest') return reply(heatRestOverride ?? { policy_id: 'heat-rest-schedule-v1', title: 'Fictional Sandline–Dune Heat Rest Schedule', source: 'demo/cross-scenario/HEAT_REST_SCHEDULE.md', scope: 'C02–C12', case_id: currentCase?.case_id, payroll_verified: false, coverage_review: null, records: { stop: null, headcount: currentCase?.headcount, arrivals: currentCase?.headcount?.arrivals ?? [], observed_time: [] }, review_queue: { status: 'pending', policy_id: 'heat-rest-schedule-v1', expected_count: 11, confirmed_count: currentCase?.headcount?.confirmed_count ?? 0 } });
     if (path === '/api/case/commands') {
       commands.push({ action: body.action, payload: body.payload }); commandIds.push(body.command_id);
       const t = currentCase?.tasks.find(x => x.action === body.action);
@@ -144,11 +145,73 @@ describe('stop-work', () => {
     await open('/web/heat-rest', 'P10');
     const user = userEvent.setup();
     expect(await screen.findByRole('heading', { name: 'Heat and rest coverage review' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Sandline–Dune Heat Rest Schedule' })).toBeTruthy();
+    expect(screen.getByText('Payroll payment has not been verified.')).toBeTruthy();
+    expect((screen.getByText(/demo\/cross-scenario\/HEAT_REST_SCHEDULE\.md/).closest('details') as HTMLDetailsElement).open).toBe(false);
     await user.click(screen.getByRole('checkbox', { name: /I verified the C02–C12 crew roster/ }));
     await user.type(screen.getByRole('textbox', { name: 'Basis or unresolved item' }), 'Checked employer roster');
     await user.click(screen.getByRole('button', { name: 'Record employer coverage review' }));
     await waitFor(() => expect(commands[0]).toMatchObject({ action: 'coverage_review', payload: { policy_id: 'heat-rest-schedule-v1', status: 'confirmed', roster_verified: true, note: 'Checked employer roster' } }));
     expect(commands[0].payload.crew_ids).toEqual(Array.from({ length: 11 }, (_, i) => `C${String(i + 2).padStart(2, '0')}`));
+  });
+
+  it('lets Mina flag coverage for verification without falsely attesting the roster', async () => {
+    currentCase = await makeCase('heat_trigger', {}, [task('coverage_review', 'P10', 'ready')]);
+    await open('/web/heat-rest', 'P10');
+    const user = userEvent.setup();
+    await screen.findByRole('heading', { name: 'Heat and rest coverage review' });
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Coverage status' }), 'needs_verification');
+    await user.type(screen.getByRole('textbox', { name: 'Basis or unresolved item' }), 'Roster identity requires checking');
+    const button = screen.getByRole('button', { name: 'Record employer coverage review' }) as HTMLButtonElement;
+    expect(button.disabled).toBe(false);
+    await user.click(button);
+    await waitFor(() => expect(commands[0]).toMatchObject({ action: 'coverage_review', payload: { status: 'needs_verification', roster_verified: false, note: 'Roster identity requires checking' } }));
+  });
+
+  it('keeps Mina’s coverage draft through a same-case poll', async () => {
+    currentCase = await makeCase('heat_trigger', {}, [task('coverage_review', 'P10', 'ready')]);
+    await open('/web/heat-rest', 'P10');
+    const user = userEvent.setup();
+    await screen.findByRole('heading', { name: 'Heat and rest coverage review' });
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Coverage status' }), 'needs_verification');
+    await user.type(screen.getByRole('textbox', { name: 'Basis or unresolved item' }), 'Need roster evidence');
+    currentCase.version++;
+    currentCase.clock = '2025-08-04T08:05:00+04:00';
+    await act(async () => { window.dispatchEvent(new Event('focus')); });
+    expect((screen.getByRole('combobox', { name: 'Coverage status' }) as HTMLSelectElement).value).toBe('needs_verification');
+    expect((screen.getByRole('textbox', { name: 'Basis or unresolved item' }) as HTMLTextAreaElement).value).toBe('Need roster evidence');
+  });
+
+  it('shows Amal aggregate chronology, confirmed duration, delivery and open commercial questions', async () => {
+    currentCase = await makeCase('heat_trigger', { stopped: true, recovered: true }, []);
+    heatRestOverride = { policy_id: 'heat-rest-schedule-v1', title: 'Fictional Sandline–Dune Heat Rest Schedule', source: 'demo/cross-scenario/HEAT_REST_SCHEDULE.md', scope: 'Dune Civil Works C02–C12', case_id: currentCase.case_id, payroll_verified: false,
+      coverage_review: { status: 'confirmed', roster_verified: true, note: 'Private employer note', reviewed_by: 'P10', reviewed_at: currentCase.clock },
+      records: { headcount: { expected_count: 11, checked_in_count: 1, confirmed_count: 11 }, observed_time: [] },
+      commercial_summary: { stop_at: currentCase.clock, recovery_confirmed_at: currentCase.clock, confirmed_count: 11, coverage_status: 'confirmed', cost_review_at: null,
+        chronology: [{ action: 'stop', title: 'Heavy work stopped', occurred_at: currentCase.clock }, { action: 'checkin', title: 'Rana Al Nadir checked in', occurred_at: currentCase.clock }], confirmed_time: { recovery_worker_minutes: 26, workshop_worker_minutes: 2, latest_observed_at: currentCase.clock },
+        employer_review: { status: 'confirmed', roster_verified: true, reviewed_at: currentCase.clock }, delivery: { status: 'accepted', milestones: [{ action: 'acceptDelivery', occurred_at: currentCase.clock }] },
+        unresolved_questions: [{ id: 'cost-impact', question: 'Has the cost impact been reviewed?', status: 'open' }] } };
+    await open('/web/heat-rest', 'P01');
+    expect(await screen.findByRole('heading', { name: 'Project evidence' })).toBeTruthy();
+    expect(screen.getByText(/Confirmed recovery: 26 worker-minutes/)).toBeTruthy();
+    expect(screen.getByText(/Confirmed workshop work: 2 worker-minutes/)).toBeTruthy();
+    expect(screen.getByText('Delivery accepted')).toBeTruthy();
+    expect(screen.getByText('Personal shelter arrival recorded')).toBeTruthy();
+    expect(screen.getByText('Has the cost impact been reviewed?')).toBeTruthy();
+    expect(screen.queryByText('Private employer note')).toBeNull();
+    expect(screen.queryByText('Rana Al Nadir checked in')).toBeNull();
+  });
+
+  it('keeps Amal monitoring aggregate-only with an absent solver capture', async () => {
+    currentCase = await makeCase('heat_trigger', { issued: true, stopped: true, recovered: true }, [task('costReview', 'P01', 'ready')]);
+    currentCase.capture = null; currentCase.request = null; currentCase.plan_assessment = null; currentCase.workers = [];
+    currentCase.headcount = { expected_count: 11, checked_in_count: 1, confirmed_count: 11, confirmed_at: currentCase.clock, arrivals: [] };
+    await open('/web/monitoring', 'P01');
+    expect(await screen.findByRole('heading', { name: 'Project monitoring' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Open project heat and rest view' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Record cost impact review' })).toBeTruthy();
+    expect(screen.queryByText('Heat risk by worker')).toBeNull();
+    expect(screen.queryByText('0 / 0')).toBeNull();
   });
 
   it('Huda acknowledges from the site app', async () => {
@@ -168,7 +231,7 @@ describe('stop-work', () => {
   it('shows replayed site conditions on heat controls without using them for clearance', async () => {
     currentCase = await makeCase('heat_trigger', {}, [task('issue', 'P03', 'ready')]);
     await open('/web/heat-controls', 'P03');
-    expect(await screen.findByRole('heading', { name: 'Site conditions · ERA5 replay' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: 'Site conditions · Historical ERA5' })).toBeTruthy();
     expect(screen.getByText(/08:00 · TWL 127 W\/m² in sun · 167 in shade/)).toBeTruthy();
     expect(screen.getAllByText(/never clears a hold/).length).toBeGreaterThan(0);
     expect(screen.getByRole('list', { name: 'TWL in sun by hour' }).querySelector('[aria-current="time"]')?.textContent).toContain('08:00');
@@ -215,6 +278,17 @@ describe('stop-work', () => {
     expect(screen.getByText(/Your supervisor sees your band and action, never the reasons/)).toBeTruthy();
   });
 
+  it('tells a worker to stop and reach shelter before recovery is confirmed', async () => {
+    currentCase = await makeCase('heat_trigger', { issued: true }, []);
+    await open('/worker/now', 'C05');
+    expect(await screen.findByText('Stop heavy work')).toBeTruthy();
+    expect(screen.queryByText('Work as briefed')).toBeNull();
+    currentCase = await makeCase('heat_trigger', { issued: true, stopped: true }, []);
+    await open('/worker/now', 'C05');
+    expect(await screen.findByText('Go to shelter')).toBeTruthy();
+    expect(screen.queryByText('Work as briefed')).toBeNull();
+  });
+
   it('records the full foreman headcount after one personal arrival', async () => {
     currentCase = await makeCase('heat_trigger', { stopped: true, checkedIn: true }, [task('recover', 'C01', 'ready')]);
     currentCase.headcount = { expected_count: 11, checked_in_count: 1, confirmed_count: 0, confirmed_at: null, arrivals: [{ person_id: 'C05', checked_in_at: currentCase.clock }] };
@@ -239,6 +313,22 @@ describe('stop-work', () => {
 });
 
 describe('assessed workshop plan', () => {
+  it('shows an actionable waiting state for a nullable assessment response', async () => {
+    currentCase = await makeCase('heat_trigger', { stopped: true, recovered: true }, [task('activity', 'C01', 'ready')]);
+    currentCase.plan_assessment = { id: null, assessed_at: null, observed_through: null, approval_deadline: null, status: 'awaiting_observations', request: null, response: null };
+    await open('/site/proposal', 'C01');
+    expect(await screen.findByText(/Current observed activity is needed for every active worker/)).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Approve assessed proposal' })).toBeNull();
+  });
+
+  it('keeps the return-to-recovery action visible if the new assessment is blocked', async () => {
+    currentCase = await makeCase('incident_substitute', { stopped: true, recovered: true, assigned: true }, [task('start_recovery', 'C01', 'ready')]);
+    currentCase.request!.snapshot.workers[0].location_id = 'workshop';
+    currentCase.plan_assessment = { id: null, assessed_at: null, observed_through: null, approval_deadline: null, status: 'blocked', request: null, response: null };
+    await open('/site/proposal', 'C01');
+    expect(await screen.findByText(/Current planning is blocked/)).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Confirm work stopped and return to recovery' })).toBeTruthy();
+  });
   it('binds approval to the current assessment and disables expired proposals', async () => {
     currentCase = await makeCase('incident_substitute', { stopped: true, recovered: true }, [task('assign', 'C01', 'ready')]);
     const capture = currentCase.capture!;

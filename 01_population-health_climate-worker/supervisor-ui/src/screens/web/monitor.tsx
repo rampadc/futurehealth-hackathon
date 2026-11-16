@@ -12,8 +12,17 @@ import { CrewRiskPanel } from '../risk';
 
 /** Squad Monitoring: within five seconds, does anyone need action now? */
 export function SquadMonitoringScreen({ session }: ScreenProps) {
-  const { caseView } = session;
+  const { caseView, person } = session;
   if (!caseView) return <NoCase session={session} />;
+  if (person?.id === 'P01') return <div className="hs-screen">
+    <Head kicker={`Project monitoring · ${time(caseView.clock)} GST`} title="Project monitoring" sub="Case-linked operations and commercial review" />
+    <Hero>
+      <Metric label="Heavy work" value={caseView.story.stopped ? 'Stopped' : caseView.story.issued ? 'Stop instructed' : 'Awaiting instruction'} tone={caseView.story.issued ? 'red' : undefined} />
+      <Metric label="Foreman headcount" value={`${caseView.headcount?.confirmed_count ?? 0} / ${caseView.headcount?.expected_count ?? 11}`} />
+    </Hero>
+    <Section title="Project evidence"><p>Review the case chronology, confirmed work and recovery duration, employer coverage and delivery state.</p><button type="button" className="hs-button is-primary" onClick={() => navigate('/web/heat-rest')}>Open project heat and rest view</button></Section>
+    <Section title="Cost impact review"><ActionButton session={session} action="costReview" label="Record cost impact review" /></Section>
+  </div>;
   const story = caseView.story;
   const heat = heatNow(caseView);
   const people = crew(caseView);

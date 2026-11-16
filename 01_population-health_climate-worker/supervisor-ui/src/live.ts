@@ -19,7 +19,7 @@ export type CaseView = {
   viewer_id?: string;
   time?: { mode: 'elapsed' | 'legacy'; server_now: string; started_at: string; ends_at: string; status: 'running' | 'ended' | 'historical' };
   headcount?: { expected_count: number; checked_in_count: number; confirmed_count: number; cooled_recovery_count?: number; welfare_count?: number; confirmed_at: string | null; arrivals: Array<{ person_id: string; checked_in_at: string }> };
-  plan_assessment?: { id: string; assessed_at: string; observed_through: string; approval_deadline: string; status: 'proposed' | 'approved' | 'expired' | 'awaiting_observations' | 'blocked'; approved_at?: string | null; started_worker_ids?: string[]; request: ReplayRequest; response: ReplayCapture['response']; check?: unknown } | null;
+  plan_assessment?: { id: string | null; assessed_at: string | null; observed_through: string | null; approval_deadline: string | null; status: 'proposed' | 'approved' | 'expired' | 'awaiting_observations' | 'blocked'; approved_at?: string | null; started_worker_ids?: string[]; request: ReplayRequest | null; response: ReplayCapture['response'] | null; check?: unknown } | null;
 };
 
 export class ApiError extends Error {
@@ -86,6 +86,12 @@ export type HeatRestView = {
   coverage_review: null | { status: 'confirmed' | 'needs_verification'; crew_ids?: string[]; roster_verified: boolean; note: string; reviewed_by?: string; reviewed_at?: string };
   records?: { instruction?: { issued_at?: string; acknowledged_at?: string } | null; stop?: { confirmed_at?: string } | null; headcount?: { expected_count: number; checked_in_count: number; confirmed_count: number; confirmed_at?: string | null }; arrivals?: Array<{ person_id: string; checked_in_at: string }>; observed_time?: Array<{ person_id?: string; kind: string; starts_at: string; ends_at: string }> };
   review_queue?: { status: 'pending' | 'reviewed'; policy_id: string; expected_count: number; confirmed_count: number };
-  commercial_summary?: { stop_at?: string | null; recovery_confirmed_at?: string | null; confirmed_count?: number; coverage_status?: string; cost_review_at?: string | null };
+  commercial_summary?: { stop_at?: string | null; recovery_confirmed_at?: string | null; confirmed_count?: number; coverage_status?: string; cost_review_at?: string | null;
+    chronology?: Array<{ action: string; title: string; occurred_at: string }>;
+    confirmed_time?: { recovery_worker_minutes: number; workshop_worker_minutes: number; latest_observed_at: string | null };
+    employer_review?: { status: string; roster_verified: boolean; reviewed_at: string } | null;
+    delivery?: { status: 'not_started' | 'drafted' | 'approved' | 'sent' | 'accepted'; milestones: Array<{ action: string; occurred_at: string }> };
+    unresolved_questions?: Array<{ id: string; question: string; status: 'open' }>;
+  };
   [key: string]: unknown;
 };

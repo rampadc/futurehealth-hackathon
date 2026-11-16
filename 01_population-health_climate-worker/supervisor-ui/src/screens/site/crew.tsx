@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { atDubai, payloads, toIso } from '../../commands';
 import { EvidenceAction } from '../../EvidenceAction';
+import { ApprovalCountdown } from '../../LiveClock';
 import { reasonLabel } from '../../copy';
 import { navigate } from '../../router';
 import { assessmentCapture, assignedIds, crew, intervalsOf, kindLabel, time, who, type CrewMember } from '../data';
@@ -84,14 +85,20 @@ export function ProposalScreen({ session }: ScreenProps) {
   const plan = capture?.response.crew_rest;
   const ids = assignedIds(capture);
   const people = crew(caseView);
-  if (!plan) return <div className="hs-screen"><Head title="Proposal" /><Empty>No proposal yet. Planning unlocks when the headcount and confirmations are complete.</Empty></div>;
-  const planned = plan.planning_status === 'planned';
   const assessment = caseView.plan_assessment;
+  const working = (caseView.request?.snapshot.workers ?? caseView.capture?.request.snapshot.workers ?? []).filter(w => w.location_id === 'workshop' && !(w.person_id === 'C08' && caseView.story.reported)).map(w => w.person_id);
+  const canReturn = caseView.tasks.some(t => t.action === 'start_recovery' && t.status === 'ready');
+  const returnControl = canReturn && <Section title="Stop workshop work and return to recovery">
+    <p>Choose workers you saw stop work and return to cooled shelter. This records actual work through now.</p>
+    {working.map(id => <label className="hs-field" key={id}><input type="checkbox" checked={returnIds.includes(id)} onChange={e => setReturnIds(old => e.target.checked ? [...old, id] : old.filter(x => x !== id))} /> {who(id)}</label>)}
+    <button type="button" className="hs-button is-primary" disabled={!returnIds.length || session.busy} onClick={() => void session.act('start_recovery', { person_ids: returnIds, zone_id: 'shelter_a', observed_work: true }).then(() => setReturnIds([]))}>Confirm work stopped and return to recovery</button>
+  </Section>;
+  if (!plan) return <div className="hs-screen"><Head title="Proposal review" /><Empty>{assessment?.status === 'awaiting_observations' ? 'Current observed activity is needed for every active worker before a new proposal can be assessed.' : assessment?.status === 'blocked' ? 'Current planning is blocked. Review the live reading, readiness and observed activity.' : 'No proposal yet. Planning unlocks when the headcount and confirmations are complete.'}</Empty>{returnControl}</div>;
+  const planned = plan.planning_status === 'planned';
+  const reviewStatus = assessment?.status === 'proposed' ? 'Ready for Huda review' : assessment?.status === 'approved' ? 'Approved proposal' : assessment?.status === 'expired' ? 'Review window expired' : 'No current proposal';
   const now = Date.parse(caseView.clock);
   const workNow = [...new Set(plan.intervals.filter(i => i.kind === 'work' && Date.parse(i.starts_at) <= now && now < Date.parse(i.ends_at)).map(i => i.person_id))];
   const canStart = assessment?.status === 'approved' && workNow.length > 0 && caseView.tasks.some(t => t.action === 'start_work' && t.status === 'ready');
-  const working = (caseView.request?.snapshot.workers ?? caseView.capture?.request.snapshot.workers ?? []).filter(w => w.location_id === 'workshop' && !(w.person_id === 'C08' && caseView.story.reported)).map(w => w.person_id);
-  const canReturn = caseView.tasks.some(t => t.action === 'start_recovery' && t.status === 'ready');
   return <div className="hs-screen">
     <Head kicker={`Proposal · ${time(caseView.clock)} GST`} title="Proposal review" />
     <Hero>
@@ -102,7 +109,7 @@ export function ProposalScreen({ session }: ScreenProps) {
     <Draft>
       <p><b>{planned ? `${ids.length} workers meet every requirement for workshop preparation.` : `Planning is ${plan.planning_status.replaceAll('_', ' ')}.`}</b></p>
       {plan.blockers.length > 0 && <p>Waiting for: {plan.blockers.map(reasonLabel).join(', ')}.</p>}
-      <p className="hs-small">Assessed {time(assessment?.assessed_at)} · review by {time(assessment?.approval_deadline)} · {assessment?.status ?? 'historical'}</p><p className="hs-small">Solver {plan.solver_status ?? '—'}{plan.optimal ? ' · optimal' : ''} · policy {plan.policy_id ?? 'none'} · {plan.useful_worker_minutes ?? 0} proposed worker-minutes</p>
+      <p className="hs-small">Assessed {time(assessment?.assessed_at)} · review by {time(assessment?.approval_deadline)} · {reviewStatus}{assessment?.status === 'proposed' && assessment.approval_deadline && <> · <ApprovalCountdown view={caseView} deadline={assessment.approval_deadline} /></>}</p><p className="hs-small">Solver {plan.solver_status ?? '—'}{plan.optimal ? ' · optimal' : ''} · policy {plan.policy_id ?? 'none'} · {plan.useful_worker_minutes ?? 0} proposed worker-minutes</p>
     </Draft>
     <Section title="Proposed workers">
       {ids.length ? <List>{ids.map(id => { const iv = intervalsOf(capture, id); return <Row key={id} lead={<Avatar id={id} size="md" />} title={who(id)} detail={iv.slice(0, 3).map(i => `${kindLabel(i.kind)} ${time(i.starts_at)}–${time(i.ends_at)}`).join(', ')} badge={caseView.story.assigned ? <span className="hs-badge" data-tone="done">✓ Assigned</span> : <span className="hs-badge" data-tone="plan">Proposed</span>} />; })}</List>
@@ -119,11 +126,7 @@ export function ProposalScreen({ session }: ScreenProps) {
       <label className="hs-field"><input type="checkbox" checked={prerequisitesConfirmed} onChange={e => setPrerequisitesConfirmed(e.target.checked)} /> I confirmed workshop permit, resources, supervision and readiness.</label>
       <button type="button" className="hs-button is-primary" disabled={!canStart || !recoveryConfirmed || !prerequisitesConfirmed || session.busy} onClick={() => void session.act('start_work', { assessment_id: assessment.id, person_ids: workNow, observed_recovery: true, prerequisites_confirmed: true })}>Confirm start of work for {workNow.length} workers</button>
     </Section>}
-    {canReturn && <Section title="Stop workshop work and return to recovery">
-      <p>Choose workers you saw stop work and return to cooled shelter. This records actual work through now.</p>
-      {working.map(id => <label className="hs-field" key={id}><input type="checkbox" checked={returnIds.includes(id)} onChange={e => setReturnIds(old => e.target.checked ? [...old, id] : old.filter(x => x !== id))} /> {who(id)}</label>)}
-      <button type="button" className="hs-button is-primary" disabled={!returnIds.length || session.busy} onClick={() => void session.act('start_recovery', { person_ids: returnIds, zone_id: 'shelter_a', observed_work: true }).then(() => setReturnIds([]))}>Confirm work stopped and return to recovery</button>
-    </Section>}
+    {returnControl}
   </div>;
 }
 
