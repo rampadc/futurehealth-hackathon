@@ -30,7 +30,7 @@ function CheckIn({ session }: ScreenProps) {
   return <div className="hs-screen">
     <h1 id="hs-title"><T k="p4.title" /></h1>
     <p className="hs-muted"><T k="p4.hint" /></p>
-    {step === 'start' && <Section title={<T k="p4.conv" />}>
+    {step === 'start' && <Section icon="message" title={<T k="p4.conv" />}>
       <div className="hs-form">
         <button type="button" className="hs-button is-danger" onClick={() => setStep('unwell')}><T k="unwell" /></button>
         <button type="button" className="hs-button" onClick={() => setStep('ok')}><T k="p4.water" /></button>
@@ -39,7 +39,7 @@ function CheckIn({ session }: ScreenProps) {
       <VoiceCheckIn onUnderstood={() => setStep('unwell')} />
     </Section>}
     {step === 'ok' && <Note><En>Noted on this phone. Drink water and keep to your rest times. Only “I feel unwell” asks your supervisor for help.</En></Note>}
-    {(step === 'unwell' || step === 'emergency') && <Section title={<T k="p4.fixedq" />}>
+    {(step === 'unwell' || step === 'emergency') && <Section icon="message" title={<T k="p4.fixedq" />}>
       <Statement><T k="p4.q" /></Statement>
       <div className="hs-form-row">
         <button type="button" className="hs-button" aria-pressed={step === 'unwell'} onClick={() => setStep('unwell')}><T k="no" /></button>
@@ -83,7 +83,7 @@ function MyPlan({ session }: ScreenProps) {
         <Metric label={<T k="p5.nextrest" />} value={nextRest ? `${time(nextRest.starts_at)}–${time(nextRest.ends_at)}` : '—'} sub={t('shelterA')} />
         <Metric label="Work in plan" value={`${work} min`} />
       </Hero>
-      <Section title={<T k="p5.hour" />}>
+      <Section icon="calendar" title={<T k="p5.hour" />}>
         <List>{mine.map(i => <Row key={i.starts_at} title={`${time(i.starts_at)}–${time(i.ends_at)} · ${i.kind === 'work' ? t('work') : t('rest')}`} detail={i.kind === 'work' ? t('p5.prep') : t('p5.rec')} badge={actuallyCurrent === i ? <span className="hs-badge" data-tone="plan"><T k="p5.now" /></span> : undefined} />)}</List>
       </Section>
     </>}

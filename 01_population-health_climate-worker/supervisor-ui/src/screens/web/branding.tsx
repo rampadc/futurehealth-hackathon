@@ -78,7 +78,7 @@ export function BrandingSettings({ session }: ScreenProps) {
             <span className="hs-label">{theme}</span>
             <div className="hs-preview-bar"><BrandMark palette={draft.platform} /><span>Supervisor web</span></div>
             <div className="hs-preview-bar"><BrandMark palette={draft.mobile} /><span>Site and worker apps</span></div>
-            <span className="hs-hold">■ Heavy-work hold</span>
+            <span className="hs-hold">Heavy-work hold</span>
           </div>)}</div>
         </Draft>
       </Section>

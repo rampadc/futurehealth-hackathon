@@ -33,11 +33,11 @@
     },
     render() {
       const [state, text] = this.summary();
-      const glyph = { synced: '✓', pending: '…', sending: '↻', failed: '!', offline: '⌀' }[state];
-      $$('[data-sync]').forEach(el => { el.dataset.state = state; el.innerHTML = `<span aria-hidden="true">${glyph}</span>${text}`; el.setAttribute('aria-label', `Sync status: ${text}`); });
+      const glyph = { synced: '<span class="si" data-status="ok" aria-hidden="true"></span>', pending: '…', sending: '↻', failed: '<span class="si" data-status="error" aria-hidden="true"></span>', offline: '⌀' }[state];
+      $$('[data-sync]').forEach(el => { el.dataset.state = state; el.innerHTML = `${glyph.startsWith('<') ? glyph : `<span aria-hidden="true">${glyph}</span>`}${text}`; el.setAttribute('aria-label', `Sync status: ${text}`); });
       const q = $('#queue'); if (!q) return;
       const label = { saved: 'Saved on this phone', sending: 'Sending', sent: 'Sent', failed: 'Not sent', conflict: 'Conflict' };
-      const mark = { saved: '…', sending: '', sent: '✓', failed: '!', conflict: '≠' };
+      const mark = { saved: '…', sending: '', sent: '<span class="si" data-status="ok" aria-hidden="true"></span>', failed: '<span class="si" data-status="error" aria-hidden="true"></span>', conflict: '<span class="si" data-status="warn" aria-hidden="true"></span>' };
       q.innerHTML = this.items.map(i => `<li class="queue__item" data-state="${i.state}" data-id="${i.id}">
         <span class="queue__mark" aria-hidden="true">${mark[i.state]}</span>
         <span class="queue__body"><span class="queue__title">${i.title}</span><span class="queue__meta"><b>${label[i.state]}</b> · ${i.meta}</span></span>

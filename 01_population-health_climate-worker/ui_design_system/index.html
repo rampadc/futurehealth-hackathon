@@ -18,33 +18,48 @@
 <div class="guide">
   <nav class="guide__nav" aria-label="Design system sections">
     <div class="rail__brand"><div class="t-title">Heat-Safe</div><div class="t-meta">Design system · “Issued Sheet” · v0.1</div></div>
-    <ol>
-      <li><a href="#metaphor"><span>01</span>Metaphor</a></li>
-      <li><a href="#colour"><span>02</span>Colour</a></li>
-      <li><a href="#type"><span>03</span>Type</a></li>
-      <li><a href="#space"><span>04</span>Space and targets</a></li>
-      <li><a href="#motion"><span>05</span>Motion</a></li>
-      <li><a href="#icons"><span>06</span>Icons</a></li>
-      <li><a href="#signals"><span>07</span>Signal grammar</a></li>
-      <li><a href="#buttons"><span>08</span>Buttons</a></li>
-      <li><a href="#fields"><span>09</span>Fields and controls</a></li>
-      <li><a href="#status"><span>10</span>Stamps and readouts</a></li>
-      <li><a href="#rows"><span>11</span>Action rows</a></li>
-      <li><a href="#drafts"><span>12</span>AI and proposals</a></li>
-      <li><a href="#feedback"><span>13</span>Feedback states</a></li>
-      <li><a href="#confirm"><span>14</span>Confirmations</a></li>
-      <li><a href="#timeline"><span>15</span>Timeline and statements</a></li>
-      <li><a href="#compositions"><span>16</span>Compositions</a></li>
-      <li><a href="#platform"><span>17</span>Web ↔ mobile rules</a></li>
-      <li><a href="#glare"><span>18</span>Glare and gloves</a></li>
-      <li><a href="#sync"><span>19</span>Offline and sync</a></li>
-      <li><a href="#agent"><span>20</span>Agent task state</a></li>
-      <li><a href="#ambient"><span>21</span>Ambient AI</a></li>
-      <li><a href="#guardrails"><span>22</span>Guardrails and rollback</a></li>
-      <li><a href="#capture"><span>23</span>Field capture</a></li>
-      <li><a href="#zones"><span>24</span>Zone plan</a></li>
-      <li><a href="#brand"><span>25</span>Company branding</a></li>
-      <li><a href="#crew-photos"><span>26</span>Crew photos</a></li>
+    <ol class="navchaps">
+      <li class="navchap" data-chap="1"><span class="navchap__label" id="nc1"><span>Part 1</span>Foundations</span>
+        <ol aria-labelledby="nc1">
+          <li><a data-tone="1" href="#metaphor"><span>01</span>Metaphor</a></li>
+          <li><a data-tone="2" href="#colour"><span>02</span>Colour</a></li>
+          <li><a data-tone="3" href="#type"><span>03</span>Type</a></li>
+          <li><a data-tone="4" href="#space"><span>04</span>Space and targets</a></li>
+          <li><a data-tone="5" href="#motion"><span>05</span>Motion</a></li>
+          <li><a data-tone="1" href="#icons"><span>06</span>Icons</a></li>
+          <li><a data-tone="2" href="#signals"><span>07</span>Signal grammar</a></li>
+        </ol></li>
+      <li class="navchap" data-chap="2"><span class="navchap__label" id="nc2"><span>Part 2</span>Components</span>
+        <ol aria-labelledby="nc2">
+          <li><a data-tone="3" href="#buttons"><span>08</span>Buttons</a></li>
+          <li><a data-tone="4" href="#fields"><span>09</span>Fields and controls</a></li>
+          <li><a data-tone="5" href="#status"><span>10</span>Stamps and readouts</a></li>
+          <li><a data-tone="1" href="#rows"><span>11</span>Action rows</a></li>
+          <li><a data-tone="2" href="#drafts"><span>12</span>AI and proposals</a></li>
+          <li><a data-tone="3" href="#feedback"><span>13</span>Feedback states</a></li>
+          <li><a data-tone="4" href="#confirm"><span>14</span>Confirmations</a></li>
+          <li><a data-tone="5" href="#timeline"><span>15</span>Timeline and statements</a></li>
+        </ol></li>
+      <li class="navchap" data-chap="3"><span class="navchap__label" id="nc3"><span>Part 3</span>Screens and conditions</span>
+        <ol aria-labelledby="nc3">
+          <li><a data-tone="1" href="#compositions"><span>16</span>Compositions</a></li>
+          <li><a data-tone="2" href="#platform"><span>17</span>Web ↔ mobile rules</a></li>
+          <li><a data-tone="3" href="#glare"><span>18</span>Glare and gloves</a></li>
+          <li><a data-tone="4" href="#sync"><span>19</span>Offline and sync</a></li>
+        </ol></li>
+      <li class="navchap" data-chap="4"><span class="navchap__label" id="nc4"><span>Part 4</span>AI and field patterns</span>
+        <ol aria-labelledby="nc4">
+          <li><a data-tone="5" href="#agent"><span>20</span>Agent task state</a></li>
+          <li><a data-tone="1" href="#ambient"><span>21</span>Ambient AI</a></li>
+          <li><a data-tone="2" href="#guardrails"><span>22</span>Guardrails and rollback</a></li>
+          <li><a data-tone="3" href="#capture"><span>23</span>Field capture</a></li>
+          <li><a data-tone="4" href="#zones"><span>24</span>Zone plan</a></li>
+        </ol></li>
+      <li class="navchap" data-chap="5"><span class="navchap__label" id="nc5"><span>Part 5</span>Identity</span>
+        <ol aria-labelledby="nc5">
+          <li><a data-tone="5" href="#brand"><span>25</span>Company branding</a></li>
+          <li><a data-tone="1" href="#crew-photos"><span>26</span>Crew photos</a></li>
+        </ol></li>
     </ol>
     <div class="controls">
       <div class="field"><span class="field__label" id="themeL">Light</span>
@@ -63,13 +78,18 @@
 
   <main class="guide__main" id="main">
 
+  <div class="gchap" data-chap="1" role="group" aria-labelledby="gch1">
+  <header class="gchap__open"><span class="gchap__part">Part 1 · Sections 01–07</span><p class="gchap__title" id="gch1">Foundations</p>
+    <p class="gchap__lede">The sheet, its palette, type, space, motion, icons and the four kinds of statement. Every component after this is built from these.</p>
+    <nav class="gchap__toc" aria-label="In Foundations"><a href="#metaphor"><span>01</span>Metaphor</a> <a href="#colour"><span>02</span>Colour</a> <a href="#type"><span>03</span>Type</a> <a href="#space"><span>04</span>Space and targets</a> <a href="#motion"><span>05</span>Motion</a> <a href="#icons"><span>06</span>Icons</a> <a href="#signals"><span>07</span>Signal grammar</a></nav></header>
+
   <!-- 01 ─────────────────────────────────────────────────────────── -->
   <section class="gsec" id="metaphor" aria-labelledby="h-metaphor">
     <header><span class="gsec__num">01 · Core metaphor</span>
       <h1 class="hero-title" id="h-metaphor">The issued sheet.</h1>
       <p>Heat-Safe is read in a site cabin and in 45 °C glare by people who already trust two things: engineering drawings and safety signs. Every screen is a <b>sheet on the site permit board</b>. Drawing conventions decide structure; safety-sign conventions decide colour. Nothing floats, glows or casts a shadow, because a sheet doesn’t.</p></header>
     <ol class="rules-list">
-      <li><b>1 · Line weight is hierarchy.</b><span class="t-small muted">Hair 1px separates rows. Structure 2px frames a section. Signal 8px frames, on all four sides, the one cell that needs action.</span></li>
+      <li><b>1 · Line weight is hierarchy.</b><span class="t-small muted">Hair 1px separates rows. Structure 2px frames a section. Signal is an 8px top line over a 1px frame, both in the signal colour, on the one cell that needs action.</span></li>
       <li><b>2 · Line style is certainty.</b><span class="t-small muted">Solid = issued fact. Dashed = draft, proposal or AI, not yet issued. Hatched = no work happens here.</span></li>
       <li><b>3 · Ink fill is a stamp.</b><span class="t-small muted">A solid ink block means a human recorded it, or an emergency. Stamps are the heaviest mass on a sheet, so they are rare.</span></li>
       <li><b>4 · Colour is a safety signal, never decoration.</b><span class="t-small muted">ISO 3864 meanings only: red prohibits, yellow cautions, green confirms a safe condition, blue instructs. Components are identified by number, not hue.</span></li>
@@ -79,7 +99,7 @@
     <div class="lineset" aria-label="Line vocabulary">
       <div class="line-spec"><i style="border-block-start: var(--rule-hair)"></i><b>Hair · 1px</b>Rows, cells</div>
       <div class="line-spec"><i style="border-block-start: var(--rule-structure)"></i><b>Structure · 2px</b>Sections, frames</div>
-      <div class="line-spec"><i style="border: var(--rule-signal)"></i><b>Signal · 8px frame</b>Needs action now · the whole cell</div>
+      <div class="line-spec"><i style="box-shadow: var(--signal-frame)"></i><b>Signal · 8px top + 1px frame</b>Needs action now · the whole cell</div>
       <div class="line-spec"><i style="border-block-start: var(--rule-draft)"></i><b>Draft · 2px dashed</b>AI, proposal</div>
       <div class="line-spec"><i style="background: var(--hatch-rest); border: var(--rule-hair)"></i><b>Hatch</b>Rest, break, excluded</div>
       <div class="line-spec"><i style="background: var(--color-ink)"></i><b>Stamp</b>Recorded, emergency</div>
@@ -162,10 +182,17 @@
     </div>
   </section>
 
+  </div>
+
+  <div class="gchap" data-chap="2" role="group" aria-labelledby="gch2">
+  <header class="gchap__open"><span class="gchap__part">Part 2 · Sections 08–15</span><p class="gchap__title" id="gch2">Components</p>
+    <p class="gchap__lede">The parts screens are assembled from, each shown in every state it can take.</p>
+    <nav class="gchap__toc" aria-label="In Components"><a href="#buttons"><span>08</span>Buttons</a> <a href="#fields"><span>09</span>Fields and controls</a> <a href="#status"><span>10</span>Stamps and readouts</a> <a href="#rows"><span>11</span>Action rows</a> <a href="#drafts"><span>12</span>AI and proposals</a> <a href="#feedback"><span>13</span>Feedback states</a> <a href="#confirm"><span>14</span>Confirmations</a> <a href="#timeline"><span>15</span>Timeline and statements</a></nav></header>
+
   <!-- 08 ─────────────────────────────────────────────────────────── -->
   <section class="gsec" id="buttons" aria-labelledby="h-buttons">
     <header><span class="gsec__num">08 · Buttons</span><h2 id="h-buttons">Every state, every variant</h2>
-      <p>Hover adds a yellow rail; press sinks 1px (secondary inverts); focus is an ink ring with a yellow halo that survives glare; disabled is hatched pencil with <code>disabled</code> and a not-allowed cursor; loading keeps the width and sets <code>aria-busy</code>; error closes the button in the red 8px signal frame and adds a reason.</p></header>
+      <p>Buttons are sentence case with a 4px bottom key edge, so they never read as stamps. Hover adds a yellow rail; press pushes the key down and the edge collapses (secondary inverts); focus is an ink ring with a yellow halo that survives glare; disabled is hatched pencil with <code>disabled</code> and a not-allowed cursor; loading keeps the width and sets <code>aria-busy</code>; error marks the button with the red signal, an 8px top line over a 1px frame, and adds a reason.</p></header>
     <div class="matrix-scroll"><div class="matrix" style="--cols:6">
       <div class="mh">Variant</div><div class="mh">Default</div><div class="mh">Hover</div><div class="mh">Focus</div><div class="mh">Active</div><div class="mh">Disabled</div><div class="mh">Loading</div>
       <div><b>Primary</b></div>
@@ -179,7 +206,7 @@
     </div></div>
     <div class="cols">
       <div class="stack"><h3>Live: success</h3><button class="btn btn--primary" type="button" data-load data-ok="08:19 · Action marked done">Mark action done</button><span class="caption">Click: aria-busy for 1.4s, then a toast.</span></div>
-      <div class="stack"><h3>Live: failure</h3><button class="btn btn--primary" type="button" data-load data-fail="1" aria-describedby="failMsg">Send plan to crew phones</button><span class="field__error" id="failMsg" hidden>■ Not sent. 0 of 4 delivered. Your plan is saved; retry when the network returns.</span></div>
+      <div class="stack"><h3>Live: failure</h3><button class="btn btn--primary" type="button" data-load data-fail="1" aria-describedby="failMsg">Send plan to crew phones</button><span class="field__error" id="failMsg" hidden>Not sent. 0 of 4 delivered. Your plan is saved; retry when the network returns.</span></div>
     </div>
   </section>
 
@@ -191,7 +218,7 @@
       <div class="field"><label class="field__label" for="f1">Evidence reference</label><input class="input" id="f1" placeholder="e.g. Shelter A · 08:18 · in person"><span class="field__hint">Default</span></div>
       <div class="field"><label class="field__label" for="f2">Evidence reference</label><input class="input is-hover" id="f2" value="PTW-0412"><span class="field__hint">Hover</span></div>
       <div class="field"><label class="field__label" for="f3">Evidence reference</label><input class="input is-focus" id="f3" value="PTW-04"><span class="field__hint">Focus</span></div>
-      <div class="field is-error"><label class="field__label" for="f4">Meter ID</label><input class="input" id="f4" aria-invalid="true" aria-describedby="f4e" value=""><span class="field__error" id="f4e" aria-live="polite">■ Meter ID is required for a manual reading.</span></div>
+      <div class="field is-error"><label class="field__label" for="f4">Meter ID</label><input class="input" id="f4" aria-invalid="true" aria-describedby="f4e" value=""><span class="field__error" id="f4e" aria-live="polite">Meter ID is required for a manual reading.</span></div>
       <div class="field"><label class="field__label" for="f5">Confirmer</label><input class="input" id="f5" value="Huda (C01) · recorded automatically" disabled><span class="field__hint">Disabled: set by sign-in</span></div>
       <div class="field is-loading"><label class="field__label" for="f6">Latest reading</label><input class="input" id="f6" value="Requesting from sensor t1…" aria-busy="true" readonly><span class="field__hint">Loading</span></div>
     </div>
@@ -233,7 +260,7 @@
   <!-- 10 ─────────────────────────────────────────────────────────── -->
   <section class="gsec" id="status" aria-labelledby="h-status">
     <header><span class="gsec__num">10 · Stamps and readouts</span><h2 id="h-status">Status words and instrument readings</h2>
-      <p>Readouts sit in one ruled band, divided by hairlines, not floated in separate cards. The focal readout takes double width and the 8px signal frame on all four sides.</p></header>
+      <p>Readouts sit in one ruled band, divided by hairlines, not floated in separate cards. The focal readout takes double width and the signal: an 8px top line over a 1px frame.</p></header>
     <div class="row-flex">
       <span class="stamp stamp--stop" data-glyph="■">Stop-work</span>
       <span class="stamp stamp--caution" data-glyph="▲">Caution</span>
@@ -241,7 +268,7 @@
       <span class="stamp stamp--mandatory" data-glyph="▶">Work 08:11</span>
       <span class="stamp stamp--emergency" data-glyph="✚">Emergency</span>
       <span class="stamp stamp--recorded" data-glyph="✓">Recorded</span>
-      <span class="stamp" data-glyph="✓">Done</span>
+      <span class="stamp stamp--done" data-glyph="✓">Done</span>
       <span class="stamp stamp--waiting" data-glyph="…">Waiting</span>
       <span class="stamp stamp--overdue" data-glyph="!">Overdue</span>
       <span class="stamp stamp--draft" data-glyph="◇">AI</span>
@@ -264,14 +291,14 @@
   <!-- 11 ─────────────────────────────────────────────────────────── -->
   <section class="gsec" id="rows" aria-labelledby="h-rows">
     <header><span class="gsec__num">11 · Action rows</span><h2 id="h-rows">The workhorse of every list</h2>
-      <p>One row is one touch target. The lead is the crew photo whenever the row is about a person. The trailing stamp carries status; the inline-start edge carries selection (ink); urgency closes the whole row in the 8px signal frame. On the worker app descriptions never truncate.</p></header>
-    <section class="ledger" aria-labelledby="ledgerH">
-      <div class="ledger__head"><span class="t-label" id="ledgerH">Needs action</span><span class="ledger__count">4 · sorted by urgency</span></div>
+      <p>One row is one touch target. The lead is the crew photo whenever the row is about a person. The trailing stamp carries status; the inline-start edge carries selection (ink); urgency marks the whole row with the signal: an 8px top line over a 1px frame. On the worker app descriptions never truncate.</p></header>
+    <section class="ledger" aria-labelledby="ledgerH" data-tone="1">
+      <div class="ledger__head"><span class="t-label" id="ledgerH"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>Needs action</span><span class="ledger__count">4 · sorted by urgency</span></div>
       <ul class="ledger__list">
         <li><button class="arow arow--urgent" type="button"><span class="arow__lead" data-person="C08" data-size="md"></span><span class="arow__body"><span class="arow__title">Bilal (C08) · needs rest now</span><span class="arow__desc">Remove from heat and check on him within 10 minutes. Unplanned rest recorded 08:18.</span></span><span class="arow__trail"><span class="stamp stamp--stop" data-glyph="■">Red</span><span class="arow__time">due 08:28</span></span></button></li>
         <li><button class="arow is-hover" type="button" tabindex="-1"><span class="arow__lead" data-person="P06" data-size="md"></span><span class="arow__body"><span class="arow__title">Record first-aid contact · hover</span><span class="arow__desc">Salim (P06) notified 08:18.</span></span><span class="arow__trail"><span class="stamp stamp--waiting" data-glyph="…">Waiting</span></span></button></li>
         <li><button class="arow is-focus is-selected" type="button" tabindex="-1" aria-current="true"><span class="arow__lead"><span class="rail__num">3</span></span><span class="arow__body"><span class="arow__title">Review replan 08:18–09:18 · focus + selected</span><span class="arow__desc">Bilal excluded from work. Leila unconfirmed: choose a branch before sending.</span></span><span class="arow__trail"><span class="stamp stamp--overdue" data-glyph="!">Overdue</span></span></button></li>
-        <li><button class="arow arow--done" type="button"><span class="arow__lead"><span class="rail__num">2</span></span><span class="arow__body"><span class="arow__title">Confirm a safe recovery location · done</span><span class="arow__desc">11 of 11 checked in at Shelter A, 08:04 · kiosk.</span></span><span class="arow__trail"><span class="stamp" data-glyph="✓">Done</span></span></button></li>
+        <li><button class="arow arow--done" type="button"><span class="arow__lead"><span class="rail__num">2</span></span><span class="arow__body"><span class="arow__title">Confirm a safe recovery location · done</span><span class="arow__desc">11 of 11 checked in at Shelter A, 08:04 · kiosk.</span></span><span class="arow__trail"><span class="stamp stamp--done" data-glyph="✓">Done</span></span></button></li>
         <li><button class="arow" type="button" disabled><span class="arow__lead" data-person="P02" data-size="md"></span><span class="arow__body"><span class="arow__title">Record restart decision · disabled</span><span class="arow__desc">Only Rashid (superintendent) can record a restart.</span></span><span class="arow__trail"><span class="stamp" data-glyph="🔒" style="border-color:var(--color-pencil)">Locked</span></span></button></li>
         <li aria-hidden="true"><div class="arow"><span class="arow__lead"><span class="skel" style="inline-size:1.5rem;block-size:1.5rem"></span></span><span class="arow__body"><span class="skel skel--title"></span><span class="skel skel--line"></span></span><span class="arow__trail"><span class="skel skel--stamp"></span></span></div></li>
       </ul>
@@ -309,9 +336,9 @@
     <header><span class="gsec__num">13 · Feedback states</span><h2 id="h-feedback">Errors, offline, empty, loading</h2>
       <p>No happy-path-only screens. Errors never clear a form; cached data stays visible with its age. Empty states say why the sheet is blank and offer one way forward.</p></header>
     <div class="stack">
-      <div class="banner" role="alert"><span class="banner__text"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>Couldn’t reach Heat-Safe in 20 seconds. Showing the last update from 08:04. Your entries are saved on this device.</span><button class="btn" type="button" data-load data-ok="Updated 08:19">Retry</button></div>
+      <div class="banner" role="alert"><span class="banner__text"><span class="si" data-status="error" aria-hidden="true"></span>Couldn’t reach Heat-Safe in 20 seconds. Showing the last update from 08:04. Your entries are saved on this device.</span><button class="btn" type="button" data-load data-ok="Updated 08:19">Retry</button></div>
       <div class="banner banner--offline" role="status"><span class="banner__text"><svg class="icon" aria-hidden="true"><use href="#i-offline"/></svg>No network. Warnings come from the rules on this phone. 2 check-ins waiting to send.</span></div>
-      <div class="banner banner--caution" role="status"><span class="banner__text"><svg class="icon" aria-hidden="true"><use href="#i-caution"/></svg>Sensor t1 not reporting since 07:52. Band raised one level; forecast in use.</span><button class="btn" type="button" onclick="toast('Request sent to Maya')">Ask Maya for a reading</button></div>
+      <div class="banner banner--caution" role="status"><span class="banner__text"><span class="si" data-status="warn" aria-hidden="true"></span>Sensor t1 not reporting since 07:52. Band raised one level; forecast in use.</span><button class="btn" type="button" onclick="toast('Request sent to Maya')">Ask Maya for a reading</button></div>
     </div>
     <div class="cols">
       <div class="empty"><div class="empty__mark"><svg class="icon icon--lg" aria-hidden="true"><use href="#i-person"/></svg></div><p class="empty__text"><b>No crew on this site yet.</b> Import the Dune Civil Works roster and the site’s locations to start monitoring.</p><button class="btn btn--primary" type="button" onclick="toast('Opens site setup')">Import crew roster</button></div>
@@ -333,7 +360,7 @@
       <div class="dialog__body">
         <h3 class="dialog__title" id="dlgWT">Withdraw “08:03 stop confirmed”?</h3>
         <p class="t-small">Crew planning will lock again until it is re-recorded.</p>
-        <div class="field"><label class="field__label" for="dlgIn">Type CONFIRM to withdraw</label><input class="input" id="dlgIn" autocomplete="off" aria-describedby="dlgErr"><span class="field__error" id="dlgErr" hidden>■ Type exactly CONFIRM.</span></div>
+        <div class="field"><label class="field__label" for="dlgIn">Type CONFIRM to withdraw</label><input class="input" id="dlgIn" autocomplete="off" aria-describedby="dlgErr"><span class="field__error" id="dlgErr" hidden>Type exactly CONFIRM.</span></div>
       </div>
       <div class="dialog__acts"><button class="btn" type="button" data-cancel>Cancel</button><button class="btn btn--danger" type="button" data-ok disabled><span>Withdraw</span></button></div>
     </dialog>
@@ -354,6 +381,13 @@
       <div class="statement statement--emergency"><p class="statement__text">✚ Emergency · Call 998 · start cooling · keep someone with him</p><span class="statement__src">Escalation rule · not AI</span></div>
     </div>
   </section>
+
+  </div>
+
+  <div class="gchap" data-chap="3" role="group" aria-labelledby="gch3">
+  <header class="gchap__open"><span class="gchap__part">Part 3 · Sections 16–19</span><p class="gchap__title" id="gch3">Screens and conditions</p>
+    <p class="gchap__lede">Whole screens, and how they change between desk and phone, sun and gloves, online and offline.</p>
+    <nav class="gchap__toc" aria-label="In Screens and conditions"><a href="#compositions"><span>16</span>Compositions</a> <a href="#platform"><span>17</span>Web ↔ mobile rules</a> <a href="#glare"><span>18</span>Glare and gloves</a> <a href="#sync"><span>19</span>Offline and sync</a></nav></header>
 
   <!-- 16 ─────────────────────────────────────────────────────────── -->
   <section class="gsec" id="compositions" aria-labelledby="h-comp">
@@ -386,13 +420,13 @@
                 <div class="readout"><span class="readout__label">Heavy-work hold</span><span class="readout__value">Active</span><span class="readout__note">since 08:01</span></div>
                 <div class="readout"><span class="readout__label">Accounted for</span><span class="readout__value">11 / 11</span><span class="readout__note">Shelter A · 08:04</span></div>
               </div>
-              <section class="ledger" aria-labelledby="c1h"><div class="ledger__head"><span class="t-label" id="c1h">Needs action</span><span class="ledger__count">3</span></div>
+              <section class="ledger" aria-labelledby="c1h" data-tone="1"><div class="ledger__head"><span class="t-label" id="c1h"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>Needs action</span><span class="ledger__count">3</span></div>
                 <ul class="ledger__list">
                   <li><button class="arow arow--urgent" type="button" aria-current="true"><span class="arow__lead" data-person="C08" data-size="md"></span><span class="arow__body"><span class="arow__title">Bilal (C08) · needs rest now</span><span class="arow__desc">Remove from heat and check on him within 10 minutes.</span></span><span class="arow__trail"><span class="stamp stamp--stop" data-glyph="■">Red</span><span class="arow__time">due 08:28</span></span></button></li>
                   <li><button class="arow" type="button"><span class="arow__lead"><span class="rail__num">3</span></span><span class="arow__body"><span class="arow__title">Review replan 08:18–09:18</span><span class="arow__desc">Bilal excluded. Leila unconfirmed.</span></span><span class="arow__trail"><span class="stamp stamp--waiting" data-glyph="…">Waiting</span></span></button></li>
                   <li><button class="arow" type="button"><span class="arow__lead" data-person="P02" data-size="md"></span><span class="arow__body"><span class="arow__title">Restart decision open</span><span class="arow__desc">Owner: Rashid · 8 checks.</span></span><span class="arow__trail"><span class="stamp" data-glyph="">Info</span></span></button></li>
                 </ul></section>
-              <section class="ledger" aria-labelledby="c2h"><div class="ledger__head"><span class="t-label" id="c2h">Crew by location</span><span class="ledger__count">aggregates only</span></div>
+              <section class="ledger" aria-labelledby="c2h" data-tone="2"><div class="ledger__head"><span class="t-label" id="c2h"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>Crew by location</span><span class="ledger__count">aggregates only</span></div>
                 <ul class="ledger__list">
                   <li><div class="arow"><span class="arow__lead"><svg class="icon" aria-hidden="true"><use href="#i-shelter"/></svg></span><span class="arow__body"><span class="arow__title">Shelter A · 7</span><span class="arow__desc">Cooled recovery · last check-in 08:04</span></span><span class="arow__trail"><span class="stamp" data-glyph="">Recovery</span></span></div></li>
                   <li><div class="arow"><span class="arow__lead"><svg class="icon" aria-hidden="true"><use href="#i-calc"/></svg></span><span class="arow__body"><span class="arow__title">Workshop · 4 of 6 places</span><span class="arow__desc">Covered work</span></span><span class="arow__trail"><span class="stamp stamp--mandatory" data-glyph="▶">Work</span></span></div></li>
@@ -422,7 +456,7 @@
           <div class="readouts">
             <div class="readout readout--focal"><span class="readout__label">Needs rest now</span><span class="readout__value">9:42</span><span class="readout__note">minutes left to check on him</span></div>
           </div>
-          <section class="ledger pad" aria-labelledby="m6h"><div class="ledger__head"><span class="t-label" id="m6h">Steps</span><span class="ledger__count">0 of 3</span></div>
+          <section class="ledger pad" aria-labelledby="m6h" data-tone="3"><div class="ledger__head"><span class="t-label" id="m6h"><svg class="icon" aria-hidden="true"><use href="#i-list"/></svg>Steps</span><span class="ledger__count">0 of 3</span></div>
             <ul class="ledger__list">
               <li><div class="arow arow--urgent"><span class="arow__lead t-title">1</span><span class="arow__body"><span class="arow__title">Remove Bilal from the heat</span><span class="arow__desc">Confirm where he is now.</span></span><span class="arow__trail"><span class="stamp stamp--waiting" data-glyph="…">Waiting</span></span></div></li>
               <li><div class="arow"><span class="arow__lead" data-person="P06" data-size="md"></span><span class="arow__body"><span class="arow__title">Record first-aid contact</span><span class="arow__desc">Salim (P06) notified 08:18.</span></span><span class="arow__trail"><span class="stamp stamp--waiting" data-glyph="…">Waiting</span></span></div></li>
@@ -444,7 +478,7 @@
             <div class="readout readout--focal"><span class="readout__label" data-t="status">Your status</span><span class="readout__value" data-t="inrec">In recovery</span><span class="readout__note" data-t="shelter">Shelter A</span></div>
           </div>
           <div class="pad row-flex"><span class="band band--low"><span class="band__swatch"></span><span data-t="band">Low band · 145 W/m²</span></span><span class="stamp stamp--stop" data-glyph="■" data-t="hold">Heavy work stopped</span></div>
-          <section class="ledger pad worker" aria-labelledby="p2h"><div class="ledger__head"><span class="t-label" id="p2h" data-t="msgs">Messages</span></div>
+          <section class="ledger pad worker" aria-labelledby="p2h" data-tone="4"><div class="ledger__head"><span class="t-label" id="p2h" data-t="msgs"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg>Messages</span></div>
             <ul class="ledger__list">
               <li><button class="arow" type="button"><span class="arow__lead"><svg class="icon icon--lg" aria-hidden="true"><use href="#i-water"/></svg></span><span class="arow__body"><span class="arow__title" data-t="water">Drink water</span><span class="arow__desc" data-t="waterd">One cup now. Next reminder 08:19.</span></span><span class="arow__trail"><svg class="icon icon--dir" aria-hidden="true"><use href="#i-forward"/></svg></span></button></li>
               <li><button class="arow" type="button"><span class="arow__lead"><svg class="icon icon--lg" aria-hidden="true"><use href="#i-clock"/></svg></span><span class="arow__body"><span class="arow__title" data-t="plan">Next: work 08:11</span><span class="arow__desc" data-t="pland">Workshop 08:11–08:26, then rest.</span></span><span class="arow__trail"><svg class="icon icon--dir" aria-hidden="true"><use href="#i-forward"/></svg></span></button></li>
@@ -509,6 +543,13 @@
       <div>Offline</div><div><span class="sync" data-state="offline">⌀ No network · 3 saved on this phone</span></div><div>Warnings come from the rules on this phone.</div>
     </div>
   </section>
+
+  </div>
+
+  <div class="gchap" data-chap="4" role="group" aria-labelledby="gch4">
+  <header class="gchap__open"><span class="gchap__part">Part 4 · Sections 20–24</span><p class="gchap__title" id="gch4">AI and field patterns</p>
+    <p class="gchap__lede">How agents, proposals, capture and the zone plan behave so a person always makes the call.</p>
+    <nav class="gchap__toc" aria-label="In AI and field patterns"><a href="#agent"><span>20</span>Agent task state</a> <a href="#ambient"><span>21</span>Ambient AI</a> <a href="#guardrails"><span>22</span>Guardrails and rollback</a> <a href="#capture"><span>23</span>Field capture</a> <a href="#zones"><span>24</span>Zone plan</a></nav></header>
 
   <!-- 20 ─────────────────────────────────────────────────────────── -->
   <section class="gsec" id="agent" aria-labelledby="h-agent">
@@ -609,6 +650,13 @@
     </div>
   </section>
 
+  </div>
+
+  <div class="gchap" data-chap="5" role="group" aria-labelledby="gch5">
+  <header class="gchap__open"><span class="gchap__part">Part 5 · Sections 25–26</span><p class="gchap__title" id="gch5">Identity</p>
+    <p class="gchap__lede">Who issued the sheet: company branding and crew photos, and the places neither may appear.</p>
+    <nav class="gchap__toc" aria-label="In Identity"><a href="#brand"><span>25</span>Company branding</a> <a href="#crew-photos"><span>26</span>Crew photos</a></nav></header>
+
   <!-- 25 ─────────────────────────────────────────────────────────── -->
   <section class="gsec" id="brand" aria-labelledby="h-brand">
     <header><span class="gsec__num">25 · Company branding</span><h2 id="h-brand">The company signs the sheet; it doesn’t colour the signals</h2>
@@ -653,7 +701,7 @@
       </div>
       <div class="brandlab__previews" id="bPreviews" aria-label="Previews"></div>
     </div>
-    <section class="ledger" aria-labelledby="bChecksH"><div class="ledger__head"><span class="t-label" id="bChecksH">Checks</span><span class="ledger__count" id="bChecksN" aria-live="polite"></span></div><ul class="ledger__list" id="bChecks"></ul></section>
+    <section class="ledger" aria-labelledby="bChecksH" data-tone="5"><div class="ledger__head"><span class="t-label" id="bChecksH"><svg class="icon" aria-hidden="true"><use href="#i-list"/></svg>Checks</span><span class="ledger__count" id="bChecksN" aria-live="polite"></span></div><ul class="ledger__list" id="bChecks"></ul></section>
     <details class="brandlab__out"><summary class="t-small"><b>Generated brand tokens and web app manifest</b></summary><pre id="bCss"></pre><pre id="bManifest"></pre></details>
   </section>
   <!-- 26 ─────────────────────────────────────────────────────────── -->
@@ -678,12 +726,12 @@
       <figure><span id="stackDemo"></span><figcaption><b>Crew stack</b>First four, then a count</figcaption></figure>
     </div>
     <h3>In context</h3>
-    <section class="ledger" aria-labelledby="photoLedgerH">
-      <div class="ledger__head"><span class="t-label" id="photoLedgerH">Crew in Shelter A</span><span class="ledger__count">photo · name · status</span></div>
+    <section class="ledger" aria-labelledby="photoLedgerH" data-tone="2">
+      <div class="ledger__head"><span class="t-label" id="photoLedgerH"><svg class="icon" aria-hidden="true"><use href="#i-people"/></svg>Crew in Shelter A</span><span class="ledger__count">photo · name · status</span></div>
       <ul class="ledger__list">
-        <li><div class="arow"><span class="arow__lead" data-person="C05" data-size="md"></span><span class="arow__body"><span class="arow__title">Rana (C05)</span><span class="arow__desc">Checked in 08:04 · kiosk</span></span><span class="arow__trail"><span class="stamp" data-glyph="✓">Recovery</span></span></div></li>
+        <li><div class="arow"><span class="arow__lead" data-person="C05" data-size="md"></span><span class="arow__body"><span class="arow__title">Rana (C05)</span><span class="arow__desc">Checked in 08:04 · kiosk</span></span><span class="arow__trail"><span class="stamp stamp--done" data-glyph="✓">Recovery</span></span></div></li>
         <li><div class="arow"><span class="arow__lead" data-person="C09" data-size="md"></span><span class="arow__body"><span class="arow__title">Leila (C09)</span><span class="arow__desc">Readiness not confirmed</span></span><span class="arow__trail"><span class="stamp stamp--waiting" data-glyph="…">Waiting</span></span></div></li>
-        <li><div class="arow"><span class="arow__lead" data-person="C11" data-size="md"></span><span class="arow__body"><span class="arow__title">Mariam (C11)</span><span class="arow__desc">No photo on record yet: initials until she adds one</span></span><span class="arow__trail"><span class="stamp" data-glyph="✓">Recovery</span></span></div></li>
+        <li><div class="arow"><span class="arow__lead" data-person="C11" data-size="md"></span><span class="arow__body"><span class="arow__title">Mariam (C11)</span><span class="arow__desc">No photo on record yet: initials until she adds one</span></span><span class="arow__trail"><span class="stamp stamp--done" data-glyph="✓">Recovery</span></span></div></li>
       </ul>
     </section>
     <p class="t-small" style="margin:0">✓ Recorded by <span data-person="C01" data-mode="person" data-size="xs"></span> at 08:11. A decision stamp keeps the ink stamp and adds the face of the person who recorded it.</p>
@@ -711,6 +759,7 @@
     </div>
   </section>
 
+  </div>
   </main>
 </div>
 
@@ -741,7 +790,7 @@
   $('#themeSeg').addEventListener('change', e => { root.dataset.theme = e.detail; swatches(); });
   $('#dirSeg').addEventListener('change', e => { root.dir = e.detail; });
   $('#demoStamp').addEventListener('click', () => { const s = $('#demoStampTarget'); s.classList.remove('is-new'); void s.offsetWidth; s.classList.add('is-new'); });
-  $('#demoWipe').addEventListener('click', () => { $('#demoWipeTarget').innerHTML = `<div class="banner" role="alert"><span class="banner__text">${icon('alert')}Stop-work issued 08:01 · heavy exposed civil work</span></div>`; });
+  $('#demoWipe').addEventListener('click', () => { $('#demoWipeTarget').innerHTML = `<div class="banner" role="alert"><span class="banner__text"><span class="si" data-status="error" aria-hidden="true"></span>Stop-work issued 08:01 · heavy exposed civil work</span></div>`; });
   document.addEventListener('confirmed', e => { if (e.target.closest('dialog')) return; toast(e.target.id === 'm6Hold' ? '08:21 · Removal recorded by Huda · saved on this phone' : 'Confirmed'); });
   initField();
 

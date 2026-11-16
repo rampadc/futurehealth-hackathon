@@ -52,3 +52,5 @@ No build step: plain HTML, CSS and JS (`core.js` shells and components, `screens
 ## Crew photos and account screens
 
 People are drawn with their round crew photo from `../ui_design_system/people.js` (section 26 of the style guide). Software (agents, jobs, the kiosk) keeps a square ⚙ tile. Each person can add or replace their own photo on the account screens: **W10** (web, from your photo in the side bar), **M9** (site app, Me tab) and **P9** (worker app, from Me). Here the upload stays in this browser; the app stores it on the server.
+
+The site has four squads (civil, formwork, steel fixing, MEP). The 4 August scenario follows the civil crew in full; the others carry enough state to compare squads. W1, W3, W4 and W5 open with a **squad selector** showing each squad's alerts and warnings; W2 and W6 compare squads in small tables. **W11 Site setup** shows which sensors serve which squads and locations, on a site plan and as tables. The Planning Agent is drawn with a friendly hard-hat face on W7 and M8, at the product's request; elsewhere software keeps its square ⚙ tile.
