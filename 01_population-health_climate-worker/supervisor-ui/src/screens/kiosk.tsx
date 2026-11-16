@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { langOf, preferredLanguage, tr } from '../i18n';
-import { crew, time } from './data';
+import { assessmentCapture, assignedIds, crew, time } from './data';
 import { Computed, Head, Hero, Metric, NoCase, Note, Avatar } from './kit';
 import type { ScreenProps } from './registry';
 
@@ -16,6 +16,7 @@ export function KioskScreen({ session }: ScreenProps) {
   if (!caseView || !person) return <NoCase session={session} />;
   const people = crew(caseView).filter(p => p.id === person.id);
   const checkin = caseView.tasks.find(t => t.action === 'checkin');
+  const ownApprovedWorkshop = caseView.plan_assessment?.status === 'approved' && assignedIds(assessmentCapture(caseView)).includes(person.id);
   const arrived = new Set(caseView.headcount?.arrivals.filter(a => a.person_id === person.id).map(a => a.person_id) ?? []);
   if (checkin?.status === 'recorded') arrived.add(checkin.actor_id);
   const tap = (id: string) => {
@@ -31,7 +32,7 @@ export function KioskScreen({ session }: ScreenProps) {
     <Hero>
       <Metric label={<>My arrival · <span lang="ar">في الملجأ</span></>} value={arrived.size ? 'Recorded' : 'Not recorded'} tone="ok" />
       <Metric label={<>Water · <span lang="ar">ماء</span></>} value="💧" sub="Cooler checked by Maya" />
-      <Metric label="Next" value={caseView.story.assigned ? 'Workshop' : 'Rest'} sub="your foreman will call you" />
+      <Metric label="Next" value={ownApprovedWorkshop ? 'Workshop' : 'Follow foreman'} sub="your foreman will call you" />
     </Hero>
     {greeting && !g && <p className="hs-statusline" role="status">Badge {greeting.id} is not on this crew. Please see Huda.</p>}
     {g && <p className="hs-statusline" role="status" lang={gl} dir={langOf(gl).dir}>{greeting!.ok ? `✓ ${tr('kiosk.checked', gl).text} · ${g.name.split(' ')[0]}` : `${g.name.split(' ')[0]}: please see Huda`}</p>}

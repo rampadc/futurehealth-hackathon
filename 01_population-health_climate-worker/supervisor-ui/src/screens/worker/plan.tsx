@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { navigate } from '../../router';
-import { intervalsOf, kindLabel, minutes, nowAndNext, time } from '../data';
+import { assessmentCapture, intervalsOf, kindLabel, minutes, nowAndNext, time } from '../data';
 import { Computed, CtaBar, Empty, Hero, HoldButton, List, Metric, NoCase, Note, Row, Section, Statement } from '../kit';
 import type { ScreenProps } from '../registry';
 import { En, T, useT, useWorker, WorkerFrame } from './frame';
@@ -67,24 +67,28 @@ function MyPlan({ session }: ScreenProps) {
   if (!caseView || !person) return <NoCase session={session} />;
   const story = caseView.story;
   const pending = story.reported && (!story.removed || !story.firstaid);
-  const mine = story.assigned && !pending ? intervalsOf(caseView.capture, person.id) : [];
+  const approved = caseView.plan_assessment ? caseView.plan_assessment.status === 'approved' : story.assigned;
+  const planNeedsUpdate = story.assigned && !!caseView.plan_assessment && !approved;
+  const mine = story.assigned && approved && !pending ? intervalsOf(assessmentCapture(caseView), person.id) : [];
   const { current, next } = nowAndNext(mine, caseView.clock);
+  const location = caseView.request?.snapshot.workers.find(worker => worker.person_id === person.id)?.location_id;
+  const actuallyCurrent = current?.kind === 'work' && location === 'workshop' || current?.kind === 'recovery' && (location === 'shelter_a' || location === 'shelter_b') ? current : null;
   const work = mine.filter(i => i.kind === 'work').reduce((sum, i) => sum + minutes(i), 0);
   const nextRest = mine.find(i => i.kind === 'recovery' && Date.parse(i.starts_at) >= Date.parse(caseView.clock));
   return <div className="hs-screen">
     <h1 id="hs-title"><T k="p5.title" /></h1>
-    {!mine.length ? <Empty><En>{pending ? 'Your times are being updated after a report on your crew. Stay in recovery.' : story.assigned ? 'You have no work assigned in this plan. Stay in recovery.' : 'Your foreman has not confirmed the plan yet.'}</En></Empty> : <>
+    {!mine.length ? <Empty><En>{pending ? 'Your times are being updated after a report on your crew. Follow your foreman’s recovery instruction.' : planNeedsUpdate ? 'Current observations are needed for an updated plan. Follow your foreman until new times are confirmed.' : story.assigned ? 'You have no work assigned in this plan. Stay in recovery.' : 'Your foreman has not confirmed the plan yet.'}</En></Empty> : <>
       <Hero>
-        <Metric label={<T k="p5.now" />} value={current ? kindLabel(current.kind) : '—'} sub={current ? `until ${time(current.ends_at)}` : next ? `next at ${time(next.starts_at)}` : undefined} tone={current?.kind === 'recovery' ? 'ok' : undefined} />
+        <Metric label={<T k="p5.now" />} value={actuallyCurrent ? kindLabel(actuallyCurrent.kind) : current?.kind === 'work' ? 'Await foreman’s start' : '—'} sub={actuallyCurrent ? `until ${time(actuallyCurrent.ends_at)}` : current?.kind === 'work' ? 'Approved plan; work begins after a separate confirmation' : next ? `next at ${time(next.starts_at)}` : undefined} tone={actuallyCurrent?.kind === 'recovery' ? 'ok' : undefined} />
         <Metric label={<T k="p5.nextrest" />} value={nextRest ? `${time(nextRest.starts_at)}–${time(nextRest.ends_at)}` : '—'} sub={t('shelterA')} />
         <Metric label="Work in plan" value={`${work} min`} />
       </Hero>
       <Section title={<T k="p5.hour" />}>
-        <List>{mine.map(i => <Row key={i.starts_at} title={`${time(i.starts_at)}–${time(i.ends_at)} · ${i.kind === 'work' ? t('work') : t('rest')}`} detail={i.kind === 'work' ? t('p5.prep') : t('p5.rec')} badge={current === i ? <span className="hs-badge" data-tone="plan"><T k="p5.now" /></span> : undefined} />)}</List>
+        <List>{mine.map(i => <Row key={i.starts_at} title={`${time(i.starts_at)}–${time(i.ends_at)} · ${i.kind === 'work' ? t('work') : t('rest')}`} detail={i.kind === 'work' ? t('p5.prep') : t('p5.rec')} badge={actuallyCurrent === i ? <span className="hs-badge" data-tone="plan"><T k="p5.now" /></span> : undefined} />)}</List>
       </Section>
     </>}
     <Note><T k="p5.midday" /></Note>
-    {person.id === 'C05' && <button type="button" className="hs-button" onClick={() => navigate('/worker/heat-rest')}>View my heat and rest coverage</button>}
+    {(person.id === 'C05' || person.id === 'C08') && <button type="button" className="hs-button" onClick={() => navigate('/worker/heat-rest')}>View my heat and rest coverage</button>}
     <Computed><T k="p5.own" /></Computed>
   </div>;
 }

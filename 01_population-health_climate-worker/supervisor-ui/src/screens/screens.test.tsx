@@ -9,6 +9,8 @@ import type { CrewRisk } from '../contract';
 import { SCREENS } from './registry';
 import { outboxScope, readOutbox } from '../offline';
 import { renewAccessGeneration } from '../accessGeneration';
+import type { CaseSession } from '../session';
+import { ActionCardScreen } from './site/crew';
 
 const reply = (value: unknown, status = 200) => new Response(JSON.stringify(value), { status, headers: { 'Content-Type': 'application/json' } });
 let currentCase: CaseView | null;
@@ -131,6 +133,13 @@ describe('every built screen', () => {
 });
 
 describe('stop-work', () => {
+  it('keeps foreman headcount distinct from later crew locations', async () => {
+    currentCase = await makeCase('incident_substitute', { stopped: true, recovered: true, assigned: true, reported: true, removed: true }, []);
+    currentCase.headcount = { expected_count: 11, checked_in_count: 1, confirmed_count: 11, confirmed_at: '2025-08-04T08:04:00+04:00', arrivals: [] };
+    await open('/web/monitoring', 'C01');
+    expect(await screen.findByText('Huda confirmed at 08:04')).toBeTruthy();
+  });
+
   it('shows Rana only her arrival when she opens Huda’s headcount route', async () => {
     currentCase = await makeCase('heat_trigger', { stopped: true }, []);
     currentCase.headcount = { expected_count: 11, checked_in_count: 1, confirmed_count: 0, confirmed_at: null, arrivals: [{ person_id: 'C05', checked_in_at: currentCase.clock }] };
@@ -140,6 +149,22 @@ describe('stop-work', () => {
     expect(screen.queryByRole('button', { name: /Confirm 11 workers/ })).toBeNull();
   });
 
+  it('shows Bilal only his own heat and rest coverage feedback', async () => {
+    currentCase = await makeCase('incident_substitute', { stopped: true, recovered: true, reported: true }, []);
+    currentCase.headcount = { expected_count: 11, checked_in_count: 1, confirmed_count: 11, confirmed_at: currentCase.clock, arrivals: [] };
+    heatRestOverride = { policy_id: 'heat-rest-schedule-v1', title: 'Fictional Sandline–Dune Heat Rest Schedule', source: 'demo/cross-scenario/HEAT_REST_SCHEDULE.md', scope: 'Dune Civil Works C02–C12', case_id: currentCase.case_id, payroll_verified: false,
+      coverage_review: { status: 'confirmed', roster_verified: true, reviewed_by: 'P10', reviewed_at: currentCase.clock, note: 'Private employer basis', crew_ids: ['C05'] },
+      records: { headcount: { expected_count: 11, checked_in_count: 1, confirmed_count: 11 }, arrivals: [], observed_time: [] } };
+    await open('/worker/heat-rest', 'C08');
+    expect(await screen.findByRole('heading', { name: 'My heat and rest coverage' })).toBeTruthy();
+    expect(screen.getAllByText('Coverage confirmed').length).toBeGreaterThan(0);
+    expect(screen.getByText('Not recorded')).toBeTruthy();
+    expect(screen.queryByText('Case-linked operations')).toBeNull();
+    expect(screen.queryByText(/Foreman headcount:/)).toBeNull();
+    expect(screen.queryByText('Private employer basis')).toBeNull();
+    expect(screen.queryByText('C05')).toBeNull();
+  });
+
   it('records Mina’s coverage decision against the policy and verified roster', async () => {
     currentCase = await makeCase('heat_trigger', {}, [task('coverage_review', 'P10', 'ready')]);
     await open('/web/heat-rest', 'P10');
@@ -147,7 +172,7 @@ describe('stop-work', () => {
     expect(await screen.findByRole('heading', { name: 'Heat and rest coverage review' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Sandline–Dune Heat Rest Schedule' })).toBeTruthy();
     expect(screen.getByText('Payroll payment has not been verified.')).toBeTruthy();
-    expect((screen.getByText(/demo\/cross-scenario\/HEAT_REST_SCHEDULE\.md/).closest('details') as HTMLDetailsElement).open).toBe(false);
+    expect((await screen.findByText(/demo\/cross-scenario\/HEAT_REST_SCHEDULE\.md/)).closest('details')?.open).toBe(false);
     await user.click(screen.getByRole('checkbox', { name: /I verified the C02–C12 crew roster/ }));
     await user.type(screen.getByRole('textbox', { name: 'Basis or unresolved item' }), 'Checked employer roster');
     await user.click(screen.getByRole('button', { name: 'Record employer coverage review' }));
@@ -296,6 +321,29 @@ describe('stop-work', () => {
     expect(screen.queryByText(/not on a shift today/)).toBeNull();
   });
 
+  it('keeps only the worker’s approved plan after the latest capture becomes safety-only', async () => {
+    currentCase = await makeCase('incident_substitute', { stopped: true, recovered: true, assigned: true }, []);
+    const assessed = structuredClone(currentCase.capture!);
+    const ownResponse = structuredClone(assessed.response);
+    ownResponse.crew_rest.intervals = ownResponse.crew_rest.intervals.filter(interval => interval.person_id === 'C05');
+    expect(ownResponse.crew_rest.intervals.length).toBeGreaterThan(0);
+    currentCase.capture!.response.crew_rest.intervals = [];
+    currentCase.request!.snapshot.workers = currentCase.request!.snapshot.workers.filter(worker => worker.person_id === 'C05');
+    currentCase.plan_assessment = { id: 'own-approved', assessed_at: currentCase.clock, observed_through: currentCase.clock, approval_deadline: currentCase.clock, status: 'approved', request: { ...assessed.request, snapshot: { ...assessed.request.snapshot, workers: assessed.request.snapshot.workers.filter(worker => worker.person_id === 'C05') } }, response: ownResponse };
+    await open('/worker/my-plan', 'C05');
+    expect(await screen.findByText('Work in plan')).toBeTruthy();
+    expect(screen.queryByText(/C06/)).toBeNull();
+  });
+
+  it('withholds an expired worker plan until current observations support a new one', async () => {
+    currentCase = await makeCase('incident_substitute', { stopped: true, recovered: true, assigned: true }, []);
+    const assessed = currentCase.capture!;
+    currentCase.plan_assessment = { id: 'expired-plan', assessed_at: currentCase.clock, observed_through: currentCase.clock, approval_deadline: currentCase.clock, status: 'expired', request: assessed.request, response: assessed.response };
+    await open('/worker/my-plan', 'C05');
+    expect(await screen.findByText(/Current observations are needed for an updated plan/)).toBeTruthy();
+    expect(screen.queryByText('Work in plan')).toBeNull();
+  });
+
   it('records the full foreman headcount after one personal arrival', async () => {
     currentCase = await makeCase('heat_trigger', { stopped: true, checkedIn: true }, [task('recover', 'C01', 'ready')]);
     currentCase.headcount = { expected_count: 11, checked_in_count: 1, confirmed_count: 0, confirmed_at: null, arrivals: [{ person_id: 'C05', checked_in_at: currentCase.clock }] };
@@ -344,9 +392,51 @@ describe('assessed workshop plan', () => {
     expect((await screen.findByRole('button', { name: 'Approve assessed proposal' }) as HTMLButtonElement).disabled).toBe(true);
     view.unmount();
     currentCase.plan_assessment.status = 'proposed';
+    currentCase.story.assigned = true;
     await open('/site/proposal', 'C01');
+    await screen.findByRole('heading', { name: 'Proposal review' });
+    expect(screen.getAllByText('Proposed').length).toBeGreaterThan(0);
+    expect(screen.queryByText('✓ Assigned')).toBeNull();
     await userEvent.click(await screen.findByRole('button', { name: 'Approve assessed proposal' }));
     await waitFor(() => expect(commands[0]).toMatchObject({ action: 'assign', payload: { assessment_id: 'assessment-1' } }));
+  });
+
+  it('labels an expired assigned proposal as a previous snapshot', async () => {
+    currentCase = await makeCase('incident_substitute', { stopped: true, recovered: true, assigned: true }, [task('assign', 'C01', 'recorded')]);
+    const capture = currentCase.capture!;
+    currentCase.plan_assessment = { id: 'assessment-1', assessed_at: currentCase.clock, observed_through: currentCase.clock, approval_deadline: currentCase.clock, status: 'expired', request: capture.request, response: capture.response };
+    await open('/site/proposal', 'C01');
+    expect(await screen.findByText('This previous proposal is no longer current. Record fresh observations and recalculate.')).toBeTruthy();
+    expect(screen.queryByText(/workers meet every requirement/)).toBeNull();
+    expect(screen.getAllByText('Previous assignment').length).toBeGreaterThan(0);
+    expect(screen.queryByText('✓ Assigned')).toBeNull();
+  });
+
+  it('keeps a new web proposal unassigned despite an older assignment', async () => {
+    currentCase = await makeCase('incident_substitute', { assigned: true }, []);
+    const capture = currentCase.capture!;
+    currentCase.plan_assessment = { id: 'assessment-new', assessed_at: currentCase.clock, observed_through: currentCase.clock, approval_deadline: currentCase.clock, status: 'proposed', request: capture.request, response: capture.response };
+    await open('/web/crew', 'C01');
+    expect((await screen.findAllByText('Proposed')).length).toBeGreaterThan(0);
+    expect(screen.queryByText('Assigned')).toBeNull();
+  });
+
+  it('keeps the kiosk handoff with the foreman until this worker has an approved plan', async () => {
+    currentCase = await makeCase('incident_substitute', { assigned: true }, []);
+    const capture = currentCase.capture!;
+    currentCase.plan_assessment = { id: 'assessment-new', assessed_at: currentCase.clock, observed_through: currentCase.clock, approval_deadline: currentCase.clock, status: 'proposed', request: capture.request, response: capture.response };
+    await open('/kiosk/check-in', 'C05');
+    expect(await screen.findByText('Follow foreman')).toBeTruthy();
+    expect(screen.queryByText('Workshop')).toBeNull();
+  });
+
+  it('excludes Bilal from the workshop readiness count after his report', async () => {
+    currentCase = await makeCase('incident_substitute', { reported: true }, []);
+    currentCase.workers = currentCase.request!.snapshot.workers.map(worker => ({ person_id: worker.person_id, last_observed_at: null, readiness: ['C05', 'C06', 'C07', 'C08'].includes(worker.person_id) ? 'ready' : 'unconfirmed' }));
+    await open('/site/readiness', 'C01');
+    expect((await screen.findByText('Confirmed')).closest('.hs-metric')?.textContent).toContain('3');
+    expect(screen.getAllByText('Unconfirmed')[0].closest('.hs-metric')?.textContent).toContain('7');
+    expect(screen.getByText('1 excluded from workshop readiness')).toBeTruthy();
   });
 
   it('keeps Huda’s work-start confirmations through a poll and clears them for a new proposal', async () => {
@@ -382,6 +472,17 @@ describe('assessed workshop plan', () => {
 });
 
 describe('assistance', () => {
+  it('keeps Bilal’s report time fixed as the case clock moves', async () => {
+    const view = await makeCase('incident_substitute', { reported: true }, []);
+    view.story.events = [{ id: 'report', actorId: 'C08', title: 'Bilal requested assistance', occurred_at: '2025-08-04T08:14:00+04:00' }];
+    const foreman = PERSONAS.find(p => p.id === 'C01')!;
+    const session = { caseView: view, person: foreman, busy: false } as CaseSession;
+    const mounted = render(<ActionCardScreen session={session} />);
+    expect(screen.getByText('Bilal (C08) · reported 08:14')).toBeTruthy();
+    mounted.rerender(<ActionCardScreen session={{ ...session, caseView: { ...view, clock: '2025-08-04T08:15:00+04:00' } }} />);
+    expect(screen.getByText('Bilal (C08) · reported 08:14')).toBeTruthy();
+  });
+
   it('needs the typed word REMOVED before recording a removal', async () => {
     currentCase = await makeCase('removal_unconfirmed', { reported: true, assigned: true }, [task('incident_record', 'C01', 'recorded'), task('remove', 'C01', 'ready')]);
     await open('/site/action-card', 'C01');

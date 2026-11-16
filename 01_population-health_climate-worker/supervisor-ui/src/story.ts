@@ -24,7 +24,7 @@ type Flag = 'issued' | 'acknowledged' | 'stopped' | 'checkedIn' | 'recovered' | 
 /** Organisation admin for the platform screens (system & trust, branding). Not part of the nine-person case story. */
 export const ADMIN: Persona = { id: 'P09', name: 'Hessa Al Qamar', role: 'HSE systems admin', organisation: 'Sandline', description: 'Publishes company branding and reviews the trust log.' }
 
-export interface StoryEvent { id: string; actorId: string; title: string }
+export interface StoryEvent { id: string; actorId: string; title: string; occurred_at?: string }
 export type StoryState = Record<Flag, boolean> & { events: StoryEvent[] }
 
 export type ActionId = 'issue' | 'acknowledge' | 'stop' | 'checkin' | 'recover' | 'assign' | 'report' | 'remove' | 'firstaid' | 'leila' | 'draftDelivery' | 'approveDelivery' | 'sendDelivery' | 'acceptDelivery' | 'fresh' | 'permit' | 'review' | 'handover' | 'costReview'

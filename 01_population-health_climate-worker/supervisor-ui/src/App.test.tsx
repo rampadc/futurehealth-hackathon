@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
 import { PERSONAS, initialStory } from './story';
@@ -92,6 +92,11 @@ describe('live supervisor workspace', () => {
     expect(await screen.findByText('Version conflict')).toBeTruthy();
     expect(screen.queryByText('Stop heavy trench work recorded.')).toBeNull();
     expect(screen.getByText('New heat finding at the civil trench')).toBeTruthy();
+    const beforePoll = calls.filter(call => call.path === '/api/case').length;
+    await act(async () => { window.dispatchEvent(new Event('focus')); });
+    await waitFor(() => expect(calls.filter(call => call.path === '/api/case').length).toBeGreaterThan(beforePoll));
+    expect(screen.getByText('Version conflict')).toBeTruthy();
+    expect(currentCase!.tasks[0].status).toBe('ready');
   });
 
   it('keeps worker actions private and offers an observed activity form only to its owner', async () => {

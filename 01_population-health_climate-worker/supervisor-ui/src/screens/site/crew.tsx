@@ -30,7 +30,9 @@ export function ReadinessScreen({ session }: ScreenProps) {
   if (!caseView || !person) return <NoCase session={session} />;
   const all = crew(caseView);
   const list = [...all].sort((a, b) => Number(b.qualifications.includes('civil_worker')) - Number(a.qualifications.includes('civil_worker')));
-  const confirmed = list.filter(p => p.readiness === 'ready').length;
+  const confirmed = list.filter(p => !p.excluded && p.readiness === 'ready').length;
+  const unconfirmed = list.filter(p => !p.excluded && p.readiness !== 'ready').length;
+  const excluded = list.length - confirmed - unconfirmed;
   const readinessTask = caseView.tasks.find(t => t.action === 'readiness');
   const canConfirm = readinessTask?.status === 'ready' && readinessTask.actor_id === person.id;
   const workshop = caseView.capture?.request.locations.find(l => l.id === caseView.capture?.request.task_locations.workshop_prep);
@@ -57,7 +59,7 @@ export function ReadinessScreen({ session }: ScreenProps) {
     <Head kicker={`Readiness · ${time(caseView.clock)} GST`} title="Confirm readiness" sub="Workshop preparation" />
     <Hero>
       <Metric label="Confirmed" value={String(confirmed)} sub="ready for workshop preparation" tone={confirmed ? 'ok' : undefined} />
-      <Metric label="Unconfirmed" value={String(list.length - confirmed)} />
+      <Metric label="Unconfirmed" value={String(unconfirmed)} sub={excluded ? `${excluded} excluded from workshop readiness` : undefined} />
       <Metric label="Workshop places" value={workshop ? `${workshop.capacity - fixed.length} of ${workshop.capacity}` : '—'} sub={fixed.length ? `${fixed.length} fixed occupants` : undefined} />
     </Hero>
     <Section title="Affected workers" hint={canConfirm ? 'Tap a worker to confirm' : undefined}>
@@ -99,6 +101,8 @@ export function ProposalScreen({ session }: ScreenProps) {
   </Section>;
   if (!plan) return <div className="hs-screen"><Head title="Proposal review" /><Empty>{assessment?.status === 'awaiting_observations' ? 'Current observed activity is needed for every active worker before a new proposal can be assessed.' : assessment?.status === 'blocked' ? 'Current planning is blocked. Review the live reading, readiness and observed activity.' : 'No proposal yet. Planning unlocks when the headcount and confirmations are complete.'}</Empty>{returnControl}</div>;
   const planned = plan.planning_status === 'planned';
+  const expired = assessment?.status === 'expired';
+  const approved = assessment?.status === 'approved' || (!assessment && caseView.story.assigned);
   const reviewStatus = assessment?.status === 'proposed' ? 'Ready for Huda review' : assessment?.status === 'approved' ? 'Approved proposal' : assessment?.status === 'expired' ? 'Review window expired' : 'No current proposal';
   const now = Date.parse(caseView.clock);
   const workNow = [...new Set(plan.intervals.filter(i => i.kind === 'work' && Date.parse(i.starts_at) <= now && now < Date.parse(i.ends_at)).map(i => i.person_id))];
@@ -106,17 +110,17 @@ export function ProposalScreen({ session }: ScreenProps) {
   return <div className="hs-screen">
     <Head kicker={`Proposal · ${time(caseView.clock)} GST`} title="Proposal review" />
     <Hero>
-      <Metric label="Proposed" value={String(ids.length)} sub={ids.map(id => id).join(', ') || 'nobody yet'} tone={ids.length ? 'ok' : undefined} />
-      <Metric label="Stay in recovery" value={String(Math.max(0, people.length - ids.length))} sub="Shelter A" />
+      <Metric label={expired ? 'Previous proposal' : 'Proposed'} value={String(ids.length)} sub={ids.map(id => id).join(', ') || 'nobody yet'} tone={ids.length && !expired ? 'ok' : undefined} />
+      <Metric label={expired ? 'Others at assessment' : 'Not proposed'} value={String(Math.max(0, people.length - ids.length))} sub="See current crew locations" />
       <Metric label="Trench" value={caseView.story.stopped ? 'Stopped' : 'Held'} sub="heavy work stays stopped" tone="red" />
     </Hero>
     <Draft>
-      <p><b>{planned ? `${ids.length} workers meet every requirement for workshop preparation.` : `Planning is ${plan.planning_status.replaceAll('_', ' ')}.`}</b></p>
+      <p><b>{expired ? 'This previous proposal is no longer current. Record fresh observations and recalculate.' : planned ? `${ids.length} workers meet every requirement for workshop preparation.` : `Planning is ${plan.planning_status.replaceAll('_', ' ')}.`}</b></p>
       {plan.blockers.length > 0 && <p>Waiting for: {plan.blockers.map(reasonLabel).join(', ')}.</p>}
       <p className="hs-small">Assessed {time(assessment?.assessed_at)} · review by {time(assessment?.approval_deadline)} · {reviewStatus}{assessment?.status === 'proposed' && assessment.approval_deadline && <> · <ApprovalCountdown view={caseView} deadline={assessment.approval_deadline} /></>}</p><p className="hs-small">Solver {plan.solver_status ?? '—'}{plan.optimal ? ' · optimal' : ''} · policy {plan.policy_id ?? 'none'} · {plan.useful_worker_minutes ?? 0} proposed worker-minutes</p>
     </Draft>
-    <Section title="Proposed workers">
-      {ids.length ? <List>{ids.map(id => { const iv = intervalsOf(capture, id); return <Row key={id} lead={<Avatar id={id} size="md" />} title={who(id)} detail={iv.slice(0, 3).map(i => `${kindLabel(i.kind)} ${time(i.starts_at)}–${time(i.ends_at)}`).join(', ')} badge={caseView.story.assigned ? <span className="hs-badge" data-tone="done">✓ Assigned</span> : <span className="hs-badge" data-tone="plan">Proposed</span>} />; })}</List>
+    <Section title={expired ? 'Workers in previous proposal' : 'Proposed workers'}>
+      {ids.length ? <List>{ids.map(id => { const iv = intervalsOf(capture, id); return <Row key={id} lead={<Avatar id={id} size="md" />} title={who(id)} detail={iv.slice(0, 3).map(i => `${kindLabel(i.kind)} ${time(i.starts_at)}–${time(i.ends_at)}`).join(', ')} badge={expired ? <span className="hs-badge" data-tone="muted">Previous assignment</span> : approved ? <span className="hs-badge" data-tone="done">✓ Assigned</span> : <span className="hs-badge" data-tone="plan">Proposed</span>} />; })}</List>
         : <Empty>No productive assignment is available yet.</Empty>}
     </Section>
     <Computed>Proposed work is not observed activity or permission to start work.</Computed>
@@ -147,8 +151,9 @@ export function ActionCardScreen({ session }: ScreenProps) {
     ['recovery_check', 'Confirm the recovery check', 'Huda'],
   ];
   const salim = person.id === 'P06';
+  const reportedAt = story.events.find(event => event.id === 'report')?.occurred_at;
   return <div className="hs-screen">
-    <Head kicker={`Bilal (C08) · reported ${time(caseView.clock)}`} title="Worker action card" />
+    <Head kicker={reportedAt ? `Bilal (C08) · reported ${time(reportedAt)}` : 'Bilal (C08) · report recorded'} title="Worker action card" />
     <Statement tone="red" source="⚙ Escalation rule · not AI">Bilal needs rest now. Keep him off work and with someone.</Statement>
     <Note tone="amber">If he is confused, has vomited or stopped sweating: treat it as an emergency, start cooling, keep someone with him and call 998.</Note>
     <Section title="Steps">

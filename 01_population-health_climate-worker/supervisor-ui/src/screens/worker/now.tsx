@@ -1,5 +1,5 @@
 import { navigate } from '../../router';
-import { heatNow, intervalsOf, kindLabel, nowAndNext, taskFor, time } from '../data';
+import { assessmentCapture, heatNow, intervalsOf, kindLabel, nowAndNext, taskFor, time } from '../data';
 import { Band, Computed, CtaBar, Empty, Hero, HoldButton, List, Metric, NoCase, Note, Row, Section, Statement } from '../kit';
 import type { ScreenProps } from '../registry';
 import { OwnRiskPanel } from '../risk';
@@ -11,7 +11,8 @@ function statusOf(session: ScreenProps['session']) {
   const story = caseView!.story;
   const id = person!.id;
   const excluded = id === 'C08' && story.reported;
-  const mine = story.assigned && !(story.reported && (!story.removed || !story.firstaid)) ? intervalsOf(caseView!.capture, id) : [];
+  const approved = caseView!.plan_assessment ? caseView!.plan_assessment.status === 'approved' : story.assigned;
+  const mine = story.assigned && approved && !(story.reported && (!story.removed || !story.firstaid)) ? intervalsOf(assessmentCapture(caseView!), id) : [];
   const { current, next } = nowAndNext(mine, caseView!.clock);
   const recovering = story.stopped || story.checkedIn || current?.kind === 'recovery';
   return { story, excluded, current, next, recovering };
@@ -33,6 +34,8 @@ function Now({ session }: ScreenProps) {
   const stopOrdered = story.issued && !story.stopped;
   const goToShelter = story.stopped && !story.recovered && !inShelter && location !== 'welfare';
   const workingNow = location === 'workshop' && !stopOrdered && !excluded;
+  const planNeedsUpdate = story.assigned && !!caseView.plan_assessment && caseView.plan_assessment.status !== 'approved';
+  const stopWorkshop = workingNow && planNeedsUpdate;
   const onRoster = !!(caseView.request?.snapshot.workers ?? caseView.capture?.request.snapshot.workers ?? caseView.workers ?? []).find(worker => worker.person_id === person.id);
   const checkin = taskFor(caseView, 'checkin');
   const checkedIn = person.id === 'C05' ? checkin?.status === 'recorded' : story.checkedIn;
@@ -40,7 +43,7 @@ function Now({ session }: ScreenProps) {
     <h1 id="hs-title"><T k="p2.title" /></h1>
     {story.issued && !story.stopped && <button type="button" className="hs-button is-danger" onClick={() => navigate('/worker/alert')}><T k="stopwork" /> · {t('p2.stop.d')}</button>}
     <Hero>
-      <Metric label={<T k="p2.status" />} value={excluded ? <En>Rest now</En> : stopOrdered ? <En>Stop heavy work</En> : goToShelter ? <En>Go to shelter</En> : workingNow ? <En>Workshop work</En> : actualCurrent ? <En>{kindLabel(actualCurrent.kind)}</En> : recovering ? t('p2.inrec') : heat.heavyHeld ? <En>Hold heavy work</En> : <En>Work as briefed</En>} sub={excluded ? <En>Stay with the site support team</En> : stopOrdered || goToShelter ? <En>Go to Shelter A</En> : workingNow ? <En>Cooled workshop preparation</En> : recovering ? t('shelterA') : undefined} tone={excluded || stopOrdered ? 'red' : goToShelter || heat.heavyHeld && !recovering ? 'amber' : recovering && !workingNow ? 'ok' : undefined} />
+      <Metric label={<T k="p2.status" />} value={excluded ? <En>Rest now</En> : stopOrdered ? <En>Stop heavy work</En> : goToShelter ? <En>Go to shelter</En> : stopWorkshop ? <En>Stop workshop work</En> : workingNow ? <En>Workshop work</En> : planNeedsUpdate ? <En>Await updated plan</En> : actualCurrent ? <En>{kindLabel(actualCurrent.kind)}</En> : recovering ? t('p2.inrec') : heat.heavyHeld ? <En>Hold heavy work</En> : <En>Work as briefed</En>} sub={excluded ? <En>Stay with the site support team</En> : stopOrdered || goToShelter ? <En>Go to Shelter A</En> : stopWorkshop ? <En>Follow your foreman’s recovery instruction</En> : workingNow ? <En>Cooled workshop preparation</En> : planNeedsUpdate ? <En>Follow your foreman until current times are confirmed</En> : recovering ? t('shelterA') : undefined} tone={excluded || stopOrdered || stopWorkshop ? 'red' : goToShelter || planNeedsUpdate || heat.heavyHeld && !recovering ? 'amber' : recovering && !workingNow ? 'ok' : undefined} />
       <Metric label={<T k="p2.heat" />} value={heat.reading ? `${heat.reading.twl} W/m²` : '—'} sub={<><En><Band band={heat.band.band} label={heat.band.label} /></En>{heat.heavyHeld && <> · {t('p2.heatq')}</>}</>} />
       <Metric label={<T k="p2.next" />} value={next ? <><En>{kindLabel(next.kind)}</En> {time(next.starts_at)}</> : '—'} sub={next ? (next.kind === 'work' ? t('workshop') : t('shelterA')) : <En>Wait for your foreman</En>} />
     </Hero>

@@ -30,13 +30,21 @@ export function DemoControl({ caseView, onChange, onReturn }: Props) {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const loadSequence = useRef(0);
+  const busyRef = useRef(busy);
+  busyRef.current = busy;
   const loadRuns = async () => {
     const sequence = ++loadSequence.current;
     try { const value = await live.demoState(); if (sequence === loadSequence.current) setPresenterCase(value); } catch (cause) { if (sequence === loadSequence.current) setError(cause instanceof Error ? cause.message : 'Unable to load presenter case'); }
     try { const value = await live.runs(); if (sequence === loadSequence.current) setRuns(Array.isArray(value) ? value as WorkflowRun[] : []); } catch (cause) { if (sequence === loadSequence.current) setError(cause instanceof Error ? cause.message : 'Unable to load workflow runs'); }
     try { const value = await live.agentRuns(); if (sequence === loadSequence.current) setAgentRuns(Array.isArray(value) ? value as ModelRun[] : []); } catch (cause) { if (sequence === loadSequence.current) setError(cause instanceof Error ? cause.message : 'Unable to load model runs'); }
   };
-  useEffect(() => { void loadRuns(); }, [caseView?.version]);
+  useEffect(() => {
+    const refresh = () => { if (!busyRef.current) void loadRuns(); };
+    refresh();
+    const timer = window.setInterval(refresh, 5_000);
+    window.addEventListener('focus', refresh);
+    return () => { window.clearInterval(timer); window.removeEventListener('focus', refresh); loadSequence.current++; };
+  }, [caseView?.version]);
   const execute = async (label: string, operation: () => Promise<unknown>) => {
     loadSequence.current++;
     setBusy(true); setError(''); setMessage('');

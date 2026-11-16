@@ -19,6 +19,7 @@ export function useCaseSession({ onSignedIn, onSignedOut }: Options = {}) {
   const [initialising, setInitialising] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const actionError = useRef(false);
   const [feedback, setFeedback] = useState('');
   const requestNumber = useRef(0);
   const activePersonId = useRef<string | null>(null);
@@ -37,12 +38,12 @@ export function useCaseSession({ onSignedIn, onSignedOut }: Options = {}) {
         setError('This tab identity changed. Choose your persona again.');
         return false;
       }
-      if (current === requestNumber.current) { setCaseView(next); setError(''); }
+      if (current === requestNumber.current) { setCaseView(next); if (!actionError.current) setError(''); }
       return !expectedCaseId || next?.case_id === expectedCaseId;
     } catch (cause) {
       if (current !== requestNumber.current || expectedPersonId !== activePersonId.current) return false;
-      if (cause instanceof ApiError && cause.status === 401) { activePersonId.current = null; setPerson(null); setCaseView(null); }
-      if (current === requestNumber.current) setError(cause instanceof Error ? cause.message : copy.loadError);
+      if (cause instanceof ApiError && cause.status === 401) { actionError.current = false; activePersonId.current = null; setPerson(null); setCaseView(null); }
+      if (current === requestNumber.current && !actionError.current) setError(cause instanceof Error ? cause.message : copy.loadError);
       return false;
     }
   };
@@ -77,6 +78,7 @@ export function useCaseSession({ onSignedIn, onSignedOut }: Options = {}) {
 
   const signIn = async (selected: Persona) => {
     requestNumber.current++;
+    actionError.current = false;
     setBusy(true); setError('');
     try {
       const result = await live.signIn(selected.id);
@@ -89,6 +91,7 @@ export function useCaseSession({ onSignedIn, onSignedOut }: Options = {}) {
 
   const signOut = async () => {
     requestNumber.current++;
+    actionError.current = false;
     setBusy(true); setError('');
     try {
       await live.signOut();
@@ -137,12 +140,13 @@ export function useCaseSession({ onSignedIn, onSignedOut }: Options = {}) {
           if (current && task && task.status === 'ready') { await live.command(current, entry.action, entry.payload, entry.command_id); sent++; }
         } catch (cause) {
           if (isNetworkError(cause)) break;
+          actionError.current = true;
           setError(`A saved ${entry.action === 'report' ? 'report' : 'check-in'} could not be sent: ${cause instanceof Error ? cause.message : 'unknown error'}`);
         }
         remaining = remaining.filter(e => e.command_id !== entry.command_id);
       }
     } catch (cause) {
-      if (!isNetworkError(cause)) setError(cause instanceof Error ? cause.message : copy.loadError);
+      if (!isNetworkError(cause)) { actionError.current = true; setError(cause instanceof Error ? cause.message : copy.loadError); }
     } finally {
       writeOutbox(scope, remaining);
       setOutbox(scope === outboxScope(person.id) ? remaining : readOutbox(outboxScope(person.id)));
@@ -167,24 +171,25 @@ export function useCaseSession({ onSignedIn, onSignedOut }: Options = {}) {
     if (!caseView || !person || !isReady(caseView, action) || busy) return;
     const command_id = crypto.randomUUID();
     if (QUEUEABLE.has(action) && isOffline()) { queue({ command_id, case_id: caseView.case_id, action, payload, queued_at: new Date().toISOString() }); return; }
-    setBusy(true); setError(''); setFeedback('');
+    actionError.current = false; setBusy(true); setError(''); setFeedback('');
     try {
       await live.command(caseView, action, payload, command_id);
       if (await refreshCase(caseView.case_id)) setFeedback(`${caseView.tasks.find(task => task.action === action)?.label ?? action}.`);
     } catch (cause) {
       if (QUEUEABLE.has(action) && isNetworkError(cause)) { queue({ command_id, case_id: caseView.case_id, action, payload, queued_at: new Date().toISOString() }); return; }
-      if (await refreshCase(caseView.case_id)) setError(cause instanceof Error ? cause.message : 'The action could not be recorded');
+      if (await refreshCase(caseView.case_id)) { actionError.current = true; setError(cause instanceof Error ? cause.message : 'The action could not be recorded'); }
     } finally { setBusy(false); }
   };
 
   const retryCalculation = async () => {
     if (!caseView?.retry_available || busy) return;
+    actionError.current = false;
     setBusy(true); setError(''); setFeedback('');
     try {
       await live.retry(caseView.case_id, caseView.version);
       if (await refreshCase(caseView.case_id)) setFeedback('Calculation retried. Review the latest solver status.');
     } catch (cause) {
-      if (await refreshCase(caseView.case_id)) setError(cause instanceof Error ? cause.message : 'The calculation could not be retried');
+      if (await refreshCase(caseView.case_id)) { actionError.current = true; setError(cause instanceof Error ? cause.message : 'The calculation could not be retried'); }
     } finally { setBusy(false); }
   };
 

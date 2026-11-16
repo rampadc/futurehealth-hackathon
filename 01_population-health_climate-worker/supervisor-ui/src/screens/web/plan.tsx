@@ -65,7 +65,7 @@ export function CrewWorkshopScreen({ session }: ScreenProps) {
           <td>{p.qualifications.includes('civil_worker') ? 'Yes' : 'No'}</td>
           <td>{p.excluded ? '■ Excluded' : p.readiness === 'ready' ? `Ready${p.readinessUntil ? ` until ${time(p.readinessUntil)}` : ''}` : p.readiness === 'not_ready' ? 'Not ready' : 'Unconfirmed'}</td>
           <td>{time(p.lastObserved)}</td>
-          <td>{proposed.includes(p.id) ? (caseView.story.assigned ? 'Assigned' : 'Proposed') : p.excluded ? 'Excluded' : 'Recovery'}</td>
+          <td>{proposed.includes(p.id) ? caseView.plan_assessment?.status === 'expired' ? 'Previous assignment' : caseView.plan_assessment?.status === 'approved' || !caseView.plan_assessment && caseView.story.assigned ? 'Assigned' : 'Proposed' : p.excluded ? 'Excluded' : 'Recovery'}</td>
         </tr>)}</tbody>
       </table></div>
     </Section>

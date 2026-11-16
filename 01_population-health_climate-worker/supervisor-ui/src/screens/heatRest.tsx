@@ -15,42 +15,43 @@ const chronologyLabel = (action: string) => ({ issue: 'Stop-work instruction iss
 
 export function HeatRestScreen({ session }: ScreenProps) {
   const { caseView, person } = session;
-  const [loadedPolicy, setPolicy] = useState<HeatRestView | null>(null);
+  const [loadedPolicy, setPolicy] = useState<{ caseId: string; viewerId: string; value: HeatRestView } | null>(null);
   const [error, setError] = useState('');
   const [rosterVerified, setRosterVerified] = useState(false);
   const [status, setStatus] = useState<'confirmed' | 'needs_verification'>('confirmed');
   const [note, setNote] = useState('');
-  useEffect(() => { setRosterVerified(false); setStatus('confirmed'); setNote(''); }, [caseView?.case_id]);
+  useEffect(() => { setPolicy(null); setRosterVerified(false); setStatus('confirmed'); setNote(''); }, [caseView?.case_id, person?.id]);
   useEffect(() => {
     if (!caseView || !person) return;
     let active = true;
-    void live.heatRest().then(value => { if (active) { setPolicy(value); setError(''); } }).catch(cause => { if (active) setError(cause instanceof Error ? cause.message : 'Coverage could not be loaded'); });
+    const caseId = caseView.case_id, viewerId = person.id;
+    void live.heatRest().then(value => { if (active) { setPolicy({ caseId, viewerId, value }); setError(''); } }).catch(cause => { if (active) setError(cause instanceof Error ? cause.message : 'Coverage could not be loaded'); });
     return () => { active = false; };
   }, [caseView?.case_id, caseView?.version, person?.id]);
   if (!caseView || !person) return <NoCase session={session} />;
-  const policy = loadedPolicy?.case_id && loadedPolicy.case_id !== caseView.case_id ? null : loadedPolicy;
+  const policy = loadedPolicy?.caseId === caseView.case_id && loadedPolicy.viewerId === person.id && (!loadedPolicy.value.case_id || loadedPolicy.value.case_id === caseView.case_id) ? loadedPolicy.value : null;
   const review = policy?.coverage_review;
   const mina = person.id === 'P10';
-  const rana = person.id === 'C05';
+  const worker = person.id === 'C05' || person.id === 'C08';
   const arrival = caseView.headcount?.arrivals.some(a => a.person_id === person.id);
   const task = caseView.tasks.find(t => t.action === 'coverage_review' && t.actor_id === person.id);
   const commercial = person.id === 'P01' ? policy?.commercial_summary : null;
   const send = () => { if (!policy || status === 'confirmed' && !rosterVerified || !note.trim()) return; void session.act('coverage_review', { policy_id: policy.policy_id, status, crew_ids: CREW_IDS, roster_verified: rosterVerified, note: note.trim() }); };
   return <div className="hs-screen">
-    <Head kicker="Employer · Dune Civil Works" title={mina ? 'Heat and rest coverage review' : rana ? 'My heat and rest coverage' : person.id === 'P01' ? 'Project heat and rest view' : 'Crew heat and rest coverage'} />
+    <Head kicker="Employer · Dune Civil Works" title={mina ? 'Heat and rest coverage review' : worker ? 'My heat and rest coverage' : person.id === 'P01' ? 'Project heat and rest view' : 'Crew heat and rest coverage'} />
     {error && <p role="alert" className="hs-error">{error}</p>}
     <Section title="Sandline–Dune Heat Rest Schedule">
-      <p>Employer heat and rest schedule · {rana ? 'your own coverage' : policy?.scope ?? 'Dune Civil Works crew'}</p>{policy?.commitment && <p><b>{policy.commitment}</b></p>}
+      <p>Employer heat and rest schedule · {worker ? 'your own coverage' : policy?.scope ?? 'Dune Civil Works crew'}</p>{policy?.commitment && <p><b>{policy.commitment}</b></p>}
       <p>{policy?.payroll_verified ? 'Payroll payment verified.' : 'Payroll payment has not been verified.'}</p>
       {policy && <details><summary>Policy version and source record</summary><p>Version 1 · policy {policy.policy_id} · source {policy.source} · case {policy.case_id ?? caseView.case_id}</p></details>}
       <Note>Coverage review is an employer record. Safety actions and recovery continue independently.</Note>
     </Section>
     <Hero>
       <Metric label="Stop-work" value={policy?.records?.stop?.confirmed_at ? 'Confirmed' : policy?.records?.instruction?.issued_at ? 'Issued' : 'Pending'} sub={time(policy?.records?.stop?.confirmed_at)} />
-      <Metric label={rana ? 'My arrival' : 'Shelter arrivals'} value={rana ? arrival || policy?.records?.arrivals?.some(a => a.person_id === person.id) ? 'Recorded' : 'Not recorded' : `${policy?.records?.headcount?.checked_in_count ?? caseView.headcount?.checked_in_count ?? 0} / ${policy?.records?.headcount?.expected_count ?? caseView.headcount?.expected_count ?? 11}`} />
+      <Metric label={worker ? 'My arrival' : 'Shelter arrivals'} value={worker ? arrival || policy?.records?.arrivals?.some(a => a.person_id === person.id) ? 'Recorded' : 'Not recorded' : `${policy?.records?.headcount?.checked_in_count ?? caseView.headcount?.checked_in_count ?? 0} / ${policy?.records?.headcount?.expected_count ?? caseView.headcount?.expected_count ?? 11}`} />
       <Metric label="Coverage review" value={coverageLabel(review?.status)} sub={review?.reviewed_at ? time(review.reviewed_at) : undefined} />
     </Hero>
-    {!rana && person.id !== 'P01' && <Section title="Case-linked operations">
+    {!worker && person.id !== 'P01' && <Section title="Case-linked operations">
       <p>Foreman headcount: {policy?.records?.headcount?.confirmed_count ?? caseView.headcount?.confirmed_count ?? 0} / {policy?.records?.headcount?.expected_count ?? caseView.headcount?.expected_count ?? 11} confirmed. Observed activity records: {policy?.records?.observed_time?.length ?? 0}.</p>
       <p>Plan review: {assessmentLabel(caseView.plan_assessment?.status)}{caseView.plan_assessment?.assessed_at ? ` · assessed ${time(caseView.plan_assessment.assessed_at)}` : ''}. Heavy trench work remains stopped.</p>
     </Section>}
@@ -83,6 +84,6 @@ export function HeatRestScreen({ session }: ScreenProps) {
       <button type="button" className="hs-button is-primary" disabled={task?.status !== 'ready' || status === 'confirmed' && !rosterVerified || !note.trim() || session.busy} onClick={send}>Record employer coverage review</button>
     </Section>}
     {review && <Section title="Recorded employer review"><p>{coverageLabel(review.status)}{mina && review.note ? ` · ${review.note}` : ''}</p><p className="hs-small">{PERSONAS.find(persona => persona.id === review.reviewed_by)?.name ?? 'Mina Rahman'} · {time(review.reviewed_at)}</p></Section>}
-    <CtaBar>{rana ? <button type="button" className="hs-button" onClick={() => navigate('/worker/my-plan')}>Back to my plan</button> : person.id === 'C01' ? <button type="button" className="hs-button" onClick={() => navigate('/site/headcount')}>Back to headcount</button> : person.id === 'P01' ? <button type="button" className="hs-button" onClick={() => navigate('/web/monitoring')}>Back to project monitoring</button> : null}</CtaBar>
+    <CtaBar>{worker ? <button type="button" className="hs-button" onClick={() => navigate('/worker/my-plan')}>Back to my plan</button> : person.id === 'C01' ? <button type="button" className="hs-button" onClick={() => navigate('/site/headcount')}>Back to headcount</button> : person.id === 'P01' ? <button type="button" className="hs-button" onClick={() => navigate('/web/monitoring')}>Back to project monitoring</button> : null}</CtaBar>
   </div>;
 }
