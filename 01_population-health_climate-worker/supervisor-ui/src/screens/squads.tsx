@@ -3,6 +3,7 @@ import type { CaseView } from '../live';
 import { crew, heatNow, time } from './data';
 import { Avatar, Badge, Band, List, Row } from './kit';
 import { StatusIcon } from '../shared/icons';
+import { TwlReadout } from './twl';
 
 /**
  * Squads on the Sandline–Dune site. The live case covers the civil crew; the backend has no
@@ -71,7 +72,7 @@ export function SquadPicker({ squads, lines }: { squads: Squad[]; lines?: (q: Sq
   const [current, choose] = useSquad();
   return <div className="hs-squads" role="radiogroup" aria-label="Squad">{squads.map(q =>
     <button key={q.id} type="button" role="radio" aria-checked={q.id === current} className="hs-sq" onClick={() => choose(q.id)}>
-      <span className="hs-sq-h"><Avatar id={q.foremanId} size="sm" /><span><b>{q.name}</b><small>{q.foreman}</small></span></span>
+      <span className="hs-sq-h"><Avatar id={q.foremanId} size="md" /><span><b>{q.name}</b><small>{q.foreman}</small></span></span>
       <span className="hs-sq-n">
         <span data-zero={!q.alerts || undefined}>{q.alerts > 0 && <StatusIcon status="error" />}<b>{q.alerts}</b> alert{q.alerts === 1 ? '' : 's'}</span>
         <span data-zero={!q.warnings || undefined}>{q.warnings > 0 && <StatusIcon status="warn" />}<b>{q.warnings}</b> warning{q.warnings === 1 ? '' : 's'}</span>
@@ -80,7 +81,7 @@ export function SquadPicker({ squads, lines }: { squads: Squad[]; lines?: (q: Sq
     </button>)}</div>;
 }
 
-export const bandOf = (q: Squad) => <Band band={q.band} label={q.twl == null ? 'No reading' : `TWL ${q.twl}${q.estimated ? ' · est.' : ''}`} />;
+export const bandOf = (q: Squad) => <TwlReadout twl={q.twl} estimated={q.estimated} band={q.band} size={56} />;
 
 /** A fixture squad's open items, or a clear "nothing needs action". */
 export function SquadItems({ squad }: { squad: Squad }) {

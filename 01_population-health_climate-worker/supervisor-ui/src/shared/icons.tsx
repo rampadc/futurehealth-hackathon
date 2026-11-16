@@ -9,6 +9,7 @@ const PATHS = {
   camera: '<path d="M3 7h4l2-3h6l2 3h4v13H3z"/><circle cx="12" cy="13" r="4"/>',
   clock: '<circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/>',
   emergency: '<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/>',
+  gauge: '<path d="M3 18a9 9 0 0 1 18 0"/><path d="M12 18l5-6"/><path d="M3 18h18"/>',
   globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c4 4.5 4 13.5 0 18M12 3c-4 4.5-4 13.5 0 18"/>',
   list: '<path d="M10 6h10M10 12h10M10 18h10"/><path d="M4 5h3v3H4zM4 11h3v3H4zM4 17h3v3H4z"/>',
   lock: '<path d="M5 11h14v10H5z"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',

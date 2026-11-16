@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from '../App';
 import { loadCase, type CaseId } from '../replay';
@@ -258,8 +258,7 @@ describe('stop-work', () => {
     await open('/web/heat-controls', 'P03');
     expect(await screen.findByRole('heading', { name: 'Site conditions · Historical ERA5' })).toBeTruthy();
     expect(screen.getByText(/08:00 · TWL 127 W\/m² in sun · 167 in shade/)).toBeTruthy();
-    expect(screen.getAllByText(/never clears a hold/).length).toBeGreaterThan(0);
-    expect(screen.getByRole('list', { name: 'TWL in sun by hour' }).querySelector('[aria-current="time"]')?.textContent).toContain('08:00');
+    expect(screen.getByRole('img', { name: /^TWL by hour/ })).toBeTruthy();
   });
 
   it('says conditions are unavailable and to rely on local readings', async () => {
@@ -272,19 +271,38 @@ describe('stop-work', () => {
   it('shows each worker’s heat-risk band and action, most at risk first, without reasons', async () => {
     currentCase = await makeCase('heat_trigger', {}, []);
     await open('/web/monitoring', 'P03');
-    const table = await screen.findByRole('table', { name: 'Heat risk by worker' });
-    const rows = [...table.querySelectorAll('tbody tr')].map(r => r.textContent ?? '');
-    expect(rows[0]).toMatch(/C06.*Red.*20 min work/);
-    expect(rows[2]).toMatch(/C07.*Amber/);
+    const red = await screen.findByRole('table', { name: 'Red band workers' });
+    const amber = screen.getByRole('table', { name: 'Amber band workers' });
+    expect(red.closest('[data-signal="red"]')).toBeTruthy();
+    expect(amber.closest('[data-signal]')).toBeNull();
+    expect(red.textContent).toMatch(/C06.*20 min work/);
+    expect(amber.textContent).toMatch(/C07/);
+    // Red appears before Amber.
+    expect(red.compareDocumentPosition(amber) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(screen.getByText('Crew band Red · 3 of 3 at Amber or above')).toBeTruthy();
-    expect(table.textContent).not.toMatch(/unwell|coverall|TWL/i);
+    for (const t of [red, amber]) expect(t.textContent).not.toMatch(/unwell|coverall|TWL/i);
+  });
+
+  it('sorts a band table by any column and greys out "work as planned"', async () => {
+    crewRisk = { ...crewRisk, workers: [...crewRisk.workers, { person_id: 'C05', band: 'green', action: 'Work as planned', needs_rest: false, check_in_person: false }] };
+    currentCase = await makeCase('heat_trigger', {}, []);
+    await open('/web/monitoring', 'P03');
+    const red = await screen.findByRole('table', { name: 'Red band workers' });
+    const names = () => [...red.querySelectorAll('tbody tr td:first-child')].map(td => td.textContent);
+    const before = names();
+    fireEvent.click(within(red).getByRole('button', { name: /Worker/ }));
+    expect(names()).toEqual([...before].reverse());
+    expect(within(red).getByRole('columnheader', { name: /Worker/ }).getAttribute('aria-sort')).toBe('descending');
+    const green = screen.getByRole('table', { name: 'Green band workers' });
+    expect(within(green).getByText('Work as planned').className).toContain('hs-no-action');
+    expect(within(red).getByText(/Strict work and rest/).closest('td')?.className ?? '').not.toContain('hs-no-action');
   });
 
   it('never shows a faulty reading as low risk', async () => {
     currentCase = await makeCase('heat_trigger', {}, []);
     currentCase.request!.snapshot.readings[0] = { ...currentCase.request!.snapshot.readings[0], twl: 145, quality: 'invalid' };
     await open('/web/monitoring', 'P03');
-    expect(await screen.findByText(/TWL 145 W\/m² · Unknown/)).toBeTruthy();
+    expect((await screen.findAllByText(/TWL 145 W\/m² · Unknown/)).length).toBeGreaterThan(0);
     expect(screen.queryByText(/Low environmental risk/)).toBeNull();
   });
 

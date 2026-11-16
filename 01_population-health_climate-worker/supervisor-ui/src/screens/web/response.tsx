@@ -26,14 +26,14 @@ export function HeatControlsScreen({ session }: ScreenProps) {
       <div className="hs-scroll"><table className="hs-table hs-table-sm">
         <thead><tr><th>Squad</th><th>Location</th><th>TWL W/m²</th><th>Band</th><th>Source</th><th>Heavy exposed work</th></tr></thead>
         <tbody>{squadsFor(caseView).map(q => <tr key={q.id}>
-          <td><Person id={q.foremanId} size="xs"><b>{q.name}</b></Person></td><td>{q.loc}</td><td>{q.twl ?? '—'}</td><td>{bandOf(q)}</td>
+          <td><Person id={q.foremanId} size="md"><b>{q.name}</b></Person></td><td>{q.loc}</td><td>{q.twl ?? '—'}</td><td>{bandOf(q)}</td>
           <td>{q.live ? `Sensor ${r?.sensor_id ?? '—'} · ${time(r?.measured_at)}` : q.estimated ? `Forecast · ${q.sensor} offline` : `Sensor ${q.sensor}`}</td>
           <td>{q.hold ? <Hold /> : '— No hold'}</td></tr>)}</tbody>
       </table></div>
       <Computed />
     </Section>
     <div className="hs-grid">
-      <Section title="Task controls" hint={response ? `Assessed ${time(response.decision_at)}` : undefined}>
+      <Section title="Task controls">
         {controls.length ? <List>{controls.map(c => <Row key={c.task_id} title={nameOf(c.task_id)} detail={c.reason_codes.map(reasonLabel).join(' · ') || 'No restriction'} badge={c.state === 'held' || c.state === 'stopped' ? <Hold>{c.state}</Hold> : <span className="hs-badge" data-tone="muted">{c.state}</span>} />)}</List>
           : <Empty>The solver has not assessed this case yet.</Empty>}
         <Computed />
@@ -99,14 +99,14 @@ export function ProtectiveResponseScreen({ session }: ScreenProps) {
     <Head kicker={`Protective response · ${time(caseView.clock)} GST`} title="Protective response" sub="People act first; these records follow. Crew planning stays locked until they are complete." />
     <SquadPicker squads={squads} lines={lines} />
     {locked && <Note tone="amber">Crew planning locked: {protective?.planning_blockers.map(reasonLabel).join(', ') || 'until the headcount is recorded'}.</Note>}
-    <Section title="Required confirmations" hint="Owner · status · due">
+    <Section title="Required confirmations">
       <List>{rows.map(r => <Row key={r.action} title={LABELS[r.action] ?? r.action} detail={taskLine(session, r.action)} badge={taskBadge(session, r.action)} />)}</List>
     </Section>
     {mine.length > 0 && <Section title="Record yours">
       {mine.map(t => t.action === 'recover' ? <button key={t.action} type="button" className="hs-button is-primary" onClick={() => navigate('/site/headcount')}>Open physical headcount</button> : <ActionButton key={t.action} session={session} action={t.action} label={t.label} primary
         confirm={t.action === 'remove' ? { word: 'REMOVED', title: 'Confirm the worker is out of the heat', body: 'This records your human confirmation for the protective response. Software cannot record it for you.' } : undefined} />)}
     </Section>}
-    {protective && protective.actions.length > 0 && <Section title="Solver’s protective actions" hint="Proposals · applied: false">
+    {protective && protective.actions.length > 0 && <Section title="Solver’s protective actions">
       <Draft><ul className="hs-plain">{protective.actions.map(a => <li key={a.code + a.owner_id}>{reasonLabel(a.code)} · <Person id={a.owner_id}>{nameOf(a.owner_id)}</Person> · {a.status}{a.due_at ? ` · due ${time(a.due_at)}` : ''}{a.message ? ` — ${a.message}` : ''}</li>)}</ul></Draft>
     </Section>}
     <Note>No health detail appears here. A worker’s own health record stays with them and occupational health.</Note>
