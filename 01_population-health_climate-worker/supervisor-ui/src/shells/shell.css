@@ -24,7 +24,7 @@
 }
 .hs-body { flex: 1; display: grid; grid-template-columns: minmax(12rem, 16rem) minmax(0, 1fr); min-block-size: 0; }
 .hs-rail { display: flex; flex-direction: column; gap: var(--space-half); padding: var(--space-2); border-inline-end: var(--rule-hair); background: var(--color-sheet); }
-.hs-rail > button { text-align: start; background: none; border: 0; padding: var(--space-1) var(--space-2); min-block-size: var(--target); border-inline-start: 3px solid transparent; }
+.hs-rail > button { display: flex; align-items: center; gap: var(--space-1); text-align: start; background: none; border: 0; padding: var(--space-1) var(--space-2); min-block-size: var(--target); border-inline-start: 3px solid transparent; }
 .hs-rail > button[aria-current='page'] { border-inline-start-color: var(--color-ink); font-weight: var(--weight-bold); }
 .hs-rail small { color: var(--color-pencil); }
 .hs-main { padding: var(--gutter); min-inline-size: 0; }
@@ -95,3 +95,9 @@
 /* Admin group at the end of the rail. */
 .hs-rail-group { margin: var(--space-2) 0 0; padding: var(--space-1) var(--space-2) 0; border-block-start: var(--rule-hair); font-size: var(--fs-small); color: var(--color-pencil); text-transform: uppercase; letter-spacing: 0.04em; }
 .hs-shell[data-device='site'] .hs-rail-group, .hs-shell[data-device='worker'] .hs-rail-group { display: none; }
+
+/* Rail icons: line icon before each screen name (shared/icons.tsx). */
+.hs-rail > button .hs-icon { inline-size: 1.25em; block-size: 1.25em; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: square; stroke-linejoin: miter; }
+
+/* Heat-Safe Crew logo in the title bar, before the product name. */
+.hs-logo { inline-size: 2.25rem; block-size: 2.25rem; border-radius: 50%; flex: none; display: block; }

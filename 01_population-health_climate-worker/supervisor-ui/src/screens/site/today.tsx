@@ -25,7 +25,7 @@ export function TodayScreen({ session }: ScreenProps) {
       <Metric label="Arrived" value={`${accounted} / ${caseView.headcount?.expected_count ?? 11}`} sub="Shelter A" tone={accounted === (caseView.headcount?.expected_count ?? 11) ? 'ok' : undefined} />
       <Metric label="TWL" value={heat.reading ? `${heat.reading.twl} W/m²` : '—'} sub={<><Band band={heat.band.band} label={heat.band.label} /> · {heat.reading?.sensor_id ?? 'no sensor'} · {time(heat.reading?.measured_at)}</>} />
     </Hero>
-    <Section title="Actions" hint="Tap to open">
+    <Section title="Actions">
       {mine.length ? <List label="Your actions">{mine.map(task => <Row key={task.action} title={task.label} detail={taskLine(session, task.action)} badge={taskBadge(session, task.action)} onClick={SCREEN_FOR_ACTION[task.action]?.site ? () => open(task.action) : undefined} />)}</List>
         : <Empty>No actions for you in this case. {heat.reading && `TWL ${heat.reading.twl} W/m² at ${time(heat.reading.measured_at)}.`}</Empty>}
     </Section>
@@ -56,7 +56,7 @@ export function StopWorkScreen({ session }: ScreenProps) {
         <Row title="Separate light task" detail="Not affected by this instruction." badge={<span className="hs-badge" data-tone="muted">Not affected</span>} />
       </List>
     </Section>
-    <Section title="What worker phones receive" hint="Fixed template · reviewed translation">
+    <Section title="What worker phones receive">
       <SmsPreview workerIds={people.map(p => p.id)} names={people.map(p => p.name)} />
     </Section>
     <Note>Nothing is sent from this demo. The preview shows the message size each crew language would need.</Note>
@@ -108,7 +108,7 @@ export function HeadcountScreen({ session }: ScreenProps) {
       <Metric label="Foreman confirmed" value={`${confirmed} / ${expected}`} sub={headcount?.confirmed_at ? time(headcount.confirmed_at) : 'awaiting Huda’s observation'} tone={confirmed === expected ? 'ok' : undefined} />
       <Metric label="Safe locations" value={cooled === undefined && welfare === undefined ? '—' : `${cooled ?? 0} cooled · ${welfare ?? 0} Welfare`} sub="Accounted crew may be in separate safe locations" />
     </Hero>
-    <Section title="Affected workers" hint="Phone or kiosk arrivals appear separately from Huda’s headcount">
+    <Section title="Affected workers">
       <List>{people.map(p => <Row key={p.id} lead={<Avatar id={p.id} size="md" excluded={p.excluded} />} title={who(p.id)} detail={arrivals.has(p.id) ? `Personal arrival ${time(arrivals.get(p.id))} · last known ${p.location ?? 'unknown'}` : `Last known: ${p.location ?? 'unknown'}`} badge={arrivals.has(p.id) ? <span className="hs-badge" data-tone="done">✓ Arrived</span> : confirmed === expected ? <span className="hs-badge" data-tone="done">✓ Accounted by Huda</span> : <span className="hs-badge" data-tone="wait">No personal arrival</span>} />)}</List>
     </Section>
     <CtaBar note="Confirm only after directly accounting for each affected worker at Shelter A or Welfare. Personal check-ins are not required for this physical attestation.">

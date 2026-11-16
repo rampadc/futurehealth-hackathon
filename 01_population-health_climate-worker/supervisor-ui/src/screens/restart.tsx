@@ -77,7 +77,7 @@ export function RestartReviewScreen({ session }: ScreenProps) {
   /* Per squad: latest reading, status, the midday break and readiness checks done. */
   const squads = squadsFor(caseView).map(q => q.live ? { ...q, status: story.reviewed ? 'Review recorded' : `Stop-work · ${restart.status.replaceAll('_', ' ')}`, checks: { done: passing, total: CHECKS.length }, reading: { twl: heat.reading?.twl ?? null, at: time(heat.reading?.measured_at), fresh: heat.freshness === 'current' } } : q);
   const sq = squads.find(q => q.id === squadId) ?? squads[0];
-  const table = <Section title="Restart status by squad" hint="Select a squad">
+  const table = <Section title="Restart status by squad">
     <div className="hs-scroll"><table className="hs-table hs-table-sm">
       <thead><tr><th>Squad</th><th>Latest reading</th><th>Current status</th><th>Break starts</th><th>Break ends · forecast</th><th>Readiness checks</th></tr></thead>
       <tbody>{squads.map(q => <tr key={q.id} aria-selected={q.id === sq.id} onClick={() => choose(q.id)} className="hs-pick">
@@ -92,7 +92,7 @@ export function RestartReviewScreen({ session }: ScreenProps) {
   return <div className="hs-screen">
     <Head kicker="Restart review · Heavy exposed civil work" title="Restart review" sub="Recording the review does not authorise resuming work. The site decision stays with the superintendent." />
     {table}
-    <Section title="Eight checks · Civil crew" hint="Each human check needs a named confirmer">
+    <Section title="Eight checks · Civil crew">
       <List>{CHECKS.map(([label, action, key]) => {
         const c = key ? (checks as Record<string, { status: string; actor_id: string | null; observed_at: string | null }> | null)?.[key] : null;
         const owner = progress(caseView, action).owner;
@@ -107,7 +107,7 @@ export function RestartReviewScreen({ session }: ScreenProps) {
         <ActionButton session={session} action="permit" label="Confirm permit check" />
         <ActionButton session={session} action="review" label="Record restart review" primary confirm={rashid ? { word: 'RESTART', title: 'Record your restart review', body: 'This records your review as superintendent. Heavy work stays stopped; the restart decision itself is made on site.' } : undefined} />
       </Section>
-      <Section title="Shift handover" hint="Can happen with restart still open">
+      <Section title="Shift handover">
         <Note>Open decisions: {[!story.fresh && 'fresh reading · Maya', !story.permit && 'permit check · Tariq', !story.reviewed && 'restart review · Rashid', !story.deliveryAccepted && 'supplier acceptance · Noura'].filter(Boolean).join('; ') || 'the separate site decision to resume work'}.</Note>
         <ActionButton session={session} action="handover" label="Record shift handover" />
       </Section>
