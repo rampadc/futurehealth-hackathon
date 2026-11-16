@@ -831,6 +831,8 @@ class CaseService:
                    'arrivals':[{'person_id':'C05','checked_in_at':checkin['occurred_at']}] if checkin else []}
         if persona_id in {'C05','C08'}:
             headcount['arrivals']=[item for item in headcount['arrivals'] if item['person_id']==persona_id]
+            headcount.pop('cooled_recovery_count')
+            headcount.pop('welfare_count')
         if persona_id in {'C05','C08'}:
             assessment={**assessment,'started_worker_ids':[pid for pid in assessment['started_worker_ids'] if pid==persona_id],
                         'request':None,'response':None,'check':None}
@@ -845,6 +847,18 @@ class CaseService:
             result.update(request=None,capture=None,plan_assessment=None,runs=[],workers=[],retry_available=False,
                           story={**{key:value for key,value in flags.items() if key in {'issued','acknowledged','stopped','checkedIn','recovered'}},
                                  'events':[item for item in timeline if item['id'] in visible]})
+        if persona_id=='P01':
+            visible={'issue','acknowledge','stop','recover','activity','assign','start_work',
+                     'start_recovery','coverage_review','draftDelivery','approveDelivery','sendDelivery',
+                     'acceptDelivery','handover','costReview','escalate','escalation_followup'}
+            aggregate_flags={'issued','acknowledged','stopped','checkedIn','recovered','assigned',
+                             'deliveryDrafted','deliveryApproved','deliverySent','deliveryAccepted',
+                             'handover','costReviewed'}
+            result.update(request=None,capture=None,plan_assessment=None,runs=[],workers=[],retry_available=False,
+                          headcount={**headcount,'arrivals':[]},
+                          story={**{key:value for key,value in flags.items() if key in aggregate_flags},
+                                 'events':[{**item,'title':TASK_LABELS.get(item['id'],item['title'])}
+                                           for item in timeline if item['id'] in visible]})
         return result
 
     def heat_rest(self, actor: str | None):
@@ -880,6 +894,9 @@ class CaseService:
                               'cooled_recovery_count':sum(w['location_id'] in {'shelter_a','shelter_b'} for w in snapshot['workers']) if recover else 0,
                               'welfare_count':sum(w['location_id']=='welfare' for w in snapshot['workers']) if recover else 0},
                  'arrivals':arrivals,'observed_time':intervals}
+        if actor in {'C05','C08'}:
+            records['headcount'].pop('cooled_recovery_count')
+            records['headcount'].pop('welfare_count')
         result={'policy_id':'heat-rest-schedule-v1','title':'Fictional Sandline–Dune Heat Rest Schedule',
                 'case_id':case['id'],'source':'demo/cross-scenario/HEAT_REST_SCHEDULE.md',
                 'scope':'Required heat recovery in ordinary rostered shift time for verified Dune civil crew',

@@ -260,6 +260,11 @@ def test_incident_first_headcount_keeps_removed_worker_in_welfare(setup_case):
     view=command(case,'C01','recover',{'person_ids':[f'C{i:02}' for i in range(2,13)],'zone_id':'shelter_a'})
     assert (view['headcount']['confirmed_count'],view['headcount']['cooled_recovery_count'],
             view['headcount']['welfare_count'])==(11,10,1)
+    for worker in ('C05','C08'):
+        assert 'cooled_recovery_count' not in case.read_case(worker)['headcount']
+        assert 'welfare_count' not in case.read_case(worker)['headcount']
+        assert 'cooled_recovery_count' not in case.heat_rest(worker)['records']['headcount']
+        assert 'welfare_count' not in case.heat_rest(worker)['records']['headcount']
     snap=view['request']['snapshot']
     assert len(snap['recovery']['person_ids'])==10 and 'C08' not in snap['recovery']['person_ids']
     assert next(w for w in snap['workers'] if w['person_id']=='C08')['location_id']=='welfare'
@@ -390,3 +395,25 @@ def test_project_manager_receives_aggregate_commercial_evidence(setup_case):
                    (active['id'],'duplicate-observed-work','C01','activity',active['clock'],json.dumps({'intervals':[work]})))
         db.execute('UPDATE cases SET version=version+1 WHERE id=?',(active['id'],))
     assert case.heat_rest('P01')['commercial_summary']['confirmed_time']==summary['confirmed_time']
+
+
+def test_project_manager_case_view_excludes_clinical_and_worker_records(setup_case):
+    case,_=setup_case
+    recovered(case)
+    command(case,'C08','report',{'note':'private-symptom-marker'})
+    command(case,'C01','incident_record',{'note':'private-clinical-marker'})
+    command(case,'C01','remove',{'location_id':'welfare'})
+    command(case,'P06','firstaid')
+    view=case.read_case('P01')
+    assert view['request'] is None and view['capture'] is None and view['plan_assessment'] is None
+    assert view['runs']==[] and view['workers']==[] and not view['retry_available']
+    assert view['headcount']['arrivals']==[]
+    assert [task['action'] for task in view['tasks']]==['costReview']
+    assert not {'report','incident_record','remove','firstaid','readiness','leila'} & {
+        item['id'] for item in view['story']['events']}
+    assert not any(item['id']=='checkin' or item.get('actorId')=='C05' for item in view['story']['events'])
+    assert not {'reported','removed','firstaid'} & set(view['story'])
+    serialized=json.dumps(view)
+    assert 'private-symptom-marker' not in serialized and 'private-clinical-marker' not in serialized
+    assert 'person_id' not in serialized
+    assert 'private-symptom-marker' not in json.dumps(case.heat_rest('P01'))
