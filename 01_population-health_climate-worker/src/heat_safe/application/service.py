@@ -862,6 +862,7 @@ class CaseService:
             if event['action']=='activity': intervals.extend(event['payload']['intervals'])
             if event['action']=='start_work': intervals.extend(event['payload'].get('recovery_intervals',[]))
             if event['action']=='start_recovery': intervals.extend(event['payload']['work_intervals'])
+        all_intervals=intervals
         arrivals=[{'person_id':'C05','checked_in_at':checkin['occurred_at']}] if checkin else []
         snapshot=self._project(case,events)['snapshot']
         if actor in {'C05','C08'}:
@@ -891,9 +892,41 @@ class CaseService:
                                     'coverage_review':review}
         if actor=='P01':
             cost=latest('costReview')
+            visible={'issue','acknowledge','stop','checkin','recover','activity','assign','start_work',
+                     'start_recovery','coverage_review','draftDelivery','approveDelivery','sendDelivery',
+                     'acceptDelivery','handover','costReview'}
+            chronology=[{'action':e['action'],'title':TASK_LABELS.get(e['action'],e['action']),
+                         'occurred_at':e['occurred_at']} for e in events if e['action'] in visible]
+            chronology.sort(key=lambda item:item['occurred_at'])
+            seen=set(); minutes={'recovery':0.0,'work':0.0}; observed=[]
+            for item in all_intervals:
+                if item['kind'] not in minutes: continue
+                key=(item['person_id'],item['kind'],item['zone_id'],item['starts_at'],item['ends_at'])
+                if key in seen: continue
+                seen.add(key)
+                minutes[item['kind']]+=(at(item['ends_at'])-at(item['starts_at'])).total_seconds()/60
+                observed.append(item['ends_at'])
+            delivery_actions=('draftDelivery','approveDelivery','sendDelivery','acceptDelivery')
+            milestones=[{'action':e['action'],'occurred_at':e['occurred_at']} for e in events if e['action'] in delivery_actions]
+            delivery_status={'draftDelivery':'drafted','approveDelivery':'approved','sendDelivery':'sent',
+                             'acceptDelivery':'accepted'}
             result['commercial_summary']={'stop_at':stop['occurred_at'] if stop else None,
                 'recovery_confirmed_at':recover['occurred_at'] if recover else None,
                 'confirmed_count':records['headcount']['confirmed_count'],
                 'coverage_status':review['status'] if review else 'unverified',
-                'cost_review_at':cost['occurred_at'] if cost else None}
+                'cost_review_at':cost['occurred_at'] if cost else None,
+                'chronology':chronology,
+                'confirmed_time':{'recovery_worker_minutes':round(minutes['recovery'],2),
+                                  'workshop_worker_minutes':round(minutes['work'],2),
+                                  'latest_observed_at':max(observed) if observed else None},
+                'employer_review':{'status':review['status'],'roster_verified':review['roster_verified'],
+                                   'reviewed_at':review['reviewed_at']} if review else None,
+                'delivery':{'status':delivery_status[milestones[-1]['action']] if milestones else 'not_started',
+                            'milestones':milestones},
+                'unresolved_questions':[
+                    {'id':'dune_payroll_confirmation','question':'Has Dune confirmed actual payment for covered recovery?','status':'open'},
+                    {'id':'dune_sandline_reimbursement','question':'How will Dune and Sandline treat lost output and standby?','status':'open'},
+                    {'id':'supplier_charges','question':'Were any supplier charges incurred for the delivery change?','status':'open'},
+                    {'id':'client_delay_allowance','question':'Does the contract support any client heat-delay allowance?','status':'open'},
+                ]}
         return result

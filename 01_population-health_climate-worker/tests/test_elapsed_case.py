@@ -1,6 +1,7 @@
 """Elapsed case state keeps evidence time and proposed work separate."""
 import asyncio
 import copy
+import json
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -348,3 +349,44 @@ def test_actual_workshop_occupancy_blocks_new_cohort(setup_case,monkeypatch):
     with pytest.raises(module.CaseError,match='occupancy'):
         command(case,'C01','start_work',{'assessment_id':new['id'],'person_ids':replacements,
             'observed_recovery':True,'prerequisites_confirmed':True},key='start-new-cohort')
+
+
+def test_project_manager_receives_aggregate_commercial_evidence(setup_case):
+    case,clock=setup_case
+    plan=observed(case,clock)['plan_assessment']
+    command(case,'P10','coverage_review',{'policy_id':'heat-rest-schedule-v1','status':'confirmed',
+        'crew_ids':[f'C{i:02}' for i in range(2,13)],'roster_verified':True,'note':'Internal roster note'})
+    command(case,'C01','assign',{'assessment_id':plan['id']})
+    for action in ('draftDelivery','approveDelivery','sendDelivery','acceptDelivery'):
+        command(case,'P05',action)
+    clock.advance(minutes=4)
+    command(case,'C01','start_work',{'assessment_id':plan['id'],'person_ids':['C05'],
+        'observed_recovery':True,'prerequisites_confirmed':True})
+    command(case,'C08','report')
+    command(case,'C01','incident_record')
+    command(case,'C01','remove',{'location_id':'welfare'})
+    command(case,'P06','firstaid')
+    clock.advance(minutes=2)
+    command(case,'C01','start_recovery',{'person_ids':['C05'],'zone_id':'shelter_a','observed_work':True})
+    command(case,'P02','handover')
+    command(case,'P01','costReview')
+    summary=case.heat_rest('P01')['commercial_summary']
+    assert summary['confirmed_count']==11
+    assert summary['employer_review']=={'status':'confirmed','roster_verified':True,
+        'reviewed_at':case.heat_rest('P10')['coverage_review']['reviewed_at']}
+    assert summary['confirmed_time']['recovery_worker_minutes']==26
+    assert summary['confirmed_time']['workshop_worker_minutes']==2
+    assert summary['delivery']['status']=='accepted'
+    assert [m['action'] for m in summary['delivery']['milestones']]==[
+        'draftDelivery','approveDelivery','sendDelivery','acceptDelivery']
+    assert summary['cost_review_at'] is not None
+    assert not {'report','incident_record','remove','firstaid'} & {e['action'] for e in summary['chronology']}
+    assert all(item['status']=='open' for item in summary['unresolved_questions'])
+    assert 'Internal roster note' not in str(summary)
+    with case._conn() as db:
+        active=case._active(db)
+        work=json.loads(db.execute("SELECT payload FROM events WHERE case_id=? AND action='start_recovery'",(active['id'],)).fetchone()['payload'])['work_intervals'][0]
+        db.execute('INSERT INTO events(case_id,command_id,actor_id,action,occurred_at,payload) VALUES (?,?,?,?,?,?)',
+                   (active['id'],'duplicate-observed-work','C01','activity',active['clock'],json.dumps({'intervals':[work]})))
+        db.execute('UPDATE cases SET version=version+1 WHERE id=?',(active['id'],))
+    assert case.heat_rest('P01')['commercial_summary']['confirmed_time']==summary['confirmed_time']
