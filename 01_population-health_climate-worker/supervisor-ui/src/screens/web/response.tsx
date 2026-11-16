@@ -26,7 +26,7 @@ export function HeatControlsScreen({ session }: ScreenProps) {
       <div className="hs-scroll"><table className="hs-table hs-table-sm">
         <thead><tr><th>Squad</th><th>Location</th><th>TWL W/m²</th><th>Band</th><th>Source</th><th>Heavy exposed work</th></tr></thead>
         <tbody>{squadsFor(caseView).map(q => <tr key={q.id}>
-          <td><Person id={q.foremanId} size="xs"><b>{q.name}</b></Person></td><td>{q.loc}</td><td>{q.twl ?? '—'}</td><td>{bandOf(q)}</td>
+          <td><Person id={q.foremanId} size="md"><b>{q.name}</b></Person></td><td>{q.loc}</td><td>{q.twl ?? '—'}</td><td>{bandOf(q)}</td>
           <td>{q.live ? `Sensor ${r?.sensor_id ?? '—'} · ${time(r?.measured_at)}` : q.estimated ? `Forecast · ${q.sensor} offline` : `Sensor ${q.sensor}`}</td>
           <td>{q.hold ? <Hold /> : '— No hold'}</td></tr>)}</tbody>
       </table></div>

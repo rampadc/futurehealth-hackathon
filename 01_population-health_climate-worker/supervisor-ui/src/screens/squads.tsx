@@ -72,7 +72,7 @@ export function SquadPicker({ squads, lines }: { squads: Squad[]; lines?: (q: Sq
   const [current, choose] = useSquad();
   return <div className="hs-squads" role="radiogroup" aria-label="Squad">{squads.map(q =>
     <button key={q.id} type="button" role="radio" aria-checked={q.id === current} className="hs-sq" onClick={() => choose(q.id)}>
-      <span className="hs-sq-h"><Avatar id={q.foremanId} size="sm" /><span><b>{q.name}</b><small>{q.foreman}</small></span></span>
+      <span className="hs-sq-h"><Avatar id={q.foremanId} size="md" /><span><b>{q.name}</b><small>{q.foreman}</small></span></span>
       <span className="hs-sq-n">
         <span data-zero={!q.alerts || undefined}>{q.alerts > 0 && <StatusIcon status="error" />}<b>{q.alerts}</b> alert{q.alerts === 1 ? '' : 's'}</span>
         <span data-zero={!q.warnings || undefined}>{q.warnings > 0 && <StatusIcon status="warn" />}<b>{q.warnings}</b> warning{q.warnings === 1 ? '' : 's'}</span>

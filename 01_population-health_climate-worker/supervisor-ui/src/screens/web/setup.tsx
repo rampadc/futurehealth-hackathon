@@ -51,7 +51,7 @@ export function SiteSetupScreen({ session }: ScreenProps) {
     <Section title="Squads and locations">
       <div className="hs-scroll"><table className="hs-table hs-table-sm">
         <thead><tr><th>Squad</th><th>Foreman</th><th>Location</th><th>Recovery</th><th>Sensors</th><th>Workers</th></tr></thead>
-        <tbody>{squads.map(q => <tr key={q.id}><td><b>{q.name}</b></td><td><Person id={q.foremanId} size="xs">{q.foreman}</Person></td><td>{q.loc}</td><td>{q.shelter}</td>
+        <tbody>{squads.map(q => <tr key={q.id}><td><b>{q.name}</b></td><td><Person id={q.foremanId} size="md">{q.foreman}</Person></td><td>{q.loc}</td><td>{q.shelter}</td>
           <td>{SENSORS.filter(x => x.squads.includes(q.id)).map(x => x.id.toUpperCase()).join(', ')}</td><td>{q.size}</td></tr>)}</tbody>
       </table></div>
     </Section>

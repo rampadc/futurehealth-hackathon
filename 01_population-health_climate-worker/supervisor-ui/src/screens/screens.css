@@ -242,6 +242,8 @@ button.hs-row-body:hover { background: var(--color-base); }
 .hs-sq { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-half); padding: var(--space-2); background: var(--color-base); color: var(--color-ink); border: var(--hair-width) solid var(--color-section-frame); text-align: start; min-inline-size: 0; font: inherit; cursor: pointer; }
 .hs-sq:hover { background: var(--color-sheet); }
 .hs-sq[aria-checked='true'] { background: var(--color-sheet); border: 2px solid var(--color-ink); box-shadow: inset 0 4px 0 var(--color-ink); }
+/* Foreman photo on squad cards: twice the old small size. */
+.hs-sq-h .hs-avatar { --_size: 3rem; }
 .hs-sq-h { display: flex; align-items: center; gap: var(--space-1); min-inline-size: 0; }
 .hs-sq-h > span:last-child { display: grid; min-inline-size: 0; }
 .hs-sq-h small { font-size: var(--fs-label); color: var(--color-graphite); }
@@ -324,3 +326,10 @@ button.hs-row-body:hover { background: var(--color-base); }
 .hs-sort { background: none; border: 0; padding: 0; font: inherit; text-transform: inherit; letter-spacing: inherit; font-weight: var(--weight-bold); cursor: pointer; white-space: nowrap; }
 .hs-sort span { color: var(--color-graphite); }
 .hs-shell .hs-no-action { color: var(--color-pencil); }
+
+/* TWL reading underlined in its band colour (unknown stays neutral). */
+.hs-twl-text[data-tone] { text-decoration-line: underline; text-decoration-thickness: 3px; text-underline-offset: 4px; text-decoration-skip-ink: none; }
+.hs-twl-text[data-tone='green'] { text-decoration-color: var(--color-signal-green); }
+.hs-twl-text[data-tone='amber'] { text-decoration-color: var(--color-signal-yellow); }
+.hs-twl-text[data-tone='red'] { text-decoration-color: var(--color-signal-red); }
+.hs-twl-text[data-tone='unknown'] { text-decoration-color: var(--color-pencil); text-decoration-style: dashed; }

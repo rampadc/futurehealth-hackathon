@@ -70,7 +70,7 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
     <a href="#hs-main" className="skip-link">Skip to screen</a>
     <header className="hs-bar">
       {showBrand && <BrandMark palette={brand} />}
-      <img className="hs-logo" src={heatSafeLogo} alt="" width="36" height="36" />
+      <img className="hs-logo" src={heatSafeLogo} alt="" width="72" height="72" />
       <strong>Heat-Safe Crew</strong>
       <span className="hs-muted">{info.name}</span>
       {session.caseView && <span className="hs-muted"><LiveClock view={session.caseView} /></span>}

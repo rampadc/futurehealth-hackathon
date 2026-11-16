@@ -81,7 +81,7 @@ export function RestartReviewScreen({ session }: ScreenProps) {
     <div className="hs-scroll"><table className="hs-table hs-table-sm">
       <thead><tr><th>Squad</th><th>Latest reading</th><th>Current status</th><th>Break starts</th><th>Break ends · forecast</th><th>Readiness checks</th></tr></thead>
       <tbody>{squads.map(q => <tr key={q.id} aria-selected={q.id === sq.id} onClick={() => choose(q.id)} className="hs-pick">
-        <td><Avatar id={q.foremanId} size="xs" /> <b>{q.name}</b></td>
+        <td><Avatar id={q.foremanId} size="md" /> <b>{q.name}</b></td>
         <td><b>{q.reading.twl ?? '—'} W/m²</b> · {q.reading.at}{q.reading.fresh ? ' · fresh' : q.live ? ` · ${heat.freshness}` : ''}</td>
         <td>{q.status}</td><td>{q.breakStart}</td><td>{q.breakEnd}</td>
         <td>{q.checks.total ? <><StatusIcon status={q.checks.done === q.checks.total ? 'ok' : 'warn'} /> <b>{q.checks.done} of {q.checks.total}</b></> : '—'}</td></tr>)}</tbody>

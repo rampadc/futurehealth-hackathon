@@ -100,4 +100,4 @@
 .hs-rail > button .hs-icon { inline-size: 1.25em; block-size: 1.25em; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: square; stroke-linejoin: miter; }
 
 /* Heat-Safe Crew logo in the title bar, before the product name. */
-.hs-logo { inline-size: 2.25rem; block-size: 2.25rem; border-radius: 50%; flex: none; display: block; }
+.hs-logo { inline-size: 4.5rem; block-size: 4.5rem; border-radius: 50%; flex: none; display: block; }
