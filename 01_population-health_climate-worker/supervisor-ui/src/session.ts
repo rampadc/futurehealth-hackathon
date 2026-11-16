@@ -52,6 +52,7 @@ export function useCaseSession({ onSignedIn, onSignedOut }: Options = {}) {
       try {
         await establishTabId();
         const session = await live.session();
+        if (!active) return;
         activePersonId.current = session.person?.id ?? null;
         const currentCase = session.person ? await live.case() : null;
         if (currentCase?.viewer_id && session.person && currentCase.viewer_id !== session.person.id) {

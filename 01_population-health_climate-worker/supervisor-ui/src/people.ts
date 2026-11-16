@@ -78,6 +78,7 @@ export function usePhotoSync(signedIn: boolean, caseVersion?: number) {
 
 export async function uploadOwnPhoto(personId: string, image: string) {
   const saved = await live.uploadPhoto(image);
+  generation++;
   uploaded = { ...uploaded, [personId]: saved.updated_at };
   photoData[personId] = image;
   emit();
@@ -85,6 +86,7 @@ export async function uploadOwnPhoto(personId: string, image: string) {
 
 export async function removeOwnPhoto(personId: string) {
   await live.removePhoto();
+  generation++;
   const { [personId]: _removed, ...rest } = uploaded;
   uploaded = rest;
   delete photoData[personId];
