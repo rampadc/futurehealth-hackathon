@@ -3,6 +3,8 @@ import type { SiteConditions } from '../contract';
 import { live } from '../live';
 import type { CaseSession } from '../session';
 import { Band, Badge, Computed, List, Note, Row, Section } from './kit';
+import { time } from './data';
+import { TwlChart, type TwlReadingPoint } from './twl';
 
 const ZONE: Record<string, string> = { low: 'Low zone', medium: 'Medium zone', high: 'High zone' };
 const zone = (z: string) => ZONE[z] ?? z;
@@ -28,18 +30,18 @@ export function useConditions(session: CaseSession) {
  * Hourly Thermal Work Limit for the site and day from the risk core. It is planning context only:
  * a forecast or replay never clears a hold; a fresh local reading and a human review do.
  */
-export function ConditionsPanel({ session, compact }: { session: CaseSession; compact?: boolean }) {
+export function ConditionsPanel({ session, compact, readings }: { session: CaseSession; compact?: boolean; readings?: TwlReadingPoint[] }) {
   const { conditions, error } = useConditions(session);
   const label = conditions?.status === 'ok' ? (conditions.kind === 'replay' ? 'Historical ERA5' : 'Forecast') : 'Forecast';
-  return <Section title={`Site conditions · ${label}`} hint="Not a local measurement · never clears a hold">
+  return <Section title={readings ? 'Site conditions and readings' : `Site conditions · ${label}`} icon="sensor">
     {error ? <p role="alert" className="hs-error">{error}</p>
       : !conditions ? <p role="status" className="hs-muted">Loading conditions…</p>
       : conditions.status !== 'ok' ? <Note tone="red">Conditions unavailable: {conditions.message}. Treat site heat as unknown and rely on local readings.</Note>
-      : <ConditionsBody conditions={conditions} compact={compact} />}
+      : <ConditionsBody conditions={conditions} compact={compact} readings={readings} label={label} now={session.caseView ? time(session.caseView.clock) : undefined} />}
   </Section>;
 }
 
-function ConditionsBody({ conditions: c, compact }: { conditions: Extract<SiteConditions, { status: 'ok' }>; compact?: boolean }) {
+function ConditionsBody({ conditions: c, compact, readings, label, now: clock }: { conditions: Extract<SiteConditions, { status: 'ok' }>; compact?: boolean; readings?: TwlReadingPoint[]; label: string; now?: string }) {
   const now = c.current;
   return <>
     <List label="Conditions now">
@@ -50,11 +52,7 @@ function ConditionsBody({ conditions: c, compact }: { conditions: Extract<SiteCo
         detail={`Peak ${c.summary.max_temperature_c} °C · WBGT ${c.summary.max_wbgt_c} °C · midday break ${c.summary.midday_break}`}
         badge={c.summary.heat_programme_required ? <Badge tone="wait">Heat programme</Badge> : undefined} />
     </List>
-    {!compact && <div className="hs-strip" role="list" aria-label="TWL in sun by hour">
-      {c.hourly.filter(h => SHIFT(h.hour)).map(h => <div key={h.hour} role="listitem" aria-current={h.hour === c.clock_hour ? 'time' : undefined} data-now={h.hour === c.clock_hour || undefined} data-zone={h.twl_zone_sun}>
-        <b>{h.hour}</b><span>{h.twl_sun_wm2}</span><span>{zone(h.twl_zone_sun)}</span>
-      </div>)}
-    </div>}
+    <TwlChart kindLabel={label} now={clock ?? c.clock_hour} hourly={c.hourly.filter(h => SHIFT(h.hour)).map(h => ({ hour: h.hour, twl: h.twl_sun_wm2 }))} readings={readings} />
     <Computed>Computed by the heat-stress rules ({c.rules_version}) from {c.source.replace(/^cache:/, '')} · {c.site} · not AI</Computed>
     {!compact && c.citation.length > 0 && <p className="hs-muted">Zones: {c.citation.map((x, i) => <span key={x.cite}>{i ? '; ' : ''}{x.url ? <a href={x.url} target="_blank" rel="noreferrer">{x.cite}</a> : x.cite}</span>)}</p>}
   </>;

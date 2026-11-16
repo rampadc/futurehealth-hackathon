@@ -26,7 +26,7 @@ export function AdminSettingsScreen({ session }: ScreenProps) {
 
 function PeopleAndRoles() {
   return <div className="hs-settings-panel">
-    <Section title="People in this demo" hint={`${PERSONAS.length + 1} named roles`}>
+    <Section title="People in this demo">
       <List label="People and roles">
         {[...PERSONAS, ADMIN].map(p => <Row key={p.id} lead={<Avatar id={p.id} size="md" />} title={`${p.name} · ${p.role}`} detail={`${p.organisation} · ${p.description}`} badge={p.id === ADMIN.id ? <Badge tone="done">Admin</Badge> : undefined} />)}
       </List>

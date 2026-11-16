@@ -13,6 +13,14 @@ import { usePhotoSync } from '../people';
 import './fonts';
 import './shell.css';
 import { LiveClock } from '../LiveClock';
+import heatSafeLogo from '../assets/heatsafe_logo.jpg';
+import { Icon, type IconName } from '../shared/icons';
+
+/** Rail icon per screen id; the screen name is always written beside it. */
+const NAV_ICON: Record<string, IconName> = {
+  monitoring: 'gauge', 'heat-rest': 'clock', 'heat-controls': 'sensor', response: 'stop', crew: 'people',
+  'work-rest': 'calendar', 'restart-review': 'play', ask: 'message', trust: 'lock', 'site-setup': 'pin', settings: 'settings',
+};
 
 type Props = { device: Device; screen?: string; onLockAccess?: () => void };
 
@@ -55,13 +63,14 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
   const allowed = screens.filter(s => !s.personas.length || s.personas.includes(session.person!.id));
   const ownScreen = allowed.find(s => !s.group) ?? allowed[0];
   const permitted = allowed.includes(screen);
-  const railButton = (s: ScreenDef) => <button key={s.id} type="button" aria-current={s.id === screen.id ? 'page' : undefined} onClick={() => go(s)}>{s.name}{!s.component && <small> · planned</small>}</button>;
+  const railButton = (s: ScreenDef) => <button key={s.id} type="button" aria-current={s.id === screen.id ? 'page' : undefined} onClick={() => go(s)}>{NAV_ICON[s.id] && <Icon name={NAV_ICON[s.id]} />}<span>{s.name}{!s.component && <small> · planned</small>}</span></button>;
   const Screen = permitted ? screen.component : undefined;
   const tabs = info.tabs;
   return <div className="hs-shell" data-theme={info.theme} data-device={device}>
     <a href="#hs-main" className="skip-link">Skip to screen</a>
     <header className="hs-bar">
       {showBrand && <BrandMark palette={brand} />}
+      <img className="hs-logo" src={heatSafeLogo} alt="" width="72" height="72" />
       <strong>Heat-Safe Crew</strong>
       <span className="hs-muted">{info.name}</span>
       {session.caseView && <span className="hs-muted"><LiveClock view={session.caseView} /></span>}
@@ -97,7 +106,6 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
 function DeviceSwitch({ current, personId }: { current: Device; personId?: string }) {
   return <p className="hs-switch">
     {(Object.keys(DEVICE_INFO) as Device[]).filter(d => d !== current && (!personId || screensFor(d).some(s => s.personas.includes(personId)))).map(d => <button key={d} type="button" className="hs-link" onClick={() => navigate(`/${d}`)}>{DEVICE_INFO[d].name}</button>)}
-    {(!personId || personId === 'C01' || (!personId.startsWith('C0') && personId !== 'P10' && personId !== 'P09')) && <button type="button" className="hs-link" onClick={() => navigate('/classic')}>Classic desktop app</button>}
   </p>;
 }
 

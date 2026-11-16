@@ -62,14 +62,14 @@ export function ReadinessScreen({ session }: ScreenProps) {
       <Metric label="Unconfirmed" value={String(unconfirmed)} sub={excluded ? `${excluded} excluded from workshop readiness` : undefined} />
       <Metric label="Workshop places" value={workshop ? `${workshop.capacity - fixed.length} of ${workshop.capacity}` : '—'} sub={fixed.length ? `${fixed.length} fixed occupants` : undefined} />
     </Hero>
-    <Section title="Affected workers" hint={canConfirm ? 'Tap a worker to confirm' : undefined}>
+    <Section title="Affected workers">
       <List>{list.map(p => <Row key={p.id} lead={<Avatar id={p.id} size="md" excluded={p.excluded} />} title={who(p.id)} detail={`${p.qualifications.map(reasonLabel).join(', ') || 'No qualification on record'} · ${p.readiness === 'ready' ? `ready${p.readinessUntil ? ` until ${time(p.readinessUntil)}` : ''}` : p.reason ?? 'no readiness confirmation yet'}`} badge={readinessBadge(p)} onClick={canConfirm && !p.excluded && p.readiness !== 'ready' ? () => setSelected(p.id) : undefined} />)}</List>
     </Section>
     <Section title="Other confirmations">
       <div className="hs-mui"><EvidenceAction action="leila" caseView={caseView} person={person} onAction={session.act} busy={session.busy} /></div>
       <ActionButton session={session} action="crew_readiness" label="Confirm crew readiness check for restart" />
     </Section>
-    {caseView.tasks.some(t => t.action === 'activity' && t.actor_id === person.id && t.status === 'ready') && <Section title="Observed activity" hint="Record only what you saw">
+    {caseView.tasks.some(t => t.action === 'activity' && t.actor_id === person.id && t.status === 'ready') && <Section title="Observed activity">
       <div className="hs-mui"><EvidenceAction action="activity" caseView={caseView} person={person} onAction={session.act} busy={session.busy} /></div>
     </Section>}
     {canConfirm && next && <CtaBar><button type="button" className="hs-button is-primary" onClick={() => setSelected(next.id)}>Confirm next: {next.name.split(' ')[0]}</button></CtaBar>}

@@ -76,7 +76,7 @@ export function CrewWorkshopScreen({ session }: ScreenProps) {
       </div>)}</div>
     </Section>
     <CrewRiskPanel session={session} />
-    {huda && <Section title="Record observations" hint="Readiness and activity are human records, never the plan">
+    {huda && <Section title="Record observations">
       <div className="hs-mui">
         {['readiness', 'activity', 'leila'].map(action => <EvidenceAction key={action} action={action} caseView={caseView} person={person} onAction={session.act} busy={session.busy} />)}
       </div>
@@ -109,7 +109,7 @@ export function WorkRestPlanScreen({ session }: ScreenProps) {
     <Section title="Timeline">
       <div className="hs-mui"><Schedule capture={capture} /></div>
     </Section>
-    <Section title="Intervals" hint={`${plan.intervals.length} intervals`}>
+    <Section title="Intervals">
       <div className="hs-scroll"><table className="hs-table">
         <thead><tr><th>Worker</th><th>Activity</th><th>Where</th><th>From</th><th>To</th></tr></thead>
         <tbody>{[...new Set(plan.intervals.map(i => i.person_id))].flatMap(id => intervalsOf(capture, id)).map(i => <tr key={i.person_id + i.starts_at}>

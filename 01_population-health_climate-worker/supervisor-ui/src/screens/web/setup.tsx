@@ -18,7 +18,7 @@ export function SiteSetupScreen({ session }: ScreenProps) {
   const sensor = SENSORS.find(x => x.id === selected) ?? SENSORS[0];
   return <div className="hs-screen">
     <Head kicker="Site setup · Sandline–Dune, Mussafah" title="Site setup" sub="Which sensors serve which squads and locations. Fix gaps before work starts." />
-    <Section title="Site plan" hint="Select a sensor">
+    <Section title="Site plan">
       <svg className="hs-siteplan" viewBox="0 0 700 290" role="group" aria-label="Site plan">
         <rect x="1" y="1" width="698" height="288" fill="none" stroke="currentColor" strokeWidth="2" />
         {ZONES.map(z => {
@@ -51,11 +51,11 @@ export function SiteSetupScreen({ session }: ScreenProps) {
     <Section title="Squads and locations">
       <div className="hs-scroll"><table className="hs-table hs-table-sm">
         <thead><tr><th>Squad</th><th>Foreman</th><th>Location</th><th>Recovery</th><th>Sensors</th><th>Workers</th></tr></thead>
-        <tbody>{squads.map(q => <tr key={q.id}><td><b>{q.name}</b></td><td><Person id={q.foremanId} size="xs">{q.foreman}</Person></td><td>{q.loc}</td><td>{q.shelter}</td>
+        <tbody>{squads.map(q => <tr key={q.id}><td><b>{q.name}</b></td><td><Person id={q.foremanId} size="md">{q.foreman}</Person></td><td>{q.loc}</td><td>{q.shelter}</td>
           <td>{SENSORS.filter(x => x.squads.includes(q.id)).map(x => x.id.toUpperCase()).join(', ')}</td><td>{q.size}</td></tr>)}</tbody>
       </table></div>
     </Section>
-    <Section title="Sensors" hint={`${SENSORS.filter(x => x.off).length} offline`}>
+    <Section title="Sensors">
       <div className="hs-scroll"><table className="hs-table hs-table-sm">
         <thead><tr><th>Sensor</th><th>Type</th><th>Location</th><th>Squads</th><th>Relay</th><th>Status</th></tr></thead>
         <tbody>{SENSORS.map(x => <tr key={x.id} className="hs-pick" aria-selected={x.id === sensor.id} onClick={() => setSelected(x.id)}>

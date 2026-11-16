@@ -9,6 +9,7 @@ import { ActionButton, Badge, Band, Computed, Empty, Head, Hero, Hold, List, Met
 import type { ScreenProps } from '../registry';
 import { ConditionsPanel } from '../conditions';
 import { CrewRiskPanel } from '../risk';
+import { TwlReadout } from '../twl';
 import { bandOf, OtherSquadScreen, SquadItems, SquadPicker, squadsFor, useSquad, SENSORS } from '../squads';
 
 /** Squad Monitoring: within five seconds, does anyone need action now? */
@@ -44,32 +45,26 @@ export function SquadMonitoringScreen({ session }: ScreenProps) {
     : [q.status, bandOf(q), <>Headcount <b>{q.headcount}</b></>];
   if (!sq.live) return <OtherSquadScreen title="Squad Monitoring" squad={sq} squads={squads} lines={lines}>
     <Section title="Needs action"><SquadItems squad={sq} /></Section>
-    <Section title="Crew by location" hint="Aggregates only · no health data"><List><Row title={`${sq.loc} · ${sq.headcount} workers`} detail={`${sq.status}. Recovery: ${sq.shelter}.`} badge={<Badge tone="muted">{sq.hold ? 'Hold' : 'Working'}</Badge>} /></List></Section>
+    <Section title="Crew by location"><List><Row title={`${sq.loc} · ${sq.headcount} workers`} detail={`${sq.status}. Recovery: ${sq.shelter}.`} badge={<Badge tone="muted">{sq.hold ? 'Hold' : 'Working'}</Badge>} /></List></Section>
   </OtherSquadScreen>;
   return <div className="hs-screen">
     <Head kicker={`Squad Monitoring · Civil crew · ${time(caseView.clock)} GST`} title="Squad Monitoring" />
     <SquadPicker squads={squads} lines={lines} />
-    <p className="hs-statusline"><Band band={heat.band.band} label={heat.reading ? `TWL ${heat.reading.twl} W/m² · ${heat.band.label}` : 'No reading'} /> · {heat.reading ? `sensor ${heat.reading.sensor_id} · ${time(heat.reading.measured_at)}` : ''} {heat.heavyHeld && <Hold />}</p>
+    <p className="hs-statusline"><TwlReadout twl={heat.reading?.twl ?? null} band={heat.band.band} /> {heat.reading ? `· sensor ${heat.reading.sensor_id} · ${time(heat.reading.measured_at)}` : ''} {heat.heavyHeld && <Hold />}</p>
     <div className="hs-grid">
-      <Section title="Your actions" hint="Overdue first">
+      <Section title="Your actions">
         {actions.length ? <List>{actions.filter(t => SCREEN_FOR_ACTION[t.action]?.web).map(t => <Row key={t.action} lead={<Avatar id={t.actor_id} size="md" />} title={t.label} detail={`${nameOf(t.actor_id)}${t.due_at ? ` · due ${time(t.due_at)}` : ''}`} badge={taskBadge(session, t.action)} onClick={() => navigate(`/web/${SCREEN_FOR_ACTION[t.action].web}`)} />)}</List>
           : <Empty>Nothing waiting for you.</Empty>}
         {/* Actions with no dedicated wireframe screen (delivery, cost review) are recorded here. */}
         {actions.filter(t => !SCREEN_FOR_ACTION[t.action]?.web).map(t => <ActionButton key={t.action} session={session} action={t.action} label={t.label} />)}
         <p className="hs-statusline">Next site handoff: {handoff.actorId ? <Person id={handoff.actorId} size="sm">{`${nameOf(handoff.actorId)} · ${handoff.title}`}</Person> : handoff.title}</p>
       </Section>
-      <Section title="Crew by location" hint="Aggregates only · no health data">
+      <Section title="Crew by location">
         <List>{[...byLocation.entries()].map(([where, n]) => <Row key={where} title={nameOf(where)} badge={<Badge tone="muted">{n}</Badge>} />)}</List>
       </Section>
     </div>
-    <ConditionsPanel session={session} compact />
+    <ConditionsPanel session={session} compact readings={(caseView.request?.snapshot.readings ?? caseView.capture?.request.snapshot.readings ?? []).map(r => ({ at: time(r.measured_at), twl: r.twl, sensor: r.sensor_id }))} />
     <CrewRiskPanel session={session} />
-    <Section title="Readings">
-      <div className="hs-strip" role="list">
-        {(caseView.request?.snapshot.readings ?? caseView.capture?.request.snapshot.readings ?? []).map(r => <div key={r.evidence_id} role="listitem"><b>{time(r.measured_at)}</b><span>{r.twl} W/m²</span><span>{r.sensor_id}</span></div>)}
-      </div>
-      <Computed />
-    </Section>
   </div>;
 }
 
@@ -96,7 +91,7 @@ export function SystemTrustScreen({ session }: ScreenProps) {
   const shown = (log ?? []).filter(e => filter === 'all' || e.kind === filter);
   return <div className="hs-screen">
     <Head kicker="System & trust" title="System & trust" sub="Every solver run and agent answer is a proposal. People record every action." />
-    <Section title="System map" hint="What feeds Heat-Safe, the rules it runs and its agents">
+    <Section title="System map">
       {/* The system map as a list of lists: one list per lane. */}
       <ul className="hs-syslist">
         <li><h3>Inputs</h3><ul>{SENSORS.filter(x => !x.id.startsWith('k')).map(x => <li key={x.id}><span><b>{x.id.toUpperCase()} · {x.type}</b><small>{x.loc} · {x.relay}</small></span><Badge tone={x.off ? 'over' : 'done'}>{x.off ? 'Offline' : 'Live'}</Badge></li>)}
@@ -110,7 +105,7 @@ export function SystemTrustScreen({ session }: ScreenProps) {
           <li><span><b>Worker Aid Agent · AI</b><small>Check-ins in the worker’s language</small></span><Badge tone="muted">Planned</Badge></li></ul></li>
       </ul>
     </Section>
-    <Section title="Trust log" hint="Newest first · people’s records and system proposals">
+    <Section title="Trust log">
       <div className="hs-chips" role="group" aria-label="Show entries">
         {TRUST_FILTERS.map(([id, label]) => <button key={id} type="button" aria-pressed={filter === id} onClick={() => setFilter(id)}>{label}{log && ` · ${id === 'all' ? log.length : counts(id)}`}</button>)}
       </div>
@@ -119,7 +114,7 @@ export function SystemTrustScreen({ session }: ScreenProps) {
         <tbody>{shown.map(e => <tr key={e.id}><td>{time(e.at)}</td><td>{e.kind === 'command' ? 'Person' : e.kind === 'solver_run' ? 'Solver' : e.kind === 'agent_run' ? 'Agent · AI' : e.kind === 'signal' ? 'Sensor or system' : 'Guardrail'}</td><td>{e.summary}</td><td>{e.status}</td></tr>)}</tbody>
       </table></div> : <Empty>{log.length ? 'No entries of this kind yet.' : 'Nothing recorded for this case yet.'}</Empty>}
     </Section>
-    <Section title="Solver runs" hint={`Case version ${caseView.version}`}>
+    <Section title="Solver runs">
       {runs.length ? <div className="hs-scroll"><table className="hs-table">
         <thead><tr><th>Version</th><th>Status</th><th>HTTP</th><th>Graph</th><th>Shown now</th></tr></thead>
         <tbody>{runs.map(r => <tr key={r.id}><td>{r.version}</td><td>{r.status}{r.error ? ` · ${r.error}` : ''}</td><td>{r.http_status ?? '—'}</td><td>{r.graph_events?.join(' → ') ?? '—'}</td><td>{r.applied && r.version === caseView.version ? 'Current result' : r.applied ? 'Result for that version' : '—'}</td></tr>)}</tbody>
