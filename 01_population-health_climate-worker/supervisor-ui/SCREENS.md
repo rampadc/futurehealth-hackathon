@@ -29,7 +29,7 @@ Screens are addressed by name. The clickable prototype in `ui_wireframes/` keeps
 
 | Device | Screens (path `/<device>/<id>`) |
 |---|---|
-| Supervisor web | `monitoring` Squad Monitoring · `heat-controls` · `response` Protective response · `crew` Crew & workshop · `work-rest` Work/rest plan · `restart-review` · `ask` Ask the Planning Agent · `trust` System & trust · `settings` Admin settings (Branding, People and roles tabs; `/web/branding` still opens it) |
+| Supervisor web | `monitoring` Squad Monitoring · `heat-controls` · `response` Protective response · `crew` Crew & workshop · `work-rest` Work/rest plan · `restart-review` · `ask` Ask the Planning Agent · `trust` System & trust · `site-setup` Site setup · `settings` Admin settings (Branding, People and roles tabs; `/web/branding` still opens it) |
 | Site app | `today` · `stop-work` · `headcount` · `readiness` · `proposal` · `action-card` · `fresh-reading` · `ask` |
 | Worker app | `welcome` · `now` · `alert` · `check-in` · `my-plan` · `shelter` · `offline` · `my-data` |
 | Kiosk | `check-in` Shelter A check-in |
@@ -104,5 +104,6 @@ Each slice should run end to end on a preview URL with presenter controls before
 
 ## Open decisions
 
+- **Squads.** The live case covers the civil crew. Formwork, steel-fixing and MEP squads are a fictional fixture in `src/screens/squads.tsx` so supervisors can compare squads (squad selector on Squad Monitoring, Protective response, Crew & workshop and Work/rest plan; per-squad tables on Heat controls and Restart review; Site setup). Replace the fixture with an API read when the backend models more than one squad.
 - **Admin persona.** System & trust and Admin settings use a new organisation admin, Hessa Al Qamar (`P09`), because Noura is the logistics coordinator in the app but the admin in the wireframes. Admin settings sits in its own Admin group at the end of the web rail; other personas see it read-only. `P09` exists only on the backend and in the device shells; the desktop story keeps its nine personas.
 - **Retiring `/classic`.** Squad Monitoring now records the delivery and cost-review actions that had no wireframe screen. Once the team no longer needs the classic app, remove `/classic` and `src/workspaces/`.

@@ -44,8 +44,65 @@ const PEOPLE = {
   aid:    { n: 'Worker Aid Agent', id: '', e: '💬', role: 'AI agent', machine: true },
   monitor:{ n: 'Risk Monitor', id: '', e: '⏱️', role: 'Deterministic job, every 15 minutes', machine: true },
   kiosk:  { n: 'Kiosk', id: '', e: '📟', role: 'Shelter A kiosk', machine: true },
+  karim:  { n: 'Karim',  id: 'C21', e: '🦺', role: 'Formwork foreman' },
+  faisal: { n: 'Faisal', id: 'C31', e: '🦺', role: 'Steel fixing foreman' },
+  jose:   { n: 'José',   id: 'C41', e: '🦺', role: 'MEP foreman' },
 };
 const AFFECTED = ['c02', 'c03', 'c04', 'rana', 'yusuf', 'dana', 'bilal', 'leila', 'zaid', 'mariam', 'samir'];
+/* ───────── squads ─────────
+   The site runs four squads. The 4 August scenario follows the civil crew in full;
+   the others carry enough state to compare squads side by side. All fictional. */
+const SQUADS = [
+  { id: 'civil', name: 'Civil crew', foreman: 'huda', loc: 'Civil trench', shelter: 'Shelter A', size: 14,
+    twl: 145, band: 'low', hold: true, status: 'Heavy work stopped', sensor: 't1', reading: { v: 175, at: '15:06', fresh: true },
+    alerts: 1, warnings: 2, actions: { open: 4, done: 4 }, responses: { done: 4, total: 4 }, headcount: '11 / 11',
+    brk: { start: '12:30', end: '15:00' }, checks: { done: 8, total: 8 } },
+  { id: 'form', name: 'Formwork crew', foreman: 'karim', loc: 'Podium deck', shelter: 'Shelter B', size: 9,
+    twl: 156, band: 'low', hold: false, status: 'Working · shade rotation', sensor: 't2', reading: { v: 158, at: '15:05', fresh: true },
+    alerts: 0, warnings: 1, actions: { open: 1, done: 2 }, responses: { done: 2, total: 2 }, headcount: '9 / 9',
+    brk: { start: '12:30', end: '15:00' }, checks: { done: 3, total: 3 }, members: ['F01', 'F02', 'F03', 'F04', 'F05', 'F06', 'F07', 'F08', 'F09'],
+    items: [['Refill the deck water cooler', 'Below 10 L at 08:12 · owner Karim · due 08:30', 'warn']] },
+  { id: 'steel', name: 'Steel fixing crew', foreman: 'faisal', loc: 'Laydown yard', shelter: 'Shelter B', size: 12,
+    twl: 138, band: 'caution', hold: false, est: true, status: 'Caution controls · sensor offline', sensor: 't3', reading: { v: 138, at: 'forecast', fresh: false },
+    alerts: 1, warnings: 1, actions: { open: 2, done: 1 }, responses: { done: 1, total: 2 }, headcount: '12 / 12',
+    brk: { start: '12:30', end: '15:00' }, checks: { done: 5, total: 8 }, members: ['S01', 'S02', 'S03', 'S04', 'S05', 'S06', 'S07', 'S08', 'S09', 'S10', 'S11', 'S12'],
+    items: [['Base station 2 offline · band raised one level', 'No heartbeat since 07:52 · Noura notified · forecast in use', 'error'], ['Extra water and rest every 45 min', 'Caution band control · owner Faisal', 'warn']] },
+  { id: 'mep', name: 'MEP crew', foreman: 'jose', loc: 'Level 2 interior', shelter: 'Shelter B', size: 6,
+    twl: 168, band: 'low', hold: false, status: 'Working · covered', sensor: 'm1', reading: { v: 168, at: '15:00', fresh: true },
+    alerts: 0, warnings: 0, actions: { open: 0, done: 1 }, responses: { done: 1, total: 1 }, headcount: '6 / 6',
+    brk: { start: '—', end: '—' }, checks: { done: 0, total: 0 }, members: ['E01', 'E02', 'E03', 'E04', 'E05', 'E06'], items: [] },
+];
+SQUADS[0].members = AFFECTED.concat(['C13', 'C14', 'huda']).filter(k => k !== 'huda');
+SQUADS.forEach(q => (q.members || []).forEach(k => { if (!PEOPLE[k]) PEOPLE[k] = { n: k, id: k, e: '👷', role: q.name + ' worker' }; }));
+const SENSORS = [
+  { id: 't1', type: 'Wet-bulb globe sensor', loc: 'Civil trench', squad: 'civil', relay: 'Base station 1', status: 'Live · 30 s ago' },
+  { id: 't2', type: 'Wet-bulb globe sensor', loc: 'Podium deck', squad: 'form', relay: 'Base station 1', status: 'Live · 45 s ago' },
+  { id: 't3', type: 'Wet-bulb globe sensor', loc: 'Laydown yard', squad: 'steel', relay: 'Base station 2', status: 'Offline since 07:52', off: true },
+  { id: 'm1', type: 'Handheld heat meter', loc: 'Level 2 interior', squad: 'mep', relay: 'Manual · Jose', status: 'Read 15:00' },
+  { id: 'bs1', type: 'Base station', loc: 'Site cabin roof', squad: '', relay: 'LTE', status: 'Live' },
+  { id: 'bs2', type: 'Base station', loc: 'Laydown yard gate', squad: '', relay: 'LTE', status: 'Offline since 07:52', off: true },
+  { id: 'k1', type: 'NFC check-in kiosk', loc: 'Shelter A', squad: 'civil', relay: 'Site Wi-Fi', status: 'Live' },
+  { id: 'k2', type: 'NFC check-in kiosk', loc: 'Shelter B', squad: 'form,steel,mep', relay: 'Site Wi-Fi', status: 'Live' },
+];
+function squad(id) { return SQUADS.find(q => q.id === (id || App.sel.squad || 'civil')) || SQUADS[0]; }
+/* Squad selector: one card per squad with its foreman, alerts and warnings (status
+   icons), plus any per-screen facts. Picking a squad carries across screens. */
+function squadPicker(extra) {
+  const cur = squad().id;
+  return `<div class="squads" role="radiogroup" aria-label="Squad">${SQUADS.map(q => {
+    const lines = extra ? extra(q) : [`${q.loc} · ${q.size} workers`];
+    return `<button class="sq ${q.id === cur ? 'on' : ''}" role="radio" aria-checked="${q.id === cur}" data-act="squad" data-id="${q.id}">
+      <span class="sq-h">${av(q.foreman, { size: 'sm' })}<span><b>${q.name}</b><small>${who(q.foreman)}</small></span></span>
+      <span class="sq-n"><span class="${q.alerts ? '' : 'zero'}">${q.alerts ? '<span class="si" data-status="error" aria-hidden="true"></span>' : ''}<b>${q.alerts}</b> alert${q.alerts === 1 ? '' : 's'}</span><span class="${q.warnings ? '' : 'zero'}">${q.warnings ? '<span class="si" data-status="warn" aria-hidden="true"></span>' : ''}<b>${q.warnings}</b> warning${q.warnings === 1 ? '' : 's'}</span></span>
+      ${lines.map(l => `<span class="sq-l">${l}</span>`).join('')}
+    </button>`; }).join('')}</div>`;
+}
+/* For squads other than the scenario's civil crew: their open items as rows. */
+function squadItems(q) {
+  if (!q.items || !q.items.length) return `<div class="statusline"><span class="si" data-status="ok" aria-hidden="true"></span> Nothing needs action for the ${q.name.toLowerCase()}.</div>`;
+  return list(q.items.map(([t, d, st]) => row({ t, d, b: st === 'error' ? B.red('Alert') : B.amber('Warning'), static: true })));
+}
+
 
 /* ───────── state ───────── */
 const App = { route: 'map', variant: 'default', role: 'foreman', sel: {}, f: {}, scale: 1, lastR: null, mirror: false, pseudo: false, qa: false, theme: 'auto' };
@@ -89,7 +146,7 @@ const attr = (k, v) => (v === undefined || v === null || v === false || v === ''
 /* ───────── components ───────── */
 /* Person key → the ID whose photo they wear. Amal has no ID in this story; this Noura is
    drawn with the Noura photo the rest of the product uses, so a name always has one face. */
-const PHOTO_ID = { amal: 'P01', noura: 'P05' };
+const PHOTO_ID = { amal: 'P01', noura: 'P05', karim: 'L02', faisal: 'L04' };
 function photoId(key) { const p = PEOPLE[key]; return p && !p.machine ? PHOTO_ID[key] || p.id || null : null; }
 /* Crew photo for people (round, ui_design_system/people.js); a square ⚙ tile for software. */
 function av(key, { sm, size, cls } = {}) {
@@ -102,17 +159,20 @@ function av(key, { sm, size, cls } = {}) {
 /* Photo + name, for sentences and table cells. */
 function pv(key, size = 'xs') { return `<span class="person">${av(key, { size })}<span>${who(key)}</span></span>`; }
 function who(key) { const p = PEOPLE[key]; return p ? `${p.n}${p.id && p.n !== p.id ? ' (' + p.id + ')' : ''}` : key; }
+const SI_OK = '<span class="si" data-status="ok" aria-hidden="true"></span>', SI_WARN = '<span class="si" data-status="warn" aria-hidden="true"></span>', SI_ERROR = '<span class="si" data-status="error" aria-hidden="true"></span>';
 const B = {
-  stop:   (l = 'Stop-work', a) => badge('■ ' + l, 'b-red', a),
-  red:    (l = 'Red', a) => badge('■ ' + l, 'b-red', a),
-  amber:  (l = 'Amber', a) => badge('▲ ' + l, 'b-amber', a),
-  green:  (l = 'Green', a) => badge('● ' + l, 'b-green', a),
+  /* Good, warning and error stamps lead with the status icon: green tick, yellow
+     triangle with "!", filled red circle with white X. */
+  stop:   (l = 'Stop-work', a) => badge(SI_ERROR + l, 'b-red', a),
+  red:    (l = 'Red', a) => badge(SI_ERROR + l, 'b-red', a),
+  amber:  (l = 'Amber', a) => badge(SI_WARN + l, 'b-amber', a),
+  green:  (l = 'Green', a) => badge(SI_OK + l, 'b-green', a),
   emerg:  (l = 'Emergency', a) => badge('✚ ' + l, 'b-emerg', a),
-  done:   (l = 'Done', a) => badge('✓ ' + l, '', a),
+  done:   (l = 'Done', a) => badge(SI_OK + l, '', a),
   rec:    (l = 'Recorded', a) => badge('✓ ' + l, 'b-rec', a),
   wait:   (l = 'Waiting', a) => badge('… ' + l, 'b-wait', a),
-  over:   (l = 'Overdue', a) => badge('! ' + l, 'b-over', a),
-  hold:   (l = 'Heavy-work hold', a) => badge('■ ' + l, 'b-red', a),
+  over:   (l = 'Overdue', a) => badge(SI_ERROR + l, 'b-over', a),
+  hold:   (l = 'Heavy-work hold', a) => badge(SI_ERROR + l, 'b-red', a),
   ai:     (l = 'AI', a) => badge('◇ ' + l, 'b-ai', a),
   plain:  (l, a) => badge(l, '', a),
   muted:  (l, a) => badge(l, 'b-muted', a),
@@ -141,8 +201,33 @@ function row(o) {
     `<span class="rt">${o.b || ''}${o.extra || ''}</span></${tag}>`;
 }
 
-function section(title, body, aside = '') {
-  return `<section><div class="list-h">${title}${aside ? `<span>${aside}</span>` : ''}</div>${body}</section>`;
+/* Every section heading leads with an icon for what it is about (icons.js). First
+   match wins, so the more specific topics come first; pass ic to choose one. */
+const SECTION_TOPICS = [
+  [/proposal|solver|\bai\b|agent|draft|suggest/i, 'ai'],
+  [/photo/i, 'camera'],
+  [/brand|preview|logo|palette|colour|surface/i, 'globe'],
+  [/\bstop\b/i, 'stop'],
+  [/\bstart\b|restart/i, 'play'],
+  [/telemetry|forecast|band|heat|reading|sensor|condition|risk|weather|twl/i, 'sensor'],
+  [/schedule|plan\b|interval|shift|handover|timeline|chronolog|hour|today|later/i, 'calendar'],
+  [/evidence|record|observ|log|event|source|review|run\b|runs|cost|commercial|history|trust|saw/i, 'calc'],
+  [/need|action|task|alert/i, 'alert'],
+  [/privacy|consent|your data|access|audit/i, 'lock'],
+  [/deliver|receive|channel|send|recipient/i, 'send'],
+  [/location|shelter|where|zone|seat|workshop|headcount/i, 'pin'],
+  [/crew|worker|people|affected|who\b|persona|employer|roster|team/i, 'people'],
+  [/conversation|message|question|ask|chat/i, 'message'],
+  [/wearable|device|phone/i, 'phone'],
+  [/water|drink/i, 'water'],
+  [/step|check|requirement|eligib|confirm|guardrail|assumption|policy|rule|operation/i, 'list'],
+  [/system|setting|admin|setup|map/i, 'settings'],
+  [/language/i, 'globe'],
+  [/account|\bme\b|profile|your/i, 'person'],
+];
+function sectionIcon(title) { const plain = String(title).replace(/<[^>]+>/g, ''); const hit = SECTION_TOPICS.find(([re]) => re.test(plain)); return hit ? icon(hit[1]) : ''; }
+function section(title, body, aside = '', ic) {
+  return `<section class="sec"><div class="list-h"><strong class="list-t">${ic ? icon(ic) : sectionIcon(title)}${title}</strong>${aside ? `<span>${aside}</span>` : ''}</div>${body}</section>`;
 }
 function list(rows) { return `<div class="list">${rows.join('')}</div>`; }
 const COMPUTED = '⚙ Computed · rules v2026.11.07-1';
@@ -200,7 +285,7 @@ function ctaHtml(c) {
 function bannerHtml(err) {
   if (!err) return '';
   const retry = err.noretry ? '' : `<button class="btn" data-act="retry">${err.retry || 'Retry'}</button>`;
-  return `<div class="banner ${err.info ? 'info' : ''}" role="status" aria-live="polite"><span>${err.text}</span>${retry}</div>`;
+  return `<div class="banner ${err.info ? 'info' : ''}" role="status" aria-live="polite"><span class="banner-t">${err.text}</span>${retry}</div>`;
 }
 
 /* ───────── shells ───────── */
@@ -213,6 +298,7 @@ const WEB_NAV = [
   { id: 'w6', l: 'Restart review', m: 4 },
   { id: 'w7', l: 'Ask the Planning Agent', ph: '◇' },
   { id: 'w8', l: 'System & trust', ph: '⚙' },
+  { id: 'w11', l: 'Site setup', ph: '⌖' },
 ];
 
 function topRight(r, mobile) {
@@ -242,7 +328,7 @@ function webShell(s, r) {
   return `<div class="shell">
     <div class="side">
       ${brandBar(App.brandRes, 'Heat-Safe Crew · Mussafah')}
-      <nav aria-label="Main">${nav}<div class="sep"></div><button class="navi" data-act="toast" data-msg="Site setup · locations, roster and sensors (not in this prototype)"><span class="ph" aria-hidden="true">⋯</span><span>Site setup</span></button><button class="navi ${s.id === 'w9' ? 'on' : ''}" data-go="w9"><span class="ph" aria-hidden="true">◐</span><span>Organisation branding</span></button></nav>
+      <nav aria-label="Main">${nav}<div class="sep"></div><button class="navi ${s.id === 'w9' ? 'on' : ''}" data-go="w9"><span class="ph" aria-hidden="true">◐</span><span>Organisation branding</span></button></nav>
       <button class="me" data-go="w10" aria-label="Your account: ${user.n}">${av(ROLES[App.role].who)}<span><b>${user.n}</b>${user.role}</span></button>
     </div>
     <div class="content">
@@ -365,8 +451,27 @@ function frameLocale(s) {
 }
 /* After render: mirror directional arrows in right-to-left frames (media ▶ is left alone),
    and optionally pseudo-localize text to test expansion. */
+/* Status glyphs written into screen text become the status icons: "✓ " good (green
+   tick), "▲ " warning (yellow triangle with "!"), "■ " error or stop (filled red circle
+   with white X). Ink stamps (recorded, emergency) keep their glyphs. */
+const STATUS_GLYPH = { '✓': 'ok', '▲': 'warn', '■': 'error' };
+function statusIcons(root) {
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT); const ns = [];
+  while (w.nextNode()) if (/[✓▲■] /.test(w.currentNode.nodeValue)) ns.push(w.currentNode);
+  ns.forEach(n => {
+    const el = n.parentElement; if (!el || el.closest('.b-rec, .b-emerg, [data-noloc], .gantt, .strip, script, style')) return;
+    const frag = document.createDocumentFragment();
+    n.nodeValue.split(/([✓▲■] )/).forEach(part => {
+      const st = STATUS_GLYPH[part[0]];
+      if (st && part.length === 2) { const i = document.createElement('span'); i.className = 'si'; i.dataset.status = st; i.setAttribute('aria-hidden', 'true'); frag.append(i, document.createTextNode(' ')); }
+      else if (part) frag.append(document.createTextNode(part));
+    });
+    n.replaceWith(frag);
+  });
+}
 function postProcess(frame) {
   if (!frame) return;
+  statusIcons(frame);
   const walk = fn => { const w = document.createTreeWalker(frame, NodeFilter.SHOW_TEXT); const ns = []; while (w.nextNode()) ns.push(w.currentNode); ns.forEach(fn); };
   walk(n => {
     const el = n.parentElement; if (!el || el.closest('[data-noloc]')) return;
@@ -422,6 +527,7 @@ function overlay(html, bottom) {
   const o = document.createElement('div');
   o.className = 'overlay' + (bottom ? ' bottom' : '');
   o.innerHTML = html;
+  statusIcons(o);
   o.addEventListener('click', e => { if (e.target === o) closeOverlay(); });
   frameEl().appendChild(o);
   return o;
@@ -500,6 +606,7 @@ function toast(msg, undo) {
 
 /* ───────── actions ───────── */
 const ACT = {
+  squad: el => { App.sel.squad = el.dataset.id; refresh(); },
   toast: el => toast(el.dataset.msg || 'Not in this prototype'),
   filter: el => menu(el, (App.lastR.filters || []).map(f => typeof f === 'string' ? { label: f, fn: () => toast('Filter: ' + f) } : f), 'Filter'),
   overflow: el => menu(el, App.lastR.overflow || [], 'More'),

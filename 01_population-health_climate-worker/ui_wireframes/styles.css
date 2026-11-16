@@ -88,7 +88,8 @@ a { color: inherit; }
 .rule1, .rule2, .rule3, .rule4 { border-inline-start: 4px solid var(--ink) !important; }
 
 /* Stamps: glyph + word, never colour alone. */
-.badge { display: inline-flex; align-items: center; gap: 4px; border: 2px solid var(--ink); padding: 2px 8px; font-size: var(--fs-label); font-weight: 700; letter-spacing: var(--track-label); text-transform: uppercase; white-space: nowrap; background: var(--paper); color: var(--ink); line-height: 1.25; }
+/* Stamps: a record, not a control. Flat 1px frame, uppercase 12px label in a 42px box, no key edge. */
+.badge { display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-height: 2.625rem; max-width: 100%; border: var(--hair-width) solid var(--ink); padding: 4px 16px; font-size: var(--fs-label); font-weight: 700; letter-spacing: var(--track-label); text-transform: uppercase; line-height: var(--lh-title); cursor: default; background: var(--paper); }
 .b-red { background: var(--band-red); color: var(--on-signal); border-color: var(--band-red); }
 .b-amber { background: var(--band-amber); color: var(--on-caution); border-color: var(--band-amber); }
 .b-green { color: var(--band-green); border-color: var(--band-green); }
@@ -134,13 +135,17 @@ a { color: inherit; }
 .mobile .photo-upload, .site .photo-upload, .worker .photo-upload { grid-template-columns: 1fr; justify-items: start; }
 
 /* Readouts: one ruled instrument band, not separate cards. The first readout is the
-   focal one: full row, focal size, and the 8px signal frame when it needs action now. */
+   focal one: full row, focal size, and the signal (8px top line, 1px frame) when it needs action now. */
 .metric { padding: 16px; background: var(--paper); min-width: 0; border-inline-start: 4px solid transparent; }
 .web .metric { padding: 16px 24px; }
 .metric.critical { border-inline-start-color: var(--ink); }
-/* Needs action now: an 8px signal frame on all four sides of the cell. */
-.metric.crit-red { outline: var(--rule-signal); outline-offset: calc(-1 * var(--signal-width)); padding: calc(16px + var(--signal-width)); }
-.web .metric.crit-red { padding: calc(16px + var(--signal-width)) calc(24px + var(--signal-width)); }
+/* Needs action now: the signal, an 8px top line over a 1px frame. It is drawn on an
+   overlay pulled out over the cell's own borders (4px inline-start edge, hairline
+   divider below the focal cell), so it lands exactly on the cell's outer edge. */
+.metric.crit-red { position: relative; padding-top: calc(16px + var(--signal-width)); border-inline-start-color: transparent; }
+.metric.crit-red::after { content: ""; position: absolute; pointer-events: none; inset-block: 0 calc(-1 * var(--_bb, 0px)); inset-inline: -4px calc(-1 * var(--_be, 0px)); border: var(--rule-signal); border-top-width: var(--signal-width); }
+.hero > .metric.crit-red:first-child { --_bb: var(--hair-width); }
+.hero > .metric.crit-red:nth-child(2):not(:last-child) { --_be: var(--hair-width); }
 .metric .lbl { font-size: var(--fs-label); font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: var(--track-label); }
 .metric .val { font-size: var(--fs-readout); font-weight: 700; line-height: var(--lh-tight); margin: 4px 0; overflow-wrap: anywhere; }
 .metric .q { font-size: 14px; color: var(--muted); }
@@ -163,22 +168,48 @@ a { color: inherit; }
 button.row:hover { background: var(--sheet); }
 .row.static { cursor: default; }
 .list { border-top: var(--rule-structure); }
+/* Section: a 1px light grey frame round the header and everything in it, so it is
+   clear what belongs to the section. The header sits on sheet paper, its title in the
+   section's tone ink; neighbouring sections take different tones by position. */
+.sec { border: var(--hair-width) solid var(--color-section-frame); }
+.sec > .list-h { background: var(--sheet); color: var(--color-section-ink); padding: 8px 16px; border-bottom: var(--rule-structure); }
+.sec > .list { border-top: 0; }
+.sec > .list > .row:last-child { border-bottom-color: transparent; }
+.sec > :not(.list-h, .list) { margin: 16px; }
+.sec:nth-of-type(5n+1) { --color-section-ink: var(--tone-1-ink); }
+.sec:nth-of-type(5n+2) { --color-section-ink: var(--tone-2-ink); }
+.sec:nth-of-type(5n+3) { --color-section-ink: var(--tone-3-ink); }
+.sec:nth-of-type(5n+4) { --color-section-ink: var(--tone-4-ink); }
+.sec:nth-of-type(5n+5) { --color-section-ink: var(--tone-5-ink); }
 .list-h { display: flex; justify-content: space-between; align-items: baseline; font-size: var(--fs-label); font-weight: 700; text-transform: uppercase; letter-spacing: var(--track-label); padding: 0 0 8px; gap: 16px; }
 .list-h span { font-weight: 500; color: var(--muted); text-transform: none; letter-spacing: 0; font-size: 14px; }
+.list-h .list-t { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; }
+/* Line icons (../ui_design_system/icons.js): 2px stroke, square caps, no fill. */
+.icon { inline-size: 1.25em; block-size: 1.25em; flex: none; stroke: currentColor; stroke-width: 2; stroke-linecap: square; stroke-linejoin: miter; fill: none; vertical-align: -0.2em; }
+.list-h .icon { inline-size: 18px; block-size: 18px; }
+[dir="rtl"] .icon--dir { transform: scaleX(-1); }
+/* Status icons beside the word (tokens.css): banners, the signal status line and the focal readout. */
+.banner-t { display: inline-flex; align-items: center; gap: 8px; }
+.banner.amber .banner-t .si { background-image: var(--icon-warn); }
+.badge .si { margin-inline-end: 2px; }
 
-/* Buttons: hover is a yellow rail under the label, press sinks 1px, disabled is pencil and dashed. */
-.cta { display: flex; align-items: center; justify-content: center; width: 100%; min-height: var(--target-glove); line-height: 1.25; padding: 8px 16px; background: var(--ink); color: var(--on-ink); font-size: 16px; font-weight: 700; border: 2px solid var(--ink); text-align: center; transition: transform var(--dur-snap) var(--easing-mechanical); }
+/* Buttons: a control, never shaped like a stamp. Sheet paper fill, 2px ink frame, a
+   4px ink key edge at the bottom, sentence case; the main button looks the same as the
+   rest. Hover is a 4px yellow rail; press pushes the key down and inverts; disabled is
+   pencil, dashed and flat. */
+.cta { display: flex; align-items: center; justify-content: center; width: 100%; min-height: var(--target-glove); line-height: 1.25; padding: 8px 16px; background: var(--sheet); color: var(--ink); font-size: 16px; font-weight: 700; border: 2px solid var(--ink); border-bottom-width: var(--key-edge); text-align: center; transition: transform var(--dur-snap) var(--easing-mechanical); }
 .web .cta { min-height: 48px; }
 .site .cta, .worker .cta { min-height: var(--target-cta); }
 .cta:hover:not(:disabled), .btn:hover:not(:disabled), .seg button:hover:not(.on), .funnel button:hover:not(.on) { box-shadow: inset 0 -4px 0 var(--color-signal-yellow); }
-.cta:active:not(:disabled), .btn:active:not(:disabled) { transform: translateY(1px); box-shadow: none; }
+.cta:active:not(:disabled), .btn:active:not(:disabled), .web .topnav .filter:active { transform: translateY(calc(var(--key-edge) - 2px)); border-bottom-width: 2px; box-shadow: none; }
+.cta:active:not(:disabled):not(.red) { background: var(--ink); color: var(--on-ink); }
 .cta:disabled { background: var(--paper); color: var(--disabled); border: 2px dashed var(--disabled); cursor: not-allowed; }
-.cta.red { background: var(--band-red); border-color: var(--band-red); color: var(--on-signal); }
+.cta.red { background: var(--band-red); border-color: var(--band-red); border-bottom-color: var(--ink); color: var(--on-signal); }
 .cta-note { font-size: 12px; color: var(--muted); margin-top: 8px; text-align: center; }
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; min-width: 44px; padding: 0 16px; border: 2px solid var(--ink); background: var(--paper); font-weight: 700; font-size: 14px; text-align: center; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; min-width: 44px; padding: 0 16px; border: 2px solid var(--ink); border-bottom-width: var(--key-edge); background: var(--sheet); font-weight: 700; font-size: 14px; text-align: center; }
 .btn:active:not(:disabled):not(.solid):not(.danger) { background: var(--ink); color: var(--on-ink); }
-.btn.solid { background: var(--ink); color: var(--on-ink); }
-.btn.danger { background: var(--band-red); border-color: var(--band-red); color: var(--on-signal); }
+/* .btn.solid: the main button looks the same as the rest. */
+.btn.danger { background: var(--band-red); border-color: var(--band-red); border-bottom-color: var(--ink); color: var(--on-signal); }
 .btn:disabled { color: var(--disabled); border: 2px dashed var(--disabled); cursor: not-allowed; background: var(--paper); }
 .iconbtn { width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border: 2px solid var(--ink); font-size: 18px; font-weight: 700; background: var(--paper); flex: none; }
 .iconbtn:hover:not(:disabled) { background: var(--sheet); }
@@ -204,12 +235,12 @@ button.row:hover { background: var(--sheet); }
 .tip code, .sheet code { font-size: 12px; background: var(--paper); border: 1px solid var(--disabled); padding: 0 4px; }
 .cite { font-size: 12px; border-inline-start: var(--rule-structure); padding-inline-start: 8px; margin: 4px 0; }
 
-/* Banner: the 8px signal frame closes the whole banner. */
-.banner { display: flex; gap: 16px; align-items: center; justify-content: space-between; padding-block: 8px; padding-inline: 16px; border: var(--rule-signal); font-size: 14px; background: var(--paper); flex: none; }
+/* Banner: the signal, an 8px top line over a 1px frame in the state's colour. */
+.banner { display: flex; gap: 16px; align-items: center; justify-content: space-between; padding-block: 8px; padding-inline: 16px; border: var(--rule-signal); border-top-width: var(--signal-width); font-size: 14px; background: var(--paper); flex: none; }
 .banner.info { border-color: var(--ink); }
 .banner.amber { border-color: var(--band-amber); }
 /* A status line that needs action now (signal). */
-.statusline.signal { border: var(--rule-signal); border-color: var(--band-red); }
+.statusline.signal { border: var(--rule-signal); border-top-width: var(--signal-width); border-color: var(--band-red); }
 .stale :is(.metric .val, .row .t, .strip, .gantt) { color: var(--disabled); }
 .stale .metric .q::after { content: ' · stale'; font-weight: 700; color: var(--ink); }
 .age { font-size: 12px; color: var(--muted); font-weight: 500; }
@@ -271,7 +302,7 @@ button.me:hover { background: var(--sheet); }
 .topnav .r { display: flex; justify-content: flex-end; gap: 8px; align-items: center; }
 .web .topnav .backlink { font-weight: 700; display: inline-flex; gap: 8px; align-items: center; min-height: 44px; background: none; }
 .web .topnav .backlink:disabled { color: var(--disabled); cursor: default; }
-.web .topnav .filter { border: 2px solid var(--ink); min-height: 44px; padding: 0 16px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; }
+.web .topnav .filter { border: 2px solid var(--ink); border-bottom-width: var(--key-edge); background: var(--sheet); min-height: 44px; padding: 0 16px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; }
 
 .main { flex: 1; display: grid; grid-template-columns: 1fr 360px; min-height: 0; }
 .main.nodetail { grid-template-columns: 1fr; }
@@ -315,18 +346,26 @@ table.t td.applied { border-inline-start: 4px solid var(--ink); font-weight: 700
 
 /* gantt: work is a mandatory instruction (blue), rest is hatched, horizon dashed */
 .gantt { border: var(--rule-structure); position: relative; }
-.g-row { display: grid; grid-template-columns: 120px 1fr; border-bottom: var(--rule-hair); height: 40px; }
+.g-row { display: grid; grid-template-columns: var(--g-lab-w, 148px) 1fr; border-bottom: var(--rule-hair); height: 40px; }
 .g-row:last-child { border-bottom: 0; }
-.g-lab { padding: 0 8px; display: flex; align-items: center; font-weight: 700; border-inline-end: var(--rule-hair); font-size: 14px; }
+.g-lab { padding: 0 8px; display: flex; align-items: center; font-weight: 700; border-inline-end: var(--rule-hair); font-size: 14px; min-width: 0; }
+.g-lab .person { gap: 8px; min-width: 0; }
+.g-lab .person > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Ask the Planning Agent: the conversation fills the screen; sources are one quiet row. */
+.convo { display: flex; flex-direction: column; gap: 16px; }
+.src-row { display: flex; flex-wrap: nowrap; align-items: baseline; gap: 4px 12px; overflow-x: auto; padding-top: 8px; border-top: var(--rule-hair); font-size: 12px; color: var(--muted); white-space: nowrap; }
+.src-row .src-k { font-weight: 700; text-transform: uppercase; letter-spacing: var(--track-label); color: var(--ink); }
+.src-row .src + .src::before { content: '·'; margin-inline-end: 12px; }
+.src-row .none { font-style: italic; }
 .g-track { position: relative; }
 .g-bar { position: absolute; top: 8px; bottom: 8px; display: flex; align-items: center; padding: 0 4px; font-size: 11px; font-weight: 700; overflow: hidden; white-space: nowrap; }
 .g-work { background: var(--plan); color: var(--on-signal); }
 .g-rest { background: var(--paper) var(--hatch-rest); border: var(--rule-hair); }
 .g-excl { border: 2px dashed var(--ink); background: var(--paper); color: var(--muted); }
-.g-ticks { display: grid; grid-template-columns: 120px 1fr; border-bottom: var(--rule-hair); height: 28px; font-size: 12px; color: var(--muted); }
+.g-ticks { display: grid; grid-template-columns: var(--g-lab-w, 148px) 1fr; border-bottom: var(--rule-hair); height: 28px; font-size: 12px; color: var(--muted); }
 .g-ticks .tk { position: relative; }
 .g-ticks .tk span { position: absolute; top: 6px; transform: translateX(-50%); }
-.g-overlay { position: absolute; inset-inline-start: 120px; inset-inline-end: 0; top: 0; bottom: 0; pointer-events: none; }
+.g-overlay { position: absolute; inset-inline-start: var(--g-lab-w, 148px); inset-inline-end: 0; top: 0; bottom: 0; pointer-events: none; }
 .g-cursor { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--ink); z-index: 3; }
 .g-horizon { position: absolute; top: 0; bottom: 0; border-inline-start: 2px dashed var(--ink); z-index: 2; }
 .scrub { display: flex; gap: 16px; align-items: center; border: var(--rule-hair); border-top: 0; padding: 8px 16px; font-size: 14px; }
@@ -393,7 +432,16 @@ table.t td.applied { border-inline-start: 4px solid var(--ink); font-weight: 700
 .tabbar button { display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; gap: 2px; min-width: 48px; border-inline-end: var(--rule-hair); text-align: center; padding: 4px 2px; line-height: 1.15; }
 .tabbar button:last-child { border-inline-end: 0; }
 .tabbar button .ic { font-size: 18px; line-height: 1; }
-.tabbar button.on { background: var(--ink); color: var(--on-ink); font-weight: 700; }
+/* Tabs: each tab has its own tone. Inactive tabs are sheet paper with a 2px tone line
+   on top; the current tab is white with the full 8px line. Inactive tabs pad the 6px
+   difference so labels don't move. */
+.tabbar button { background: var(--sheet); border-top: 2px solid var(--color-section-rule); padding-top: calc(4px + var(--section-rule-width) - 2px); }
+.tabbar button.on { background: var(--paper); border-top-width: var(--section-rule-width); padding-top: 4px; font-weight: 700; }
+.tabbar button:nth-of-type(5n+1) { --color-section-rule: var(--tone-1-rule); }
+.tabbar button:nth-of-type(5n+2) { --color-section-rule: var(--tone-2-rule); }
+.tabbar button:nth-of-type(5n+3) { --color-section-rule: var(--tone-3-rule); }
+.tabbar button:nth-of-type(5n+4) { --color-section-rule: var(--tone-4-rule); }
+.tabbar button:nth-of-type(5n+5) { --color-section-rule: var(--tone-5-rule); }
 .tabbar button.big { font-size: 14px; font-weight: 700; }
 .tabbar button.big .ic { font-size: 24px; }
 
@@ -480,7 +528,7 @@ table.t td.applied { border-inline-start: 4px solid var(--ink); font-weight: 700
 .pv .brandmark { width: 22px; height: 22px; font-size: 10px; }
 .pv .brandbar__name { font-size: 12px; }
 .pv .brandbar__product { font-size: 10px; }
-.pv .badge { font-size: 10px; padding: 1px 4px; }
+.pv .badge { font-size: 10px; padding: 1px 4px; min-height: 0; }
 .pv-install { align-items: center; justify-content: center; gap: 8px; padding: 16px 8px; text-align: center; min-height: 230px; }
 .pv-install .brandmark { width: 64px; height: 64px; font-size: 22px; }
 .swatchrow { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
@@ -574,3 +622,63 @@ pre.code { margin: 0; padding: 12px; background: var(--sheet); border: var(--rul
 /* QA aids: highlight strings that fell back to English */
 .qa-fallback .fallback { outline: 2px dashed var(--band-red); outline-offset: 1px; background: color-mix(in srgb, var(--band-red) 8%, var(--paper)); }
 [dir=rtl] .g-ticks .tk span { transform: translateX(50%); }
+
+/* ───────── Squads ─────────
+   Squad selector: one card per squad. Alerts and warnings use the status icons. */
+.squads { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; }
+.sq { display: flex; flex-direction: column; align-items: stretch; gap: 6px; padding: 12px; background: var(--paper); border: var(--hair-width) solid var(--color-section-frame); text-align: start; min-width: 0; }
+.sq:hover { background: var(--sheet); }
+.sq.on { background: var(--sheet); border: 2px solid var(--ink); padding: 11px; box-shadow: inset 0 4px 0 var(--ink); }
+.sq-h { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.sq-h > span:last-child { display: grid; min-width: 0; }
+.sq-h small { font-size: 12px; color: var(--muted); }
+.sq-n { display: flex; gap: 12px; font-size: 13px; }
+.sq-n > span { display: inline-flex; align-items: center; gap: 4px; }
+.sq-n .zero { color: var(--muted); }
+.sq-l { font-size: 12px; color: var(--muted); }
+.sq-l b { color: var(--ink); }
+
+/* TWL and restart tables by squad: small text, not readouts. */
+.t.sq-twl { font-size: 13px; }
+.t.sq-twl td, .t.sq-twl th { padding: 6px 8px; }
+.t tr[data-act] { cursor: pointer; }
+.t tr[data-act]:hover td { background: var(--sheet); }
+.t tr.on td { background: var(--sheet); font-weight: 700; }
+.t tr.on td:first-child { box-shadow: inset 4px 0 0 var(--ink); }
+.policy-row { display: flex; flex-wrap: wrap; gap: 8px 24px; padding: 8px 0 12px; font-size: 13px; }
+
+/* Crew as a grid of people. */
+.crew-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.crew-card { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 16px 8px 12px; border: var(--hair-width) solid var(--color-section-frame); background: var(--paper); text-align: center; }
+.crew-card .d { font-size: 12px; color: var(--muted); line-height: 1.35; }
+.crew-card .badge { min-height: 2rem; padding: 2px 10px; }
+.crew-card .iconbtn { position: absolute; inset-block-start: 4px; inset-inline-end: 4px; width: 32px; height: 32px; border-width: 1px; }
+.crew-card:focus-visible { box-shadow: var(--focus-ring); }
+
+/* AI Planning Agent: friendly face and a callout of what it can do. */
+.agent-intro { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 16px; }
+.agent-face { width: 72px; height: 72px; flex: none; color: var(--ink); }
+.callout { position: relative; flex: 1; background: var(--tracing); border: var(--rule-draft); padding: 12px 16px; font-size: 14px; }
+.callout::before { content: ""; position: absolute; inset-inline-start: -11px; top: 22px; width: 18px; height: 18px; background: var(--tracing); border-inline-start: var(--rule-draft); border-bottom: var(--rule-draft); transform: rotate(45deg); }
+[dir="rtl"] .callout::before { transform: rotate(-45deg); }
+.callout ul { margin: 6px 0; padding-inline-start: 18px; }
+.callout small { display: block; color: var(--muted); font-size: 12px; }
+.agent-side { display: flex; flex-direction: column; gap: 16px; }
+.agent-side .h2 { display: flex; align-items: center; gap: 8px; }
+
+/* System map as a list of lists. */
+.syslist, .syslist ul { list-style: none; margin: 0; padding: 0; }
+.syslist > li + li { margin-top: 16px; }
+.syslist h4 { margin: 0 0 6px; font-size: var(--fs-label); text-transform: uppercase; letter-spacing: var(--track-label); color: var(--muted); }
+.syslist ul { border: var(--hair-width) solid var(--color-section-frame); }
+.syslist ul li + li { border-top: var(--rule-hair); }
+.syslist .node { width: 100%; display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 12px; padding: 8px 12px; background: var(--paper); text-align: start; border: 0; }
+.syslist .node:hover { background: var(--sheet); }
+.syslist .node.sel { background: var(--sheet); box-shadow: inset 4px 0 0 var(--ink); font-weight: 700; }
+.syslist .node .badge { min-height: 2rem; padding: 2px 10px; }
+
+/* Site setup: plan of the site with sensors, zones outlined in their squad's tone. */
+.siteplan { width: 100%; height: auto; display: block; background: var(--paper); }
+.siteplan .pin { cursor: pointer; }
+.tone-key { display: inline-block; width: 14px; height: 14px; border: 3px solid; }
+.pin-key { display: inline-block; width: 12px; height: 12px; border-radius: 50% !important; background: var(--ink); }

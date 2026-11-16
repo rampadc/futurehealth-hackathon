@@ -4,6 +4,7 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, useTheme,
 } from '@mui/material';
 import { nameOf } from './replay';
+import { initialsOf, photoUrl, usePhotos } from './people';
 import type { Interval } from './replay';
 export type { Interval } from './replay';
 
@@ -34,6 +35,7 @@ const kindLabel = (kind: string) => kind.replaceAll('_', ' ');
 
 export function Timeline({ intervals, start, horizonEnd, reservationEnd, locations }: TimelineProps) {
   const theme = useTheme();
+  usePhotos();
   const colors: Record<string, string> = {
     work: theme.palette.primary.main,
     recovery: theme.palette.success.main,
@@ -98,7 +100,13 @@ export function Timeline({ intervals, start, horizonEnd, reservationEnd, locatio
               const y = chartTop + index * laneHeight;
               return (
                 <g key={worker}>
-                  <text x={chartLeft - 8} y={y + 15} textAnchor="end" fontSize="12" fill={theme.palette.text.primary}>{nameOf(worker)}</text>
+                  {/* Each lane leads with the person's round crew photo (initials when there is none). */}
+                  <clipPath id={`${titleId}-face-${index}`}><circle cx={14} cy={y + 11} r={10} /></clipPath>
+                  <circle cx={14} cy={y + 11} r={10.5} fill={theme.palette.background.paper} stroke={theme.palette.text.primary} strokeWidth="1" />
+                  {photoUrl(worker)
+                    ? <image href={photoUrl(worker)!} x={4} y={y + 1} width={20} height={20} preserveAspectRatio="xMidYMid slice" clipPath={`url(#${titleId}-face-${index})`} />
+                    : <text x={14} y={y + 15} textAnchor="middle" fontSize="8" fontWeight="700" fill={theme.palette.text.primary}>{initialsOf(worker)}</text>}
+                  <text x={30} y={y + 15} textAnchor="start" fontSize="12" fill={theme.palette.text.primary}>{nameOf(worker)}</text>
                   <line x1={chartLeft} y1={y + laneHeight - 1} x2={endX} y2={y + laneHeight - 1} stroke={theme.palette.divider} />
                 </g>
               );

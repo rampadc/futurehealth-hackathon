@@ -15,8 +15,8 @@ const BASES = [
 ] as const;
 type Basis = typeof BASES[number][0];
 
-const readinessBadge = (p: CrewMember) => p.excluded ? <span className="hs-badge" data-tone="over">■ Excluded</span>
-  : p.readiness === 'ready' ? <span className="hs-badge" data-tone="done">✓ Ready</span>
+const readinessBadge = (p: CrewMember) => p.excluded ? <span className="hs-badge" data-tone="over">Excluded</span>
+  : p.readiness === 'ready' ? <span className="hs-badge" data-tone="done">Ready</span>
     : p.readiness === 'not_ready' ? <span className="hs-badge" data-tone="muted">Not ready</span>
       : <span className="hs-badge" data-tone="wait">Unconfirmed</span>;
 

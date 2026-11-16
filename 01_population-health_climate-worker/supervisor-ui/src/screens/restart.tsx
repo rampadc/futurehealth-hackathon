@@ -7,6 +7,8 @@ import { thermalStatus } from '../thermal';
 import { heatNow, progress, taskFor, time } from './data';
 import { ActionButton, Band, Computed, CtaBar, Empty, Head, Hero, Hold, List, Metric, NoCase, Note, Row, Section, taskBadge, Avatar } from './kit';
 import type { ScreenProps } from './registry';
+import { StatusIcon } from '../shared/icons';
+import { OtherSquadScreen, squadsFor, useSquad, SquadPicker } from './squads';
 
 /** Fresh reading: a same-zone local reading for the restart review. */
 export function FreshReadingScreen({ session }: ScreenProps) {
@@ -40,7 +42,7 @@ export function FreshReadingScreen({ session }: ScreenProps) {
       </div>
       <p className="hs-small">Band for this value: <Band band={thermalStatus(value, Number.isFinite(value)).band} label={thermalStatus(value, Number.isFinite(value)).label} />. The heavy-work hold stays until a separate restart review.</p>
       <CtaBar><button type="submit" className="hs-button is-primary" disabled={!valid || session.busy}>Record fresh local reading</button></CtaBar>
-    </form> : <Note>{fresh?.status === 'recorded' ? '✓ Fresh reading recorded for the restart review.' : fresh ? `Fresh reading: ${fresh.status === 'ready' ? `ready for ${nameOf(fresh.actor_id)}` : 'waits for the crew response and first-aid handoff.'}` : 'No restart review in this case.'}</Note>}
+    </form> : <Note>{fresh?.status === 'recorded' ? <><StatusIcon status="ok" /> Fresh reading recorded for the restart review.</> : fresh ? `Fresh reading: ${fresh.status === 'ready' ? `ready for ${nameOf(fresh.actor_id)}` : 'waits for the crew response and first-aid handoff.'}` : 'No restart review in this case.'}</Note>}
     <ActionButton session={session} action="water" label="Confirm water check" />
     {fresh?.status === 'recorded' && <button type="button" className="hs-button" onClick={() => navigate('/web/restart-review')}>Open restart review (web)</button>}
   </div>;
@@ -59,6 +61,7 @@ const CHECKS: Array<[string, string, string | null]> = [
 
 /** Restart review: all eight checks together, then the superintendent's own review. */
 export function RestartReviewScreen({ session }: ScreenProps) {
+  const [squadId, choose] = useSquad();
   const { caseView, person } = session;
   if (!caseView || !person) return <NoCase session={session} />;
   const capture = caseView.capture;
@@ -71,14 +74,25 @@ export function RestartReviewScreen({ session }: ScreenProps) {
   const passing = CHECKS.filter(([, a]) => recorded(a)).length;
   const midday = checks?.proposed_at ? (() => { const h = Number(time(checks.proposed_at).slice(0, 2)), m = Number(time(checks.proposed_at).slice(3)); const mins = h * 60 + m; return mins >= 750 && mins < 900; })() : false;
   const rashid = person.id === 'P02';
+  /* Per squad: latest reading, status, the midday break and readiness checks done. */
+  const squads = squadsFor(caseView).map(q => q.live ? { ...q, status: story.reviewed ? 'Review recorded' : `Stop-work · ${restart.status.replaceAll('_', ' ')}`, checks: { done: passing, total: CHECKS.length }, reading: { twl: heat.reading?.twl ?? null, at: time(heat.reading?.measured_at), fresh: heat.freshness === 'current' } } : q);
+  const sq = squads.find(q => q.id === squadId) ?? squads[0];
+  const table = <Section title="Restart status by squad" hint="Select a squad">
+    <div className="hs-scroll"><table className="hs-table hs-table-sm">
+      <thead><tr><th>Squad</th><th>Latest reading</th><th>Current status</th><th>Break starts</th><th>Break ends · forecast</th><th>Readiness checks</th></tr></thead>
+      <tbody>{squads.map(q => <tr key={q.id} aria-selected={q.id === sq.id} onClick={() => choose(q.id)} className="hs-pick">
+        <td><Avatar id={q.foremanId} size="xs" /> <b>{q.name}</b></td>
+        <td><b>{q.reading.twl ?? '—'} W/m²</b> · {q.reading.at}{q.reading.fresh ? ' · fresh' : q.live ? ` · ${heat.freshness}` : ''}</td>
+        <td>{q.status}</td><td>{q.breakStart}</td><td>{q.breakEnd}</td>
+        <td>{q.checks.total ? <><StatusIcon status={q.checks.done === q.checks.total ? 'ok' : 'warn'} /> <b>{q.checks.done} of {q.checks.total}</b></> : '—'}</td></tr>)}</tbody>
+    </table></div>
+    <Computed>MoHRE midday break 12:30–15:00{checks?.proposed_at ? ` · proposed restart ${time(checks.proposed_at)}${midday ? ' is inside the break' : ''}` : ''}</Computed>
+  </Section>;
+  if (!sq.live) return <OtherSquadScreen title="Restart review" squad={sq} squads={squads} lines={q => [q.status]}>{table}<p className="hs-ok">No restart review for the {sq.name.toLowerCase()}: it has no stop-work. {sq.status}.</p></OtherSquadScreen>;
   return <div className="hs-screen">
     <Head kicker="Restart review · Heavy exposed civil work" title="Restart review" sub="Recording the review does not authorise resuming work. The site decision stays with the superintendent." />
-    <Hero>
-      <Metric label="Result" value={story.reviewed ? 'Review recorded' : restart.status.replaceAll('_', ' ')} sub={`${passing} of ${CHECKS.length} checks recorded`} tone={restart.status === 'ready_for_human_review' ? 'ok' : 'red'} />
-      <Metric label="Latest reading" value={heat.reading ? `${heat.reading.twl} W/m²` : '—'} sub={<><b>{heat.freshness === 'current' ? 'fresh' : heat.freshness}</b> · {time(heat.reading?.measured_at)} · sensor {heat.reading?.sensor_id ?? '—'}</>} />
-      <Metric label="Midday break" value="12:30–15:00" sub={checks?.proposed_at ? (midday ? <b>{time(checks.proposed_at)} is inside the window</b> : `${time(checks.proposed_at)} is outside the window`) : undefined} tone={midday ? 'red' : undefined} />
-    </Hero>
-    <Section title="Eight checks" hint="Each human check needs a named confirmer">
+    {table}
+    <Section title="Eight checks · Civil crew" hint="Each human check needs a named confirmer">
       <List>{CHECKS.map(([label, action, key]) => {
         const c = key ? (checks as Record<string, { status: string; actor_id: string | null; observed_at: string | null }> | null)?.[key] : null;
         const owner = progress(caseView, action).owner;

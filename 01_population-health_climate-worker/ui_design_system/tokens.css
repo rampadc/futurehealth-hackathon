@@ -30,6 +30,28 @@
   --color-signal-blue: #1D4A86;   /* mandatory instruction (work slots) · 8.8 */
   --color-on-signal: #FFFFFF;     /* text on red, green, blue fills          */
   --color-on-caution: #14120F;    /* text on yellow fill                     */
+
+
+  /* ── Section: structural colour only, never a state or signal. Five
+     natural tones (sand, sage, clay, stone, bark) so neighbouring section
+     headers and tabs never share a colour. Section headers sit on sheet paper (#F2EFE8);
+     each tone gives a rule (8px tab line, ≥ 3.7:1 on base) and an ink (header
+     label, ≥ 7.5:1 on sheet). */
+  --tone-1-rule: #A28045; --tone-1-ink: #5B4315; /* sand */
+  --tone-2-rule: #698C56; --tone-2-ink: #375028; /* sage */
+  --tone-3-rule: #BC653B; --tone-3-ink: #723311; /* clay */
+  --tone-4-rule: #807164; --tone-4-ink: #50453B; /* stone */
+  --tone-5-rule: #7B4F30; --tone-5-ink: #613F27; /* bark */
+  --color-section-rule: var(--tone-1-rule);
+  --color-section-ink: var(--tone-1-ink);
+  --color-section-frame: #D6D0C6; /* light warm grey: 1px frame round a section, grouping only */
+
+  /* ── Status icons: the only multi-colour icons. Good = green tick; warning =
+     yellow triangle with an ink "!"; error = filled red circle with a white X
+     (a white ring keeps it visible on a red fill). Use with .si (below). */
+  --icon-ok: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolyline points='3.5 12.5 9.5 18.5 20.5 5.5' fill='none' stroke='%231E6E47' stroke-width='3.2' stroke-linecap='square'/%3E%3C/svg%3E");
+  --icon-warn: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2.2 23.2 21.8H.8z' fill='%23F2A900' stroke='%2314120F' stroke-width='1.6' stroke-linejoin='miter'/%3E%3Cpath d='M12 8.8v6.4M12 17.2v2.4' stroke='%2314120F' stroke-width='2.6'/%3E%3C/svg%3E");
+  --icon-error: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10.6' fill='%23A31F24' stroke='%23FFFFFF' stroke-width='1.4'/%3E%3Cpath d='M7.8 7.8l8.4 8.4M16.2 7.8l-8.4 8.4' stroke='%23FFFFFF' stroke-width='2.6'/%3E%3C/svg%3E");
 }
 
 /* ── Derived tokens: re-resolved wherever a theme is set ─────────────── */
@@ -38,19 +60,29 @@
   --color-emissive: var(--color-signal-red);
 
   /* Rules (line weight = hierarchy) */
-  --rule-hair: 1px solid var(--color-ink);           /* rows, cells          */
+  --hair-width: 1px;
+  --rule-hair: var(--hair-width) solid var(--color-ink); /* rows, cells       */
   --rule-structure: 2px solid var(--color-ink);      /* sections, frames     */
-  /* Signal: an 8px frame on all four sides of the cell that needs action now.
-     Draw it with --rule-signal (border) or --signal-frame (outline, no layout shift). */
-  --signal-width: 8px;
-  --rule-signal: var(--signal-width) solid var(--color-emissive);  /* signal frame */
+  /* Signal: the cell that needs action now gets an 8px top line and a 1px
+     frame in the signal colour. On a cell that has its own borders, draw it
+     on an overlay that covers the border box (see .readout--focal::after),
+     so it lines up with the cell's outer edge. Elsewhere use a border:
+     border: var(--rule-signal); border-block-start-width: var(--signal-width),
+     or --signal-frame (inset shadow) on an element with no borders. */
+  --signal-width: 8px;            /* top line                              */
+  --signal-hair: 1px;             /* frame on the other three sides        */
+  --rule-signal: var(--signal-hair) solid var(--color-emissive);
+  --signal-frame: inset 0 0 0 var(--signal-hair) var(--color-emissive), inset 0 var(--signal-width) 0 0 var(--color-emissive);
   --rule-draft: 2px dashed var(--color-ink);         /* AI, proposal, draft  */
   --border-brutalist: var(--rule-structure);
   --hatch-rest: repeating-linear-gradient(135deg, transparent 0 6px, var(--color-ink) 6px 7px);
   --hatch-unknown: repeating-linear-gradient(45deg, transparent 0 3px, var(--color-pencil) 3px 4px);
 
+  /* Yellow highlights (hover rail, focus halo): one weight, 4px. */
+  --highlight-width: 4px;
+  --rail-hover: inset 0 calc(-1 * var(--highlight-width)) 0 var(--color-signal-yellow);
   /* Focus: ink ring + safety-yellow halo (visible in glare) */
-  --focus-ring: 0 0 0 2px var(--color-base), 0 0 0 4px var(--color-ink), 0 0 0 7px var(--color-signal-yellow);
+  --focus-ring: 0 0 0 2px var(--color-base), 0 0 0 4px var(--color-ink), 0 0 0 calc(4px + var(--highlight-width)) var(--color-signal-yellow);
 }
 
 :root {
@@ -103,6 +135,8 @@
   --dur-stamp: 140ms;             /* a record being made                   */
   --dur-wipe: 180ms;              /* alert reveal, panel open              */
   --dur-scan: 1.2s;               /* skeleton hatch travel                 */
+  --section-rule-width: 8px;      /* top line of a tab                     */
+  --key-edge: 4px;                /* bottom edge of a button: controls look pressable */
 
   /* ── Layers ───────────────────────────────────────────────────────── */
   --z-menu: 40;
@@ -133,10 +167,24 @@
   --color-signal-blue: #0E2A55;   /* 14.2:1 */
   --color-on-signal: #FFFFFF;
   --color-on-caution: #000000;
-  --rule-hair: 2px solid var(--color-ink);
+  /* glare: no tints; the rule carries the section */
+  --tone-1-rule: #000000; --tone-1-ink: #000000;
+  --tone-2-rule: #000000; --tone-2-ink: #000000;
+  --tone-3-rule: #000000; --tone-3-ink: #000000;
+  --tone-4-rule: #000000; --tone-4-ink: #000000;
+  --tone-5-rule: #000000; --tone-5-ink: #000000;
+  --color-section-rule: #000000; --color-section-ink: #000000;
+  --color-section-frame: #000000; /* glare: a light grey frame vanishes in sun */
+  --icon-ok: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolyline points='3.5 12.5 9.5 18.5 20.5 5.5' fill='none' stroke='%230A4429' stroke-width='3.2' stroke-linecap='square'/%3E%3C/svg%3E");
+  --icon-warn: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2.2 23.2 21.8H.8z' fill='%23FFC400' stroke='%23000000' stroke-width='1.6' stroke-linejoin='miter'/%3E%3Cpath d='M12 8.8v6.4M12 17.2v2.4' stroke='%23000000' stroke-width='2.6'/%3E%3C/svg%3E");
+  --icon-error: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10.6' fill='%237A0C10' stroke='%23FFFFFF' stroke-width='1.4'/%3E%3Cpath d='M7.8 7.8l8.4 8.4M16.2 7.8l-8.4 8.4' stroke='%23FFFFFF' stroke-width='2.6'/%3E%3C/svg%3E");
+  --hair-width: 2px;
+  --rule-hair: var(--hair-width) solid var(--color-ink);
   --rule-structure: 3px solid var(--color-ink);
   --signal-width: 10px;
-  --rule-signal: var(--signal-width) solid var(--color-emissive);
+  --signal-hair: 2px;             /* 1px vanishes in sun */
+  --rule-signal: var(--signal-hair) solid var(--color-emissive);
+  --signal-frame: inset 0 0 0 var(--signal-hair) var(--color-emissive), inset 0 var(--signal-width) 0 0 var(--color-emissive);
   --rule-draft: 3px dashed var(--color-ink);
   --fs-label: 0.8125rem;          /* 13 */
   --fs-small: 0.9375rem;          /* 15 */
@@ -160,7 +208,18 @@
   --color-signal-blue: #8DB4F0;   /* 8.9 */
   --color-on-signal: #12110F;
   --color-on-caution: #12110F;
-  --focus-ring: 0 0 0 2px var(--color-base), 0 0 0 4px var(--color-ink), 0 0 0 7px var(--color-signal-yellow);
+  --tone-1-rule: #A3885A; --tone-1-ink: #DEC7A2;
+  --tone-2-rule: #749065; --tone-2-ink: #BBD3AF;
+  --tone-3-rule: #B87252; --tone-3-ink: #F8BBA0;
+  --tone-4-rule: #84786D; --tone-4-ink: #D3C8BF;
+  --tone-5-rule: #8D6850; --tone-5-ink: #E4C3AD;
+  --color-section-rule: var(--tone-1-rule); --color-section-ink: var(--tone-1-ink);
+  --color-section-frame: #3D3832;
+  /* Night: the X takes the base colour; white on the lifted red would be 2.6:1. */
+  --icon-ok: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolyline points='3.5 12.5 9.5 18.5 20.5 5.5' fill='none' stroke='%235CCB93' stroke-width='3.2' stroke-linecap='square'/%3E%3C/svg%3E");
+  --icon-warn: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2.2 23.2 21.8H.8z' fill='%23FFC21A' stroke='%2312110F' stroke-width='1.6' stroke-linejoin='miter'/%3E%3Cpath d='M12 8.8v6.4M12 17.2v2.4' stroke='%2312110F' stroke-width='2.6'/%3E%3C/svg%3E");
+  --icon-error: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10.6' fill='%23FF7A6B' stroke='%2312110F' stroke-width='1.4'/%3E%3Cpath d='M7.8 7.8l8.4 8.4M16.2 7.8l-8.4 8.4' stroke='%2312110F' stroke-width='2.6'/%3E%3C/svg%3E");
+  --focus-ring: 0 0 0 2px var(--color-base), 0 0 0 4px var(--color-ink), 0 0 0 calc(4px + var(--highlight-width)) var(--color-signal-yellow);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
@@ -169,6 +228,16 @@
     --color-ink: #F2EEE6; --color-graphite: #B8B0A4; --color-pencil: #8E877C; --color-on-ink: #12110F;
     --color-signal-red: #FF7A6B; --color-signal-yellow: #FFC21A; --color-signal-green: #5CCB93; --color-signal-blue: #8DB4F0;
     --color-on-signal: #12110F; --color-on-caution: #12110F;
+    --tone-1-rule: #A3885A; --tone-1-ink: #DEC7A2;
+    --tone-2-rule: #749065; --tone-2-ink: #BBD3AF;
+    --tone-3-rule: #B87252; --tone-3-ink: #F8BBA0;
+    --tone-4-rule: #84786D; --tone-4-ink: #D3C8BF;
+    --tone-5-rule: #8D6850; --tone-5-ink: #E4C3AD;
+    --color-section-rule: var(--tone-1-rule); --color-section-ink: var(--tone-1-ink);
+    --color-section-frame: #3D3832;
+    --icon-ok: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolyline points='3.5 12.5 9.5 18.5 20.5 5.5' fill='none' stroke='%235CCB93' stroke-width='3.2' stroke-linecap='square'/%3E%3C/svg%3E");
+    --icon-warn: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2.2 23.2 21.8H.8z' fill='%23FFC21A' stroke='%2312110F' stroke-width='1.6' stroke-linejoin='miter'/%3E%3Cpath d='M12 8.8v6.4M12 17.2v2.4' stroke='%2312110F' stroke-width='2.6'/%3E%3C/svg%3E");
+    --icon-error: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10.6' fill='%23FF7A6B' stroke='%2312110F' stroke-width='1.4'/%3E%3Cpath d='M7.8 7.8l8.4 8.4M16.2 7.8l-8.4 8.4' stroke='%2312110F' stroke-width='2.6'/%3E%3C/svg%3E");
   }
 }
 
@@ -182,3 +251,18 @@
 :lang(ar) { --lh-body: 1.7; --lh-title: 1.5; }
 :lang(ur) { --lh-body: 2.1; --lh-title: 1.9; }
 :not(:lang(en)):not(:lang(tl)) { --track-label: 0; }
+
+/* ── Tone hook: data-tone="1…5" on a section (ledger) picks its colour.
+   Tabs pick theirs by position, so no two neighbouring tabs match. ──── */
+[data-tone="1"], :is(.tabbar__item, .rail__item):nth-of-type(5n+1) { --color-section-rule: var(--tone-1-rule); --color-section-ink: var(--tone-1-ink); }
+[data-tone="2"], :is(.tabbar__item, .rail__item):nth-of-type(5n+2) { --color-section-rule: var(--tone-2-rule); --color-section-ink: var(--tone-2-ink); }
+[data-tone="3"], :is(.tabbar__item, .rail__item):nth-of-type(5n+3) { --color-section-rule: var(--tone-3-rule); --color-section-ink: var(--tone-3-ink); }
+[data-tone="4"], :is(.tabbar__item, .rail__item):nth-of-type(5n+4) { --color-section-rule: var(--tone-4-rule); --color-section-ink: var(--tone-4-ink); }
+[data-tone="5"], :is(.tabbar__item, .rail__item):nth-of-type(5n+0) { --color-section-rule: var(--tone-5-rule); --color-section-ink: var(--tone-5-ink); }
+
+/* ── Status icon: <span class="si" data-status="ok|warn|error" aria-hidden="true"></span>.
+   Always next to a word; the icon is never the only carrier of meaning. ──── */
+.si { display: inline-block; inline-size: 1.25em; block-size: 1.25em; flex: none; vertical-align: -0.25em; background: center / contain no-repeat; }
+.si[data-status="ok"] { background-image: var(--icon-ok); }
+.si[data-status="warn"] { background-image: var(--icon-warn); }
+.si[data-status="error"] { background-image: var(--icon-error); }

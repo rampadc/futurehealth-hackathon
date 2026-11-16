@@ -5,12 +5,18 @@ import { Schedule } from '../../shared/plan';
 import { assessmentCapture, assignedIds, crew, intervalsOf, kindLabel, time, who } from '../data';
 import { ActionButton, Computed, Draft, Empty, Head, Hero, List, Metric, NoCase, Note, Row, Section, Person } from '../kit';
 import type { ScreenProps } from '../registry';
+import { StatusIcon } from '../../shared/icons';
 import { CrewRiskPanel } from '../risk';
+import { bandOf, OtherSquadScreen, SquadItems, SquadPicker, squadsFor, useSquad } from '../squads';
+import { Conversation } from '../ask';
+import { Icon } from '../../shared/icons';
+import { Avatar, Badge } from '../kit';
 
 const status = (s: string) => s.replaceAll('_', ' ');
 
 /** Crew & workshop: who can move to covered work, why, and the assignment record. */
 export function CrewWorkshopScreen({ session }: ScreenProps) {
+  const [squadId] = useSquad();
   const { caseView, person } = session;
   if (!caseView || !person) return <NoCase session={session} />;
   const capture = assessmentCapture(caseView);
@@ -25,13 +31,16 @@ export function CrewWorkshopScreen({ session }: ScreenProps) {
   const ws = capture?.request.snapshot.workshop;
   const plan = capture?.response.crew_rest;
   const huda = person.id === 'C01';
+  const squads = squadsFor(caseView);
+  const sq = squads.find(q => q.id === squadId) ?? squads[0];
+  const lines = (q: typeof sq) => q.live ? [`${ready.length} eligible · ${workshop ? `${workshop.capacity - fixed.length} of ${workshop.capacity}` : '—'} workshop places free`] : [`${q.loc} · ${q.size} workers`];
+  if (!sq.live) return <OtherSquadScreen title="Crew & workshop" squad={sq} squads={squads} lines={lines}>
+    <Section title={`Crew · ${sq.name}`}><div className="hs-crew-grid">{sq.members.map(id => <div key={id} className="hs-crew-card"><Avatar id={id} size="lg" /><b>{id}</b><Badge tone={sq.hold ? 'muted' : 'done'}>{sq.hold ? 'Recovery' : 'Working'}</Badge><span className="hs-small hs-muted">{sq.loc}</span></div>)}</div></Section>
+  </OtherSquadScreen>;
   return <div className="hs-screen">
-    <Head kicker={`Crew & workshop · ${time(caseView.clock)} GST`} title="Crew & workshop" sub="Decide who can move to covered work. A proposal is not an assignment until Huda records it." />
-    <Hero>
-      <Metric label="Eligible now" value={String(ready.length)} sub="qualified and confirmed ready" tone={ready.length ? 'ok' : 'red'} />
-      <Metric label="Workshop places" value={workshop ? `${workshop.capacity - fixed.length} free of ${workshop.capacity}` : '—'} sub={fixed.length ? `${fixed.map(nameOf).join(', ')} fixed` : undefined} />
-      <Metric label="Useful demand" value={demand ? `${demand.minimum}–${demand.maximum} people` : '—'} sub="workshop preparation" />
-    </Hero>
+    <Head kicker={`Crew & workshop · Civil crew · ${time(caseView.clock)} GST`} title="Crew & workshop" sub="Decide who can move to covered work. A proposal is not an assignment until Huda records it." />
+    <SquadPicker squads={squads} lines={lines} />
+    <p className="hs-computed">Workshop places {workshop ? `${workshop.capacity - fixed.length} free of ${workshop.capacity}` : '—'}{fixed.length ? ` · ${fixed.map(nameOf).join(', ')} fixed` : ''} · useful demand {demand ? `${demand.minimum}–${demand.maximum} people` : '—'}</p>
     <Section title="Eligibility">
       <div className="hs-funnel" role="group" aria-label="Eligibility funnel">
         <div><span className="hs-label">Affected</span><strong className="hs-readout">{people.length}</strong><span className="hs-small">heavy work stopped</span></div>
@@ -58,16 +67,13 @@ export function CrewWorkshopScreen({ session }: ScreenProps) {
       </Section>
     </div>
     <Section title="Crew · all affected">
-      <div className="hs-scroll"><table className="hs-table">
-        <thead><tr><th>Worker</th><th>Qualified</th><th>Readiness</th><th>Last observed</th><th>Proposal</th></tr></thead>
-        <tbody>{people.map(p => <tr key={p.id}>
-          <td><Person id={p.id} size="sm">{who(p.id)}</Person></td>
-          <td>{p.qualifications.includes('civil_worker') ? 'Yes' : 'No'}</td>
-          <td>{p.excluded ? '■ Excluded' : p.readiness === 'ready' ? `Ready${p.readinessUntil ? ` until ${time(p.readinessUntil)}` : ''}` : p.readiness === 'not_ready' ? 'Not ready' : 'Unconfirmed'}</td>
-          <td>{time(p.lastObserved)}</td>
-          <td>{proposed.includes(p.id) ? caseView.plan_assessment?.status === 'expired' ? 'Previous assignment' : caseView.plan_assessment?.status === 'approved' || !caseView.plan_assessment && caseView.story.assigned ? 'Assigned' : 'Proposed' : p.excluded ? 'Excluded' : 'Recovery'}</td>
-        </tr>)}</tbody>
-      </table></div>
+      {/* The crew as a grid of people, not a list. */}
+      <div className="hs-crew-grid">{people.map(p => <div key={p.id} className="hs-crew-card">
+        <Avatar id={p.id} size="lg" excluded={p.excluded} /><b>{who(p.id)}</b>
+        {p.excluded ? <Badge tone="over">Excluded</Badge> : p.readiness === 'ready' ? <Badge tone="done">Ready</Badge> : p.readiness === 'not_ready' ? <Badge tone="over">Not ready</Badge> : <Badge tone="wait">Unconfirmed</Badge>}
+        <span className="hs-small hs-muted">{p.qualifications.includes('civil_worker') ? 'Qualified' : 'Not qualified'}{p.readiness === 'ready' && p.readinessUntil ? ` · until ${time(p.readinessUntil)}` : ''} · seen {time(p.lastObserved)}</span>
+        <span className="hs-small">{proposed.includes(p.id) ? caseView.plan_assessment?.status === 'expired' ? 'Previous assignment' : caseView.plan_assessment?.status === 'approved' || !caseView.plan_assessment && caseView.story.assigned ? 'Assigned' : 'Proposed' : p.excluded ? 'Excluded' : 'Recovery'}</span>
+      </div>)}</div>
     </Section>
     <CrewRiskPanel session={session} />
     {huda && <Section title="Record observations" hint="Readiness and activity are human records, never the plan">
@@ -80,8 +86,13 @@ export function CrewWorkshopScreen({ session }: ScreenProps) {
 
 /** Work/rest plan: the next hour's work and recovery, checked by the solver. */
 export function WorkRestPlanScreen({ session }: ScreenProps) {
+  const [squadId] = useSquad();
   const { caseView } = session;
   if (!caseView) return <NoCase session={session} />;
+  const squads = squadsFor(caseView);
+  const sq = squads.find(q => q.id === squadId) ?? squads[0];
+  const lines = (q: typeof sq) => [q.live ? (caseView.capture?.response.crew_rest.planning_status ? `Plan ${caseView.capture.response.crew_rest.planning_status.replaceAll('_', ' ')}` : 'No plan yet') : q.hold ? 'Plan needed' : 'No plan needed · no heat hold'];
+  if (!sq.live) return <OtherSquadScreen title="Work/rest plan" squad={sq} squads={squads} lines={lines}><p className="hs-ok">No work/rest plan needed: the {sq.name.toLowerCase()} has no heat hold. {sq.status}.</p></OtherSquadScreen>;
   const capture = assessmentCapture(caseView);
   const plan = capture?.response.crew_rest;
   const story = caseView.story;
@@ -89,13 +100,10 @@ export function WorkRestPlanScreen({ session }: ScreenProps) {
   const pending = story.reported && (!story.removed || !story.firstaid);
   const timing = plan.timing_policy;
   const ids = assignedIds(capture);
-  return <div className="hs-screen">
+  return <div className="hs-with-side"><div className="hs-screen">
     <Head kicker={`Work/rest plan · ${capture.request.planning ? `${time(capture.request.planning.starts_at)}–${time(plan.horizon_end)}` : time(caseView.clock)}`} title="Work/rest plan" sub="Each worker sees only their own intervals." />
-    <Hero>
-      <Metric label="Proposed work" value={`${plan.useful_worker_minutes ?? 0} worker-min`} sub={`${ids.length} workers · assessed ${time(caseView.plan_assessment?.assessed_at)}`} tone="ok" />
-      <Metric label="Unmet" value={`${plan.unmet_worker_minutes ?? 0} worker-min`} />
-      <Metric label="Status" value={status(plan.planning_status)} sub={plan.planning_status === 'infeasible' ? 'rule result, not an error' : plan.optimal ? 'optimal' : plan.solver_status ?? undefined} tone={plan.planning_status === 'planned' ? 'ok' : 'red'} />
-    </Hero>
+    <SquadPicker squads={squads} lines={lines} />
+    <p className="hs-computed">{plan.useful_worker_minutes ?? 0} worker-min proposed · {ids.length} workers · {plan.unmet_worker_minutes ?? 0} unmet · {status(plan.planning_status)}{plan.planning_status === 'infeasible' ? ' (rule result, not an error)' : plan.optimal ? ' · optimal' : ''} · assessed {time(caseView.plan_assessment?.assessed_at)}</p>
     {pending && <Note tone="amber">Updated times are waiting for {[!story.removed && 'Huda’s removal confirmation', !story.firstaid && 'Salim’s first-aid contact'].filter(Boolean).join(' and ')}.</Note>}
     {timing && <Note>Work and recovery rule: {timing.initial_recovery_minutes} min initial recovery · ≤ {timing.max_work_minutes} min continuous work · {timing.between_work_recovery_minutes} min between.</Note>}
     <Section title="Timeline">
@@ -111,5 +119,8 @@ export function WorkRestPlanScreen({ session }: ScreenProps) {
     </Section>
     {plan.assumptions.length > 0 && <Section title="Assumptions"><ul className="hs-plain">{plan.assumptions.map(a => <li key={a}>{reasonLabel(a)}</li>)}</ul></Section>}
     <Computed>Proposal {caseView.plan_assessment?.status ?? 'historical'} · review deadline {time(caseView.plan_assessment?.approval_deadline)} · actual work starts only after Huda’s confirmation</Computed>
+  </div>
+    {/* The AI Planning Agent sits in a right-hand sidebar beside the plan it explains. */}
+    <aside className="hs-side" aria-label="AI Planning Agent"><h2><Icon name="ai" /> AI Planning Agent</h2><Conversation session={session} compact /></aside>
   </div>;
 }

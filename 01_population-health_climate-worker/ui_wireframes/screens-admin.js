@@ -268,3 +268,60 @@ screen('p9', { ...ACCOUNT_DEF, device: 'worker', tab: 'me', name: 'Me: my photo'
   mount() { accountMount('rana'); },
   actions: { ...LANG_ACT, ...ACCOUNT_ACTIONS(() => 'rana') },
 });
+
+/* ───────── W11 · Site setup ─────────
+   Which sensors sit with which squads and locations on the site. A plan of the site,
+   then the same facts as tables. Each squad's zone is outlined in its section tone. */
+const ZONES = [
+  { id: 'trench', l: 'Civil trench', squad: 'civil', kind: 'Exposed', x: 20, y: 150, w: 210, h: 90 },
+  { id: 'deck', l: 'Podium deck', squad: 'form', kind: 'Exposed · partial shade', x: 250, y: 40, w: 200, h: 110 },
+  { id: 'yard', l: 'Laydown yard', squad: 'steel', kind: 'Exposed', x: 470, y: 150, w: 210, h: 120 },
+  { id: 'l2', l: 'Level 2 interior', squad: 'mep', kind: 'Covered', x: 250, y: 170, w: 200, h: 100 },
+  { id: 'wshop', l: 'Workshop', squad: '', kind: 'Covered · 6 places', x: 20, y: 40, w: 120, h: 80 },
+  { id: 'sa', l: 'Shelter A', squad: 'civil', kind: 'Cooled recovery · 14 places', x: 150, y: 40, w: 80, h: 80, shelter: true },
+  { id: 'sb', l: 'Shelter B', squad: 'form,steel,mep', kind: 'Cooled recovery · 20 places', x: 470, y: 40, w: 120, h: 90, shelter: true },
+];
+const PINS = { t1: [120, 200], t2: [350, 90], t3: [600, 215], m1: [350, 225], bs1: [660, 70], bs2: [660, 255], k1: [190, 95], k2: [530, 95] };
+const TONE_OF = { civil: 1, form: 2, steel: 3, mep: 4 };
+function sitePlan(sel) {
+  const zone = z => { const t = TONE_OF[z.squad] ? `var(--tone-${TONE_OF[z.squad]}-rule)` : 'var(--ink)';
+    return `<g><rect x="${z.x}" y="${z.y}" width="${z.w}" height="${z.h}" fill="${z.shelter ? 'var(--sheet)' : 'var(--paper)'}" stroke="${t}" stroke-width="${z.squad && !z.squad.includes(',') ? 3 : 1.5}" ${z.kind.startsWith('Covered') ? '' : ''}/><text x="${z.x + 8}" y="${z.y + 18}" font-size="12" font-weight="700" fill="var(--ink)">${z.l}</text><text x="${z.x + 8}" y="${z.y + 33}" font-size="10" fill="var(--muted)">${z.kind}</text></g>`; };
+  const pin = sn => { const [x, y] = PINS[sn.id]; const on = sel === sn.id;
+    return `<g class="pin" data-act="sensor" data-id="${sn.id}" role="button" tabindex="0" aria-label="${sn.id.toUpperCase()} · ${sn.type} · ${sn.loc}"><circle cx="${x}" cy="${y}" r="${on ? 13 : 11}" fill="${sn.off ? 'var(--band-red)' : 'var(--ink)'}" stroke="var(--paper)" stroke-width="2"/><text x="${x}" y="${y + 4}" text-anchor="middle" font-size="9" font-weight="700" fill="var(--paper)">${sn.id.toUpperCase()}</text>${on ? `<circle cx="${x}" cy="${y}" r="17" fill="none" stroke="var(--ink)" stroke-width="2"/>` : ''}</g>`; };
+  return `<svg class="siteplan" viewBox="0 0 700 290" role="group" aria-label="Site plan, Sandline–Dune, Mussafah">
+    <rect x="1" y="1" width="698" height="288" fill="none" stroke="var(--ink)" stroke-width="2"/>
+    <text x="690" y="284" text-anchor="end" font-size="10" fill="var(--muted)">Site cabin · gate ↘</text>
+    ${ZONES.map(zone).join('')}${SENSORS.map(pin).join('')}</svg>
+    <div class="flex" style="font-size:12px;gap:16px;margin-top:8px">${SQUADS.map(q => `<span class="flex" style="gap:6px"><i class="tone-key" style="border-color:var(--tone-${TONE_OF[q.id]}-rule)"></i>${q.name}</span>`).join('')}<span class="flex" style="gap:6px"><i class="pin-key"></i>Sensor or base station · red = offline</span></div>`;
+}
+screen('w11', {
+  device: 'web', name: 'Site setup', short: 'Site setup', clock: '07:30',
+  persona: 'Noura (HSE systems admin) and Maya, with each foreman.', context: 'Desktop, before the shift and whenever a sensor or squad moves.',
+  job: 'See which sensors cover which squads and locations, and fix gaps before work starts.',
+  render() {
+    const sel = App.sel.w11 || 't1';
+    const sn = SENSORS.find(x => x.id === sel);
+    const sqName = ids => ids ? ids.split(',').map(i => squad(i).name).join(', ') : '—';
+    const squadsTbl = `<table class="t"><thead><tr><th>Squad</th><th>Foreman</th><th>Location</th><th>Recovery</th><th>Sensors</th><th>Workers</th></tr></thead><tbody>
+      ${SQUADS.map(q => `<tr><td><b>${q.name}</b></td><td>${av(q.foreman, { size: 'xs' })} ${who(q.foreman)}</td><td>${q.loc}</td><td>${q.shelter}</td><td>${SENSORS.filter(x => x.squad.split(',').includes(q.id)).map(x => x.id.toUpperCase()).join(', ')}</td><td>${q.size}</td></tr>`).join('')}</tbody></table>`;
+    const sensorsTbl = `<table class="t"><thead><tr><th>Sensor</th><th>Type</th><th>Location</th><th>Squad</th><th>Relay</th><th>Status</th></tr></thead><tbody>
+      ${SENSORS.map(x => `<tr class="${x.id === sel ? 'on' : ''}" data-act="sensor" data-id="${x.id}" tabindex="0"><td><b>${x.id.toUpperCase()}</b></td><td>${x.type}</td><td>${x.loc}</td><td>${sqName(x.squad)}</td><td>${x.relay}</td><td>${x.off ? '■ ' : '✓ '}${x.status}</td></tr>`).join('')}</tbody></table>`;
+    const locs = list(ZONES.map(z => row({ t: z.l, d: `${z.kind} · ${z.squad ? sqName(z.squad) : 'Shared · workshop preparation'}`, b: B.plain(SENSORS.filter(x => x.loc === z.l).map(x => x.id.toUpperCase()).join(', ') || 'No sensor'), static: true })));
+    return {
+      nav: { title: 'Site setup · Sandline–Dune, Mussafah', back: 'w1', clock: '07:30' },
+      overflow: [{ label: 'Import crew roster (CSV)' }, { label: 'Export site setup' }],
+      body: [
+        section('Site plan', sitePlan(sel), 'Select a sensor'),
+        section('Squads and locations', squadsTbl),
+        section('Sensors', sensorsTbl, `${SENSORS.filter(x => x.off).length} offline`),
+        section('Locations', locs),
+      ],
+      detail: `<h2 class="h2">${sn.id.toUpperCase()} · ${sn.type}</h2><div>${sn.off ? B.red('Offline') : B.done('Live')}</div>
+        <dl class="kv"><dt>Location</dt><dd>${sn.loc}</dd><dt>Squads</dt><dd>${sqName(sn.squad)}</dd><dt>Relay</dt><dd>${sn.relay}</dd><dt>Status</dt><dd>${sn.status}</dd></dl>
+        ${sn.off ? `<div class="statusline signal">■ No heartbeat since 07:52. Squads it covers fall back to the forecast and their band rises one level.</div>` : ''}
+        <div class="flex"><button class="btn" data-act="toast" data-msg="Move ${sn.id.toUpperCase()} · not in this prototype">Move to another location</button><button class="btn" data-act="toast" data-msg="Reassign ${sn.id.toUpperCase()} · not in this prototype">Change squads</button></div>`,
+      cta: { label: 'Add a sensor', act: 'toast', msg: 'Add sensor · pair a device by its QR code (not in this prototype)' },
+    };
+  },
+  actions: { sensor: el => { App.sel.w11 = el.dataset.id; refresh(); } },
+});

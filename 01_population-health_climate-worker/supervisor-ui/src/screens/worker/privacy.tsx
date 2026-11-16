@@ -57,7 +57,7 @@ function Welcome({ session }: ScreenProps) {
   return <div className="hs-screen">
     <Head kicker={<button type="button" className="hs-link" onClick={() => setStep('lang')}>🌐 {langOf(lang).endonym}</button>} title={<T k="p1.title" />} />
     <Note><T k="p1.sees" /></Note>
-    <Section title={<T k="p1.choices" />}>
+    <Section icon="list" title={<T k="p1.choices" />}>
       <List>
         <Row title={<T k="c.checkins" />} detail={<><T k="c.checkins.s" /> · <T k="c.checkins.d" /></>} badge={<Toggle on={draft.checkins} onChange={v => setDraft({ ...draft, checkins: v })} label={t('c.checkins')} />} />
         <Row title={<T k="c.wear" />} detail={<T k="c.wear.d" />} badge={<Toggle on={draft.wearable} onChange={v => setDraft({ ...draft, wearable: v })} label={t('c.wear')} />} />
@@ -103,7 +103,7 @@ function MyData({ session }: ScreenProps) {
       <Metric label="Recorded actions" value={String(events.length)} sub="in this case" />
       <Metric label={<T k="p8.wear" />} value={consent.wearable ? t('on') : t('off')} sub={<T k="p8.notpaired" />} />
     </Hero>
-    <Section title={<T k="p8.consent" />}>
+    <Section icon="lock" title={<T k="p8.consent" />}>
       <List>
         <Row title={<T k="c.checkins" />} detail={consent.at ? t('p8.agreed', { date: time(consent.at) }) : <En>Not chosen yet.</En>} badge={<span className="hs-badge" data-tone={consent.checkins ? 'done' : 'muted'}>{consent.checkins ? t('on') : t('off')}</span>} onClick={() => navigate('/worker/welcome')} />
       </List>
@@ -111,7 +111,7 @@ function MyData({ session }: ScreenProps) {
     <Section title="What your supervisor saw">
       {events.length ? <List>{events.map(e => <Row key={e.id} title={e.title} />)}</List> : <p className="hs-muted"><T k="p8.none" /></p>}
     </Section>
-    <Section title={<T k="p8.who" />}><p className="hs-muted"><T k="p8.none" /></p></Section>
+    <Section icon="people" title={<T k="p8.who" />}><p className="hs-muted"><T k="p8.none" /></p></Section>
     <CtaBar>
       <button type="button" className="hs-button is-primary" onClick={() => void download()}><T k="p8.download" /></button>
       <HoldButton className="hs-button is-danger" onConfirm={() => void withdraw()} hint={t('hold')} disabled={!consent.checkins && !consent.wearable}><T k="p8.delete" /></HoldButton>
