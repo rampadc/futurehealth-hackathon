@@ -426,6 +426,13 @@ def test_worker_keeps_own_approved_plan_after_safety_refresh(setup_case):
     command(case,'C01','assign',{'assessment_id':assessment['id']})
     clock.advance(minutes=1)
     run(case.catch_up())
+    with case._conn() as db:
+        for row in db.execute('SELECT id,response FROM runs WHERE response IS NOT NULL').fetchall():
+            response=json.loads(row['response'])
+            response['crew_rest']['blockers']=['activity_history_missing:C08','review_lead_in_location_not_cooled:C06']
+            response['protective_response']['planning_blockers']=['first_aid_contact_missing']
+            response['restart']['blockers']=['removal_unconfirmed']
+            db.execute('UPDATE runs SET response=? WHERE id=?',(module.encoded(response),row['id']))
     view=case.read_case('C05')
     assert view['capture']['response']['crew_rest']['planning_status']=='blocked'
     own=view['plan_assessment']
@@ -436,5 +443,26 @@ def test_worker_keeps_own_approved_plan_after_safety_refresh(setup_case):
     assert own['check'] is None
     assert 'solver_calls' not in own['response'] and 'plan_check' not in own['response']
     assert own['response']['crew_rest']['occupancy']==[]
+    assert own['response']['crew_rest']['blockers']==[]
+    assert view['capture']['response']['crew_rest']['blockers']==[]
+    assert own['response']['protective_response']['planning_blockers']==[]
+    assert own['response']['restart']['blockers']==[]
+    assert view['capture']['response']['protective_response']['planning_blockers']==[]
+    assert view['capture']['response']['restart']['blockers']==[]
     serialized=json.dumps(own)
     assert all(f'C{i:02}' not in serialized for i in range(2,13) if i!=5)
+
+
+def test_rana_does_not_receive_bilals_health_flags(setup_case):
+    case,_=setup_case
+    recovered(case)
+    command(case,'C08','report')
+    command(case,'C01','incident_record')
+    command(case,'C01','remove',{'location_id':'welfare'})
+    command(case,'P06','firstaid')
+    rana=case.read_case('C05')['story']
+    bilal=case.read_case('C08')['story']
+    assert rana['recovered'] is True
+    assert all(rana[key] is False for key in ('reported','removed','firstaid','leila'))
+    assert all(bilal[key] is True for key in ('reported','removed','firstaid'))
+    assert not {'report','incident_record','remove','firstaid'} & {item['id'] for item in rana['events']}

@@ -719,12 +719,15 @@ class CaseService:
             if 'excluded_worker_ids' in section: section['excluded_worker_ids']=[x for x in section['excluded_worker_ids'] if x==worker_id]
         crew=response.get('crew_rest',{})
         if crew:
+            crew['blockers']=[]
             crew['occupancy']=[]
             crew['assumptions']=[]
             if 'useful_worker_minutes' in crew:
                 crew['useful_worker_minutes']=sum((at(i['ends_at'])-at(i['starts_at'])).total_seconds()/60
                                                   for i in crew.get('intervals',[]) if i.get('kind')=='work')
             if 'unmet_worker_minutes' in crew: crew['unmet_worker_minutes']=None
+        if 'protective_response' in response: response['protective_response']['planning_blockers']=[]
+        if 'restart' in response: response['restart']['blockers']=[]
         for section in [response,*[v for v in response.values() if isinstance(v,dict)]]:
             if 'actions' in section:
                 section['actions']=[a for a in section['actions'] if not a.get('person_ids') or worker_id in a['person_ids']]
@@ -762,6 +765,8 @@ class CaseService:
                          if next(w for w in current_snapshot['workers'] if w['person_id']==pid)['availability']=='available'
                          and (not items or max(at(item['ends_at']) for item in items)!=at(case['clock']))]
         flags={flag: action in done for action,flag in FLAG.items()}
+        if persona_id=='C05':
+            flags.update(reported=False,removed=False,firstaid=False,leila=False)
         timeline=[]
         for e in events:
             if persona_id in {'C05','C08'} and e['actor_id'] in {f'C{i:02}' for i in range(2,13)} and e['actor_id']!=persona_id: continue
