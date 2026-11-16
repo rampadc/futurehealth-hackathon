@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import copy
 
 import httpx
 from google.adk.events import Event, EventActions
@@ -13,6 +14,9 @@ from google.genai import types
 
 async def run_graph(request: dict, base_url: str) -> tuple[int, dict, list[str]]:
     """Run actual ADK nodes and edges; retain protective results if planning fails."""
+    safety_request=copy.deepcopy(request)
+    safety_request['planning']=None
+    safety_request['snapshot']['activity_history']=[]
     async def project_evidence(ctx):
         return Event(output='evidence projected', actions=EventActions(state_delta={
             'input_fingerprint': json.dumps(request, sort_keys=True),
@@ -20,9 +24,13 @@ async def run_graph(request: dict, base_url: str) -> tuple[int, dict, list[str]]
 
     def solver_node(path: str, key: str):
         async def invoke(ctx):
+            if key=='plan' and request.get('planning') is None:
+                return Event(output='plan:skipped', actions=EventActions(state_delta={
+                    'plan_status':204,'plan_response':{'skipped':'No complete observed planning batch'},
+                }))
             try:
                 async with httpx.AsyncClient(timeout=45) as client:
-                    result = await client.post(f'{base_url}/v2/{path}', json=request)
+                    result = await client.post(f'{base_url}/v2/{path}', json=request if key=='plan' else safety_request)
                 status, body = result.status_code, result.json()
             except httpx.HTTPError as exc:
                 status, body = 0, {'error': f'{type(exc).__name__}: {exc}'}
@@ -35,8 +43,9 @@ async def run_graph(request: dict, base_url: str) -> tuple[int, dict, list[str]]
         state = ctx.state
         statuses = [state.get(f'{key}_status',0) for key in ('heat','protective','plan','restart')]
         if statuses[0] != 200 or statuses[1] != 200 or statuses[3] != 200:
-            status = next((s for s in statuses if s != 200),500)
-            body = next((state[f'{key}_response'] for key in ('heat','protective','restart') if state.get(f'{key}_status') == status), {'error':'solver call failed'})
+            failed=next((key for key in ('heat','protective','restart') if state.get(f'{key}_status') != 200),None)
+            status=state.get(f'{failed}_status',500)
+            body=state.get(f'{failed}_response',{'error':'solver call failed'})
             route = 'solver_error'
         else:
             heat, protective, restart = (state[f'{key}_response'] for key in ('heat','protective','restart'))
@@ -44,10 +53,11 @@ async def run_graph(request: dict, base_url: str) -> tuple[int, dict, list[str]]
             if statuses[2] == 200:
                 plan = state['plan_response']
             else:
-                plan = {**meta,'planning_status':'model_invalid','solver_status':'MODEL_INVALID','optimal':False,
+                missing=statuses[2]==204
+                plan = {**meta,'planning_status':'blocked' if missing else 'model_invalid','solver_status':None if missing else 'MODEL_INVALID','optimal':False,
                     'policy_id':None,'timing_policy':None,'policy_source':'none','horizon_end':None,
                     'recovery_reservation_end':None,'intervals':[],'occupancy':[],'carry_forward_rest':[],
-                    'useful_worker_minutes':None,'unmet_worker_minutes':None,'blockers':['planner_http_error'],
+                    'useful_worker_minutes':None,'unmet_worker_minutes':None,'blockers':['observed_activity_missing' if missing else 'planner_http_error'],
                     'assumptions':[],'held_task_ids':heat['held_task_ids']}
             body = {**meta,'heat':heat,'protective_response':protective,'crew_rest':plan,'restart':restart}
             status = 200

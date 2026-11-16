@@ -17,6 +17,67 @@ from . import storage
 router = APIRouter()
 COOKIE = '__Host-heat_access'
 TTL = 8 * 60 * 60
+TAB_HEADER = 'x-heat-tab-id'
+TAB_PATTERN = re.compile(r'[A-Za-z0-9_-]{16,128}')
+TAB_TABLE = 'CREATE TABLE IF NOT EXISTS persona_tabs(access_hash TEXT NOT NULL, tab_id TEXT NOT NULL, persona_id TEXT NOT NULL, PRIMARY KEY(access_hash,tab_id))'
+
+
+def initialize_tabs(service) -> None:
+    with service._conn() as db:
+        db.execute(TAB_TABLE)
+
+
+def _tab_id(request: Request) -> str | None:
+    value = request.headers.get(TAB_HEADER, '')
+    return value if TAB_PATTERN.fullmatch(value) else None
+
+
+def _access_identity(request: Request) -> str:
+    return digest(request.cookies.get(COOKIE, '')) if required() else 'local'
+
+
+def actor_for_request(request: Request, service) -> str | None:
+    tab = _tab_id(request)
+    if tab:
+        if required() and not role(request):
+            return None
+        initialize_tabs(service)
+        with service._conn() as db:
+            row = db.execute('SELECT persona_id FROM persona_tabs WHERE access_hash=? AND tab_id=?',
+                             (_access_identity(request), tab)).fetchone()
+        return row['persona_id'] if row else None
+    # Local fixture clients predate tab sessions. Hosted requests never inherit a shared persona cookie.
+    if required() or request.headers.get(TAB_HEADER):
+        return None
+    token = request.cookies.get('heat_persona')
+    if not token:
+        return None
+    with service._conn() as db:
+        row = db.execute('SELECT persona_id FROM sessions WHERE token=?', (token,)).fetchone()
+    return row['persona_id'] if row else None
+
+
+def select_persona(request: Request, service, persona_id: str) -> None:
+    tab = _tab_id(request)
+    if not tab:
+        raise HTTPException(400, 'Reload the workspace before choosing your account.')
+    if required() and not role(request):
+        raise HTTPException(401, 'Access code required')
+    initialize_tabs(service)
+    with service._conn() as db:
+        db.execute('INSERT INTO persona_tabs(access_hash,tab_id,persona_id) VALUES (?,?,?) '
+                   'ON CONFLICT(access_hash,tab_id) DO UPDATE SET persona_id=excluded.persona_id',
+                   (_access_identity(request), tab, persona_id))
+
+
+def clear_persona(request: Request, service) -> None:
+    tab = _tab_id(request)
+    if not tab:
+        raise HTTPException(400, 'Reload the workspace before choosing your account.')
+    initialize_tabs(service)
+    with service._conn() as db:
+        db.execute('DELETE FROM persona_tabs WHERE access_hash=? AND tab_id=?',
+                   (_access_identity(request), tab))
 
 
 def required() -> bool:
@@ -47,11 +108,13 @@ def initialize() -> None:
             'CREATE TABLE IF NOT EXISTS access_attempts(bucket TEXT PRIMARY KEY, failures INTEGER NOT NULL, expires_at DOUBLE PRECISION NOT NULL)',
             'CREATE TABLE IF NOT EXISTS access_personas(persona_hash TEXT PRIMARY KEY, access_hash TEXT NOT NULL)',
             'CREATE TABLE IF NOT EXISTS access_config(id TEXT PRIMARY KEY, fingerprint TEXT NOT NULL)',
+            TAB_TABLE,
         ):
             db.execute(sql)
         current = db.execute("SELECT fingerprint FROM access_config WHERE id='codes'").fetchone()
         if not current or current['fingerprint'] != fingerprint():
             db.execute('DELETE FROM access_personas')
+            db.execute('DELETE FROM persona_tabs')
             db.execute('DELETE FROM access_sessions')
             db.execute("INSERT INTO access_config(id,fingerprint) VALUES ('codes',?) ON CONFLICT(id) DO UPDATE SET fingerprint=excluded.fingerprint", (fingerprint(),))
 
@@ -107,7 +170,10 @@ async def protect(request: Request, call_next):
         return JSONResponse({'detail': 'Access code required'}, status_code=401)
     if (path == '/api/demo' or path.startswith('/api/demo/')) and current_role != 'presenter':
         return JSONResponse({'detail': 'Presenter access required'}, status_code=403)
-    if not (path == '/api/session' and request.method in {'POST', 'DELETE'}) and not persona_is_bound(request):
+    tab = request.headers.get(TAB_HEADER)
+    if tab and not _tab_id(request):
+        return JSONResponse({'detail': 'Invalid workspace tab. Reload the page.'}, status_code=400)
+    if not tab and not (path == '/api/session' and request.method in {'POST', 'DELETE'}) and not persona_is_bound(request):
         return JSONResponse({'detail': 'Choose your account again'}, status_code=401)
     return await call_next(request)
 
@@ -167,6 +233,7 @@ def logout(request: Request):
         with storage.connection() as db:
             token_hash = digest(token)
             db.execute('DELETE FROM access_personas WHERE access_hash=?', (token_hash,))
+            db.execute('DELETE FROM persona_tabs WHERE access_hash=?', (token_hash,))
             db.execute('DELETE FROM access_sessions WHERE token_hash=?', (token_hash,))
     response = JSONResponse({'required': required(), 'role': None})
     response.delete_cookie(COOKIE, secure=True, httponly=True, samesite='lax', path='/')

@@ -12,12 +12,21 @@ import { CrewRiskPanel } from '../risk';
 
 /** Squad Monitoring: within five seconds, does anyone need action now? */
 export function SquadMonitoringScreen({ session }: ScreenProps) {
-  const { caseView } = session;
+  const { caseView, person } = session;
   if (!caseView) return <NoCase session={session} />;
+  if (person?.id === 'P01') return <div className="hs-screen">
+    <Head kicker={`Project monitoring · ${time(caseView.clock)} GST`} title="Project monitoring" sub="Case-linked operations and commercial review" />
+    <Hero>
+      <Metric label="Heavy work" value={caseView.story.stopped ? 'Stopped' : caseView.story.issued ? 'Stop instructed' : 'Awaiting instruction'} tone={caseView.story.issued ? 'red' : undefined} />
+      <Metric label="Foreman headcount" value={`${caseView.headcount?.confirmed_count ?? 0} / ${caseView.headcount?.expected_count ?? 11}`} />
+    </Hero>
+    <Section title="Project evidence"><p>Review the case chronology, confirmed work and recovery duration, employer coverage and delivery state.</p><button type="button" className="hs-button is-primary" onClick={() => navigate('/web/heat-rest')}>Open project heat and rest view</button></Section>
+    <Section title="Cost impact review"><ActionButton session={session} action="costReview" label="Record cost impact review" /></Section>
+  </div>;
   const story = caseView.story;
   const heat = heatNow(caseView);
   const people = crew(caseView);
-  const accounted = people.filter(p => p.inRecovery).length;
+  const accounted = caseView.headcount?.confirmed_count ?? 0;
   const open = caseView.tasks.filter(t => t.status === 'ready');
   const overdue = open.filter(t => t.due_at && Date.parse(t.due_at) <= Date.parse(caseView.clock));
   const needsHelp = people.filter(p => p.excluded);
@@ -30,7 +39,7 @@ export function SquadMonitoringScreen({ session }: ScreenProps) {
     <Hero>
       <Metric label="Needs action now" value={String(needsHelp.length + overdue.length)} sub={needsHelp.length ? <><Avatars ids={needsHelp.map(p => p.id)} size="sm" /> {`${needsHelp.map(p => who(p.id)).join(', ')} needs rest now`}</> : overdue.length ? `${overdue.length} overdue` : 'Nothing urgent'} tone={needsHelp.length || overdue.length ? 'red' : 'ok'} />
       <Metric label="Stop-work" value={story.issued ? 'Active' : 'None'} sub={story.issued ? 'Heavy exposed civil work' : 'No heat controls recorded'} tone={story.issued ? 'red' : undefined} />
-      <Metric label="Accounted for" value={`${accounted} / ${people.length}`} sub="Shelter A" />
+      <Metric label="Accounted for" value={`${accounted} / ${caseView.headcount?.expected_count ?? people.length}`} sub={caseView.headcount?.confirmed_at ? `Huda confirmed at ${time(caseView.headcount.confirmed_at)}` : 'Awaiting Huda’s confirmation'} />
     </Hero>
     <p className="hs-statusline"><Band band={heat.band.band} label={heat.reading ? `TWL ${heat.reading.twl} W/m² · ${heat.band.label}` : 'No reading'} /> · {heat.reading ? `sensor ${heat.reading.sensor_id} · ${time(heat.reading.measured_at)}` : ''} {heat.heavyHeld && <Hold />}</p>
     <div className="hs-grid">

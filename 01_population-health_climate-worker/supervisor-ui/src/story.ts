@@ -17,13 +17,14 @@ export const PERSONAS: Persona[] = [
   { id: 'C01', name: 'Huda Al Nadir', role: 'Civil foreman', organisation: 'Dune Civil Works', description: 'Accounts for the crew and supervises the workshop move.' },
   { id: 'C05', name: 'Rana Al Nadir', role: 'Civil worker', organisation: 'Dune Civil Works', description: 'Checks in to cooled recovery after heavy trench work stops.' },
   { id: 'C08', name: 'Bilal Al Safa', role: 'Civil worker', organisation: 'Dune Civil Works', description: 'Reports dizziness and follows the first aid route.' },
+  { id: 'P10', name: 'Mina Rahman', role: 'Employer contract manager', organisation: 'Dune Civil Works', description: 'Reviews heat and rest coverage for the contracted crew.' },
 ]
 
 type Flag = 'issued' | 'acknowledged' | 'stopped' | 'checkedIn' | 'recovered' | 'assigned' | 'reported' | 'removed' | 'firstaid' | 'leila' | 'fresh' | 'permit' | 'reviewed' | 'deliveryDrafted' | 'deliveryApproved' | 'deliverySent' | 'deliveryAccepted' | 'handover' | 'costReviewed'
 /** Organisation admin for the platform screens (system & trust, branding). Not part of the nine-person case story. */
 export const ADMIN: Persona = { id: 'P09', name: 'Hessa Al Qamar', role: 'HSE systems admin', organisation: 'Sandline', description: 'Publishes company branding and reviews the trust log.' }
 
-export interface StoryEvent { id: string; actorId: string; title: string }
+export interface StoryEvent { id: string; actorId: string; title: string; occurred_at?: string }
 export type StoryState = Record<Flag, boolean> & { events: StoryEvent[] }
 
 export type ActionId = 'issue' | 'acknowledge' | 'stop' | 'checkin' | 'recover' | 'assign' | 'report' | 'remove' | 'firstaid' | 'leila' | 'draftDelivery' | 'approveDelivery' | 'sendDelivery' | 'acceptDelivery' | 'fresh' | 'permit' | 'review' | 'handover' | 'costReview'

@@ -101,12 +101,21 @@ def _context(req):
     if start < req.decision_at:
         raise ValueError('planning starts_at precedes decision_at')
     horizon = planning.horizon_minutes
+    work_not_before = planning.work_not_before or start
     zones = planning_locations(req)
     recovery = recovery_locations(req)
     workshop = task_location(req, 'workshop_prep')
     capacity = {z: item.capacity for z, item in location_map(req).items() if z in zones}
     workers = {w.person_id: w for w in req.snapshot.workers}
     excluded = set(protective.excluded_worker_ids)
+    if work_not_before > start:
+        unknown = sorted(pid for pid in CREW if pid not in excluded and
+                         workers[pid].location_id not in recovery)
+        if unknown:
+            return {'status': 'blocked',
+                    'blockers': [f'review_lead_in_location_not_cooled:{pid}' for pid in unknown],
+                    'heat': heat, 'protective': protective, 'planning': planning,
+                    'policy': policy, 'rules': rules}
     incident_locations = {i.person_id: i.location_id for i in req.snapshot.incidents}
     recorded = {a.person_id for a in req.snapshot.activity_history}
     absent = sorted(set(CREW) - excluded - recorded)
@@ -159,8 +168,9 @@ def _context(req):
                 raise ValueError('zone fixed occupants must exclude affected workers')
     gates = []
     for t in range(horizon):
+        at = _at(start, t)
         w = task[t]
-        enabled = (zone[workshop][t].status == 'available' and
+        enabled = (at >= work_not_before and zone[workshop][t].status == 'available' and
                    w.permit_status == 'valid' and w.resource_status == 'available' and
                    w.supervision_status == 'available' and
                    req.snapshot.workshop.permit_status == 'valid' and
@@ -173,7 +183,8 @@ def _context(req):
             'start': start, 'horizon': horizon, 'length': length,
             'zone': zone, 'task': task, 'fixed': fixed, 'gates': gates, 'workers': workers,
             'excluded': excluded, 'zones': zones, 'recovery': recovery, 'workshop': workshop,
-            'capacity': capacity, 'incident_locations': incident_locations}
+            'capacity': capacity, 'incident_locations': incident_locations,
+            'work_not_before': work_not_before}
 
 
 def _response(req, ctx, **extra):
@@ -294,6 +305,8 @@ def _minute_checker(req, ctx, intervals):
             else:
                 if kind == 'unavailable':
                     violations.add(f'available_worker_unavailable:{pid}:{t}')
+                if _at(start,t) < ctx['work_not_before'] and (kind != 'recovery' or zone != worker.location_id):
+                    violations.add(f'review_lead_in_location:{pid}:{t}')
                 if kind == 'work':
                     work_count += 1
                     if t >= horizon:
@@ -392,7 +405,10 @@ def _recovery_placement(req, ctx, ids):
         local = {}
         for pid in ids:
             preferred = ctx['workers'][pid].location_id
-            order = (preferred, *(z for z in recovery if z != preferred)) if preferred in recovery else recovery
+            if _at(ctx['start'],t) < ctx['work_not_before']:
+                order = (preferred,)
+            else:
+                order = (preferred, *(z for z in recovery if z != preferred)) if preferred in recovery else recovery
             chosen = next((z for z in order if ctx['zone'][z][t].status == 'available' and remaining[z] > 0), None)
             if chosen is None:
                 break
@@ -467,6 +483,8 @@ def solve_plan(req):
                         _qualified(pid))
             if not can_work:
                 model.add(w == 0)
+            if _at(ctx['start'],t) < ctx['work_not_before']:
+                model.add(rec[pid,worker.location_id,t] == 1)
             for z in recovery:
                 if ctx['zone'][z][t].status != 'available':
                     model.add(rec[pid,z,t] == 0)

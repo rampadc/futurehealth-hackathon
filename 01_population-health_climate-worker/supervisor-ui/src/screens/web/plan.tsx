@@ -2,7 +2,7 @@ import { reasonLabel } from '../../copy';
 import { EvidenceAction } from '../../EvidenceAction';
 import { nameOf } from '../../replay';
 import { Schedule } from '../../shared/plan';
-import { assignedIds, crew, intervalsOf, kindLabel, time, who } from '../data';
+import { assessmentCapture, assignedIds, crew, intervalsOf, kindLabel, time, who } from '../data';
 import { ActionButton, Computed, Draft, Empty, Head, Hero, List, Metric, NoCase, Note, Row, Section, Person } from '../kit';
 import type { ScreenProps } from '../registry';
 import { CrewRiskPanel } from '../risk';
@@ -13,7 +13,7 @@ const status = (s: string) => s.replaceAll('_', ' ');
 export function CrewWorkshopScreen({ session }: ScreenProps) {
   const { caseView, person } = session;
   if (!caseView || !person) return <NoCase session={session} />;
-  const capture = caseView.capture;
+  const capture = assessmentCapture(caseView);
   const people = crew(caseView);
   const qualified = people.filter(p => p.qualifications.includes('civil_worker'));
   const ready = qualified.filter(p => p.readiness === 'ready' && !p.excluded);
@@ -45,9 +45,9 @@ export function CrewWorkshopScreen({ session }: ScreenProps) {
         {plan ? <Draft>
           <p><b>{proposed.length ? `${proposed.map(id => nameOf(id).split(' ')[0]).join(', ')} for workshop preparation.` : 'No productive assignment yet.'}</b></p>
           {plan.blockers.length > 0 && <p>Waiting for: {plan.blockers.map(reasonLabel).join(', ')}.</p>}
-          <p className="hs-small">Status {status(plan.planning_status)} · {plan.useful_worker_minutes ?? 0} useful / {plan.unmet_worker_minutes ?? 0} unmet worker-minutes</p>
-        </Draft> : <Empty>The planner has not run for this case yet.</Empty>}
-        {huda && <ActionButton session={session} action="assign" label="Record assignment" primary />}
+          <p className="hs-small">Assessed {time(caseView.plan_assessment?.assessed_at)} · review by {time(caseView.plan_assessment?.approval_deadline)} · {caseView.plan_assessment?.status ?? 'historical'}</p><p className="hs-small">Status {status(plan.planning_status)} · {plan.useful_worker_minutes ?? 0} useful / {plan.unmet_worker_minutes ?? 0} unmet worker-minutes in this proposal</p>
+        </Draft> : <Empty>{caseView.plan_assessment?.status === 'awaiting_observations' ? 'Current observed activity is needed for every active worker before a proposal can be assessed.' : caseView.plan_assessment?.status === 'blocked' ? 'Current planning is blocked. Review the live reading, readiness and observed activity.' : 'The planner has not run for this case yet.'}</Empty>}
+        {huda && <ActionButton session={session} action="assign" label="Approve this assessed proposal" primary disabled={caseView.plan_assessment?.status !== 'proposed'} />}
       </Section>
       <Section title="Requirement checks">
         <List>
@@ -65,7 +65,7 @@ export function CrewWorkshopScreen({ session }: ScreenProps) {
           <td>{p.qualifications.includes('civil_worker') ? 'Yes' : 'No'}</td>
           <td>{p.excluded ? '■ Excluded' : p.readiness === 'ready' ? `Ready${p.readinessUntil ? ` until ${time(p.readinessUntil)}` : ''}` : p.readiness === 'not_ready' ? 'Not ready' : 'Unconfirmed'}</td>
           <td>{time(p.lastObserved)}</td>
-          <td>{proposed.includes(p.id) ? (caseView.story.assigned ? 'Assigned' : 'Proposed') : p.excluded ? 'Excluded' : 'Recovery'}</td>
+          <td>{proposed.includes(p.id) ? caseView.plan_assessment?.status === 'expired' ? 'Previous assignment' : caseView.plan_assessment?.status === 'approved' || !caseView.plan_assessment && caseView.story.assigned ? 'Assigned' : 'Proposed' : p.excluded ? 'Excluded' : 'Recovery'}</td>
         </tr>)}</tbody>
       </table></div>
     </Section>
@@ -82,22 +82,22 @@ export function CrewWorkshopScreen({ session }: ScreenProps) {
 export function WorkRestPlanScreen({ session }: ScreenProps) {
   const { caseView } = session;
   if (!caseView) return <NoCase session={session} />;
-  const capture = caseView.capture;
+  const capture = assessmentCapture(caseView);
   const plan = capture?.response.crew_rest;
   const story = caseView.story;
-  if (!capture || !plan) return <div className="hs-screen"><Head title="Work/rest plan" /><Empty>No plan yet. The planner needs observed work and rest history from Shelter A.</Empty></div>;
+  if (!capture || !plan) return <div className="hs-screen"><Head title="Work/rest plan" /><Empty>{caseView.plan_assessment?.status === 'awaiting_observations' ? 'Current observed activity is needed for every active worker before a new plan can be assessed.' : caseView.plan_assessment?.status === 'blocked' ? 'Current planning is blocked. Review the live reading, readiness and observed activity.' : 'No plan yet. The planner needs observed work and rest history from Shelter A.'}</Empty></div>;
   const pending = story.reported && (!story.removed || !story.firstaid);
   const timing = plan.timing_policy;
   const ids = assignedIds(capture);
   return <div className="hs-screen">
     <Head kicker={`Work/rest plan · ${capture.request.planning ? `${time(capture.request.planning.starts_at)}–${time(plan.horizon_end)}` : time(caseView.clock)}`} title="Work/rest plan" sub="Each worker sees only their own intervals." />
     <Hero>
-      <Metric label="Useful work" value={`${plan.useful_worker_minutes ?? 0} worker-min`} sub={`${ids.length} workers`} tone="ok" />
+      <Metric label="Proposed work" value={`${plan.useful_worker_minutes ?? 0} worker-min`} sub={`${ids.length} workers · assessed ${time(caseView.plan_assessment?.assessed_at)}`} tone="ok" />
       <Metric label="Unmet" value={`${plan.unmet_worker_minutes ?? 0} worker-min`} />
       <Metric label="Status" value={status(plan.planning_status)} sub={plan.planning_status === 'infeasible' ? 'rule result, not an error' : plan.optimal ? 'optimal' : plan.solver_status ?? undefined} tone={plan.planning_status === 'planned' ? 'ok' : 'red'} />
     </Hero>
     {pending && <Note tone="amber">Updated times are waiting for {[!story.removed && 'Huda’s removal confirmation', !story.firstaid && 'Salim’s first-aid contact'].filter(Boolean).join(' and ')}.</Note>}
-    {timing && <Note>Timing policy {timing.id} (fictional test policy): {timing.initial_recovery_minutes} min initial recovery · ≤ {timing.max_work_minutes} min continuous work · {timing.between_work_recovery_minutes} min between.</Note>}
+    {timing && <Note>Work and recovery rule: {timing.initial_recovery_minutes} min initial recovery · ≤ {timing.max_work_minutes} min continuous work · {timing.between_work_recovery_minutes} min between.</Note>}
     <Section title="Timeline">
       <div className="hs-mui"><Schedule capture={capture} /></div>
     </Section>
@@ -110,6 +110,6 @@ export function WorkRestPlanScreen({ session }: ScreenProps) {
       </table></div>
     </Section>
     {plan.assumptions.length > 0 && <Section title="Assumptions"><ul className="hs-plain">{plan.assumptions.map(a => <li key={a}>{reasonLabel(a)}</li>)}</ul></Section>}
-    <Computed>Solver proposal · applied: false · sending to phones is not part of this demo</Computed>
+    <Computed>Proposal {caseView.plan_assessment?.status ?? 'historical'} · review deadline {time(caseView.plan_assessment?.approval_deadline)} · actual work starts only after Huda’s confirmation</Computed>
   </div>;
 }

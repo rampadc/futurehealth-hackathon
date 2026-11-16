@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { navigate } from '../../router';
 import { crew, heatNow, SCREEN_FOR_ACTION, tasksOf, time, who } from '../data';
 import { Band, Computed, CtaBar, Empty, Head, Hero, List, Metric, NoCase, Row, Section, Statement, taskBadge, taskLine, ActionButton, Note, Avatar } from '../kit';
@@ -13,7 +14,7 @@ export function TodayScreen({ session }: ScreenProps) {
   const story = caseView.story;
   const heat = heatNow(caseView);
   const people = crew(caseView);
-  const accounted = people.filter(p => p.inRecovery).length;
+  const accounted = caseView.headcount?.checked_in_count ?? 0;
   const mine = tasksOf(caseView, person?.id).sort((a, b) => order[a.status] - order[b.status]);
   const first = mine.find(t => t.status === 'ready');
   const open = (action: string) => { const target = SCREEN_FOR_ACTION[action]?.site; if (target) navigate(`/site/${target}`); };
@@ -21,7 +22,7 @@ export function TodayScreen({ session }: ScreenProps) {
     <Head kicker={`Today · ${time(caseView.clock)} GST`} title="Your actions" />
     <Hero>
       <Metric label="Stop-work" value={story.issued ? 'Heavy work' : 'None yet'} sub={story.issued ? (story.stopped ? 'Stopped and confirmed' : 'Instruction issued') : 'Awaiting safety review'} tone={story.issued ? 'red' : undefined} />
-      <Metric label="Accounted" value={`${accounted} / ${people.length}`} sub="Shelter A" tone={people.length && accounted === people.length ? 'ok' : undefined} />
+      <Metric label="Arrived" value={`${accounted} / ${caseView.headcount?.expected_count ?? 11}`} sub="Shelter A" tone={accounted === (caseView.headcount?.expected_count ?? 11) ? 'ok' : undefined} />
       <Metric label="TWL" value={heat.reading ? `${heat.reading.twl} W/m²` : '—'} sub={<><Band band={heat.band.band} label={heat.band.label} /> · {heat.reading?.sensor_id ?? 'no sensor'} · {time(heat.reading?.measured_at)}</>} />
     </Hero>
     <Section title="Actions" hint="Tap to open">
@@ -86,26 +87,33 @@ function SmsPreview({ workerIds, names }: { workerIds: string[]; names: string[]
   })}</ul>;
 }
 
-/** Headcount: every affected worker in a safe recovery place. */
+/** Headcount: Huda directly accounts for the roster at its current safe locations. */
 export function HeadcountScreen({ session }: ScreenProps) {
   const { caseView } = session;
+  const [attested, setAttested] = useState(false);
+  useEffect(() => { setAttested(false); }, [caseView?.case_id, caseView?.headcount?.confirmed_at]);
   if (!caseView) return <NoCase session={session} />;
   const people = crew(caseView);
-  const accounted = people.filter(p => p.inRecovery);
-  const missing = people.filter(p => !p.inRecovery);
-  const recoveredAt = caseView.request?.snapshot.recovery?.recorded_at ?? caseView.capture?.request.snapshot.recovery?.recorded_at;
+  const arrivals = new Map(caseView.headcount?.arrivals.map(a => [a.person_id, a.checked_in_at]) ?? []);
+  const headcount = caseView.headcount;
+  const expected = headcount?.expected_count ?? people.length;
+  const checkedIn = headcount?.checked_in_count ?? arrivals.size;
+  const confirmed = headcount?.confirmed_count ?? 0;
+  const cooled = headcount?.cooled_recovery_count;
+  const welfare = headcount?.welfare_count;
   return <div className="hs-screen">
-    <Head kicker={`Headcount · ${time(caseView.clock)} GST`} title="Headcount · Shelter A" />
+    <Head kicker={`Headcount · ${time(caseView.clock)} GST`} title="Crew headcount" sub="Personal arrivals and Huda’s physical roster confirmation are separate records." />
     <Hero>
-      <Metric label="Accounted" value={`${accounted.length} / ${people.length}`} sub={missing.length ? 'not complete' : 'all affected workers'} tone={missing.length ? 'red' : 'ok'} />
-      <Metric label="Not yet recorded" value={String(missing.length)} sub={missing.map(p => p.name.split(' ')[0]).join(', ') || 'none'} />
-      <Metric label="Recorded" value={time(recoveredAt)} sub="Shelter A" />
+      <Metric label="Personal arrivals" value={`${checkedIn} / ${expected}`} sub="Phone or kiosk check-ins" />
+      <Metric label="Foreman confirmed" value={`${confirmed} / ${expected}`} sub={headcount?.confirmed_at ? time(headcount.confirmed_at) : 'awaiting Huda’s observation'} tone={confirmed === expected ? 'ok' : undefined} />
+      <Metric label="Safe locations" value={cooled === undefined && welfare === undefined ? '—' : `${cooled ?? 0} cooled · ${welfare ?? 0} Welfare`} sub="Accounted crew may be in separate safe locations" />
     </Hero>
-    <Section title="Affected workers" hint="Kiosk and phone check-ins appear live">
-      <List>{people.map(p => <Row key={p.id} lead={<Avatar id={p.id} size="md" excluded={p.excluded} />} title={who(p.id)} detail={p.inRecovery ? `In cooled recovery · Shelter A` : `Last known: ${p.location ?? 'unknown'}`} badge={p.inRecovery ? <span className="hs-badge" data-tone="done">✓ Arrived</span> : <span className="hs-badge" data-tone="wait">Not recorded</span>} />)}</List>
+    <Section title="Affected workers" hint="Phone or kiosk arrivals appear separately from Huda’s headcount">
+      <List>{people.map(p => <Row key={p.id} lead={<Avatar id={p.id} size="md" excluded={p.excluded} />} title={who(p.id)} detail={arrivals.has(p.id) ? `Personal arrival ${time(arrivals.get(p.id))} · last known ${p.location ?? 'unknown'}` : `Last known: ${p.location ?? 'unknown'}`} badge={arrivals.has(p.id) ? <span className="hs-badge" data-tone="done">✓ Arrived</span> : confirmed === expected ? <span className="hs-badge" data-tone="done">✓ Accounted by Huda</span> : <span className="hs-badge" data-tone="wait">No personal arrival</span>} />)}</List>
     </Section>
-    <CtaBar note="Confirm only after you have seen each worker in Shelter A.">
-      <ActionButton session={session} action="recover" label={`Confirm all ${people.length} accounted for`} primary />
+    <CtaBar note="Confirm only after directly accounting for each affected worker at Shelter A or Welfare. Personal check-ins are not required for this physical attestation.">
+      {!headcount?.confirmed_at && <label className="hs-field"><input type="checkbox" checked={attested} onChange={event => setAttested(event.target.checked)} /> I personally accounted for all affected workers at their current safe locations</label>}
+      <ActionButton session={session} action="recover" label={`Confirm ${expected} workers accounted for`} primary disabled={!attested || people.length !== expected} />
       <ActionButton session={session} action="personnel" label="Confirm personnel check for restart" />
     </CtaBar>
   </div>;

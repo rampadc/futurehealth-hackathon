@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, Container, MenuItem, Paper, Stack, TextField, Typography } from '@mui/material';
 import { live, type CaseView } from './live';
 import { applyPreset, readingPayload, SCENARIO_PRESETS, type ReadingKind } from './scenarioPresets';
 import { timeLabel } from './Timeline';
+import { LiveClock } from './LiveClock';
 
 type Props = { caseView: CaseView | null; onChange: (next: CaseView | null) => Promise<void>; onReturn: () => void };
 const pretty = (value: unknown) => JSON.stringify(value, null, 2);
@@ -19,7 +20,6 @@ const READING_KINDS: Array<[ReadingKind, string]> = [['valid', 'Valid, measured 
 
 export function DemoControl({ caseView, onChange, onReturn }: Props) {
   const [presenterCase, setPresenterCase] = useState<CaseView | null>(caseView);
-  const [time, setTime] = useState(caseView ? timeLabel(caseView.clock) : '08:11');
   const [twl, setTwl] = useState('145');
   const [readingKind, setReadingKind] = useState<ReadingKind>('valid');
   const [runs, setRuns] = useState<WorkflowRun[]>([]);
@@ -29,20 +29,29 @@ export function DemoControl({ caseView, onChange, onReturn }: Props) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const loadSequence = useRef(0);
+  const busyRef = useRef(busy);
+  busyRef.current = busy;
   const loadRuns = async () => {
-    try { setPresenterCase(await live.demoState()); } catch (cause) { setError(cause instanceof Error ? cause.message : 'Unable to load presenter case'); }
-    try { const value = await live.runs(); setRuns(Array.isArray(value) ? value as WorkflowRun[] : []); } catch (cause) { setError(cause instanceof Error ? cause.message : 'Unable to load workflow runs'); }
-    try { const value = await live.agentRuns(); setAgentRuns(Array.isArray(value) ? value as ModelRun[] : []); } catch (cause) { setError(cause instanceof Error ? cause.message : 'Unable to load model runs'); }
+    const sequence = ++loadSequence.current;
+    try { const value = await live.demoState(); if (sequence === loadSequence.current) setPresenterCase(value); } catch (cause) { if (sequence === loadSequence.current) setError(cause instanceof Error ? cause.message : 'Unable to load presenter case'); }
+    try { const value = await live.runs(); if (sequence === loadSequence.current) setRuns(Array.isArray(value) ? value as WorkflowRun[] : []); } catch (cause) { if (sequence === loadSequence.current) setError(cause instanceof Error ? cause.message : 'Unable to load workflow runs'); }
+    try { const value = await live.agentRuns(); if (sequence === loadSequence.current) setAgentRuns(Array.isArray(value) ? value as ModelRun[] : []); } catch (cause) { if (sequence === loadSequence.current) setError(cause instanceof Error ? cause.message : 'Unable to load model runs'); }
   };
-  useEffect(() => { void loadRuns(); }, [caseView?.version]);
+  useEffect(() => {
+    const refresh = () => { if (!busyRef.current) void loadRuns(); };
+    refresh();
+    const timer = window.setInterval(refresh, 5_000);
+    window.addEventListener('focus', refresh);
+    return () => { window.clearInterval(timer); window.removeEventListener('focus', refresh); loadSequence.current++; };
+  }, [caseView?.version]);
   const execute = async (label: string, operation: () => Promise<unknown>) => {
+    loadSequence.current++;
     setBusy(true); setError(''); setMessage('');
     try { const next = await operation(); setPresenterCase(next as CaseView | null); await onChange(next as CaseView | null); await loadRuns(); setMessage(`${label} complete.`); }
     catch (cause) { setError(cause instanceof Error ? cause.message : `${label} failed`); }
     finally { setBusy(false); }
   };
-  const clockAt = `2025-08-04T${time}:00+04:00`;
-  const clockValid = /^\d\d:\d\d$/.test(time) && (!presenterCase || Date.parse(clockAt) > Date.parse(presenterCase.clock));
   const selectedRun = runs.find(run => run.id === selectedRunId) ?? runs[0];
   const selectedModelRun = agentRuns.find(run => run.id === selectedModelRunId) ?? agentRuns[0];
   const solverCalls = (selectedRun?.response as { solver_calls?: SolverCall[] } | null)?.solver_calls ?? [];
@@ -52,21 +61,16 @@ export function DemoControl({ caseView, onChange, onReturn }: Props) {
     {error && <Alert severity="error" role="alert">{error}</Alert>}{message && <Alert severity="success" role="status">{message}</Alert>}
     <Paper variant="outlined" sx={{ p: 3 }}><Stack spacing={2}>
       <Typography variant="h6" component="h2">Case</Typography>
-      <Typography variant="body2">{presenterCase ? `Active case ${presenterCase.case_id} · version ${presenterCase.version} · ${timeLabel(presenterCase.clock)} GST` : 'No active case'}</Typography>
+      <Typography variant="body2">{presenterCase ? <>Active case {presenterCase.case_id} · version {presenterCase.version} · <LiveClock view={presenterCase} /></> : 'No active case'}</Typography>
       <Stack direction="row" spacing={2}><Button variant="contained" disabled={busy || !!presenterCase} onClick={() => void execute('Case start', live.start)}>Start heat response case</Button><Button color="error" variant="outlined" disabled={busy || !presenterCase} onClick={() => void execute('Case reset', live.reset)}>Reset active case</Button></Stack>
     </Stack></Paper>
     <Paper variant="outlined" sx={{ p: 3 }}><Stack spacing={2}>
       <Typography variant="h6" component="h2">Scenario presets</Typography>
-      <Typography variant="body2" color="text.secondary">Each preset resets the case, then sets the clock and the local reading. It does not record a person’s instruction, stop, headcount or symptom report.</Typography>
+      <Typography variant="body2" color="text.secondary">Each preset resets the case, then sets a local reading. It does not record a person’s instruction, stop, headcount or symptom report.</Typography>
       <Stack spacing={1.5}>{SCENARIO_PRESETS.map(preset => <Stack key={preset.id} direction="row" spacing={2} sx={{ alignItems: 'center' }}>
         <Button variant="outlined" disabled={busy} sx={{ flexShrink: 0 }} onClick={() => void execute(preset.title, () => applyPreset(preset, live))}>{preset.title}</Button>
         <Typography variant="body2">{preset.detail}</Typography>
       </Stack>)}</Stack>
-    </Stack></Paper>
-    <Paper variant="outlined" sx={{ p: 3 }}><Stack spacing={2}>
-      <Typography variant="h6" component="h2">Case clock · 4 Aug 2025 GST</Typography>
-      <Typography variant="body2" color="text.secondary">Advance the case time to observe stale readings, recovery coverage and restart rules.</Typography>
-      <Stack direction="row" spacing={2}><TextField label="New time (GST)" type="time" size="small" disabled={busy} value={time} onChange={event => setTime(event.target.value)} slotProps={{ inputLabel: { shrink: true } }} /><Button variant="contained" disabled={busy || !presenterCase || !clockValid} onClick={() => void execute('Clock advance', () => live.clock(clockAt))}>Advance clock</Button></Stack>
     </Stack></Paper>
     <Paper variant="outlined" sx={{ p: 3 }}><Stack spacing={2}>
       <Typography variant="h6" component="h2">Local reading signal</Typography>
@@ -76,7 +80,7 @@ export function DemoControl({ caseView, onChange, onReturn }: Props) {
         <TextField select label="Reading" size="small" disabled={busy} value={readingKind} onChange={event => setReadingKind(event.target.value as ReadingKind)} sx={{ minWidth: 220 }}>
           {READING_KINDS.map(([value, label]) => <MenuItem key={value} value={value}>{label}</MenuItem>)}
         </TextField>
-        <Button variant="contained" disabled={busy || !presenterCase || !Number.isFinite(Number(twl)) || Number(twl) <= 0 || Number(twl) >= 500} onClick={() => void execute('Reading signal', () => live.signal(readingPayload(presenterCase!, Number(twl), readingKind)))}>Inject reading</Button>
+        <Button variant="contained" disabled={busy || !presenterCase || !Number.isFinite(Number(twl)) || Number(twl) <= 0 || Number(twl) >= 500} onClick={() => void execute('Reading signal', () => live.signal(presenterCase!.case_id, readingPayload(presenterCase!, Number(twl), readingKind)))}>Inject reading</Button>
       </Stack>
     </Stack></Paper>
     {presenterCase && <Paper variant="outlined" sx={{ p: 3 }}><Typography variant="h6" component="h2" sx={{ mb: 2 }}>Current workflow</Typography><Stack spacing={1}>{presenterCase.tasks.map(task => <Typography variant="body2" key={`${task.actor_id}:${task.action}`}>{task.actor_id} · {task.label} · {task.status}{task.reason ? ` · ${task.reason}` : ''}</Typography>)}</Stack><Box sx={{ mt: 2 }}><JsonDetails title="Solver response" value={{ status: presenterCase.capture?.http_status, provenance: presenterCase.capture?.provenance, response: presenterCase.capture?.response ?? null }} /></Box></Paper>}

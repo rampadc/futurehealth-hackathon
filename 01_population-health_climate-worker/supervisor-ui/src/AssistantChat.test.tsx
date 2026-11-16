@@ -48,7 +48,7 @@ it('restores the persisted conversation and clears it through the backend', asyn
   expect(await screen.findByText('Previously recorded answer.')).toBeTruthy();
   await user.click(screen.getByRole('button', { name: 'New chat' }));
   await waitFor(() => expect(screen.queryByText('Previously recorded answer.')).toBeNull());
-  expect(fetch).toHaveBeenCalledWith('/api/chat/history', { method: 'DELETE' });
+  expect(fetch).toHaveBeenCalledWith('/api/chat/history', expect.objectContaining({ method: 'DELETE', headers: expect.objectContaining({ 'X-Heat-Tab-ID': expect.any(String) }) }));
 });
 
 it('parses stream frames split across network chunks', async () => {

@@ -465,6 +465,19 @@
           "minimum": 1,
           "title": "Horizon Minutes",
           "type": "integer"
+        },
+        "work_not_before": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Work Not Before"
         }
       },
       "required": [

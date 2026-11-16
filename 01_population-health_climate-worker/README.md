@@ -33,11 +33,17 @@ state under `.local/heat-safe/` by default, which is ignored by Git. Set
 
 The `.env` file supplies the personal `future-health-513202` project and the
 separate ADC path described below. Keep its credentials out of source control.
-The nine named roles are fictional demo personas, not authenticated users. The
-presenter clock and inputs simulate site events; the backend and solver compute
-responses for those inputs when called. A plan remains a proposal (`applied: false`):
-this demo does not apply work assignments, release held work, send SMS, or provide
-clinical or field safety approval. The standalone ADK dev UI can still be run with
+The named roles are fictional demo personas, not authenticated users. A fresh
+case starts at 08:00 GST on 4 August 2025 and advances with real elapsed time to
+10:30; there is no manual clock control. Presenter controls can start or reset a
+case and inspect executions. Open separate browser tabs to select different
+personas without changing the other tabs. The backend and solver compute responses
+for recorded inputs. A solver plan remains a proposal (`applied: false`): a
+separate human confirmation records assignment, and another confirmation records
+the actual start of work when its proposed start time arrives. This demo does not
+release held trench work, send SMS, or provide clinical or field safety approval.
+See the [elapsed case walkthrough](supervisor-ui/README.md#live-elapsed-case) for
+the cross-persona flow. The standalone ADK dev UI can still be run with
 `uv run --env-file .env adk web agents` on its own port; it is not needed by this
 three-service launcher.
 

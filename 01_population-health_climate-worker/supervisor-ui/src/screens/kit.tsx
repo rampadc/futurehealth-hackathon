@@ -230,5 +230,5 @@ export function Choice<T extends string>({ legend, value, options, onChange }: {
 
 export function NoCase({ session }: { session: CaseSession }) {
   if (session.caseView) return null;
-  return <Empty>There is no active case. Start one from presenter controls (<code>/demo-control</code>).</Empty>;
+  return <Empty>There is no active case yet. The site presenter starts the shared case.</Empty>;
 }

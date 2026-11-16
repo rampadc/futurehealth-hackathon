@@ -1,5 +1,5 @@
 import { useEffect, useSyncExternalStore } from 'react';
-import { live } from './live';
+import { apiFetch, live } from './live';
 import { nameOf } from './replay';
 
 /**
@@ -15,6 +15,8 @@ const ISSUED: Record<string, string> = Object.fromEntries(
 
 /** person id → upload version, from GET /api/people/photos. */
 let uploaded: Record<string, string> = {};
+const photoData: Record<string, string> = {};
+let generation = 0;
 let version = 0;
 const listeners = new Set<() => void>();
 const emit = () => { version++; listeners.forEach(listener => listener()); };
@@ -25,8 +27,7 @@ export const hasUploadedPhoto = (id: string) => id in uploaded;
 
 /** The photo to draw for a person, or null to draw initials. */
 export function photoUrl(id: string): string | null {
-  const v = uploaded[id];
-  if (v) return `/api/people/${encodeURIComponent(id)}/photo?v=${encodeURIComponent(v)}`;
+  if (uploaded[id] && photoData[id]) return photoData[id];
   return ISSUED[id] ?? null;
 }
 
@@ -40,25 +41,55 @@ export function initialsOf(id: string) {
 export function usePhotos() { return useSyncExternalStore(subscribe, () => version, () => version); }
 
 export async function refreshPhotos() {
-  try { uploaded = (await live.photos()).photos ?? {}; emit(); }
+  const current = generation;
+  try {
+    const next = (await live.photos()).photos ?? {};
+    if (current !== generation) return;
+    for (const id of Object.keys(photoData)) if (uploaded[id] !== next[id]) delete photoData[id];
+    uploaded = next; emit();
+    await Promise.all(Object.keys(next).filter(id => !photoData[id]).map(async id => {
+      try {
+        const response = await apiFetch(`/api/people/${encodeURIComponent(id)}/photo?v=${encodeURIComponent(next[id])}`);
+        if (!response.ok) return;
+        const mime = response.headers.get('Content-Type')?.split(';')[0];
+        if (!mime || !ACCEPTED.test(mime)) return;
+        const bytes = new Uint8Array(await response.arrayBuffer());
+        let binary = '';
+        for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+        const data = `data:${mime};base64,${btoa(binary)}`;
+        if (current === generation && uploaded[id] === next[id]) { photoData[id] = data; emit(); }
+      } catch { /* The issued photo remains available. */ }
+    }));
+  }
   catch { /* Issued photos and initials still show; uploads appear on the next refresh. */ }
+}
+
+export function clearPhotos() {
+  generation++;
+  uploaded = {};
+  for (const id of Object.keys(photoData)) delete photoData[id];
+  emit();
 }
 
 /** Load uploaded photos while someone is signed in, and again whenever the case changes. */
 export function usePhotoSync(signedIn: boolean, caseVersion?: number) {
-  useEffect(() => { if (signedIn) void refreshPhotos(); }, [signedIn, caseVersion]);
+  useEffect(() => { if (signedIn) void refreshPhotos(); else clearPhotos(); }, [signedIn, caseVersion]);
 }
 
 export async function uploadOwnPhoto(personId: string, image: string) {
   const saved = await live.uploadPhoto(image);
+  generation++;
   uploaded = { ...uploaded, [personId]: saved.updated_at };
+  photoData[personId] = image;
   emit();
 }
 
 export async function removeOwnPhoto(personId: string) {
   await live.removePhoto();
+  generation++;
   const { [personId]: _removed, ...rest } = uploaded;
   uploaded = rest;
+  delete photoData[personId];
   emit();
 }
 

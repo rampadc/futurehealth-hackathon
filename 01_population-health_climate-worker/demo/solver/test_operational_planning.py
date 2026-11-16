@@ -8,7 +8,7 @@ from unittest.mock import patch
 from operations.contracts import CheckRequest, Request
 from operations.planning import check_plan, solve_plan
 from operations.fixtures import canonical_request, cases, readiness_record
-from operations.common import POLICY, catalog
+from operations.common import POLICY, catalog, metadata
 from test_operational_decisions import at
 
 
@@ -21,6 +21,14 @@ def request(*, ready=('C05','C06','C07','C08'), horizon=60, demand=4):
             worker['readiness'] = readiness_record(worker['person_id'],confirmed_at=at(8,11))
         else:
             worker['readiness'] = None
+    return data
+
+
+def review_request(*, horizon=5, boundary=at(8,13)):
+    data = request(horizon=horizon)
+    data['planning']['work_not_before'] = boundary
+    for worker in data['snapshot']['workers']:
+        worker['location_id'] = 'shelter_a' if int(worker['person_id'][1:]) <= 8 else 'shelter_b'
     return data
 
 
@@ -67,6 +75,81 @@ def _actual_bits(plan,pid,horizon):
 
 
 class PlanningTests(unittest.TestCase):
+    def test_review_boundary_gates_work_and_checker_accepts_equality(self):
+        data = review_request()
+        plan = solve_plan(Request.model_validate(data))
+        self.assertEqual(plan.planning_status, 'planned')
+        self.assertTrue(all(i.starts_at >= datetime.fromisoformat(at(8,13))
+                            for i in plan.intervals if i.kind == 'work'))
+        self.assertTrue(any(i.starts_at == datetime.fromisoformat(at(8,13))
+                            for i in plan.intervals if i.kind == 'work'))
+        proposed = [i.model_dump(mode='json') for i in plan.intervals]
+        checked = check_plan(CheckRequest.model_validate({**data, 'proposed_intervals': proposed}))
+        self.assertTrue(checked.accepted, checked.violations)
+        early = copy.deepcopy(proposed)
+        first = next(i for i in early if i['person_id'] == 'C05' and i['starts_at'] == at(8,11))
+        first.update(kind='work', task_id='workshop_prep', zone_id='workshop')
+        rejected = check_plan(CheckRequest.model_validate({**data, 'proposed_intervals': early}))
+        self.assertFalse(rejected.accepted)
+        self.assertTrue(any(v.startswith('task_gate:C05:0') for v in rejected.violations))
+        wrong_room = copy.deepcopy(proposed)
+        next(i for i in wrong_room if i['person_id'] == 'C05' and i['starts_at'] == at(8,11))['zone_id'] = 'shelter_b'
+        rejected = check_plan(CheckRequest.model_validate({**data, 'proposed_intervals': wrong_room}))
+        self.assertIn('review_lead_in_location:C05:0', rejected.violations)
+
+    def test_review_lead_in_advances_initial_recovery_without_new_observations(self):
+        data = review_request(horizon=4)
+        data['timing_policy'] = {'id': 'review-initial-nine', 'initial_recovery_minutes': 9,
+                                 'max_work_minutes': 15, 'between_work_recovery_minutes': 15}
+        data['planning']['policy_id'] = None
+        plan = solve_plan(Request.model_validate(data))
+        first = min(i.starts_at for i in plan.intervals if i.kind == 'work')
+        self.assertEqual(first, datetime.fromisoformat(at(8,13)))
+
+    def test_review_lead_in_uses_current_cooling_capacity_and_rest(self):
+        data = review_request()
+        for location in data['locations']:
+            if location['id'] == 'shelter_a':
+                location['capacity'] = 7
+            if location['id'] == 'shelter_b':
+                location['capacity'] = 4
+        plan = solve_plan(Request.model_validate(data))
+        self.assertEqual(plan.planning_status, 'planned')
+        for zone, count in (('shelter_a', 7), ('shelter_b', 4)):
+            self.assertTrue(any(row.zone_id == zone and row.starts_at == datetime.fromisoformat(at(8,11))
+                                and row.count == count for row in plan.occupancy))
+        self.assertTrue(all(i.kind == 'recovery' and i.zone_id ==
+                            next(w['location_id'] for w in data['snapshot']['workers'] if w['person_id'] == i.person_id)
+                            for i in plan.intervals if i.starts_at == datetime.fromisoformat(at(8,11))))
+        data['locations'][4]['capacity'] = 6
+        blocked = solve_plan(Request.model_validate(data))
+        self.assertIn(blocked.planning_status, ('infeasible', 'blocked'))
+        self.assertEqual(blocked.intervals, [])
+
+    def test_review_lead_in_noncooled_location_blocks_and_end_boundary_has_no_work(self):
+        data = review_request()
+        next(w for w in data['snapshot']['workers'] if w['person_id'] == 'C05')['location_id'] = 'workshop'
+        blocked = solve_plan(Request.model_validate(data))
+        self.assertEqual(blocked.planning_status, 'blocked')
+        self.assertIn('review_lead_in_location_not_cooled:C05', blocked.blockers)
+        no_work = review_request(horizon=2, boundary=at(8,13))
+        plan = solve_plan(Request.model_validate(no_work))
+        self.assertEqual(plan.planning_status, 'recovery_only')
+        self.assertEqual(plan.useful_worker_minutes, 0)
+        self.assertTrue(all(i.kind == 'recovery' for i in plan.intervals))
+
+    def test_review_boundary_validation_and_optional_fingerprint(self):
+        legacy = request(horizon=5)
+        base = metadata(Request.model_validate(legacy))['input_fingerprint']
+        for invalid in (at(8,10), at(8,12,30), '2025-08-05T08:13:00+04:00',
+                        '2025-08-04T08:13:00+03:00'):
+            data = review_request(boundary=invalid)
+            with self.subTest(invalid=invalid), self.assertRaises(ValueError):
+                solve_plan(Request.model_validate(data))
+        data = review_request()
+        self.assertNotEqual(metadata(Request.model_validate(data))['input_fingerprint'], base)
+        self.assertEqual(metadata(Request.model_validate(legacy))['input_fingerprint'], base)
+
     def test_reduced_exhaustive_one_worker_max_tour_and_ties(self):
         horizon = 16
         feasible = (bits for bits in itertools.product((False,True),repeat=horizon)

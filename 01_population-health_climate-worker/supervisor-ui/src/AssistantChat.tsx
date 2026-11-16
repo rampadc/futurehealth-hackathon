@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 
 import { Alert, Box, Button, Divider, Drawer, IconButton, InputAdornment, Stack, SvgIcon, TextField, Typography } from '@mui/material';
 import type { ReplayCapture } from './replay';
 import type { Persona, StoryState } from './story';
+import { apiFetch } from './live';
 
 export interface AssistantChatProps {
   open: boolean; onClose: () => void; person: Persona; story: StoryState;
@@ -43,7 +44,7 @@ export function AssistantChat({ open, onClose, onNavigate, person, caseId }: Ass
   useEffect(() => { if (open) input.current?.focus(); }, [open]);
   useEffect(() => {
     const controller = new AbortController(); setLoaded(false); setMessages([]); setError(''); setPending(false); setFailed(undefined);
-    if (caseId) fetch('/api/chat/history', { signal: controller.signal }).then(async response => {
+    if (caseId) apiFetch('/api/chat/history', { signal: controller.signal }).then(async response => {
       if (!response.ok) throw new Error('Conversation history could not be loaded.');
       const result = await response.json(); if (!controller.signal.aborted) { setMessages(result.messages); setLoaded(true); }
     }).catch(error => { if (!controller.signal.aborted) setError(error.message); });
@@ -52,7 +53,7 @@ export function AssistantChat({ open, onClose, onNavigate, person, caseId }: Ass
   const newChat = async () => {
     abort.current?.abort(); setPending(false);
     try {
-      const response = await fetch('/api/chat/history', { method: 'DELETE' });
+      const response = await apiFetch('/api/chat/history', { method: 'DELETE' });
       if (!response.ok) throw new Error('Could not start a new conversation.');
       setMessages([]); setDraft(''); setError(''); setFailed(undefined); setLoaded(true); input.current?.focus();
     } catch (error) { setError(error instanceof Error ? error.message : 'Could not start a new conversation.'); }
@@ -63,7 +64,7 @@ export function AssistantChat({ open, onClose, onNavigate, person, caseId }: Ass
     if (!retryId) setMessages(previous => [...previous, { id, author: 'user', text }]);
     const controller = new AbortController(); abort.current = controller; let answered = false;
     try {
-      const response = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal, body: JSON.stringify({ message: text, message_id: id, case_id: caseId }) });
+      const response = await apiFetch('/api/chat', { method: 'POST', signal: controller.signal, body: JSON.stringify({ message: text, message_id: id, case_id: caseId }) });
       await readChatStream(response, (kind, data) => {
         if (kind === 'error') throw new Error(String(data.message));
         if (kind === 'answer') {

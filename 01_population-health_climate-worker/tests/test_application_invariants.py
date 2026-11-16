@@ -55,6 +55,7 @@ def test_case_api_requires_session(case, monkeypatch):
     with TestClient(api.app) as client:
         assert client.get('/api/case').status_code == 401
         assert client.post('/api/case/commands', json={
+            'case_id': 'not-authenticated',
             'command_id': 'one', 'expected_version': 0, 'action': 'issue', 'payload': {},
         }).status_code == 401
 
