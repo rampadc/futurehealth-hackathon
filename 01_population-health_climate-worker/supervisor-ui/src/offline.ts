@@ -1,3 +1,6 @@
+import { accessGeneration } from './accessGeneration';
+import { tabSessionHeader } from './tabSession';
+
 /**
  * Outbox for worker actions made without a network (worker offline state). Only a worker's own
  * check-in and "I feel unwell" report are queued: supervisor decisions are never replayed
@@ -6,19 +9,22 @@
  */
 export const QUEUEABLE = new Set(['checkin', 'report']);
 
-export type Queued = { command_id: string; action: string; payload: Record<string, unknown>; queued_at: string };
+export type Queued = { command_id: string; case_id: string; action: string; payload: Record<string, unknown>; queued_at: string };
 
-const key = (personId: string) => `hs-outbox:${personId}`;
+export const outboxScope = (personId: string) => `hs-outbox:${accessGeneration()}:${tabSessionHeader()['X-Heat-Tab-ID']}:${personId}`;
 
-export function readOutbox(personId: string | undefined): Queued[] {
-  if (!personId) return [];
-  try { return JSON.parse(localStorage.getItem(key(personId)) ?? '[]') as Queued[]; } catch { return []; }
+export function readOutbox(scope: string | undefined): Queued[] {
+  if (!scope) return [];
+  try {
+    const entries = JSON.parse(localStorage.getItem(scope) ?? '[]') as unknown;
+    return Array.isArray(entries) ? entries.filter((e): e is Queued => !!e && typeof e === 'object' && typeof e.case_id === 'string' && typeof e.command_id === 'string' && QUEUEABLE.has(e.action)) : [];
+  } catch { return []; }
 }
 
-export function writeOutbox(personId: string, entries: Queued[]) {
+export function writeOutbox(scope: string, entries: Queued[]) {
   try {
-    if (entries.length) localStorage.setItem(key(personId), JSON.stringify(entries));
-    else localStorage.removeItem(key(personId));
+    if (entries.length) localStorage.setItem(scope, JSON.stringify(entries));
+    else localStorage.removeItem(scope);
   } catch { /* Storage blocked: the entry stays in memory for this page only. */ }
 }
 

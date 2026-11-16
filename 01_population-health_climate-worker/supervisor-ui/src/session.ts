@@ -3,8 +3,9 @@ import { copy } from './copy';
 import { ApiError, live, type CaseView } from './live';
 import type { Persona } from './story';
 import { isReady } from './shared/ui';
-import { isNetworkError, isOffline, QUEUEABLE, readOutbox, writeOutbox, type Queued } from './offline';
+import { isNetworkError, isOffline, QUEUEABLE, outboxScope, readOutbox, writeOutbox, type Queued } from './offline';
 import { establishTabId, rotateTabId } from './tabSession';
+import { ACCESS_GENERATION_KEY } from './accessGeneration';
 
 type Options = { onSignedIn?: () => void; onSignedOut?: () => void };
 
@@ -98,26 +99,42 @@ export function useCaseSession({ onSignedIn, onSignedOut }: Options = {}) {
 
   const queue = (entry: Queued) => {
     if (!person) return;
-    const next = [...readOutbox(person.id).filter(e => e.action !== entry.action), entry];
-    writeOutbox(person.id, next); setOutbox(next);
+    const scope = outboxScope(person.id);
+    const next = [...readOutbox(scope).filter(e => e.action !== entry.action || e.case_id !== entry.case_id), entry];
+    writeOutbox(scope, next); setOutbox(next);
     setFeedback('Saved on this phone. It will send when the network returns.');
   };
 
   /** Send queued worker actions once the network is back. Stops at the first network failure. */
   const flush = async () => {
     if (!person || flushing.current || isOffline()) return;
-    const pending = readOutbox(person.id);
+    const scope = outboxScope(person.id);
+    const pending = readOutbox(scope);
     if (!pending.length) return;
     flushing.current = true;
     let remaining = [...pending];
+    let stale = 0;
+    let sent = 0;
     try {
       for (const entry of pending) {
+        if (scope !== outboxScope(person.id) || activePersonId.current !== person.id) break;
         const current = await live.case();
+        if (scope !== outboxScope(person.id) || activePersonId.current !== person.id) break;
+        if (current?.viewer_id && current.viewer_id !== person.id) {
+          await rotateTabId(); activePersonId.current = null;
+          setPerson(null); setCaseView(null); setError('This tab identity changed. Choose your persona again.');
+          break;
+        }
+        if (!current || entry.case_id !== current.case_id) {
+          stale++;
+          remaining = remaining.filter(e => e.command_id !== entry.command_id);
+          continue;
+        }
         const task = current?.tasks.find(t => t.action === entry.action && t.actor_id === person.id);
         // Not open yet (an earlier step is missing): keep it for the next flush.
         if (current && task?.status === 'waiting') continue;
         try {
-          if (current && task && task.status === 'ready') await live.command(current, entry.action, entry.payload, entry.command_id);
+          if (current && task && task.status === 'ready') { await live.command(current, entry.action, entry.payload, entry.command_id); sent++; }
         } catch (cause) {
           if (isNetworkError(cause)) break;
           setError(`A saved ${entry.action === 'report' ? 'report' : 'check-in'} could not be sent: ${cause instanceof Error ? cause.message : 'unknown error'}`);
@@ -127,31 +144,35 @@ export function useCaseSession({ onSignedIn, onSignedOut }: Options = {}) {
     } catch (cause) {
       if (!isNetworkError(cause)) setError(cause instanceof Error ? cause.message : copy.loadError);
     } finally {
-      writeOutbox(person.id, remaining); setOutbox(remaining);
+      writeOutbox(scope, remaining);
+      setOutbox(scope === outboxScope(person.id) ? remaining : readOutbox(outboxScope(person.id)));
       flushing.current = false;
-      if (remaining.length < pending.length) { setFeedback('Saved actions sent.'); await refreshCase(); }
+      if (stale && scope === outboxScope(person.id)) setFeedback(`${stale} saved action${stale === 1 ? '' : 's'} from an earlier case discarded.${sent ? ` ${sent} current-case action${sent === 1 ? '' : 's'} sent.` : ' Nothing was sent for the new case.'}`);
+      else if (remaining.length < pending.length) { setFeedback('Saved actions sent.'); await refreshCase(); }
     }
   };
 
   useEffect(() => {
-    setOutbox(readOutbox(person?.id));
+    setOutbox(person ? readOutbox(outboxScope(person.id)) : []);
     if (!person) return;
     void flush();
     const online = () => { void flush(); };
+    const accessChanged = (event: StorageEvent) => { if (event.key === ACCESS_GENERATION_KEY) { setOutbox(readOutbox(outboxScope(person.id))); void flush(); } };
     window.addEventListener('online', online);
-    return () => window.removeEventListener('online', online);
-  }, [person?.id]);
+    window.addEventListener('storage', accessChanged);
+    return () => { window.removeEventListener('online', online); window.removeEventListener('storage', accessChanged); };
+  }, [person?.id, caseView?.case_id]);
 
   const act = async (action: string, payload: Record<string, unknown>) => {
     if (!caseView || !person || !isReady(caseView, action) || busy) return;
     const command_id = crypto.randomUUID();
-    if (QUEUEABLE.has(action) && isOffline()) { queue({ command_id, action, payload, queued_at: new Date().toISOString() }); return; }
+    if (QUEUEABLE.has(action) && isOffline()) { queue({ command_id, case_id: caseView.case_id, action, payload, queued_at: new Date().toISOString() }); return; }
     setBusy(true); setError(''); setFeedback('');
     try {
       await live.command(caseView, action, payload, command_id);
       if (await refreshCase()) setFeedback(`${caseView.tasks.find(task => task.action === action)?.label ?? action}.`);
     } catch (cause) {
-      if (QUEUEABLE.has(action) && isNetworkError(cause)) { queue({ command_id, action, payload, queued_at: new Date().toISOString() }); return; }
+      if (QUEUEABLE.has(action) && isNetworkError(cause)) { queue({ command_id, case_id: caseView.case_id, action, payload, queued_at: new Date().toISOString() }); return; }
       await refreshCase();
       setError(cause instanceof Error ? cause.message : 'The action could not be recorded');
     } finally { setBusy(false); }

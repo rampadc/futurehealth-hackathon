@@ -7,6 +7,8 @@ import { ADMIN, PERSONAS, initialStory, type StoryState } from '../story';
 import type { CaseView, Task } from '../live';
 import type { CrewRisk } from '../contract';
 import { SCREENS } from './registry';
+import { outboxScope, readOutbox } from '../offline';
+import { renewAccessGeneration } from '../accessGeneration';
 
 const reply = (value: unknown, status = 200) => new Response(JSON.stringify(value), { status, headers: { 'Content-Type': 'application/json' } });
 let currentCase: CaseView | null;
@@ -383,6 +385,55 @@ describe('platform screens', () => {
 });
 
 describe('offline worker actions', () => {
+  it('discards a saved check-in when the presenter has reset to another case', async () => {
+    const online = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    currentCase = await makeCase('heat_trigger', { issued: true, acknowledged: true, stopped: true }, [task('checkin', 'C05', 'ready')]);
+    await open('/worker/shelter', 'C05');
+    fireEvent.keyDown(await screen.findByRole('button', { name: /Check in at Shelter A/ }), { key: ' ' });
+    await screen.findByText(/1 saved action waiting to send/);
+    expect(readOutbox(outboxScope('C05'))[0].case_id).toBe('case-1');
+    currentCase = { ...currentCase, case_id: 'case-2' };
+    online.mockReturnValue(true);
+    window.dispatchEvent(new Event('online'));
+    await waitFor(() => expect(readOutbox(outboxScope('C05'))).toHaveLength(0));
+    expect(commands).toEqual([]);
+    expect(await screen.findByText(/saved action from an earlier case discarded/)).toBeTruthy();
+    online.mockRestore();
+  });
+
+  it('does not replay a saved action after a new access login', async () => {
+    const online = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    currentCase = await makeCase('heat_trigger', { issued: true, acknowledged: true, stopped: true }, [task('checkin', 'C05', 'ready')]);
+    await open('/worker/shelter', 'C05');
+    fireEvent.keyDown(await screen.findByRole('button', { name: /Check in at Shelter A/ }), { key: ' ' });
+    await screen.findByText(/1 saved action waiting to send/);
+    const oldScope = outboxScope('C05');
+    renewAccessGeneration();
+    expect(outboxScope('C05')).not.toBe(oldScope);
+    online.mockReturnValue(true);
+    window.dispatchEvent(new Event('online'));
+    await waitFor(() => expect(readOutbox(outboxScope('C05'))).toHaveLength(0));
+    expect(commands).toEqual([]);
+    online.mockRestore();
+  });
+
+  it('retains the same-case queued action across a tab reload', async () => {
+    const online = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    currentCase = await makeCase('heat_trigger', { issued: true, acknowledged: true, stopped: true }, [task('checkin', 'C05', 'ready')]);
+    const view = await open('/worker/shelter', 'C05');
+    fireEvent.keyDown(await screen.findByRole('button', { name: /Check in at Shelter A/ }), { key: ' ' });
+    await screen.findByText(/1 saved action waiting to send/);
+    const scope = outboxScope('C05');
+    view.unmount();
+    await open('/worker/shelter', 'C05');
+    expect(await screen.findByText(/1 saved action waiting to send/)).toBeTruthy();
+    expect(outboxScope('C05')).toBe(scope);
+    online.mockReturnValue(true);
+    window.dispatchEvent(new Event('online'));
+    await waitFor(() => expect(commands).toEqual([{ action: 'checkin', payload: {} }]));
+    online.mockRestore();
+  });
+
   it('queues a check-in without a network and sends it once when the network returns', async () => {
     const online = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
     currentCase = await makeCase('heat_trigger', { issued: true, acknowledged: true, stopped: true }, [task('checkin', 'C05', 'ready')]);
@@ -391,13 +442,13 @@ describe('offline worker actions', () => {
     fireEvent.keyDown(hold, { key: ' ' });
     expect(await screen.findByText(/1 saved action waiting to send/, {}, { timeout: 2000 })).toBeTruthy();
     expect(commands).toEqual([]);
-    expect(JSON.parse(localStorage.getItem('hs-outbox:C05')!)).toHaveLength(1);
-    const queuedId = JSON.parse(localStorage.getItem('hs-outbox:C05')!)[0].command_id;
+    expect(readOutbox(outboxScope('C05'))).toHaveLength(1);
+    const queuedId = readOutbox(outboxScope('C05'))[0].command_id;
     online.mockReturnValue(true);
     window.dispatchEvent(new Event('online'));
     await waitFor(() => expect(commands).toEqual([{ action: 'checkin', payload: {} }]));
     expect(commandIds).toEqual([queuedId]);
-    await waitFor(() => expect(localStorage.getItem('hs-outbox:C05')).toBeNull());
+    await waitFor(() => expect(readOutbox(outboxScope('C05'))).toHaveLength(0));
     online.mockRestore();
   });
 
@@ -407,7 +458,7 @@ describe('offline worker actions', () => {
     await open('/site/stop-work', 'C01');
     await userEvent.click(await screen.findByRole('button', { name: 'Acknowledge' }));
     await waitFor(() => expect(commands).toEqual([{ action: 'acknowledge', payload: {} }]));
-    expect(localStorage.getItem('hs-outbox:C01')).toBeNull();
+    expect(readOutbox(outboxScope('C01'))).toHaveLength(0);
     online.mockRestore();
   });
 });
