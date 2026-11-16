@@ -93,4 +93,4 @@ def make_tool(read_view: Callable[[], dict], solver_url: str, post: Post = http_
 def tools_for(actor: str, read_view: Callable[[], dict], solver_url: str) -> list:
     """Workers only see their own plan, so a crew-wide what-if is for supervisors and responders."""
     from heat_safe.application.platform_api import WORKERS
-    return [] if actor in WORKERS or actor == 'P10' else [make_tool(read_view, solver_url)]
+    return [] if actor in WORKERS or actor in {'P01', 'P10'} else [make_tool(read_view, solver_url)]

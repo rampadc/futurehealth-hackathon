@@ -2,14 +2,13 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 import httpx
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -169,27 +168,6 @@ async def command(request: Request, body: CommandInput):
 async def retry(request: Request, body: RetryInput):
     service = request.app.state.service
     return await service.retry(service.actor_from_request(request),body.expected_version,case_id=body.case_id)
-
-
-@app.get('/api/case/events')
-async def events(request: Request):
-    service=app.state.service
-    if service.actor_from_request(request) is None:
-        raise CaseError(401, 'Choose a local persona')
-    q=asyncio.Queue(maxsize=20)
-    service._listeners.add(q)
-    async def stream():
-        try:
-            current=service.read_case(service.actor_from_request(request))
-            yield f"data: {json.dumps({'version':current['version'] if current else None})}\n\n"
-            while True:
-                if await request.is_disconnected(): break
-                try:
-                    msg=await asyncio.wait_for(q.get(),timeout=15)
-                    yield f'data: {json.dumps(msg)}\n\n'
-                except TimeoutError: yield ': keepalive\n\n'
-        finally: service._listeners.discard(q)
-    return StreamingResponse(stream(),media_type='text/event-stream',headers={'Cache-Control':'no-cache'})
 
 
 @app.post('/api/demo/start')

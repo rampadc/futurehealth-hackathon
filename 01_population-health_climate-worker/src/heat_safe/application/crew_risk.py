@@ -114,7 +114,8 @@ def case_crew_risk(request: Request):
     if not view:
         return None
     risks, inputs = assess(view)
-    return {'inputs': inputs, 'crew': crew_risk(risks), 'workers': [r.for_supervisor() for r in risks]}
+    return {'inputs': inputs, 'crew': crew_risk(risks),
+            'workers': [] if persona == 'P01' else [r.for_supervisor() for r in risks]}
 
 
 @router.get('/api/worker/risk')

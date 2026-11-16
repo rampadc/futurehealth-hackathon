@@ -67,6 +67,7 @@ def test_worker_data_holds_only_their_own_records(app):
 
 def test_trust_log_lists_runs_commands_and_is_for_supervisors(app):
     assert client(app, 'P10').get('/api/trust-log').status_code == 403
+    assert client(app, 'P01').get('/api/trust-log').status_code == 403
     entries = client(app, 'P02').get('/api/trust-log').json()
     kinds = {e['kind'] for e in entries}
     assert {'solver_run', 'command'} <= kinds

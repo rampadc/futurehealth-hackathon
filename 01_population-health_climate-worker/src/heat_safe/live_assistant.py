@@ -50,8 +50,8 @@ def scoped_case(request: Request):
         raise HTTPException(401, 'Sign in to use the assistant.')
     if isinstance(actor, dict):
         actor = actor['id']
-    if actor == 'P10':
-        raise HTTPException(403, 'Use the employer heat-rest workspace for coverage review.')
+    if actor in {'P01', 'P10'}:
+        raise HTTPException(403, 'Use the project or employer heat-rest workspace for the scoped review record.')
     view = service.read_case(actor)
     if not view:
         raise HTTPException(409, 'There is no active site case.')

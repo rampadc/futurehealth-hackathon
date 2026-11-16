@@ -31,8 +31,9 @@ def test_history_requires_signed_in_persona(client):
     assert client.post('/api/chat', json={'case_id': 'case-1', 'message': 'Hello'}).status_code == 401
 
 
-def test_employer_review_cannot_open_operational_chat(client):
-    client.cookies.set('actor', 'P10')
+@pytest.mark.parametrize('actor', ['P01', 'P10'])
+def test_aggregate_review_cannot_open_operational_chat(client, actor):
+    client.cookies.set('actor', actor)
     assert client.get('/api/chat/history').status_code == 403
     assert client.post('/api/chat', json={'case_id': 'case-1', 'message': 'Show the crew risks'}).status_code == 403
 
@@ -55,7 +56,7 @@ def test_mismatched_case_never_invokes_model(client):
     assert result.status_code == 409
 
 
-@pytest.mark.parametrize('persona,has_what_if', [('P02', True), ('C01', True), ('P03', True), ('C05', False), ('C08', False)])
+@pytest.mark.parametrize('persona,has_what_if', [('P02', True), ('C01', True), ('P03', True), ('C05', False), ('C08', False), ('P01', False)])
 def test_only_supervisors_and_responders_get_the_what_if_tool(persona, has_what_if):
     from heat_safe.application.what_if import tools_for
     names = [tool.__name__ for tool in tools_for(persona, lambda: {}, 'http://solver')]
