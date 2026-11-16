@@ -7,8 +7,9 @@ import { useId, useState, type PointerEvent } from 'react';
  */
 export const TWL_HIGH_BELOW = 115;
 export const TWL_POLICY = 140;
-const MIN = 60;
-const MAX = 260;
+/* Gauge scale: tight round the band edges so small changes move the needle visibly. Readings outside are pinned to the ends. */
+const MIN = 90;
+const MAX = 170;
 
 const clamp = (v: number) => Math.min(MAX, Math.max(MIN, v));
 const SIGNAL = { red: 'var(--color-signal-red)', amber: 'var(--color-signal-yellow)', green: 'var(--color-signal-green)' };
@@ -17,7 +18,7 @@ const TONE_WORD = { red: 'High risk', amber: 'Caution', green: 'Low risk' } as c
 
 /** Small semicircle speedometer: coloured bands, a black policy line and a needle at the reading. */
 export function TwlGauge({ twl, size = 64, label, valid = true }: { twl: number | null; size?: number; label?: string; valid?: boolean }) {
-  const w = 100, h = 58, cx = 50, cy = 52, r = 40;
+  const w = 100, h = 60, cx = 50, cy = 54, r = 38;
   const at = (v: number, rad = r) => {
     const a = Math.PI * (1 - (clamp(v) - MIN) / (MAX - MIN));
     return [cx + rad * Math.cos(a), cy - rad * Math.sin(a)] as const;
@@ -26,18 +27,18 @@ export function TwlGauge({ twl, size = 64, label, valid = true }: { twl: number 
     const [x1, y1] = at(from); const [x2, y2] = at(to);
     return `M${x1.toFixed(2)} ${y1.toFixed(2)}A${r} ${r} 0 0 1 ${x2.toFixed(2)} ${y2.toFixed(2)}`;
   };
-  const [p1x, p1y] = at(TWL_POLICY, r - 9); const [p2x, p2y] = at(TWL_POLICY, r + 9);
-  const needle = twl == null ? null : at(twl, r - 4);
+  const [p1x, p1y] = at(TWL_POLICY, r - 14); const [p2x, p2y] = at(TWL_POLICY, r + 12);
+  const needle = twl == null ? null : at(twl, r - 12);
   const name = twl == null ? 'No TWL reading' : `TWL ${twl} W/m², ${valid ? TONE_WORD[twlTone(twl)] : 'Unknown (faulty reading)'}; policy level ${TWL_POLICY} W/m²`;
   return <span className="hs-gauge" title={name}>
     <svg viewBox={`0 0 ${w} ${h}`} width={size} height={size * h / w} role="img" aria-label={label ?? name}>
-      <path d={arc(MIN, MAX)} fill="none" stroke="var(--color-section-frame, #ccc)" strokeWidth="10" />
+      <path d={arc(MIN, MAX)} fill="none" stroke="var(--color-section-frame, #ccc)" strokeWidth="20" />
       {twl != null && valid && <>
-        <path d={arc(MIN, TWL_HIGH_BELOW)} fill="none" stroke={SIGNAL.red} strokeWidth="10" />
-        <path d={arc(TWL_HIGH_BELOW, TWL_POLICY)} fill="none" stroke={SIGNAL.amber} strokeWidth="10" />
-        <path d={arc(TWL_POLICY, MAX)} fill="none" stroke={SIGNAL.green} strokeWidth="10" />
+        <path d={arc(MIN, TWL_HIGH_BELOW)} fill="none" stroke={SIGNAL.red} strokeWidth="20" />
+        <path d={arc(TWL_HIGH_BELOW, TWL_POLICY)} fill="none" stroke={SIGNAL.amber} strokeWidth="20" />
+        <path d={arc(TWL_POLICY, MAX)} fill="none" stroke={SIGNAL.green} strokeWidth="20" />
       </>}
-      <line x1={p1x} y1={p1y} x2={p2x} y2={p2y} stroke="#000" strokeWidth="3.5" />
+      <line x1={p1x} y1={p1y} x2={p2x} y2={p2y} stroke="#000" strokeWidth="4" />
       {needle && <><line x1={cx} y1={cy} x2={needle[0]} y2={needle[1]} stroke={valid ? "var(--color-ink)" : "var(--color-pencil)"} strokeWidth="3" strokeLinecap="round" strokeDasharray={valid ? undefined : "4 3"} /><circle cx={cx} cy={cy} r="4" fill={valid ? "var(--color-ink)" : "var(--color-pencil)"} /></>}
     </svg>
   </span>;
@@ -53,7 +54,7 @@ export function TwlReadout({ twl, estimated, size, band }: { twl: number | null;
   const word = twl == null ? '' : !valid ? 'Unknown' : TONE_WORD[(band as keyof typeof TONE_WORD) in TONE_WORD ? band as keyof typeof TONE_WORD : twlTone(twl)];
   return <span className="hs-twl">
     <TwlGauge twl={twl} size={size} valid={valid} />
-    <span>{twl == null ? 'No reading' : `TWL ${twl} W/m² · ${word}${estimated ? ' · est.' : ''}`}</span>
+    <span className="hs-twl-text" data-tone={twl == null ? undefined : valid ? (band && band in TONE_WORD ? band : twlTone(twl)) : 'unknown'}>{twl == null ? 'No reading' : `TWL ${twl} W/m² · ${word}${estimated ? ' · est.' : ''}`}</span>
   </span>;
 }
 
