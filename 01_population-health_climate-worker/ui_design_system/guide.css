@@ -1,20 +1,68 @@
 /* Layout of the style guide page only (not part of the product components). */
 .guide { display: grid; grid-template-columns: minmax(14rem, 18rem) 1fr; min-block-size: 100vh; }
 .guide__nav { position: sticky; inset-block-start: 0; align-self: start; max-block-size: 100vh; overflow-y: auto; border-inline-end: var(--rule-structure); background: var(--color-sheet); }
-.guide__nav ol { list-style: none; margin: 0; padding: var(--space-1) 0; counter-reset: sec; }
+/* ── Chapters ────────────────────────────────────────────────────────
+   26 sections read as five parts. Body text always sits on white paper;
+   colour lives only in the headers (section headings sit on a tinted band), so the eye finds where a part begins and
+   which part it is in without reading numbers.
+   Natural palette (sand, stone, sage, clay, bark), earth hues 50–135 only,
+   far from the four signal colours and the cool tracing-paper hue.
+   --chap-ink  heading text  ≥ 9.0:1 on white, ≥ 7.8:1 on sheet (AAA)
+   --chap-rule header rules  ≥ 3.5:1 on white, ≥ 3.1:1 on sheet (non-text ≥ 3:1)
+   Section headings sit on sheet paper (#F2EFE8); chap-ink on it ≥ 7.8:1
+   Wayfinding for this guide only, never product colour. Glare turns both
+   to ink, as the product drops every subtle colour in sun. */
+.guide { --chap-ink: var(--color-ink); --chap-rule: var(--color-ink); }
+[data-chap="1"] { --chap-ink: #5B4315; --chap-rule: #A28045; } /* sand  · h80  */
+[data-chap="2"] { --chap-ink: #51453A; --chap-rule: #948373; } /* stone · h65  */
+[data-chap="3"] { --chap-ink: #375028; --chap-rule: #6F925C; } /* sage  · h135 */
+[data-chap="4"] { --chap-ink: #6D3714; --chap-rule: #BC7044; } /* clay  · h50  */
+[data-chap="5"] { --chap-ink: #5E4028; --chap-rule: #A57D5C; } /* bark  · h60  */
+[data-theme="night"] [data-chap="1"] { --chap-ink: #DEC7A2; --chap-rule: #9C8255; }
+[data-theme="night"] [data-chap="2"] { --chap-ink: #D4C8BD; --chap-rule: #918377; }
+[data-theme="night"] [data-chap="3"] { --chap-ink: #BBD3AF; --chap-rule: #749065; }
+[data-theme="night"] [data-chap="4"] { --chap-ink: #F2BEA1; --chap-rule: #B27654; }
+[data-theme="night"] [data-chap="5"] { --chap-ink: #E1C4AE; --chap-rule: #9F7F65; }
+[data-theme="glare"] [data-chap] { --chap-ink: var(--color-ink); --chap-rule: var(--color-ink); }
+
+/* Nav: the part name carries its colour and a 4px rule; links stay ink. */
+.guide__nav ol { list-style: none; margin: 0; padding: 0; }
+.navchap { border-block-start: var(--rule-hair); }
+.navchap__label { display: flex; align-items: baseline; gap: var(--space-1); padding: var(--space-2) var(--space-2) var(--space-half); font-size: var(--fs-label); font-weight: var(--weight-bold); letter-spacing: var(--track-label); text-transform: uppercase; color: var(--chap-ink); border-block-start: 4px solid var(--chap-rule); }
+.navchap__label span { flex: none; white-space: nowrap; }
+.navchap ol { padding-block-end: var(--space-1); }
 .guide__nav a { display: flex; gap: var(--space-1); padding: var(--space-half) var(--space-2); color: inherit; text-decoration: none; font-size: var(--fs-small); min-block-size: var(--target-pointer); align-items: center; border-inline-start: 4px solid transparent; }
 .guide__nav a:hover { background: var(--color-base); }
-.guide__nav a[aria-current="true"] { border-inline-start-color: var(--color-ink); background: var(--color-base); font-weight: var(--weight-bold); }
+.guide__nav a[aria-current="true"] { border-inline-start-color: var(--chap-rule); background: var(--color-base); font-weight: var(--weight-bold); }
 .guide__nav a span { inline-size: 1.75rem; color: var(--color-graphite); font-weight: var(--weight-bold); }
 .guide__nav .controls { padding: var(--space-2); border-block-start: var(--rule-hair); display: grid; gap: var(--space-2); }
 .guide__main { min-inline-size: 0; }
-.gsec { padding: var(--section-gap) var(--gutter); border-block-end: var(--rule-structure); display: grid; gap: var(--space-3); max-inline-size: 90rem; }
-.gsec > header { display: grid; gap: var(--space-1); max-inline-size: 48rem; }
-.gsec__num { font-size: var(--fs-label); font-weight: var(--weight-bold); letter-spacing: var(--track-label); color: var(--color-graphite); }
+
+/* Part opener: a heavy coloured rule, then the part name in its colour. */
+.gchap + .gchap { border-block-start: var(--rule-structure); }
+.gchap__open { padding: var(--space-6) var(--gutter) var(--space-3); border-block-start: 12px solid var(--chap-rule); border-block-end: var(--rule-structure); display: grid; gap: var(--space-1); }
+.gchap__open > * { max-inline-size: 48rem; margin: 0; }
+.gchap__part { font-size: var(--fs-label); font-weight: var(--weight-bold); letter-spacing: var(--track-label); text-transform: uppercase; color: var(--chap-ink); }
+.gchap__title { font-size: var(--fs-focal); font-weight: var(--weight-bold); line-height: var(--lh-tight); letter-spacing: var(--track-focal); color: var(--chap-ink); }
+.gchap__toc { display: flex; flex-wrap: wrap; gap: var(--space-half) var(--space-2); padding-block-start: var(--space-1); max-inline-size: 64rem; }
+.gchap__toc a { color: inherit; font-size: var(--fs-small); text-decoration-color: var(--chap-rule); text-decoration-thickness: 2px; text-underline-offset: 4px; min-block-size: var(--target-pointer); display: inline-flex; align-items: center; gap: var(--space-half); }
+.gchap__toc a span { color: var(--chap-ink); font-weight: var(--weight-bold); }
+
+/* Section: only the heading (number + title) sits on sheet paper; the
+   intro and demos stay on white. */
+.gsec { padding: 0 var(--gutter) var(--section-gap); border-block-end: var(--rule-structure); display: grid; gap: var(--space-3); max-inline-size: 90rem; }
+.gchap > .gsec:last-child { border-block-end: 0; }
+.gsec > header { display: grid; }
+.gsec > header > :is(.gsec__num, h1, h2) { background: var(--color-sheet); color: var(--chap-ink); margin-inline: calc(-1 * var(--gutter)); padding-inline: var(--gutter); }
+.gsec > header > .gsec__num { padding-block-start: var(--space-3); }
+.gsec > header > :is(h1, h2) { padding-block: var(--space-1) var(--space-3); }
+.gsec > header > p { margin-block-start: var(--space-3); }
+.gsec__num { font-size: var(--fs-label); font-weight: var(--weight-bold); letter-spacing: var(--track-label); }
 .gsec h2 { margin: 0; font-size: var(--fs-heading); line-height: var(--lh-title); }
 .gsec h3 { margin: 0; font-size: var(--fs-title); }
 .gsec p { margin: 0; max-inline-size: 48rem; }
 .hero-title { font-size: var(--fs-focal); line-height: var(--lh-tight); letter-spacing: var(--track-focal); margin: 0; max-inline-size: 18ch; }
+.gsec > header > .hero-title { max-inline-size: none; }
 .rules-list { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); border-block-start: var(--rule-structure); }
 .rules-list li { padding: var(--space-2) var(--space-2) var(--space-2) 0; border-block-end: var(--rule-hair); display: grid; gap: var(--space-1); }
 .rules-list b { font-size: var(--fs-small); }
@@ -57,6 +105,8 @@
 .device__body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
 .device__scroll { flex: 1; display: grid; align-content: start; gap: var(--space-3); padding-block: var(--space-2); }
 .device__scroll > .pad { padding-inline: var(--space-2); }
+/* A section on a phone screen: the side gap goes outside its frame, so the frame wraps the section, not the screen edge. */
+.device__scroll > .ledger.pad { padding-inline: 0; margin-inline: var(--space-2); }
 .compositions { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 24.5rem), 1fr)); gap: var(--space-4); align-items: start; justify-items: center; }
 
 /* W1 composition: rail + ledger + detail, collapsing with container width. */
@@ -70,7 +120,7 @@
 .kv dt { font-size: var(--fs-label); font-weight: var(--weight-bold); letter-spacing: var(--track-label); text-transform: uppercase; color: var(--color-graphite); }
 .kv dd { margin: 0; }
 @container web (max-width: 64rem) { .w1__main { grid-template-columns: 1fr; } .w1__detail { border-inline-start: 0; border-block-start: var(--rule-structure); } }
-@container web (max-width: 44rem) { .w1 { grid-template-columns: 1fr; } .w1 .rail { display: flex; overflow-x: auto; border-inline-end: 0; border-block-end: var(--rule-structure); } .w1 .rail__brand { display: none; } .w1 .rail__item { white-space: nowrap; border-inline-start: 0; border-block-end: 4px solid transparent; } .w1 .rail__item[aria-current="page"] { border-block-end-color: var(--color-ink); } }
+@container web (max-width: 44rem) { .w1 { grid-template-columns: 1fr; } .w1 .rail { display: flex; overflow-x: auto; border-inline-end: 0; border-block-end: var(--rule-structure); } .w1 .rail__brand { display: none; } .w1 .rail__item { white-space: nowrap; border-inline-start: 0; border-block-start: var(--section-rule-width) solid var(--color-section-rule); border-block-end: 4px solid transparent; } .w1 .rail__item[aria-current="page"] { border-block-end-color: var(--color-ink); } }
 
 .toast-region { position: fixed; inset-block-end: var(--space-3); inset-inline-start: 50%; transform: translateX(-50%); z-index: var(--z-toast); max-inline-size: calc(100vw - 2 * var(--space-2)); }
 [dir="rtl"] .toast-region { transform: translateX(50%); }
@@ -78,8 +128,15 @@
 @media (max-width: 60rem) {
   .guide { grid-template-columns: 1fr; }
   .guide__nav { position: static; max-block-size: none; border-inline-end: 0; border-block-end: var(--rule-structure); }
-  .guide__nav ol { display: flex; overflow-x: auto; padding: 0; }
+  .navchaps { display: flex; overflow-x: auto; }
+  .navchap { display: flex; flex: none; align-items: stretch; border-block: 0; }
+  .navchap__label { padding: var(--space-1) var(--space-2); align-items: center; white-space: nowrap; }
+  .navchap__label span { display: none; }
+  .navchap ol { display: flex; padding: 0; }
   .guide__nav a { white-space: nowrap; }
+  .navchap__label { border-block-start: var(--signal-width) solid var(--chap-rule); }
+  .guide__nav a { border-inline-start: 0; border-block-start: var(--section-rule-width) solid var(--color-section-rule); } /* each tab its own tone (data-tone) */
+  .guide__nav a[aria-current="true"] { box-shadow: inset 0 -4px 0 var(--color-ink); }
 }
 /* 25 · Company branding lab */
 .brandlab { display: grid; grid-template-columns: minmax(min(100%, 20rem), 24rem) 1fr; gap: var(--space-4); align-items: start; }

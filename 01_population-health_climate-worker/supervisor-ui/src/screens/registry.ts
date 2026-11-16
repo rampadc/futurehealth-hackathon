@@ -4,6 +4,7 @@ import { HeatControlsScreen, ProtectiveResponseScreen } from './web/response';
 import { CrewWorkshopScreen, WorkRestPlanScreen } from './web/plan';
 import { SquadMonitoringScreen, SystemTrustScreen } from './web/monitor';
 import { AdminSettingsScreen } from './web/settings';
+import { SiteSetupScreen } from './web/setup';
 import { TodayScreen, StopWorkScreen, HeadcountScreen } from './site/today';
 import { ReadinessScreen, ProposalScreen, ActionCardScreen } from './site/crew';
 import { FreshReadingScreen, RestartReviewScreen } from './restart';
@@ -59,6 +60,7 @@ export const SCREENS: ScreenDef[] = [
   s('restart-review', { device: 'web', name: 'Restart review', clock: '15:08', slice: 3, owner: 'A', personas: ['P02', 'P04'], reads: ['story', 'capture.request.restart', 'capture.response.restart'], commands: ['review', 'handover'] , component: RestartReviewScreen }),
   s('ask', { device: 'web', name: 'Ask the Planning Agent', clock: '08:20', slice: 4, owner: 'A', personas: ['P03', 'C01', 'P02'], reads: ['GET /api/chat/history'], commands: [], needs: 'Uses existing POST /api/chat' , component: WebAskScreen }),
   s('trust', { device: 'web', name: 'System & trust', clock: '09:00', slice: 4, owner: 'A', personas: ['P02', 'P09'], reads: ['runs', 'GET /api/trust-log', 'GET /api/ready'], commands: [], needs: 'GET /api/trust-log (supervisors)' , component: SystemTrustScreen }),
+  s('site-setup', { device: 'web', name: 'Site setup', clock: '07:30', slice: 5, owner: 'C', personas: ['P09', 'P03', 'P02', 'C01'], reads: ['capture.request.snapshot.readings'], commands: [], needs: 'Sensors, squads and locations beyond the civil crew are a site fixture until the backend models them.', component: SiteSetupScreen }),
   s('settings', { device: 'web', group: 'admin', name: 'Admin settings', clock: '16:40', slice: 5, owner: 'C', personas: ['P09', 'P02'], reads: ['GET /api/brand', 'POST /api/brand/check'], commands: [], needs: 'PUT /api/brand · admin only, typed PUBLISH', component: AdminSettingsScreen }),
   s('account', { device: 'web', group: 'account', name: 'My account', clock: '16:45', slice: 5, owner: 'C', personas: [], reads: ['GET /api/people/photos'], commands: [], needs: 'PUT/DELETE /api/people/me/photo · own photo only', component: AccountScreen }),
   // Site app · owner B

@@ -37,40 +37,45 @@ button { cursor: pointer; }
 
 /* ── Title block: the sheet header (context and status live at the top) ── */
 .titleblock {
-  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--space-2);
+  /* Wraps instead of squeezing: the title keeps ≥ 12rem, and the actions
+     drop to their own row (aligned to the end) when the screen is narrow. */
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-2);
   padding: var(--space-1) var(--gutter); border-block-end: var(--rule-structure); background: var(--color-base);
   min-block-size: calc(var(--target) + var(--space-2));
 }
-.titleblock__main { min-inline-size: 0; }
+.titleblock > * { flex: none; }
+.titleblock > .titleblock__main { flex: 1 1 12rem; min-inline-size: 0; }
 .titleblock__title { font-size: var(--fs-title); font-weight: var(--weight-bold); line-height: var(--lh-title); overflow-wrap: anywhere; }
 .titleblock__meta { display: flex; flex-wrap: wrap; gap: 0 var(--space-2); font-size: var(--fs-label); color: var(--color-graphite); }
 .titleblock__meta > * + *::before { content: '·'; margin-inline-end: var(--space-2); }
-.titleblock__actions { display: flex; gap: var(--space-1); }
+.titleblock__actions { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-inline-start: auto; }
 
 /* ── Buttons ─────────────────────────────────────────────────────────── */
 .btn {
-  --_bg: var(--color-base); --_fg: var(--color-ink); --_bd: var(--color-ink);
+  /* Sheet paper (#F2EFE8) fill, ink outline and key edge, ink label. */
+  --_bg: var(--color-sheet); --_fg: var(--color-ink); --_bd: var(--color-ink); --_edge: var(--color-ink);
   display: inline-flex; align-items: center; justify-content: center; gap: var(--space-1);
   min-block-size: var(--target); min-inline-size: var(--target); padding: var(--space-half) var(--space-2);
-  border: 2px solid var(--_bd); background: var(--_bg); color: var(--_fg);
-  font-size: var(--fs-small); font-weight: var(--weight-bold); line-height: var(--lh-title); text-align: center;
+  /* A control, not a record: sentence case, 2px frame and a heavier bottom
+     edge (a key). Stamps are uppercase with a flat 1px frame and no edge. */
+  border: 2px solid var(--_bd); border-block-end: var(--key-edge) solid var(--_edge); background: var(--_bg); color: var(--_fg);
+  font-size: var(--fs-small); font-weight: var(--weight-bold); line-height: var(--lh-title); text-align: center; cursor: pointer;
   position: relative; transition: transform var(--dur-snap) var(--easing-mechanical), box-shadow var(--dur-snap) var(--easing-mechanical);
   -webkit-tap-highlight-color: transparent;
 }
-.btn--primary { --_bg: var(--color-ink); --_fg: var(--color-on-ink); }
-.btn--danger { --_bg: var(--color-signal-red); --_fg: var(--color-on-signal); --_bd: var(--color-signal-red); }
-.btn--quiet { --_bd: transparent; text-decoration: underline; text-underline-offset: 0.2em; }
+.btn--danger { --_bg: var(--color-signal-red); --_fg: var(--color-on-signal); --_bd: var(--color-signal-red); --_edge: var(--color-ink); }
+.btn--quiet { --_bg: transparent; --_fg: var(--color-ink); --_bd: transparent; --_edge: transparent; border-block-end-width: 2px; text-decoration: underline; text-underline-offset: 0.2em; }
 .btn--cta { min-block-size: var(--target-cta); font-size: var(--fs-body); inline-size: 100%; padding-inline: var(--space-3); }
 /* Hover: a yellow rail slides in under the label (instant, mechanical). */
-.btn:where(:hover, .is-hover):not(:disabled, [aria-disabled="true"]) { box-shadow: inset 0 -4px 0 var(--color-signal-yellow); }
+.btn:where(:hover, .is-hover):not(:disabled, [aria-disabled="true"]) { box-shadow: var(--rail-hover); }
 .btn--quiet:where(:hover, .is-hover):not(:disabled) { box-shadow: none; background: var(--color-sheet); }
-/* Active: the button is pressed 1px into the sheet; secondary inverts. */
-.btn:where(:active, .is-active):not(:disabled, [aria-disabled="true"]) { transform: translateY(1px); box-shadow: none; }
-.btn:not(.btn--primary, .btn--danger):where(:active, .is-active):not(:disabled) { --_bg: var(--color-ink); --_fg: var(--color-on-ink); }
+/* Active: the key goes down; the bottom edge collapses into the sheet; secondary inverts. */
+.btn:where(:active, .is-active):not(:disabled, [aria-disabled="true"]) { transform: translateY(calc(var(--key-edge) - 2px)); border-block-end-width: 2px; box-shadow: none; }
+.btn:not(.btn--danger):where(:active, .is-active):not(:disabled) { --_bg: var(--color-ink); --_fg: var(--color-on-ink); }
 .btn:focus-visible, .btn.is-focus { box-shadow: var(--focus-ring); }
-/* Disabled: pencil, hatched, honest cursor. */
+/* Disabled: pencil, hatched, honest cursor, flat (no key edge). */
 .btn:where(:disabled, [aria-disabled="true"]) {
-  --_fg: var(--color-pencil); --_bd: var(--color-pencil); --_bg: var(--color-base);
+  --_fg: var(--color-pencil); --_bd: var(--color-pencil); --_edge: var(--color-pencil); --_bg: var(--color-base); border-block-end-width: 2px;
   background-image: var(--hatch-unknown); background-blend-mode: normal; cursor: not-allowed;
 }
 .btn:where(:disabled, [aria-disabled="true"]) > * { background: var(--color-base); padding-inline: var(--space-half); }
@@ -81,8 +86,9 @@ button { cursor: pointer; }
   opacity: .8; animation: scan var(--dur-scan) linear infinite;
 }
 @keyframes scan { from { background-position: 0 0; } to { background-position: 48px 0; } }
-/* Error: the action failed; the red 8px signal frame and a reason below it. */
-.btn.is-error, .btn[aria-invalid="true"] { --_bd: var(--color-signal-red); box-shadow: inset 0 0 0 var(--signal-width) var(--color-signal-red); }
+/* Error: the action failed; the red signal (8px top, 1px frame) and a reason below it. */
+/* The button's own 2px border turns red and thickens to 8px on top; an inset shadow inside the border would sit out of line. */
+.btn.is-error, .btn[aria-invalid="true"] { --_bd: var(--color-signal-red); --_edge: var(--color-signal-red); box-shadow: inset 0 calc(var(--signal-width) - 2px) 0 0 var(--color-signal-red); }
 
 .ibtn { display: inline-flex; align-items: center; justify-content: center; min-inline-size: var(--target); min-block-size: var(--target); border: 2px solid var(--color-ink); background: var(--color-base); padding: 0; }
 .ibtn:where(:hover, .is-hover) { background: var(--color-sheet); }
@@ -93,7 +99,8 @@ button { cursor: pointer; }
 .field { display: grid; gap: var(--space-half); }
 .field__label { font-size: var(--fs-small); font-weight: var(--weight-bold); }
 .field__hint { font-size: var(--fs-label); color: var(--color-graphite); }
-.field__error { font-size: var(--fs-small); color: var(--color-signal-red); font-weight: var(--weight-bold); display: flex; gap: var(--space-1); }
+.field__error { font-size: var(--fs-small); color: var(--color-signal-red); font-weight: var(--weight-bold); display: flex; gap: var(--space-1); align-items: flex-start; }
+.field__error::before { content: ""; inline-size: 1.25em; block-size: 1.25em; flex: none; background: var(--icon-error) center / contain no-repeat; }
 .input {
   min-block-size: var(--target-touch); inline-size: 100%; padding: var(--space-1) var(--space-2);
   border: 2px solid var(--color-ink); background: var(--color-base); font-size: var(--fs-body);
@@ -102,7 +109,7 @@ button { cursor: pointer; }
 .input::placeholder { color: var(--color-pencil); }
 .input:where(:hover, .is-hover):not(:disabled) { background: var(--color-sheet); }
 .input:where(:focus-visible, .is-focus) { box-shadow: var(--focus-ring); background: var(--color-base); }
-.field.is-error .input, .input[aria-invalid="true"] { border-color: var(--color-signal-red); box-shadow: inset 0 0 0 calc(var(--signal-width) - 2px) var(--color-signal-red); }
+.field.is-error .input, .input[aria-invalid="true"] { border-color: var(--color-signal-red); box-shadow: inset 0 calc(var(--signal-width) - 2px) 0 0 var(--color-signal-red); }
 .input:disabled { border-style: dashed; border-color: var(--color-pencil); color: var(--color-pencil); background: var(--color-base); cursor: not-allowed; }
 .field.is-loading .input { background-image: var(--hatch-unknown); background-size: 200% 100%; animation: scan var(--dur-scan) linear infinite; color: var(--color-pencil); }
 
@@ -127,7 +134,7 @@ button { cursor: pointer; }
 .seg__opt { min-block-size: var(--target); padding: 0 var(--space-2); border: 0; border-inline-end: var(--rule-hair); background: var(--color-base); font-size: var(--fs-small); font-weight: var(--weight-bold); }
 .seg__opt:last-child { border-inline-end: 0; }
 .seg__opt[aria-checked="true"] { background: var(--color-ink); color: var(--color-on-ink); }
-.seg__opt:where(:hover, .is-hover):not([aria-checked="true"]) { box-shadow: inset 0 -4px 0 var(--color-signal-yellow); }
+.seg__opt:where(:hover, .is-hover):not([aria-checked="true"]) { box-shadow: var(--rail-hover); }
 
 /* ── Switch ──────────────────────────────────────────────────────────── */
 .switch { display: inline-flex; align-items: center; gap: var(--space-1); min-block-size: var(--target); background: none; border: 0; padding: 0; font-weight: var(--weight-bold); font-size: var(--fs-small); }
@@ -140,11 +147,18 @@ button { cursor: pointer; }
 
 /* ── Stamps: status marks. Glyph + word, never colour alone. ─────────── */
 .stamp {
-  display: inline-flex; align-items: center; gap: var(--space-half); padding: 0.125rem var(--space-1);
-  border: 2px solid var(--color-ink); font-size: var(--fs-label); font-weight: var(--weight-bold);
-  letter-spacing: var(--track-label); text-transform: uppercase; line-height: var(--lh-title); white-space: nowrap; background: var(--color-base);
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-half); padding: 0.25rem var(--space-2);
+  min-block-size: 2.625rem; /* the 42px box of a 24px label: room to read, label stays 12px */
+  border: var(--hair-width) solid var(--color-ink); font-size: var(--fs-label); font-weight: var(--weight-bold); cursor: default;
+  letter-spacing: var(--track-label); text-transform: uppercase; line-height: var(--lh-title); max-inline-size: 100%; background: var(--color-base);
 }
 .stamp::before { content: attr(data-glyph); font-size: 0.9em; letter-spacing: 0; }
+/* Good, warning and error stamps show the status icon in place of the glyph:
+   green tick, yellow triangle with "!", filled red circle with white X. */
+.stamp:is(.stamp--safe, .stamp--done, .stamp--caution, .stamp--stop, .stamp--overdue)::before { content: ""; inline-size: 1.25em; block-size: 1.25em; flex: none; background-position: center; background-size: contain; background-repeat: no-repeat; }
+.stamp:is(.stamp--safe, .stamp--done)::before { background-image: var(--icon-ok); }
+.stamp.stamp--caution::before { background-image: var(--icon-warn); }
+.stamp:is(.stamp--stop, .stamp--overdue)::before { background-image: var(--icon-error); }
 .stamp--stop { background: var(--color-signal-red); border-color: var(--color-signal-red); color: var(--color-on-signal); }
 .stamp--caution { background: var(--color-signal-yellow); border-color: var(--color-signal-yellow); color: var(--color-on-caution); }
 .stamp--safe { color: var(--color-signal-green); border-color: var(--color-signal-green); }
@@ -174,16 +188,23 @@ button { cursor: pointer; }
 .readout__label { font-size: var(--fs-label); font-weight: var(--weight-bold); letter-spacing: var(--track-label); text-transform: uppercase; color: var(--color-graphite); }
 .readout__value { font-size: var(--fs-readout); font-weight: var(--weight-bold); line-height: var(--lh-tight); overflow-wrap: anywhere; }
 .readout__note { font-size: var(--fs-small); color: var(--color-graphite); }
-/* The focal readout carries the signal frame: 8px on all four sides of the cell. Outline keeps the grid from shifting. */
-.readout--focal { grid-column: 1 / -1; background: var(--color-base); outline: var(--rule-signal); outline-offset: calc(-1 * var(--signal-width)); padding: calc(var(--space-2) + var(--signal-width)) calc(var(--gutter) + var(--signal-width)); }
+/* The focal readout carries the signal: 8px top line, 1px frame. */
+.readout--focal { grid-column: 1 / -1; background: var(--color-base); --_signal-be: 0px; --_signal-bb: var(--hair-width); /* the band clips its last 1px column rule, so the frame stops at the band edge */ padding: calc(var(--space-2) + var(--signal-width)) calc(var(--gutter) + var(--signal-hair)) var(--space-2); }
 .readout--focal .readout__value { font-size: var(--fs-focal); letter-spacing: var(--track-focal); }
 .readout.is-stale .readout__value { color: var(--color-pencil); }
 .readout.is-stale .readout__note::after { content: ' · stale'; font-weight: var(--weight-bold); color: var(--color-ink); }
 
 
 /* ── Ledger: a section is a label on a structural rule, not a box ──── */
-.ledger { display: grid; }
-.ledger__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); padding-block-end: var(--space-1); border-block-end: var(--rule-structure); }
+/* A section: a 1px light grey frame round the header and all its rows, so
+   it is clear what belongs to the section. The last row drops its ink
+   hairline so the frame is the only line at the bottom. */
+.ledger { display: grid; border: var(--hair-width) solid var(--color-section-frame); }
+.ledger__list > li:last-child > .arow { border-block-end-color: transparent; }
+.ledger__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); padding: var(--space-1) var(--space-2); background: var(--color-sheet); color: var(--color-section-ink); border-block-end: var(--rule-structure); }
+/* Every section heading leads with an icon for what the section is about. */
+.ledger__head > .t-label { display: inline-flex; align-items: center; gap: var(--space-1); }
+.ledger__head .icon { inline-size: 1.25rem; block-size: 1.25rem; flex: none; }
 .ledger__count { font-size: var(--fs-small); color: var(--color-graphite); }
 .ledger__list { list-style: none; margin: 0; padding: 0; }
 
@@ -202,8 +223,19 @@ button { cursor: pointer; }
 .arow__time { font-size: var(--fs-label); color: var(--color-graphite); }
 button.arow:where(:hover, .is-hover), .arow.is-hover { background: var(--color-sheet); }
 .arow:where(:focus-visible, .is-focus) { box-shadow: var(--focus-ring); }
-.arow[aria-current="true"], .arow.is-selected { border-inline-start-color: var(--color-ink); background: var(--color-sheet); }
-.arow--urgent { outline: var(--rule-signal); outline-offset: calc(-1 * var(--signal-width)); padding-block: calc(var(--space-2) + var(--signal-width)); padding-inline-end: calc(var(--space-2) + var(--signal-width)); }
+.arow:not(.arow--urgent)[aria-current="true"], .arow:not(.arow--urgent).is-selected { border-inline-start-color: var(--color-ink); }
+.arow[aria-current="true"], .arow.is-selected { background: var(--color-sheet); }
+.arow--urgent { --_signal-bs: 4px; border-inline-start-color: transparent; /* the signal frame is the edge: no ink selection bar inside it */ --_signal-bb: var(--hair-width); padding-block-start: calc(var(--space-2) + var(--signal-width)); }
+
+/* Signal overlay. Absolute insets measure from the padding box, so each
+   cell pulls the overlay out over its own borders (--_signal-bs/be/bb) and
+   the frame lands exactly on the cell's outer edge, over any ink border. */
+:is(.readout--focal, .arow--urgent) { position: relative; }
+:is(.readout--focal, .arow--urgent)::after {
+  content: ""; position: absolute; pointer-events: none;
+  inset-block: 0 calc(-1 * var(--_signal-bb, 0px)); inset-inline: calc(-1 * var(--_signal-bs, 0px)) calc(-1 * var(--_signal-be, 0px));
+  border: var(--rule-signal); border-block-start-width: var(--signal-width);
+}
 .arow--done .arow__title { font-weight: var(--weight-medium); color: var(--color-graphite); }
 .arow:disabled { cursor: not-allowed; color: var(--color-pencil); }
 .arow:disabled .arow__desc { color: var(--color-pencil); }
@@ -236,7 +268,7 @@ button.arow:where(:hover, .is-hover), .arow.is-hover { background: var(--color-s
 .calc { display: inline-flex; gap: var(--space-half); align-items: center; font-size: var(--fs-label); color: var(--color-graphite); }
 
 /* ── Banners ─────────────────────────────────────────────────────────── */
-.banner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-1) var(--space-2); padding: var(--space-1) var(--gutter); border: var(--rule-signal); background: var(--color-base); font-size: var(--fs-small); animation: wipe-in var(--dur-wipe) var(--easing-step); }
+.banner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-1) var(--space-2); padding: var(--space-1) var(--gutter); border: var(--rule-signal); border-block-start-width: var(--signal-width); background: var(--color-base); font-size: var(--fs-small); animation: wipe-in var(--dur-wipe) var(--easing-step); }
 .banner__text { display: flex; gap: var(--space-1); align-items: flex-start; flex: 1 1 16rem; }
 .banner--offline { border-color: var(--color-ink); }
 .banner--caution { border-color: var(--color-signal-yellow); }
@@ -306,9 +338,13 @@ button.arow:where(:hover, .is-hover), .arow.is-hover { background: var(--color-s
 .rail__num { inline-size: 1.5rem; block-size: 1.5rem; border: 2px solid currentColor; display: inline-grid; place-items: center; font-size: var(--fs-label); font-weight: var(--weight-bold); flex: none; }
 .rail__item[aria-current="page"] .rail__num { background: var(--color-ink); color: var(--color-on-ink); border-color: var(--color-ink); }
 .tabbar { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border-block-start: var(--rule-structure); background: var(--color-base); padding-block-end: max(var(--space-1), env(safe-area-inset-bottom, 0)); padding-inline: var(--space-1); }
-.tabbar__item { display: grid; justify-items: center; align-content: center; gap: 2px; min-block-size: var(--target-touch); padding: var(--space-1) var(--space-half); border: 0; border-inline-end: var(--rule-hair); background: none; font-size: var(--fs-label); font-weight: var(--weight-medium); text-align: center; }
+.tabbar__item { display: grid; justify-items: center; align-content: center; gap: 2px; min-block-size: var(--target-touch); padding: var(--space-1) var(--space-half); border: 0; border-block-start: var(--section-rule-width) solid var(--color-section-rule); border-inline-end: var(--rule-hair); background: none; font-size: var(--fs-label); font-weight: var(--weight-medium); text-align: center; }
 .tabbar__item:last-child { border-inline-end: 0; }
-.tabbar__item[aria-current="page"] { background: var(--color-ink); color: var(--color-on-ink); font-weight: var(--weight-bold); }
+/* Inactive tabs: sheet paper with a 2px tone line on top. The current tab
+   is white paper with the full 8px tone line. Inactive tabs pad the 6px
+   difference, so labels don't move when the tab changes. */
+.tabbar__item:not([aria-current="page"]) { background: var(--color-sheet); border-block-start-width: 2px; padding-block-start: calc(var(--space-1) + var(--section-rule-width) - 2px); }
+.tabbar__item[aria-current="page"] { background: var(--color-base); font-weight: var(--weight-bold); }
 .tabbar__item--primary { font-size: var(--fs-small); font-weight: var(--weight-bold); }
 
 /* Thumb zone: primary action sits above the tab bar, inset from the screen edge. */
