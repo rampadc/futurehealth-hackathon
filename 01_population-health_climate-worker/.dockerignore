@@ -40,3 +40,5 @@
 **/__pycache__/
 **/*.pyc
 **/.env*
+# Presenter-only walkthrough; keep it out of runtime images.
+demo/02_heat_alert_response/scenario-2-new-ui.html

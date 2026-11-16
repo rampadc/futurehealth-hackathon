@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Scenario 02 · Heat-Safe Crew presenter guide</title>
+<style>
+:root{color-scheme:light;--paper:#f7f2e8;--ink:#26352e;--muted:#5f6d62;--line:#d9ded0;--green:#1c674e;--light:#e9f2e9;--red:#a54636;--amber:#956415;--white:#fffdf8}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.48 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input{font:inherit}button{cursor:pointer}a{color:var(--green)}a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #ce8b38;outline-offset:2px}.page{max-width:1450px;margin:auto;padding:24px 28px 40px}.top{display:flex;justify-content:space-between;gap:28px;align-items:start;border-bottom:2px solid var(--ink);padding-bottom:18px}.eyebrow{font-size:.76rem;letter-spacing:.13em;text-transform:uppercase;font-weight:800;color:var(--green)}h1{font-family:Georgia,serif;font-size:clamp(2rem,3.1vw,3.2rem);line-height:1.08;margin:.22em 0}.lede{max-width:790px;color:var(--muted);margin:.4em 0}.stamp{border:1px solid var(--line);background:var(--white);padding:12px 15px;max-width:230px;font-size:.82rem;flex:none}.stamp strong{display:block;color:var(--green)}.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:17px 0}.seg{display:flex;border:1px solid var(--green);border-radius:7px;overflow:hidden}.seg button{border:0;background:transparent;color:var(--green);padding:8px 14px}.seg button[aria-pressed=true]{background:var(--green);color:white}.base{display:flex;align-items:center;gap:8px;margin-left:auto;font-size:.84rem}.base input{width:min(310px,42vw);padding:7px 9px;border:1px solid var(--line);border-radius:5px;background:white}.quiet{border:1px solid var(--line);border-radius:6px;background:var(--white);color:var(--ink);padding:8px 12px}.layout{display:grid;grid-template-columns:minmax(210px,260px) minmax(0,1fr);gap:24px}.rail{border-right:1px solid var(--line);padding-right:17px}.rail{max-height:calc(100vh - 220px);overflow-y:auto;position:sticky;top:16px;align-self:start}.rail h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.12em;margin:0 0 10px}.rail button{width:100%;text-align:left;border:0;border-left:3px solid transparent;background:transparent;color:var(--ink);padding:8px 9px;margin:2px 0}.rail button[aria-current=step]{border-color:var(--green);background:var(--light);font-weight:700}.rail button.done:before{content:'✓ ';color:var(--green)}.rail small{display:block;color:var(--muted);font-weight:400}.main{min-width:0}.notice{background:#fff4d9;border-left:4px solid var(--amber);padding:12px 15px;margin:0 0 16px}.notice strong{color:#69480d}.guidecard{background:var(--white);border:1px solid var(--line);border-radius:12px;box-shadow:0 3px 14px #374f3810;padding:24px 28px}.meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.chip{background:var(--light);border:1px solid #cee0d1;border-radius:50px;padding:3px 10px;color:var(--green);font-size:.8rem;font-weight:700}.chip.time{background:#f1e8d6;border-color:#e4d5b5;color:#755015}.chip.optional{background:#f3eee5;border-color:#e4d9c9;color:#745b3a}.guidecard h2{font-family:Georgia,serif;font-size:clamp(1.55rem,2.25vw,2.35rem);line-height:1.17;margin:14px 0 8px}.route{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0 15px}.route code{background:#edf0e9;padding:4px 8px;border-radius:4px}.route a,.primary{display:inline-block;background:var(--green);color:white;border:1px solid var(--green);text-decoration:none;border-radius:6px;padding:8px 12px;font-weight:700}.guidecard h3{font-size:.83rem;letter-spacing:.09em;text-transform:uppercase;color:var(--green);margin:20px 0 7px}.guidecard ol{margin:0;padding-left:22px}.guidecard li{padding:2px 0}.say,.expect,.trouble{padding:12px 14px;border-radius:6px;margin:12px 0 0}.say{background:#edf3e9}.expect{background:#e8f1ed}.trouble{background:#fbf0e5}.say b,.expect b,.trouble b{display:block;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}.actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:17px;margin-top:20px}.actions .spacer{flex:1}.progress{font-size:.83rem;color:var(--muted)}.reference{border-top:1px solid var(--line);margin-top:24px;padding-top:16px;font-size:.83rem;color:var(--muted)}.reference details{margin:7px 0}.reference summary{cursor:pointer;color:var(--ink);font-weight:700}.reference code{white-space:normal}.printhead{display:none}@media(max-width:800px){.page{padding:18px}.top{display:block}.stamp{max-width:none;margin-top:14px}.base{margin-left:0}.layout{display:block}.rail{max-height:none;position:static;border:0;display:flex;overflow:auto;gap:4px;padding:0 0 12px}.rail h2{display:none}.rail button{min-width:170px;border-left:0;border-bottom:3px solid transparent}.rail button[aria-current=step]{border-color:var(--green)}.guidecard{padding:18px}}@media print{body{background:white;font-size:11pt}.page{max-width:none;padding:0}.toolbar,.rail,.actions,.notice{display:none!important}.layout{display:block}.top{padding-bottom:10px}.stamp{border:0}.guidecard{display:block!important;break-inside:avoid;box-shadow:none;border:0;border-bottom:1px solid #aaa;border-radius:0;padding:13px 0}.guidecard h2{font-size:17pt}.guidecard h3{margin-top:9px}.say,.expect,.trouble{padding:6px 9px;margin-top:6px}.printhead{display:block}.route a{color:var(--green);background:none;border:0;padding:0}}
+.access-setup{margin:20px 0;padding:18px 22px;border:1px solid var(--line);background:var(--white)}.access-setup h2{font-size:1.25rem;margin:0 0 8px}.access-setup p{max-width:1000px}.access-setup li{margin:5px 0;overflow-wrap:anywhere}.access-setup pre{padding:14px;background:#edf0e9;overflow:auto;font-size:.85rem;line-height:1.6;border:1px solid var(--line)}@media print{.access-setup{break-inside:avoid}.access-setup pre{white-space:pre-wrap;overflow-wrap:anywhere}}
+</style>
+</head>
+<body>
+<div class="page">
+<header class="top"><div><div class="eyebrow">Private presenter guide · Heat-Safe Crew</div><h1>Scenario 02: heat response</h1><p class="lede">A click-by-click guide for the real-time device UI. The core response includes a recorded employer coverage review, worker feedback and project readback. Continue into planning, assistance and restart review when time allows.</p></div><div class="stamp"><strong>Browser rehearsed · PR #24</strong>Main release 8bf0e78<br>Core and full journeys checked with real elapsed time, live solver calculations and Gemini. 16 November 2026.</div></header>
+<section class="access-setup" aria-labelledby="access-title"><h2 id="access-title">Before you start: URLs and access codes</h2>
+<p>Run these commands in Terminal on your laptop. Each prints the current code from Secret Manager using your existing Google Cloud sign-in. Open presenter controls first and enter the <b>presenter code</b>; it unlocks the product screens in the same browser. Then open and sign in every named actor tab before starting the shared case.</p>
+<ul><li><b>Main app:</b> <a data-route="/" data-actor="P03" href="https://heat-safe-app-6zb6rqbehq-ww.a.run.app/">https://heat-safe-app-6zb6rqbehq-ww.a.run.app/</a></li><li><b>Supervisor web:</b> <a data-route="/web/monitoring" data-actor="P03" href="https://heat-safe-app-6zb6rqbehq-ww.a.run.app/web/monitoring">https://heat-safe-app-6zb6rqbehq-ww.a.run.app/web/monitoring</a></li><li><b>Site app:</b> <a data-route="/site/today" data-actor="C01" href="https://heat-safe-app-6zb6rqbehq-ww.a.run.app/site/today">https://heat-safe-app-6zb6rqbehq-ww.a.run.app/site/today</a></li><li><b>Worker app:</b> <a data-route="/worker/now" data-actor="C05" href="https://heat-safe-app-6zb6rqbehq-ww.a.run.app/worker/now">https://heat-safe-app-6zb6rqbehq-ww.a.run.app/worker/now</a></li><li><b>Presenter controls:</b> <a data-route="/demo-control" href="https://heat-safe-app-6zb6rqbehq-ww.a.run.app/demo-control">https://heat-safe-app-6zb6rqbehq-ww.a.run.app/demo-control</a></li></ul>
+<pre><code># App access code (ordinary product access)
+CLOUDSDK_CONFIG=&quot;$HOME/.config/gcloud-heat-safe&quot; \
+gcloud secrets versions access latest \
+  --project=future-health-513202 \
+  --secret=heat-safe-main-gate-code
+
+# Presenter code (required for /demo-control)
+CLOUDSDK_CONFIG=&quot;$HOME/.config/gcloud-heat-safe&quot; \
+gcloud secrets versions access latest \
+  --project=future-health-513202 \
+  --secret=heat-safe-main-presenter-code</code></pre>
+<p>If Google asks you to sign in again, renew the configured account:</p>
+<pre><code>CLOUDSDK_CONFIG=&quot;$HOME/.config/gcloud-heat-safe&quot; gcloud auth login ishka.quark@gmail.com</code></pre>
+<p>The commands retrieve the codes; this guide does not store their values. Product links follow the App base URL setting below. The presenter controls and product open in separate tabs.</p></section>
+<section class="access-setup" aria-labelledby="tabs-title"><h2 id="tabs-title">Stage actor tabs before starting the case</h2><p>Open each link in a separate tab and choose the named person once. Core uses the first five; full journey also uses the remaining five. Each tab retains its own named session. Do not use routine Sign out between actor steps. Sign out inside a tab only to change that tab’s actor.</p><ul>
+<li><a data-route="/web/heat-controls" data-actor="P03">Maya · P03 · Heat controls</a></li><li><a data-route="/site/today" data-actor="C01">Huda · C01 · Site app</a></li><li><a data-route="/worker/now" data-actor="C05">Rana · C05 · Worker app</a></li><li><a data-route="/web/heat-rest" data-actor="P10">Mina · P10 · Employer coverage</a></li><li><a data-route="/web/heat-rest" data-actor="P01">Amal · P01 · Project view</a></li>
+<li><a data-route="/worker/check-in" data-actor="C08">Bilal · C08 · Check in</a></li><li><a data-route="/site/action-card" data-actor="P06">Salim · P06 · Action card</a></li><li><a data-route="/web/monitoring" data-actor="P05">Noura · P05 · Monitoring</a></li><li><a data-route="/web/restart-review" data-actor="P04">Tariq · P04 · Restart review</a></li><li><a data-route="/web/restart-review" data-actor="P02">Rashid · P02 · Restart review</a></li></ul><p>Presenter controls stay in their own <code>heat-safe-controls</code> tab. This guide opens app links only and never signs anyone in automatically.</p></section>
+<div class="toolbar"><div class="seg" role="group" aria-label="Guide length"><button id="coreMode" aria-pressed="true">Core response</button><button id="fullMode" aria-pressed="false">Full journey</button></div><button class="quiet" id="printBtn" type="button">Print guide</button><button class="quiet" id="clearBtn" type="button">Clear guide ticks</button><label class="base">App base URL <input id="baseUrl" type="url" value="https://heat-safe-app-6zb6rqbehq-ww.a.run.app" aria-label="App base URL"></label></div>
+<div class="layout"><nav class="rail" id="rail" aria-label="Guide steps"><h2>Steps</h2></nav><main class="main"><p class="notice"><strong>Real-time presenter setup</strong> Unlock presenter controls, stage the actor tabs above, then start the one shared case. The scenario clock begins at 08:00 on 4 August 2025 GST and advances at real 1× speed. There is no manual clock advance. Each product tab has its own named session; Lock access revokes the shared access gate. Do not click Reset or a preset during the story: either replaces the shared case. Guide ticks are local notes only; they send no app commands. Keep this private guide off the judge-facing screen.</p><div id="cards"></div><div class="reference"><details><summary>Operating notes and common blockers</summary><p>Focus a product tab or wait up to five seconds for case refresh. A ready task belongs to the signed-in actor shown in that tab. An expired proposal requires fresh observations and a new approval. The six-minute countdown shows elapsed recovery only; Huda still observes recovery and confirms prerequisites before actual work starts. Stop-work remains active after restart review.</p><p>Offline worker check-ins and reports are scoped to the current tab, access session and case. A saved action from an earlier case is discarded rather than replayed. SMS and delivery actions here are records or previews; they do not send messages externally.</p><p>Back, Next, Clear ticks and the Core/Full switch affect only this guide. The App base URL changes where links point; set it to the PR preview for rehearsal. Links default to the main app. Change the base URL only when rehearsing in an isolated preview or local environment. Every actor has a stable <code>heat-&lt;actor ID&gt;</code> tab target; controls use <code>heat-safe-controls</code>.</p></details><details><summary>Source and verification scope</summary><p>Checked against current branch source: <code>supervisor-ui/src/AccessBoundary.tsx</code>, <code>session.ts</code>, <code>DemoControl.tsx</code>, <code>screens/registry.ts</code>, <code>screens/site/{today,crew}.tsx</code>, <code>screens/web/{plan,monitor}.tsx</code>, <code>screens/worker/{now,plan}.tsx</code>, <code>screens/heatRest.tsx</code>, <code>screens/restart.tsx</code>, and backend case and heat-rest contracts. The core and full product journeys were rehearsed on PR #24, including at least six real minutes of recovery, both replacement branches, delivery, handover and human restart review. Guide navigation was checked separately. Rehearsal records and screenshots are kept privately in the rehearsals folder; the main case was not reset for verification.</p></details></div></main></div>
+</div>
+<script>
+const steps=[
+  {
+    "id": "stage",
+    "group": "core",
+    "when": "Before case start",
+    "actor": "controls",
+    "persona": "Presenter",
+    "role": "Controls",
+    "route": "/demo-control",
+    "title": "Stage independent named tabs",
+    "clicks": [
+      "Open presenter controls in its own tab and enter the presenter code. The code unlocks the product in this browser; never put it in the guide.",
+      "Use the staging links above to open one separate tab for each actor. In each product tab choose that named person once. Stage Maya, Huda, Rana, Mina and Amal for core; also stage Bilal, Salim, Noura, Tariq and Rashid for full journey.",
+      "Before starting the case, open Welcome: language, then consent on Rana’s worker tab (/worker/welcome). Let Rana choose a ready language, review the optional check-in and wearable choices, and save her choice. For the full journey, let Bilal do the same in his own tab. These personal choices do not start the case.",
+      "Keep these tabs open. Each has its own named session. Return to the existing actor tab at each step; do not routinely Sign out between people. Sign out only when changing the person inside one tab."
+    ],
+    "say": "Each person makes their own recorded decision in their own tab.",
+    "expect": "Product tabs show their named person, usually with No active case before start. Presenter controls have a separate tab.",
+    "trouble": "If a tab shows another person, use Sign out in that tab and choose its intended actor. Lock access affects the whole browser session."
+  },
+  {
+    "id": "start",
+    "group": "core",
+    "when": "Case start",
+    "actor": "controls",
+    "persona": "Presenter",
+    "role": "Controls",
+    "route": "/demo-control",
+    "title": "Start and check the sensor case",
+    "clicks": [
+      "On controls, check whether an active case exists. If none, click “Start heat response case”. Start and Reset affect the one shared case seen by every tab.",
+      "If a prior case exists, including an earlier fixed-clock rehearsal, click “02 Heat alert” to begin this new rehearsal. It creates a fresh elapsed-time case for all tabs; the prior case records remain in the database. Use it only at the beginning, not between persona steps.",
+      "Confirm the local civil reading is valid TWL 145 W/m² and the heavy task is held. If the seed differs, use Local reading signal → Valid, measured now → TWL 145 → Inject reading. Do not touch any clock control."
+    ],
+    "say": "The local sensor finding holds heavy trench work; human decisions now follow.",
+    "expect": "The case clock begins at 08:00 on the scenario date and advances at real 1× speed. No instruction, stop or headcount is yet recorded.",
+    "trouble": "If Start is disabled, use “02 Heat alert” once to begin a fresh rehearsal. Confirm the new case starts near 08:00 with no instruction or headcount recorded. Every staged tab should then show that new case."
+  },
+  {
+    "id": "maya",
+    "group": "core",
+    "when": "Immediately after start",
+    "actor": "P03",
+    "persona": "Maya Al Qamar",
+    "role": "Safety officer · P03",
+    "route": "/web/heat-controls",
+    "title": "Maya issues the instruction",
+    "clicks": [
+      "Switch to Maya’s already signed-in tab. Open Heat controls.",
+      "Check TWL and the ≤ 150 W/m² heavy-work site rule. Click “Issue stop-work instruction”."
+    ],
+    "say": "The site limit requires a stop even if the display band looks less severe.",
+    "expect": "The named instruction is recorded; heavy work remains held.",
+    "trouble": "If disabled, verify Maya is signed in and the local reading is valid. The task may still be calculating; wait for the next poll or focus the tab."
+  },
+  {
+    "id": "ackstop",
+    "group": "core",
+    "when": "Within 2 real minutes",
+    "actor": "C01",
+    "persona": "Huda Al Nadir",
+    "role": "Civil foreman · C01",
+    "route": "/site/stop-work",
+    "title": "Huda acknowledges and stops work",
+    "clicks": [
+      "Immediately switch to Huda’s signed-in tab. Open Stop-work instruction.",
+      "Click “Acknowledge”, then “Confirm heavy work stopped”."
+    ],
+    "say": "The instruction and the observed physical stop are separate records.",
+    "expect": "Both confirmations appear before the live two-minute acknowledgement deadline. Heavy trench work stays stopped.",
+    "trouble": "If the acknowledgement is overdue, Rashid may receive a follow-up task; Huda still records the acknowledgement and stop. Do not advance a clock."
+  },
+  {
+    "id": "rana",
+    "group": "core",
+    "when": "After physical stop",
+    "actor": "C05",
+    "persona": "Rana Al Nadir",
+    "role": "Civil worker · C05",
+    "route": "/worker/shelter",
+    "title": "Rana checks herself in",
+    "clicks": [
+      "Switch to Rana’s worker tab. Open Shelter check-in.",
+      "Press and hold “Check in at Shelter A” until it records. Her own arrival is one of eleven."
+    ],
+    "say": "Rana confirms her own arrival. This does not certify the whole crew.",
+    "expect": "Rana sees her personal check-in; Huda’s arrivals count advances by one.",
+    "trouble": "A quick tap does not submit the hold button. If the phone is offline, the action queues for this tab, access session and case only."
+  },
+  {
+    "id": "headcount",
+    "group": "core",
+    "when": "After Rana arrives",
+    "actor": "C01",
+    "persona": "Huda Al Nadir",
+    "role": "Civil foreman · C01",
+    "route": "/site/headcount",
+    "title": "Huda confirms eleven people",
+    "clicks": [
+      "Return to Huda’s tab and open Headcount.",
+      "Compare Personal arrivals with Foreman confirmed. Rana’s phone arrival is separate from Huda’s physical headcount. Directly account for the full crew at Shelter A or Welfare.",
+      "Tick “I personally accounted for all affected workers at their current safe locations”, then click “Confirm 11 workers accounted for”. Rana’s one personal arrival is enough to show the distinction; Huda’s record covers the full group."
+    ],
+    "say": "A worker’s arrival and the foreman’s whole-crew headcount are different evidence.",
+    "expect": "Personal arrivals 1 / 11 from Rana’s phone and Foreman confirmed 11 / 11 from Huda’s own observation. This starts the real elapsed recovery lead-in; it does not attest later activity.",
+    "trouble": "If the confirmation is disabled, confirm the stop and tick Huda’s physical attestation after checking all eleven. The app does not require ten more phone check-ins. If Bilal has already reported, Huda must first confirm his Welfare location with the removal action."
+  },
+  {
+    "id": "mina",
+    "group": "core",
+    "when": "After headcount",
+    "actor": "P10",
+    "persona": "Mina Rahman",
+    "role": "Employer contract manager · P10",
+    "route": "/web/heat-rest",
+    "title": "Mina records the Heat Rest Schedule review",
+    "clicks": [
+      "Switch to Mina’s tab at Heat and rest coverage. Read the real policy, case-linked stop and headcount, and employer review queue.",
+      "Select Coverage status: Confirmed, or Needs verification if that is what the employer record supports. Only for Confirmed, tick “I verified the C02–C12 crew roster against the employer’s coverage record” after checking it; for Needs verification, leave that box clear.",
+      "Enter the basis in “Basis or unresolved item”, then click “Record employer coverage review”."
+    ],
+    "say": "Dune’s schedule commits protected paid recovery during rostered shift time for covered workers. Mina records coverage; this screen does not verify payroll.",
+    "expect": "A named, case-linked coverage review replaces the old narration-only paid-rest step. Safety and recovery continue independently of its status.",
+    "trouble": "If the button is disabled, verify the roster checkbox and note, and wait for Mina’s coverage_review task to become ready. Do not present this as a payroll payment record."
+  },
+  {
+    "id": "huda-feedback",
+    "group": "core",
+    "when": "After Mina records",
+    "actor": "C01",
+    "persona": "Huda Al Nadir",
+    "role": "Civil foreman · C01",
+    "route": "/site/heat-rest",
+    "title": "Huda sees employer coverage feedback",
+    "clicks": [
+      "Return to Huda’s tab and open Heat and rest coverage in the Site app.",
+      "Show the coverage status alongside the actual stop, arrivals, foreman count and observed activity count."
+    ],
+    "say": "The operational lead can see Mina’s employer review without changing the safety decision.",
+    "expect": "Huda sees the recorded coverage status. No payroll claim is made.",
+    "trouble": "Focus the tab or wait for the five-second case refresh if the status has just changed."
+  },
+  {
+    "id": "rana-feedback",
+    "group": "core",
+    "when": "After Mina records",
+    "actor": "C05",
+    "persona": "Rana Al Nadir",
+    "role": "Civil worker · C05",
+    "route": "/worker/heat-rest",
+    "title": "Rana sees her own coverage status",
+    "clicks": [
+      "Return to Rana’s tab. From My plan use “View my heat and rest coverage”, or open this route.",
+      "Show the policy commitment, her own arrival and coverage status. Do not open Huda’s full headcount as a worker."
+    ],
+    "say": "The worker can read her own status without seeing the full crew roster.",
+    "expect": "Rana sees her arrival and coverage status only; other workers’ identities and activity are not shown.",
+    "trouble": "If she sees the wrong role screen, use “Go to my screen” and return to her own coverage route."
+  },
+  {
+    "id": "amal-project",
+    "group": "core",
+    "when": "After worker feedback",
+    "actor": "P01",
+    "persona": "Amal Al Nadir",
+    "role": "Project manager · P01",
+    "route": "/web/heat-rest",
+    "title": "Amal sees the case-linked project view",
+    "clicks": [
+      "Switch to Amal’s tab and open Heat and rest coverage.",
+      "Show the Project evidence section: stop, recovery confirmation, confirmed count, employer coverage status and cost review status."
+    ],
+    "say": "The project view joins employer coverage to operational events without exposing individual worker records or asserting payroll was checked.",
+    "expect": "The core response ends with the employer decision, worker feedback and aggregate project readback visible in the product.",
+    "trouble": "If Project evidence is missing, verify Amal (P01) is signed in and the coverage endpoint has loaded; it is separate from the later costReview action."
+  },
+  {
+    "id": "readiness",
+    "group": "full",
+    "when": "After core",
+    "actor": "C01",
+    "persona": "Huda Al Nadir",
+    "role": "Civil foreman · C01",
+    "route": "/site/readiness",
+    "title": "Huda confirms four workers individually",
+    "clicks": [
+      "In Huda’s Readiness confirmation screen, choose C05 Rana, C06, C07 and C08 Bilal one at a time.",
+      "For each, choose the face-to-face basis and a validity window, then submit “Confirm [name] ready for workshop preparation”. Do not select all eleven."
+    ],
+    "say": "These are human readiness checks for covered workshop preparation, not permission to resume heavy trench work.",
+    "expect": "Four named readiness confirmations appear. The other workers remain unconfirmed for productive workshop work.",
+    "trouble": "If a worker is excluded or not ready, do not force confirmation. The planner should show the current blocker."
+  },
+  {
+    "id": "activity11",
+    "group": "full",
+    "when": "After readiness",
+    "actor": "C01",
+    "persona": "Huda Al Nadir",
+    "role": "Civil foreman · C01",
+    "route": "/web/crew",
+    "title": "Huda attests actual recovery through now",
+    "clicks": [
+      "Open Crew & workshop in Huda’s web tab. Under Record observations choose “Record observed crew activity”.",
+      "For each of the eleven active workers, choose Recovery · Shelter A after checking the person; “Choose recovery for all after observing” is a convenience when all were observed. Tick “I observed all 11 active workers through now”. Submit the action.",
+      "No From/To entry exists. The server records the through-now cutoff."
+    ],
+    "say": "A solver proposal never becomes an observation automatically.",
+    "expect": "The current observation covers every active worker once through the new server cutoff.",
+    "trouble": "If the form is disabled, every active worker needs a choice and the attestation checkbox. After a recalculation, review the fresh form again."
+  },
+  {
+    "id": "proposal",
+    "group": "full",
+    "when": "After fresh calculation",
+    "actor": "C01",
+    "persona": "Huda Al Nadir",
+    "role": "Civil foreman · C01",
+    "route": "/site/proposal",
+    "title": "Review and approve the assessed proposal",
+    "clicks": [
+      "Open Proposal review. Read “Assessed”, “review by”, status, proposed workers and actual proposed worker-minutes.",
+      "If status is Proposed and the visible deadline has not passed, click “Approve assessed proposal”. This binds the exact assessment ID."
+    ],
+    "say": "Approval records this proposal only. It does not move anybody or start work. The useful worker-minutes are calculated, not a guaranteed 120 or 90.",
+    "expect": "The proposal becomes Approved. Heavy trench work stays stopped.",
+    "trouble": "If Expired or Awaiting observations appears, record fresh current activity and review the new assessment. Do not approve an old capture."
+  },
+  {
+    "id": "wait",
+    "group": "full",
+    "when": "During six real minutes",
+    "actor": "C01",
+    "persona": "Huda Al Nadir",
+    "role": "Civil foreman · C01",
+    "route": "/site/proposal",
+    "title": "Let real recovery time elapse",
+    "clicks": [
+      "The live clock runs at 1×. The six-minute recovery countdown is elapsed time only; it does not attest observation or authorise work.",
+      "While it runs, use Mina and Amal readbacks or the Planning Agent. Keep the approved proposal and deadline visible. Do not reset the shared case or use a clock jump.",
+      "If the proposal expires during the wait, return to observed activity and approve a fresh assessment."
+    ],
+    "say": "The crew remains in cooled recovery while the human lead checks the prerequisites.",
+    "expect": "The countdown reaches zero only after six real minutes from confirmed headcount. The approved work interval must also be active.",
+    "trouble": "A zero countdown alone never enables work. Verify actual recovery through now, readiness, permit, resources, supervision and the approved interval."
+  },
+  {
+    "id": "start-work",
+    "group": "full",
+    "when": "When approved interval is active",
+    "actor": "C01",
+    "persona": "Huda Al Nadir",
+    "role": "Civil foreman · C01",
+    "route": "/site/proposal",
+    "title": "Huda explicitly starts covered work",
+    "clicks": [
+      "In Start approved workshop work, read the Current approved work interval and its worker list.",
+      "Only when those workers have truly completed recovery, tick “I observed the required recovery through now” and “I confirmed workshop permit, resources, supervision and readiness”.",
+      "Click “Confirm start of work for [count] workers”. This is a separate human action from approval."
+    ],
+    "say": "The planner recommends a covered move; Huda authorises the actual start at the current interval.",
+    "expect": "The chosen workers move to Workshop in the current case. No automatic work start occurred when the plan was approved.",
+    "trouble": "If disabled, wait for the approved interval or refresh/approve a new assessment. Never claim prerequisites that were not checked."
+  },
+  {
+    "id": "bilal",
+    "group": "full",
+    "when": "After actual work begins",
+    "actor": "C08",
+    "persona": "Bilal Al Safa",
+    "role": "Civil worker · C08",
+    "route": "/worker/check-in",
+    "title": "Bilal reports feeling unwell",
+    "clicks": [
+      "Switch to Bilal’s worker tab and open Check in.",
+      "Choose “I feel unwell”, answer the fixed red-flag question truthfully, then press and hold the send action."
+    ],
+    "say": "Bilal’s own report initiates assistance independently of assignment; it is not a diagnosis.",
+    "expect": "Huda receives the action card. Bilal stays with someone, away from heat.",
+    "trouble": "If report is queued offline, reconnect this same case and tab; do not create a new case to replay it."
+  },
+  {
+    "id": "incident",
+    "group": "full",
+    "when": "After Bilal reports",
+    "actor": "C01",
+    "persona": "Huda Al Nadir",
+    "role": "Civil foreman · C01",
+    "route": "/site/action-card",
+    "title": "Huda records the incident and removes Bilal",
+    "clicks": [
+      "Open Worker action card in Huda’s tab. Click “Record the site incident”.",
+      "Click “Confirm Bilal removed from heat”; in the confirmation type REMOVED and submit. Bilal goes to Welfare."
+    ],
+    "say": "The actual report triggers protection. Bilal is removed from productive work.",
+    "expect": "Incident and removal are recorded with their named owner. The heavy-work hold remains.",
+    "trouble": "If removal is waiting, record the incident first. Do not confuse the report with removal."
+  },
+  {
+    "id": "firstaid",
+    "group": "full",
+    "when": "After removal",
+    "actor": "P06",
+    "persona": "Salim Al Wadi",
+    "role": "First aider · P06",
+    "route": "/site/action-card",
+    "title": "Salim records first aid contact",
+    "clicks": [
+      "Switch to Salim’s tab, open Worker action card and click “Record first-aid contact”."
+    ],
+    "say": "A first aider records contact; this guide makes no medical diagnosis.",
+    "expect": "First-aid contact appears in the case; Bilal remains excluded from workshop work.",
+    "trouble": "If unavailable, verify Huda’s removal record, then focus or refresh Salim’s tab."
+  },
+  {
+    "id": "return3",
+    "group": "full",
+    "when": "After first aid",
+    "actor": "C01",
+    "persona": "Huda Al Nadir",
+    "role": "Civil foreman · C01",
+    "route": "/site/proposal",
+    "title": "Huda stops remaining workshop work",
+    "clicks": [
+      "Return to Huda’s Proposal review. In Stop workshop work and return to recovery, select the remaining currently working, non-excluded workers.",
+      "Click “Confirm work stopped and return to recovery”. This attests their actual work through now and moves them to cooled Shelter A."
+    ],
+    "say": "The return to cooled recovery is a human-observed transition, not a planned interval silently applied.",
+    "expect": "Remaining workshop workers are back in cooled recovery. Bilal’s separate Welfare removal remains recorded.",
+    "trouble": "If the control is not ready, check who is currently in Workshop and whether Bilal’s removal and first aid are recorded."
+  },
+  {
+    "id": "activity10",
+    "group": "full",
+    "when": "After return to shelter",
+    "actor": "C01",
+    "persona": "Huda Al Nadir",
+    "role": "Civil foreman · C01",
+    "route": "/web/crew",
+    "title": "Huda attests ten active workers through now",
+    "clicks": [
+      "In Crew & workshop, record observed activity again. Check all ten active workers and choose Recovery · Shelter A for each.",
+      "Tick “I observed all 10 active workers through now” and submit. Bilal is excluded and must not be included."
+    ],
+    "say": "A new through-now observation is required after the return; the earlier proposal is not an observation.",
+    "expect": "The next calculation uses actual work and cooled recovery history for ten active workers.",
+    "trouble": "If the planner reports a lead-in blocker, check current worker locations. Use Start recovery to return any remaining workshop workers first."
+  },
+  {
+    "id": "no-sub",
+    "group": "full",
+    "when": "After the ten-person calculation",
+    "actor": "C01",
+    "persona": "Huda Al Nadir",
+    "role": "Civil foreman · C01",
+    "route": "/site/proposal",
+    "title": "Read the current no-substitute plan",
+    "clicks": [
+      "Open Proposal review and inspect the new assessment status, worker list, assessed time, deadline and useful worker-minutes.",
+      "Explain the current result. A 90 worker-minute result is an example from a captured scenario, not a guaranteed live number."
+    ],
+    "say": "With Bilal excluded, the planner may find less useful covered work.",
+    "expect": "The proposal shows its actual current value and blockers. No substitute is assumed ready.",
+    "trouble": "If Awaiting observations, update the active group through now. If Expired, use a fresh assessment."
+  },
+  {
+    "id": "leila",
+    "group": "full",
+    "when": "After no-substitute review",
+    "actor": "C01",
+    "persona": "Huda Al Nadir",
+    "role": "Civil foreman · C01",
+    "route": "/web/crew",
+    "title": "Confirm Leila with a proper evidence form",
+    "clicks": [
+      "In Crew & workshop → Record observations, use “Confirm Leila’s workshop readiness”.",
+      "Set Readiness status, enter the face-to-face or other true basis, and check Valid until (GST) for C09 Leila before clicking “Confirm readiness”."
+    ],
+    "say": "Leila’s C09 readiness is an individual human confirmation, not a solver inference.",
+    "expect": "A valid C09 readiness record appears. The Site app also has this evidence form.",
+    "trouble": "If the action is waiting, complete the relevant incident and first-aid steps; do not send an empty readiness action."
+  },
+  {
+    "id": "activity10b",
+    "group": "full",
+    "when": "After Leila confirmation",
+    "actor": "C01",
+    "persona": "Huda Al Nadir",
+    "role": "Civil foreman · C01",
+    "route": "/web/crew",
+    "title": "Refresh ten-person recovery evidence",
+    "clicks": [
+      "On the newly ready Record observed crew activity form, verify the ten active workers’ current recovery through now.",
+      "Choose Recovery · Shelter A for all observed active workers, tick the ten-person attestation and submit."
+    ],
+    "say": "Fresh human observations accompany the new readiness evidence.",
+    "expect": "The solver can calculate a new current substitute assessment.",
+    "trouble": "If a worker has moved or is unavailable, record the actual activity rather than selecting Recovery by habit."
+  },
+  {
+    "id": "subplan",
+    "group": "full",
+    "when": "After substitute calculation",
+    "actor": "C01",
+    "persona": "Huda Al Nadir",
+    "role": "Civil foreman · C01",
+    "route": "/site/proposal",
+    "title": "Review Leila’s substitute proposal",
+    "clicks": [
+      "Compare the assessed proposal with the no-substitute view. Read the actual worker list, deadline and useful worker-minutes.",
+      "If it is Proposed and still timely, approve this exact new assessment. Do not claim a new actual work start unless the approved interval is active and Huda performs the separate start confirmation."
+    ],
+    "say": "A 120 worker-minute result is an example from a captured scenario; the live result may differ.",
+    "expect": "Leila may restore productive covered capacity while heavy trench work remains stopped.",
+    "trouble": "If the new assessment is blocked or expired, show the blockers and collect current evidence instead of using a stale approval."
+  },
+  {
+    "id": "handover",
+    "group": "full",
+    "when": "After assistance",
+    "actor": "P02",
+    "persona": "Rashid Al Wadi",
+    "role": "Superintendent · P02",
+    "route": "/web/restart-review",
+    "title": "Record shift handover",
+    "clicks": [
+      "Switch to Rashid’s tab. In Restart review, use “Record shift handover” when ready.",
+      "Keep open restart decisions visible; handover does not clear the heavy-work hold."
+    ],
+    "say": "The next shift receives named open decisions and the current stop.",
+    "expect": "Handover is recorded with restart still open.",
+    "trouble": "If waiting, verify assignment, removal and first-aid prerequisites. Do not represent handover as restart approval."
+  },
+  {
+    "id": "delivery",
+    "group": "full",
+    "when": "After handover",
+    "actor": "P05",
+    "persona": "Noura Al Nadir",
+    "role": "Logistics coordinator · P05",
+    "route": "/web/monitoring",
+    "title": "Noura records four delivery handoffs",
+    "clicks": [
+      "In Squad Monitoring, complete each ready delivery task in order: Draft later delivery request, Approve delivery request, Record delivery request sent, Record supplier acceptance.",
+      "Return to the same tab as each task becomes ready; the app refreshes the case."
+    ],
+    "say": "The later materials delivery is a recorded coordination chain in this demo; no external supplier message is sent.",
+    "expect": "Four named logistics records appear.",
+    "trouble": "If a task is waiting, complete the preceding one and focus the tab. Do not claim a real message was sent."
+  },
+  {
+    "id": "fresh",
+    "group": "full",
+    "when": "For restart evidence",
+    "actor": "P03",
+    "persona": "Maya Al Qamar",
+    "role": "Safety officer · P03",
+    "route": "/site/fresh-reading",
+    "title": "Maya records a fresh local reading",
+    "clicks": [
+      "In Maya’s Fresh reading screen, enter TWL 180 W/m² and click “Record fresh local reading”. The server records “Measured now”; there is no manual timestamp.",
+      "Click “Confirm water check” if that task is ready. This reading alone does not release the heavy-work hold."
+    ],
+    "say": "A current, same-zone local reading is one restart input.",
+    "expect": "Fresh reading and water check appear as separate records.",
+    "trouble": "If a reading is stale or faulty, re-measure locally. Do not use a forecast or a different zone for clearance."
+  },
+  {
+    "id": "huda3",
+    "group": "full",
+    "when": "After fresh reading",
+    "actor": "C01",
+    "persona": "Huda Al Nadir",
+    "role": "Civil foreman · C01",
+    "route": "/site/headcount",
+    "title": "Huda completes her restart checks",
+    "clicks": [
+      "In Headcount click “Confirm personnel check for restart” when ready.",
+      "In Worker action card record “Confirm the recovery check”. In Readiness confirmation record “Confirm crew readiness check for restart”. These are three separate human checks."
+    ],
+    "say": "The eight-check restart review draws on named owners, not just the new reading.",
+    "expect": "Personnel, recovery and crew-readiness checks are recorded. Heavy work remains stopped.",
+    "trouble": "If a check is waiting, inspect its task reason; do not infer it from an earlier headcount or plan."
+  },
+  {
+    "id": "permit",
+    "group": "full",
+    "when": "After Huda checks",
+    "actor": "P04",
+    "persona": "Tariq Al Safa",
+    "role": "Permit coordinator · P04",
+    "route": "/web/restart-review",
+    "title": "Tariq confirms the permit",
+    "clicks": [
+      "In Tariq’s Restart review tab click “Confirm permit check”."
+    ],
+    "say": "Permit confirmation is owned by Tariq.",
+    "expect": "The permit line is confirmed while the heavy-work hold still applies.",
+    "trouble": "If disabled, verify the fresh reading and preceding handoffs, then focus the tab."
+  },
+  {
+    "id": "review",
+    "group": "full",
+    "when": "After all checks",
+    "actor": "P02",
+    "persona": "Rashid Al Wadi",
+    "role": "Superintendent · P02",
+    "route": "/web/restart-review",
+    "title": "Rashid records the restart review",
+    "clicks": [
+      "In Rashid’s Restart review screen, read all eight checks and blockers.",
+      "If ready, click “Record restart review”, type RESTART in the confirmation and submit. State clearly that this records a review; heavy exposed work remains stopped pending a separate site decision."
+    ],
+    "say": "A named review is recorded without automatic release of the stop-work instruction.",
+    "expect": "Review status updates; the heavy-work hold remains visible.",
+    "trouble": "If a check or midday-break rule blocks review, show the blocker honestly rather than forcing a restart."
+  },
+  {
+    "id": "cost",
+    "group": "full",
+    "when": "After handover",
+    "actor": "P01",
+    "persona": "Amal Al Nadir",
+    "role": "Project manager · P01",
+    "route": "/web/monitoring",
+    "title": "Amal reviews project cost impact",
+    "clicks": [
+      "Return to Amal’s tab. In Squad Monitoring click the ready “Record cost impact review” button.",
+      "Open Heat and rest coverage again to show the Project evidence section and cost-review time beside Mina’s coverage status."
+    ],
+    "say": "Amal owns project cost impact; Mina owns employer coverage. Neither screen verifies a payroll transaction.",
+    "expect": "The case-linked aggregate project view now includes cost-review status.",
+    "trouble": "If the cost action is waiting, check Rashid’s handover. Do not conflate a cost review with a safety restart."
+  },
+  {
+    "id": "assistant",
+    "group": "full",
+    "when": "At the end",
+    "actor": "P03",
+    "persona": "Maya Al Qamar",
+    "role": "Safety officer · P03",
+    "route": "/web/ask",
+    "title": "Inspect the Planning Agent trace",
+    "clicks": [
+      "In Maya’s Ask the Planning Agent tab, ask a live question such as “What needs attention?”",
+      "Show any tools used and the current answer. Mark what-if output hypothetical; it is not a command."
+    ],
+    "say": "The assistant explains case evidence and can explore options, but it does not make human confirmations.",
+    "expect": "The answer cites current case context or shows a real error; either result is presented honestly.",
+    "trouble": "If the model fails, show the failure and continue with the recorded workflow evidence."
+  },
+  {
+    "id": "runs",
+    "group": "full",
+    "when": "At the end",
+    "actor": "controls",
+    "persona": "Presenter",
+    "role": "Controls",
+    "route": "/demo-control",
+    "title": "Show actual workflow and solver evidence",
+    "clicks": [
+      "Switch to the separate presenter controls tab. Do not click Reset or any scenario preset.",
+      "In Current workflow and Run evidence inspect the selected Workflow run, solver endpoint results and Model run. Expand JSON only for technical follow-up."
+    ],
+    "say": "Named actions, assessed proposals and actual work observations remain distinct in the execution trail.",
+    "expect": "The evidence reflects the shared case that the actor tabs just changed.",
+    "trouble": "If a run failed, show its status; a retry never creates missing human evidence or releases the hold."
+  }
+];
+const $=id=>document.getElementById(id), key='hs-scenario02-elapsed-v1-checks',baseKey='hs-scenario02-elapsed-v1-app-base';
+let mode='core',current=0,checked=new Set();try{checked=new Set(JSON.parse(localStorage.getItem(key)||'[]'));$('baseUrl').value=localStorage.getItem(baseKey)||$('baseUrl').value}catch{}
+const visible=()=>steps.filter(s=>mode==='full'||s.group==='core');
+function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n}
+function appUrl(route){let input=$('baseUrl').value.trim();try{const u=new URL(input);if(!["http:","https:"].includes(u.protocol))throw new Error("Use an HTTP app URL");return u.origin+route}catch{return 'https://heat-safe-app-6zb6rqbehq-ww.a.run.app'+route}}
+function updateLinks(){document.querySelectorAll('a[data-route]').forEach(a=>{a.href=appUrl(a.dataset.route);a.target=a.dataset.route==='/demo-control'?'heat-safe-controls':a.dataset.actor?`heat-${a.dataset.actor}`:'heat-reference'})}
+function render(){const list=visible();current=Math.min(current,list.length-1);$('rail').replaceChildren();$('cards').replaceChildren();const title=el('h2','',`Guide steps · ${list.filter(s=>checked.has(s.id)).length}/${list.length}`);$('rail').append(title);list.forEach((s,i)=>{const nav=el('button',checked.has(s.id)?'done':'',`${s.when} · ${s.title}`);nav.type='button';nav.setAttribute('aria-current',i===current?'step':'false');nav.append(el('small','',s.persona));nav.onclick=()=>{current=i;render()};$('rail').append(nav);const card=el('article','guidecard');card.hidden=i!==current;card.dataset.group=s.group;const meta=el('div','meta');for(const t of [s.when,s.persona,s.role,s.group==='core'?'Core response':'Extended journey'])meta.append(el('span','chip'+(t===s.when?' time':s.group==='full'&&t==='Extended journey'?' optional':''),t));card.append(meta,el('h2','',s.title));const route=el('div','route');route.append(el('code','',s.route));const link=el('a','','Open app screen ↗');link.dataset.route=s.route;link.dataset.actor=s.actor;link.target=s.actor==='controls'?'heat-safe-controls':`heat-${s.actor}`;route.append(link);card.append(route,el('h3','','Do this'));const ol=el('ol');s.clicks.forEach(c=>ol.append(el('li','',c)));card.append(ol);for(const [cls,label,value] of [['say','Say this',s.say],['expect','Expected checkpoint',s.expect],['trouble','If it does not match',s.trouble]]){const box=el('div',cls);box.append(el('b','',label),el('span','',value));card.append(box)}const actions=el('div','actions');const prev=el('button','quiet','← Back');prev.type='button';prev.disabled=i===0;prev.onclick=()=>{current--;render()};const done=el('button','primary',checked.has(s.id)?'✓ Checked off':'Mark step complete');done.type='button';done.setAttribute('aria-pressed',checked.has(s.id)?'true':'false');done.onclick=()=>{checked.has(s.id)?checked.delete(s.id):checked.add(s.id);try{localStorage.setItem(key,JSON.stringify([...checked]))}catch{}render()};const next=el('button','quiet',i===list.length-1?'End of guide':'Next →');next.type='button';next.disabled=i===list.length-1;next.onclick=()=>{current++;render()};actions.append(prev,done,el('span','spacer'),el('span','progress',`${i+1} of ${list.length}`),next);card.append(actions);$('cards').append(card)});updateLinks()}
+$('coreMode').onclick=()=>{mode='core';current=0;$('coreMode').setAttribute('aria-pressed','true');$('fullMode').setAttribute('aria-pressed','false');render()};$('fullMode').onclick=()=>{mode='full';current=0;$('fullMode').setAttribute('aria-pressed','true');$('coreMode').setAttribute('aria-pressed','false');render()};$('baseUrl').onchange=()=>{try{localStorage.setItem(baseKey,$('baseUrl').value)}catch{}updateLinks()};$('baseUrl').oninput=updateLinks;$('clearBtn').onclick=()=>{checked.clear();try{localStorage.removeItem(key)}catch{}render()};$('printBtn').onclick=()=>window.print();document.addEventListener('keydown',e=>{if(e.target instanceof HTMLInputElement)return;const n=visible().length;if(e.key==='ArrowRight'&&current<n-1){current++;render()}if(e.key==='ArrowLeft'&&current>0){current--;render()}});render();
+</script>
+</body>
+</html>
