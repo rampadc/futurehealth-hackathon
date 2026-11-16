@@ -175,3 +175,19 @@ def test_observed_work_return_allows_replanning_after_report(setup_case):
     from operations.contracts import Request
     from operations.planning import solve_plan
     assert solve_plan(Request.model_validate(request)).planning_status=='planned'
+
+
+def test_employer_case_view_has_no_clinical_or_solver_records(setup_case):
+    case,_=setup_case
+    recovered(case)
+    command(case,'C08','report')
+    command(case,'C01','incident_record')
+    command(case,'C01','remove',{'location_id':'welfare'})
+    command(case,'P06','firstaid')
+    view=case.read_case('P10')
+    assert view['request'] is None and view['capture'] is None and view['plan_assessment'] is None
+    assert view['runs']==[] and view['workers']==[] and not view['retry_available']
+    assert {event['id'] for event in view['story']['events']}=={'issue','acknowledge','stop','checkin','recover'}
+    assert not any(key in view['story'] for key in ('reported','removed','firstaid','assigned'))
+    assert [task['action'] for task in view['tasks']]==['coverage_review']
+    assert case.heat_rest('P10')['records']['headcount']['confirmed_count']==11

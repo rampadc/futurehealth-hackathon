@@ -760,12 +760,18 @@ class CaseService:
         if persona_id in {'C05','C08'}:
             assessment={**assessment,'started_worker_ids':[pid for pid in assessment['started_worker_ids'] if pid==persona_id],
                         'request':None,'response':None,'check':None}
-        return {'case_id':case['id'],'version':case['version'],'clock':case['clock'],'story':{**flags,'events':timeline},
+        result={'case_id':case['id'],'version':case['version'],'clock':case['clock'],'story':{**flags,'events':timeline},
                 'request':projected_request,'capture':capture,'tasks':tasks,'runs':runs,'workers':workers,
                 'retry_available':retry_available,'viewer_id':persona_id,
                 'time':{'mode':'elapsed' if started else 'legacy','server_now':self.now().astimezone(timezone.utc).isoformat(),
                         'started_at':started,'ends_at':end,'status':('historical' if not started else 'ended' if at(case['clock'])>=END else 'running')},
                 'headcount':headcount,'plan_assessment':assessment}
+        if persona_id=='P10':
+            visible={'issue','acknowledge','stop','checkin','recover','activity','coverage_review'}
+            result.update(request=None,capture=None,plan_assessment=None,runs=[],workers=[],retry_available=False,
+                          story={**{key:value for key,value in flags.items() if key in {'issued','acknowledged','stopped','checkedIn','recovered'}},
+                                 'events':[item for item in timeline if item['id'] in visible]})
+        return result
 
     def heat_rest(self, actor: str | None):
         if actor is None: raise CaseError(401,'Choose a local persona')
