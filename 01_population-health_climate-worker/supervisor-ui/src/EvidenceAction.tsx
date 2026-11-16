@@ -43,7 +43,7 @@ export function EvidenceAction({ action, caseView, person, onAction, busy }: {
   const status = task?.status ?? 'waiting';
   const payload = (): Record<string, unknown> => {
     if (action === 'recover') return payloads.recover(caseView);
-    if (action === 'fresh') return payloads.fresh(caseView, Number(twl), caseView.clock);
+    if (action === 'fresh') return payloads.fresh(caseView, Number(twl));
     if (action === 'readiness' || action === 'leila') return payloads.readiness(action === 'leila' ? ['C09'] : selected, readinessStatus, basis, toIso(validUntil));
     if (action === 'activity') return { through_now: true, observed: true, groups: ['work', 'recovery'].map(kind => ({ kind, zone_id: kind === 'work' ? 'workshop' : 'shelter_a', person_ids: activeWorkers.filter(w => activity[w.person_id] === kind).map(w => w.person_id) })).filter(group => group.person_ids.length) };
     return simplePayload(action, caseView) ?? {};

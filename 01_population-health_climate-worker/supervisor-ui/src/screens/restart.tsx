@@ -33,7 +33,7 @@ export function FreshReadingScreen({ session }: ScreenProps) {
         <Row title="Forecast" detail="Estimated · never used for a restart." badge={<span className="hs-badge" data-tone="muted">Forecast</span>} />
       </List>
     </Section>
-    {mine ? <form className="hs-form" onSubmit={e => { e.preventDefault(); if (valid) void session.act('fresh', payloads.fresh(caseView, value, caseView.clock)); }}>
+    {mine ? <form className="hs-form" onSubmit={e => { e.preventDefault(); if (valid) void session.act('fresh', payloads.fresh(caseView, value)); }}>
       <div className="hs-form-row">
         <label className="hs-field">Local TWL (W/m²)<input type="number" inputMode="numeric" value={twl} onChange={e => setTwl(e.target.value)} /></label>
         <span className="hs-small">Measured now; the server records the time.</span>

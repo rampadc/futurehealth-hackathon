@@ -24,9 +24,9 @@ export const payloads = {
   readiness: (personIds: string[], status: 'ready' | 'not_ready', basis: string, validUntilIso: string) => ({
     confirmations: personIds.map(person_id => ({ person_id, status, basis, valid_until: validUntilIso })),
   }),
-  fresh: (caseView: CaseView, twl: number, measuredIso: string) => {
+  fresh: (caseView: CaseView, twl: number) => {
     const current = caseView.request?.snapshot.readings[0] ?? caseView.capture?.request.snapshot.readings[0];
-    return { reading: { sensor_id: current?.sensor_id ?? 't1', zone_id: current?.zone_id ?? 'civil_exposed', twl, unit: 'W/m²', quality: 'valid', measured_now: true } };
+    return { measured_now: true, reading: { sensor_id: current?.sensor_id ?? 't1', zone_id: current?.zone_id ?? 'civil_exposed', twl, unit: 'W/m²', quality: 'valid' } };
   },
 };
 

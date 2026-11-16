@@ -472,6 +472,16 @@ describe('assessed workshop plan', () => {
 });
 
 describe('assistance', () => {
+  it('records a fresh reading with the backend stamped time contract', async () => {
+    currentCase = await makeCase('restart_ready', { stopped: true, removed: true, firstaid: true }, [task('fresh', 'P03', 'ready')]);
+    await open('/site/fresh-reading', 'P03');
+    await userEvent.click(await screen.findByRole('button', { name: 'Record fresh local reading' }));
+    await waitFor(() => expect(commands[0]).toMatchObject({ action: 'fresh', payload: { measured_now: true, reading: { twl: 175, unit: 'W/m²', quality: 'valid' } } }));
+    expect(commands[0].payload.reading).not.toHaveProperty('measured_now');
+    expect(commands[0].payload.reading).not.toHaveProperty('measured_at');
+    expect(commands[0].payload.reading).not.toHaveProperty('received_at');
+  });
+
   it('keeps Bilal’s report time fixed as the case clock moves', async () => {
     const view = await makeCase('incident_substitute', { reported: true }, []);
     view.story.events = [{ id: 'report', actorId: 'C08', title: 'Bilal requested assistance', occurred_at: '2025-08-04T08:14:00+04:00' }];
