@@ -25,6 +25,8 @@
 !supervisor-ui/public/**
 !ui_design_system/
 !ui_design_system/tokens.css
+!ui_design_system/people/
+!ui_design_system/people/*.webp
 !demo/
 !demo/*/
 !demo/*/*.json
