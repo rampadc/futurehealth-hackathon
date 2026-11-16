@@ -717,6 +717,14 @@ class CaseService:
             for field in ('intervals','carry_forward_rest'):
                 if field in section: section[field]=[item for item in section[field] if item.get('person_id')==worker_id]
             if 'excluded_worker_ids' in section: section['excluded_worker_ids']=[x for x in section['excluded_worker_ids'] if x==worker_id]
+        crew=response.get('crew_rest',{})
+        if crew:
+            crew['occupancy']=[]
+            crew['assumptions']=[]
+            if 'useful_worker_minutes' in crew:
+                crew['useful_worker_minutes']=sum((at(i['ends_at'])-at(i['starts_at'])).total_seconds()/60
+                                                  for i in crew.get('intervals',[]) if i.get('kind')=='work')
+            if 'unmet_worker_minutes' in crew: crew['unmet_worker_minutes']=None
         for section in [response,*[v for v in response.values() if isinstance(v,dict)]]:
             if 'actions' in section:
                 section['actions']=[a for a in section['actions'] if not a.get('person_ids') or worker_id in a['person_ids']]
@@ -821,7 +829,7 @@ class CaseService:
         projected_request=(self._scope_worker_request(current_request,persona_id)
                            if persona_id in {'C05','C08'} else current_request)
         started=case.get('started_at')
-        end=(datetime.fromisoformat(started)+timedelta(hours=2,minutes=30)).isoformat() if started else None
+        end=END.isoformat() if started else None
         checkin=next((e for e in events if e['action']=='checkin'),None)
         recover=next((e for e in events if e['action']=='recover'),None)
         headcount={'expected_count':11,'checked_in_count':1 if checkin else 0,
@@ -834,8 +842,12 @@ class CaseService:
             headcount.pop('cooled_recovery_count')
             headcount.pop('welfare_count')
         if persona_id in {'C05','C08'}:
+            scoped=(self._scope_worker_capture({'request':assessment['request'],'response':assessment['response'],
+                                                'provenance':{}},persona_id)
+                    if assessment['request'] and assessment['response'] else None)
             assessment={**assessment,'started_worker_ids':[pid for pid in assessment['started_worker_ids'] if pid==persona_id],
-                        'request':None,'response':None,'check':None}
+                        'request':scoped['request'] if scoped else None,
+                        'response':scoped['response'] if scoped else None,'check':None}
         result={'case_id':case['id'],'version':case['version'],'clock':case['clock'],'story':{**flags,'events':timeline},
                 'request':projected_request,'capture':capture,'tasks':tasks,'runs':runs,'workers':workers,
                 'retry_available':retry_available,'viewer_id':persona_id,

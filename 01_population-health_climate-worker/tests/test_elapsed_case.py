@@ -70,6 +70,7 @@ def observed(case,clock):
 
 def test_elapsed_ticks_do_not_churn_version_and_escalation_is_once_at_due(setup_case):
     case,clock=setup_case
+    assert case.read_case()['time']['ends_at']=='2025-08-04T10:30:00+04:00'
     command(case,'P03','issue')
     version=case.read_case()['version']
     clock.advance(minutes=1)
@@ -417,3 +418,23 @@ def test_project_manager_case_view_excludes_clinical_and_worker_records(setup_ca
     assert 'private-symptom-marker' not in serialized and 'private-clinical-marker' not in serialized
     assert 'person_id' not in serialized
     assert 'private-symptom-marker' not in json.dumps(case.heat_rest('P01'))
+
+
+def test_worker_keeps_own_approved_plan_after_safety_refresh(setup_case):
+    case,clock=setup_case
+    assessment=observed(case,clock)['plan_assessment']
+    command(case,'C01','assign',{'assessment_id':assessment['id']})
+    clock.advance(minutes=1)
+    run(case.catch_up())
+    view=case.read_case('C05')
+    assert view['capture']['response']['crew_rest']['planning_status']=='blocked'
+    own=view['plan_assessment']
+    assert own['id']==assessment['id'] and own['status']=='approved'
+    assert own['response']['crew_rest']['planning_status']=='planned'
+    assert [i['person_id'] for i in own['response']['crew_rest']['intervals']]==['C05']
+    assert [w['person_id'] for w in own['request']['snapshot']['workers']]==['C05']
+    assert own['check'] is None
+    assert 'solver_calls' not in own['response'] and 'plan_check' not in own['response']
+    assert own['response']['crew_rest']['occupancy']==[]
+    serialized=json.dumps(own)
+    assert all(f'C{i:02}' not in serialized for i in range(2,13) if i!=5)
