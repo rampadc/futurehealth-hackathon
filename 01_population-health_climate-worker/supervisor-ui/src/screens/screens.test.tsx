@@ -289,6 +289,13 @@ describe('stop-work', () => {
     expect(screen.queryByText('Work as briefed')).toBeNull();
   });
 
+  it('recognises a rostered worker before any instruction or plan', async () => {
+    currentCase = await makeCase('heat_trigger', {}, []);
+    await open('/worker/now', 'C05');
+    expect(await screen.findByText(/You are on the Dune civil crew/)).toBeTruthy();
+    expect(screen.queryByText(/not on a shift today/)).toBeNull();
+  });
+
   it('records the full foreman headcount after one personal arrival', async () => {
     currentCase = await makeCase('heat_trigger', { stopped: true, checkedIn: true }, [task('recover', 'C01', 'ready')]);
     currentCase.headcount = { expected_count: 11, checked_in_count: 1, confirmed_count: 0, confirmed_at: null, arrivals: [{ person_id: 'C05', checked_in_at: currentCase.clock }] };

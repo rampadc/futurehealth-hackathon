@@ -33,6 +33,7 @@ function Now({ session }: ScreenProps) {
   const stopOrdered = story.issued && !story.stopped;
   const goToShelter = story.stopped && !story.recovered && !inShelter && location !== 'welfare';
   const workingNow = location === 'workshop' && !stopOrdered && !excluded;
+  const onRoster = !!(caseView.request?.snapshot.workers ?? caseView.capture?.request.snapshot.workers ?? caseView.workers ?? []).find(worker => worker.person_id === person.id);
   const checkin = taskFor(caseView, 'checkin');
   const checkedIn = person.id === 'C05' ? checkin?.status === 'recorded' : story.checkedIn;
   return <div className="hs-screen">
@@ -50,7 +51,7 @@ function Now({ session }: ScreenProps) {
         {person.id === 'C05' && <Row title={<T k="p2.ci" />} detail={checkedIn ? <T k="p2.ci.d" /> : <En>Not checked in yet.</En>} badge={checkedIn ? <span className="hs-badge" data-tone="done">✓</span> : undefined} onClick={checkedIn ? undefined : () => navigate('/worker/shelter')} />}
         {story.assigned && <Row title={<T k="p2.plan" />} detail={<En>{current ? `${kindLabel(current.kind)} until ${time(current.ends_at)}` : 'See My plan'}</En>} onClick={() => navigate('/worker/my-plan')} />}
       </List>
-      {!story.issued && !story.assigned && <Empty><T k="p2.empty" /></Empty>}
+      {!story.issued && !story.assigned && <Empty>{onRoster ? <En>You are on the Dune civil crew. Wait for your foreman’s instruction; your work and recovery plan will appear here when confirmed.</En> : <T k="p2.empty" />}</Empty>}
     </Section>
     <OwnRiskPanel session={session} title={<En>My heat risk</En>} wrap={s => <En>{s}</En>} />
     <Computed><T k="p2.computed" /></Computed>
