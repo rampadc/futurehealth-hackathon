@@ -60,7 +60,7 @@ export function BrandingSettings({ session }: ScreenProps) {
     {!draft ? <Empty action={admin ? <button type="button" className="hs-button is-primary" onClick={() => setDraft({ platform: EXAMPLE, mobile: EXAMPLE })}>Start with an example palette</button> : undefined}>
       No company palette yet. Every surface uses Heat-Safe paper and ink until the admin adds one.
     </Empty> : <>
-      <div className="hs-grid">{SURFACES.map(([surface, title, sub]) => <Section key={surface} title={title} hint={sub}>
+      <div className="hs-grid">{SURFACES.map(([surface, title]) => <Section key={surface} title={title}>
         <fieldset className="hs-form" disabled={!admin}>
           <label className="hs-field">Name<input value={draft[surface].name} onChange={e => change(surface, 'name', e.target.value)} /></label>
           <div className="hs-form-row">
@@ -72,7 +72,7 @@ export function BrandingSettings({ session }: ScreenProps) {
         </fieldset>
         <List label={`${title} guardrails`}>{(checks?.[surface] ?? []).map(c => <Row key={c.id} title={c.label} badge={<Badge tone={c.ok ? 'done' : 'over'}>{c.ok ? 'Pass' : 'Fails'}</Badge>} />)}</List>
       </Section>)}</div>
-      <Section title="Preview · draft" hint="Each light setting">
+      <Section title="Preview · draft">
         <Draft title="Draft · not published">
           <div className="hs-previews">{(['day', 'glare', 'night'] as const).map(theme => <div key={theme} data-theme={theme} className="hs-preview">
             <span className="hs-label">{theme}</span>

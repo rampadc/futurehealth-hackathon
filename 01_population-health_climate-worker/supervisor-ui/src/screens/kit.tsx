@@ -35,12 +35,12 @@ export function Metric({ label, value, sub, tone }: { label: ReactNode; value: R
   </div>;
 }
 
-export function Section({ title, hint, children, id, icon }: { title: ReactNode; hint?: ReactNode; children: ReactNode; id?: string; icon?: IconName }) {
+export function Section({ title, children, id, icon, tone }: { title: ReactNode; children: ReactNode; id?: string; icon?: IconName; tone?: 'red' }) {
   const auto = useId();
   const heading = id ?? auto;
   const glyph = icon ?? iconFor(title);
-  return <section className="hs-section" aria-labelledby={heading}>
-    <div className="hs-section-head"><h2 id={heading}>{glyph && <Icon name={glyph} />}{title}</h2>{hint && <span className="hs-small hs-muted">{hint}</span>}</div>
+  return <section className="hs-section" data-tone={tone} aria-labelledby={heading}>
+    <div className="hs-section-head"><h2 id={heading}>{glyph && <Icon name={glyph} />}{title}</h2></div>
     {children}
   </section>;
 }

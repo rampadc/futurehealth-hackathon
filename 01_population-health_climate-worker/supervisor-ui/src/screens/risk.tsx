@@ -3,6 +3,7 @@ import type { CrewRisk, OwnRisk, RiskBand } from '../contract';
 import { live } from '../live';
 import type { CaseSession } from '../session';
 import { who } from './data';
+import { nameOf } from '../replay';
 import { Band, Computed, List, Note, Row, Section, Person } from './kit';
 
 const LABEL: Record<RiskBand, string> = { green: 'Green', amber: 'Amber', red: 'Red', emergency: 'Emergency' };
@@ -35,7 +36,7 @@ function InputNotes({ inputs }: { inputs: CrewRisk['inputs'] }) {
  */
 export function CrewRiskPanel({ session }: { session: CaseSession }) {
   const { value: risk, error } = useRisk(session, live.crewRisk);
-  return <Section title="Heat risk by worker" hint="Band and action only · no health detail">
+  return <Section title="Heat risk by worker">
     {error ? <p role="alert" className="hs-error">{error}</p>
       : !risk ? <p role="status" className="hs-muted">Loading heat risk…</p>
       : <>
@@ -45,17 +46,44 @@ export function CrewRiskPanel({ session }: { session: CaseSession }) {
             badge={<Band band={risk.crew.band} label={LABEL[risk.crew.band]} />} />
         </List>
         <InputNotes inputs={risk.inputs} />
-        <div className="hs-scroll"><table className="hs-table" aria-label="Heat risk by worker">
-          <thead><tr><th>Worker</th><th>Band</th><th>Action</th></tr></thead>
-          <tbody>{[...risk.workers].sort((a, b) => ORDER.indexOf(a.band) - ORDER.indexOf(b.band)).map(w => <tr key={w.person_id}>
-            <td><Person id={w.person_id} size="sm">{who(w.person_id)}</Person></td>
-            <td><Band band={w.band} label={LABEL[w.band]} /></td>
-            <td>{w.needs_rest ? <b>{w.action}</b> : w.action}</td>
-          </tr>)}</tbody>
-        </table></div>
+        {ORDER.filter(b => risk.workers.some(w => w.band === b)).map(b => <BandTable key={b} band={b} workers={risk.workers.filter(w => w.band === b)} />)}
         <Computed>Computed by the heat-stress rules ({risk.inputs.rules_version}) for {risk.inputs.hour} · each worker’s clothing, work type and acclimatisation · not AI · never clears a hold</Computed>
       </>}
   </Section>;
+}
+
+/** Supervisor actions that ask nothing of anyone; shown grey. */
+const NO_ACTION = /^work as planned$/i;
+type CrewWorker = CrewRisk['workers'][number];
+type SortKey = 'worker' | 'action' | 'rest' | 'check';
+const SORT: Record<SortKey, (w: CrewWorker) => string | number> = {
+  worker: w => nameOf(w.person_id), action: w => w.action, rest: w => Number(w.needs_rest), check: w => Number(w.check_in_person),
+};
+const COLUMNS: Array<[SortKey, string]> = [['worker', 'Worker'], ['action', 'Action'], ['rest', 'Rest now'], ['check', 'Check in person']];
+
+/** One band's workers in their own table, sortable by any column. Red and emergency carry the red signal frame. */
+function BandTable({ band, workers }: { band: RiskBand; workers: CrewWorker[] }) {
+  const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 }>({ key: 'worker', dir: 1 });
+  const rows = [...workers].sort((a, b) => {
+    const x = SORT[sort.key](a), y = SORT[sort.key](b);
+    return (x < y ? -1 : x > y ? 1 : 0) * sort.dir;
+  });
+  const signal = band === 'red' || band === 'emergency';
+  return <div className="hs-band-table" data-band={band} data-signal={signal ? 'red' : undefined}>
+    <h3><Band band={band} label={LABEL[band]} /> <span className="hs-muted">· {workers.length} worker{workers.length === 1 ? '' : 's'}</span></h3>
+    <div className="hs-scroll"><table className="hs-table" aria-label={`${LABEL[band]} band workers`}>
+      <thead><tr>{COLUMNS.map(([key, label]) => <th key={key} aria-sort={sort.key === key ? (sort.dir === 1 ? 'ascending' : 'descending') : 'none'}>
+        <button type="button" className="hs-sort" onClick={() => setSort(s => ({ key, dir: s.key === key ? (s.dir === 1 ? -1 : 1) : 1 }))}>
+          {label}<span aria-hidden="true">{sort.key === key ? (sort.dir === 1 ? ' ▲' : ' ▼') : ' ↕'}</span>
+        </button></th>)}</tr></thead>
+      <tbody>{rows.map(w => <tr key={w.person_id}>
+        <td><Person id={w.person_id} size="sm">{who(w.person_id)}</Person></td>
+        <td className={NO_ACTION.test(w.action.trim()) || !w.action.trim() ? 'hs-no-action' : undefined}>{w.needs_rest ? <b>{w.action}</b> : w.action || 'No action'}</td>
+        <td>{w.needs_rest ? <b>Yes</b> : <span className="hs-no-action">No</span>}</td>
+        <td>{w.check_in_person ? <b>Yes</b> : <span className="hs-no-action">No</span>}</td>
+      </tr>)}</tbody>
+    </table></div>
+  </div>;
 }
 
 /** The worker's own band with the reasons, which only they see. */
@@ -64,7 +92,7 @@ export function OwnRiskPanel({ session, title, wrap = (s: string) => s }: { sess
   if (!risk) return error ? <Section title={title}><Note tone="amber">{wrap('Heat risk unavailable. Follow your foreman and the work/rest times.')}</Note></Section> : null;
   const why = risk.factors.length ? risk.factors
     : [risk.zone ? `${risk.zone[0].toUpperCase()}${risk.zone.slice(1)} zone in the sun at ${risk.inputs.hour} for your clothing (TWL ${risk.twl_wm2} W/m²)` : 'Site heat unknown'];
-  return <Section title={title} hint={wrap('Only you see why')}>
+  return <Section title={title}>
     <List label="My heat risk">
       <Row title={wrap(risk.action)} badge={<Band band={risk.band} label={LABEL[risk.band]} />} />
       {why.map(f => <Row key={f} title={wrap(f)} />)}

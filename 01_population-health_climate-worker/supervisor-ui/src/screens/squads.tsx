@@ -3,6 +3,7 @@ import type { CaseView } from '../live';
 import { crew, heatNow, time } from './data';
 import { Avatar, Badge, Band, List, Row } from './kit';
 import { StatusIcon } from '../shared/icons';
+import { TwlReadout } from './twl';
 
 /**
  * Squads on the Sandline–Dune site. The live case covers the civil crew; the backend has no
@@ -80,7 +81,7 @@ export function SquadPicker({ squads, lines }: { squads: Squad[]; lines?: (q: Sq
     </button>)}</div>;
 }
 
-export const bandOf = (q: Squad) => <Band band={q.band} label={q.twl == null ? 'No reading' : `TWL ${q.twl}${q.estimated ? ' · est.' : ''}`} />;
+export const bandOf = (q: Squad) => <TwlReadout twl={q.twl} estimated={q.estimated} band={q.band} size={56} />;
 
 /** A fixture squad's open items, or a clear "nothing needs action". */
 export function SquadItems({ squad }: { squad: Squad }) {
