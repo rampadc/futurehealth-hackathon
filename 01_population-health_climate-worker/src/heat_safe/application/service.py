@@ -172,7 +172,6 @@ class CaseService:
     def _assessment(self, c, case, events):
         rows=c.execute(f"SELECT * FROM runs WHERE case_id=? AND status='completed' AND applied=1 ORDER BY {self._run_order} DESC",(case['id'],)).fetchall()
         current=at(case['clock'])
-        fallback=None
         for row in rows:
             request=json.loads(row['request']); response=json.loads(row['response'] or '{}')
             plan=response.get('crew_rest',{})
@@ -180,17 +179,18 @@ class CaseService:
             work=[i for i in plan.get('intervals',[]) if i.get('kind')=='work' and i.get('task_id')=='workshop_prep']
             if not work: continue
             assessed=at(row['finished_at']) if row['finished_at'] else at(request['decision_at'])
-            deadline=min(assessed+timedelta(seconds=30),min(at(i['starts_at']) for i in work))
+            deadline=min(at(i['starts_at']) for i in work)
             approved=next((e for e in events if e['action']=='assign' and e['payload'].get('assessment_id')==row['id']),None)
             starts=[e for e in events if e['action']=='start_work' and e['payload'].get('assessment_id')==row['id']]
-            status='approved' if approved and current<max(at(i['ends_at']) for i in work) else 'expired' if current>=deadline else 'proposed'
+            invalidated=any(e['action'] in {'report','incident_record','remove','firstaid','activity','readiness','leila','fresh','sensor_reading','start_recovery'}
+                            for e in events[row['version']:])
+            status=('expired' if invalidated or assessed+timedelta(seconds=30)>deadline or current>=max(at(i['ends_at']) for i in work)
+                    else 'approved' if approved else 'expired' if current>=deadline else 'proposed')
             result={'id':row['id'],'assessed_at':assessed.isoformat(),'observed_through':request['decision_at'],
                     'approval_deadline':deadline.isoformat(),'status':status,'approved_at':approved['occurred_at'] if approved else None,
                     'started_worker_ids':sorted({pid for e in starts for pid in e['payload']['person_ids']}),
                     'request':request,'response':response,'check':response['plan_check']}
-            if status=='approved': return result
-            if fallback is None: fallback=result
-        if fallback: return fallback
+            return result
         snapshot=self._project(case,events)['snapshot']
         active={w['person_id'] for w in snapshot['workers'] if w['availability']=='available'}
         covered={i['person_id'] for i in snapshot['activity_history'] if i['person_id'] in active and at(i['ends_at'])==current}
@@ -264,7 +264,7 @@ class CaseService:
             histories = {w['person_id']:[] for w in snap['workers']}
             for item in snap['activity_history']: histories[item['person_id']].append(item)
             active={w['person_id'] for w in snap['workers'] if w['availability']=='available'}
-            if at(case['clock'])<END and all(histories[pid] and max(at(i['ends_at']) for i in histories[pid])==at(case['clock']) for pid in active):
+            if events and events[-1]['action']=='activity' and at(case['clock'])<END and all(histories[pid] and max(at(i['ends_at']) for i in histories[pid])==at(case['clock']) for pid in active):
                 start=at(case['clock']).replace(second=0,microsecond=0)
                 if start<at(case['clock']): start+=timedelta(minutes=1)
                 work_after=(at(case['clock'])+timedelta(minutes=2)).replace(second=0,microsecond=0)
@@ -345,6 +345,8 @@ class CaseService:
         p = body.get('payload') or {}
         if not isinstance(p,dict): raise CaseError(422,'payload must be an object')
         self._validate_payload(action,p)
+        if action in {'start_work','review'}:
+            await self._refresh_now()
         repeated = False
         with self._conn() as c:
             c.execute('BEGIN IMMEDIATE')
@@ -365,20 +367,44 @@ class CaseService:
         self._notify(case['id'],version)
         return self.read_case(actor)
 
+    async def _refresh_now(self):
+        with self._conn() as c:
+            c.execute('BEGIN IMMEDIATE')
+            case=self._active(c)
+            if not case: raise CaseError(404,'No active case')
+            c.execute('UPDATE cases SET clock=? WHERE id=?',(case['clock'],case['id']))
+        if not await self.recompute(case['id'],case['version']):
+            raise CaseError(409,'Current safety assessment is processing')
+        with self._conn() as c:
+            latest=c.execute(f'SELECT status,applied,request FROM runs WHERE case_id=? AND version=? ORDER BY {self._run_order} DESC LIMIT 1',
+                             (case['id'],case['version'])).fetchone()
+        if not latest or latest['status']!='completed' or not latest['applied'] or json.loads(latest['request'])['decision_at']!=case['clock']:
+            raise CaseError(503,'Current safety assessment unavailable')
+
     def _record_command(self, c, case, action, command_id, actor, p):
         raw=encoded(p)
         if action=='activity' and p.get('through_now'):
             p=self._derive_activity(case,self._events(c,case['id']),p)
+        if action=='fresh' and p.get('measured_now'):
+            p={**p,'reading':{**p['reading'],'measured_at':case['clock'],'received_at':case['clock']}}
         if action=='fresh' and at(p['reading']['received_at'])>at(case['clock']): raise CaseError(422,'Reading has not arrived at case clock')
         if action=='activity' and any(at(i['ends_at'])>at(case['clock']) for i in p['intervals']): raise CaseError(422,'Observed activity extends beyond case clock')
         if action in {'readiness','leila'} and any(at(i['valid_until'])<=at(case['clock']) for i in p['confirmations']): raise CaseError(422,'Readiness must remain valid after confirmation')
         if action=='activity': self._validate_activity_continuity(case,self._events(c,case['id']),p['intervals'])
         done = {r['action'] for r in c.execute('SELECT action FROM events WHERE case_id=?',(case['id'],))}
-        if action in done and action not in {'activity','readiness','fresh','coverage_review','start_work','start_recovery',*RESTART_ACTIONS}: raise CaseError(409,'Action already recorded')
+        if action in done and action not in {'activity','readiness','fresh','coverage_review','assign','start_work','start_recovery',*RESTART_ACTIONS}: raise CaseError(409,'Action already recorded')
         if not all(prereq in done for prereq in ACTIONS[action][2]): raise CaseError(409,'Prerequisite evidence missing')
         if action == 'review':
             latest=self._latest(c,case['id'],case['version'])
             if not latest or json.loads(latest['response']).get('restart',{}).get('status')!='ready_for_human_review': raise CaseError(409,'Restart evidence is not ready for human review')
+            projected=self._project(case,self._events(c,case['id']))
+            reading=next((r for r in projected['snapshot']['readings'] if r['zone_id']=='civil_exposed'),None)
+            checks=projected.get('restart') or {}
+            if not reading or reading['quality']!='valid' or at(case['clock'])-at(reading['measured_at'])>timedelta(minutes=5) or any(
+                checks.get(field,{}).get('status')!='confirmed' or not checks[field].get('observed_at') or
+                at(case['clock'])-at(checks[field]['observed_at'])>timedelta(minutes=5)
+                for field in RESTART_ACTIONS.values()):
+                raise CaseError(409,'Current restart evidence has expired')
         if action == 'assign':
             assessment=self._assessment(c,case,self._events(c,case['id']))
             if assessment['status']!='proposed' or p['assessment_id']!=assessment['id']: raise CaseError(409,'Current checked plan is unavailable or expired')
@@ -401,6 +427,7 @@ class CaseService:
                         raise CaseError(409,'Current cooled recovery and readiness confirmation required')
             last={pid:max((at(i['ends_at']) for i in snap['activity_history'] if i['person_id']==pid),default=at(snap['recovery']['recorded_at'])) for pid in p['person_ids']}
             p={**p,'recovery_intervals':[{'person_id':pid,'kind':'recovery','zone_id':next(w['location_id'] for w in snap['workers'] if w['person_id']==pid),'task_id':None,'starts_at':start.isoformat(),'ends_at':case['clock']} for pid,start in last.items() if start<at(case['clock'])]}
+            self._check_recovery_before_start(snap,p,case['clock'],assessment['request'])
         if action=='start_recovery':
             snap=self._project(case,self._events(c,case['id']))['snapshot']
             starts={e['payload']['person_ids'][i]:e['occurred_at'] for e in self._events(c,case['id']) if e['action']=='start_work' for i in range(len(e['payload']['person_ids']))}
@@ -466,7 +493,8 @@ class CaseService:
         elif action=='fresh':
             r=p.get('reading')
             if not isinstance(r,dict) or r.get('sensor_id')!='t1' or r.get('zone_id')!='civil_exposed' or r.get('quality') not in {'valid','invalid'} or r.get('unit')!='W/m²' or type(r.get('twl')) not in (int,float) or not math.isfinite(r['twl']) or not 0<r['twl']<500: raise CaseError(422,'Fresh local t1 reading required')
-            if at(r.get('measured_at'))>at(r.get('received_at')): raise CaseError(422,'Invalid reading chronology')
+            if p.get('measured_now') is not True or 'measured_at' in r or 'received_at' in r:
+                if at(r.get('measured_at'))>at(r.get('received_at')): raise CaseError(422,'Invalid reading chronology')
         elif action in RESTART_ACTIONS:
             if p.get('status') not in {'confirmed','not_confirmed'}: raise CaseError(422,'Explicit check status required')
 
@@ -505,6 +533,24 @@ class CaseService:
                 intervals.append({'person_id':pid,'kind':group['kind'],'zone_id':group['zone_id'],'task_id':'workshop_prep' if group['kind']=='work' else None,'starts_at':start.isoformat(),'ends_at':case['clock']})
         if seen!=active: raise CaseError(422,'Groups must cover all active workers exactly once')
         return {'intervals':intervals}
+
+    def _check_recovery_before_start(self, snap, payload, now, plan_request):
+        policy=plan_request.get('timing_policy') or SEED['timing_policy']
+        current=at(now)
+        for pid in payload['person_ids']:
+            history=sorted([*([i for i in snap['activity_history'] if i['person_id']==pid]),
+                            *([i for i in payload['recovery_intervals'] if i['person_id']==pid])],
+                           key=lambda item:at(item['ends_at']))
+            boundary=current
+            cooled=timedelta(0)
+            for item in reversed(history):
+                if at(item['ends_at'])!=boundary or item['kind']!='recovery' or item['zone_id'] not in {'shelter_a','shelter_b'}:
+                    break
+                cooled+=at(item['ends_at'])-at(item['starts_at'])
+                boundary=at(item['starts_at'])
+            needed=policy['between_work_recovery_minutes'] if any(i['kind']=='work' for i in history) else policy['initial_recovery_minutes']
+            if cooled<timedelta(minutes=needed):
+                raise CaseError(409,f'{pid} has not completed the required observed cooled recovery')
 
     async def advance_clock(self, iso: str):
         new = at(iso)
@@ -711,8 +757,9 @@ class CaseService:
                 if check.get('status')!='confirmed' or not observed or at(case['clock'])-at(observed)>timedelta(minutes=5):
                     status,reason='ready','Current confirmation needed after latest trigger'
             if action=='review' and status!='recorded' and capture_row and json.loads(capture_row['response']).get('restart',{}).get('status')!='ready_for_human_review': status,reason='waiting','Restart evidence is not ready for human review'
-            if action=='assign' and status!='recorded':
-                if assessment['status']!='proposed': status,reason='waiting','Current checked plan unavailable or expired'
+            if action=='assign':
+                status='ready' if assessment['status']=='proposed' else 'recorded' if assessment['status']=='approved' else 'waiting'
+                reason=None if status!='waiting' else 'Current checked plan unavailable or expired'
             if action=='start_work':
                 planned={i['person_id'] for i in (assessment['response'] or {}).get('crew_rest',{}).get('intervals',[]) if i['kind']=='work'}
                 pending=planned-set(assessment['started_worker_ids'])

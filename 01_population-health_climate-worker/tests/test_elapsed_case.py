@@ -30,7 +30,8 @@ def setup_case(tmp_path,monkeypatch):
         plan=request.get('planning')
         intervals=[]
         if plan:
-            start=datetime.fromisoformat(plan['work_not_before'])
+            start=max(datetime.fromisoformat(plan['work_not_before']),
+                      datetime.fromisoformat(request['decision_at'])+timedelta(minutes=4))
             intervals=[{'person_id':'C05','kind':'work','task_id':'workshop_prep','zone_id':'workshop',
                         'starts_at':start.isoformat(),'ends_at':(start+timedelta(minutes=10)).isoformat()}]
         return 200,{'crew_rest':{'planning_status':'planned' if plan else 'blocked','intervals':intervals},
@@ -109,7 +110,7 @@ def test_headcount_coverage_and_approved_start_are_distinct(setup_case):
     assert assessment['request']['snapshot']['activity_history']
     command(case,'C01','assign',{'assessment_id':assessment['id']})
     assert next(w for w in case.read_case()['request']['snapshot']['workers'] if w['person_id']=='C05')['location_id']=='shelter_a'
-    clock.advance(minutes=2)
+    clock.advance(minutes=4)
     started=command(case,'C01','start_work',{'assessment_id':assessment['id'],'person_ids':['C05'],
         'observed_recovery':True,'prerequisites_confirmed':True})
     assert started['plan_assessment']['started_worker_ids']==['C05']
@@ -120,7 +121,7 @@ def test_unapproved_plan_expires(setup_case):
     case,clock=setup_case
     view=observed(case,clock)
     assessment=view['plan_assessment']
-    clock.advance(seconds=31)
+    clock.advance(minutes=4)
     assert case.read_case()['plan_assessment']['status']=='expired'
     with pytest.raises(module.CaseError) as exc:
         command(case,'C01','assign',{'assessment_id':assessment['id']})
@@ -153,10 +154,11 @@ def test_observed_work_return_allows_replanning_after_report(setup_case):
     case,clock=setup_case
     assessment=observed(case,clock)['plan_assessment']
     command(case,'C01','assign',{'assessment_id':assessment['id']})
-    clock.advance(minutes=2)
+    clock.advance(minutes=4)
     command(case,'C01','start_work',{'assessment_id':assessment['id'],'person_ids':['C05'],
             'observed_recovery':True,'prerequisites_confirmed':True})
     command(case,'C08','report')
+    assert case.read_case()['plan_assessment']['status']=='expired'
     command(case,'C01','incident_record')
     command(case,'C01','remove',{'location_id':'welfare'})
     command(case,'P06','firstaid')
@@ -167,6 +169,10 @@ def test_observed_work_return_allows_replanning_after_report(setup_case):
         'groups':[{'person_ids':[f'C{i:02}' for i in range(2,13) if i!=8],
                    'kind':'recovery','zone_id':'shelter_a'}]},key='activity-after-report')
     request=view['capture']['request']
+    assert view['plan_assessment']['id']!=assessment['id']
+    assert view['plan_assessment']['status']=='proposed'
+    assert next(t for t in view['tasks'] if t['action']=='assign')['status']=='ready'
+    command(case,'C01','assign',{'assessment_id':view['plan_assessment']['id']},key='assign-after-report')
     assert request['planning'] is not None
     assert {i['person_id'] for i in request['snapshot']['activity_history']}=={f'C{i:02}' for i in range(2,13) if i!=8}
     assert next(w for w in request['snapshot']['workers'] if w['person_id']=='C05')['location_id']=='shelter_a'
@@ -175,6 +181,50 @@ def test_observed_work_return_allows_replanning_after_report(setup_case):
     from operations.contracts import Request
     from operations.planning import solve_plan
     assert solve_plan(Request.model_validate(request)).planning_status=='planned'
+
+
+def test_review_uses_exact_current_evidence_age(setup_case,monkeypatch):
+    case,clock=setup_case
+    async def ready_graph(request,_url):
+        return 200,{'crew_rest':{'planning_status':'blocked','intervals':[]},
+                    'protective_response':{'excluded_worker_ids':[]},
+                    'restart':{'status':'ready_for_human_review'}},['stub']
+    monkeypatch.setattr(module,'run_graph',ready_graph)
+    command(case,'C08','report')
+    command(case,'C01','incident_record')
+    command(case,'C01','remove')
+    command(case,'P06','firstaid')
+    command(case,'P03','fresh',{'measured_now':True,'reading':{'sensor_id':'t1',
+        'zone_id':'civil_exposed','twl':180.0,'unit':'W/m²','quality':'valid'}})
+    for actor,action in [('P04','permit'),('C01','personnel'),('C01','recovery_check'),
+                         ('P03','water'),('C01','crew_readiness')]:
+        command(case,actor,action,{'status':'confirmed'})
+    clock.advance(minutes=5,seconds=1)
+    with pytest.raises(module.CaseError) as exc:
+        command(case,'P02','review')
+    assert exc.value.status==409
+
+
+def test_work_start_rejects_short_observed_recovery(setup_case,monkeypatch):
+    case,clock=setup_case
+    async def early_graph(request,_url):
+        plan=request.get('planning')
+        intervals=[]
+        if plan:
+            start=datetime.fromisoformat(plan['work_not_before'])
+            intervals=[{'person_id':'C05','kind':'work','task_id':'workshop_prep','zone_id':'workshop',
+                        'starts_at':start.isoformat(),'ends_at':(start+timedelta(minutes=10)).isoformat()}]
+        return 200,{'crew_rest':{'planning_status':'planned' if plan else 'blocked','intervals':intervals},
+                    'plan_check':{'accepted':bool(plan)},'protective_response':{'excluded_worker_ids':[]},
+                    'restart':{'status':'blocked'}},['stub']
+    monkeypatch.setattr(module,'run_graph',early_graph)
+    assessment=observed(case,clock)['plan_assessment']
+    command(case,'C01','assign',{'assessment_id':assessment['id']})
+    clock.advance(minutes=2)
+    with pytest.raises(module.CaseError) as exc:
+        command(case,'C01','start_work',{'assessment_id':assessment['id'],'person_ids':['C05'],
+            'observed_recovery':True,'prerequisites_confirmed':True})
+    assert exc.value.status==409
 
 
 def test_employer_case_view_has_no_clinical_or_solver_records(setup_case):
