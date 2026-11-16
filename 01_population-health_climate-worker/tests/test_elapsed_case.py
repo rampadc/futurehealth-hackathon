@@ -1,0 +1,177 @@
+"""Elapsed case state keeps evidence time and proposed work separate."""
+import asyncio
+import sys
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
+import pytest
+
+from heat_safe.application import service as module
+
+
+def run(value):
+    return asyncio.run(value)
+
+
+class Clock:
+    def __init__(self):
+        self.value=datetime(2026,11,16,tzinfo=timezone.utc)
+
+    def __call__(self):
+        return self.value
+
+    def advance(self, **kwargs):
+        self.value+=timedelta(**kwargs)
+
+
+@pytest.fixture
+def setup_case(tmp_path,monkeypatch):
+    async def graph(request,_url):
+        plan=request.get('planning')
+        intervals=[]
+        if plan:
+            start=datetime.fromisoformat(plan['work_not_before'])
+            intervals=[{'person_id':'C05','kind':'work','task_id':'workshop_prep','zone_id':'workshop',
+                        'starts_at':start.isoformat(),'ends_at':(start+timedelta(minutes=10)).isoformat()}]
+        return 200,{'crew_rest':{'planning_status':'planned' if plan else 'blocked','intervals':intervals},
+                    'plan_check':{'accepted':bool(plan)},'protective_response':{'excluded_worker_ids':[]},
+                    'restart':{'status':'blocked'}},['stub']
+    monkeypatch.setattr(module,'run_graph',graph)
+    clock=Clock()
+    case=module.CaseService(tmp_path/'case.sqlite3',now=clock)
+    run(case.start())
+    return case,clock
+
+
+def command(case,actor,action,payload=None,key=None):
+    return run(case.command(actor,{'action':action,'command_id':key or action,
+            'expected_version':case.read_case(actor)['version'],'payload':payload or {}}))
+
+
+def recovered(case):
+    command(case,'P03','issue')
+    command(case,'C01','acknowledge')
+    command(case,'C01','stop')
+    command(case,'C05','checkin')
+    command(case,'C01','recover',{'person_ids':[f'C{i:02}' for i in range(2,13)],'zone_id':'shelter_a'})
+
+
+def observed(case,clock):
+    recovered(case)
+    command(case,'C01','readiness',{'confirmations':[{'person_id':'C05','status':'ready',
+             'basis':'Observed cooled recovery','valid_until':'2025-08-04T09:00:00+04:00'}]})
+    clock.advance(minutes=2)
+    return command(case,'C01','activity',{'through_now':True,'observed':True,
+        'groups':[{'person_ids':[f'C{i:02}' for i in range(2,13)],'kind':'recovery','zone_id':'shelter_a'}]})
+
+
+def test_elapsed_ticks_do_not_churn_version_and_escalation_is_once_at_due(setup_case):
+    case,clock=setup_case
+    command(case,'P03','issue')
+    version=case.read_case()['version']
+    clock.advance(minutes=1)
+    assert case.read_case()['version']==version
+    run(case.catch_up())
+    assert case.read_case()['version']==version
+    assert case.read_case()['capture']['request']['decision_at']=='2025-08-04T08:01:00+04:00'
+    clock.advance(minutes=1)
+    run(case.catch_up())
+    first=case.read_case()
+    assert first['version']==version+1
+    assert next(e for e in first['story']['events'] if e['id']=='escalate')['occurred_at']=='2025-08-04T08:02:00+04:00'
+    clock.advance(minutes=3)
+    run(case.catch_up())
+    assert case.read_case()['version']==first['version']
+
+
+def test_headcount_coverage_and_approved_start_are_distinct(setup_case):
+    case,clock=setup_case
+    recovered(case)
+    head=case.read_case()['headcount']
+    assert (head['checked_in_count'],head['confirmed_count'])==(1,11)
+    assert head['arrivals']==[{'person_id':'C05','checked_in_at':head['arrivals'][0]['checked_in_at']}]
+    review=command(case,'P10','coverage_review',{'policy_id':'heat-rest-schedule-v1',
+        'status':'needs_verification','crew_ids':[f'C{i:02}' for i in range(2,13)],
+        'roster_verified':False,'note':'Roster pending'})
+    assert review['version']>0
+    assert 'crew_ids' not in case.heat_rest('C05')['coverage_review']
+    assert 'note' not in case.heat_rest('C05')['coverage_review']
+    assert case.heat_rest('P10')['review_queue']['confirmed_count']==11
+    assert case.heat_rest('P01')['records']['arrivals']==[]
+    assert case.heat_rest('P01')['commercial_summary']['coverage_status']=='needs_verification'
+    command(case,'C01','readiness',{'confirmations':[{'person_id':'C05','status':'ready',
+             'basis':'Observed cooled recovery','valid_until':'2025-08-04T09:00:00+04:00'}]})
+    clock.advance(minutes=2)
+    view=command(case,'C01','activity',{'through_now':True,'observed':True,
+        'groups':[{'person_ids':[f'C{i:02}' for i in range(2,13)],'kind':'recovery','zone_id':'shelter_a'}]})
+    assessment=view['plan_assessment']
+    assert assessment['status']=='proposed'
+    assert assessment['request']['snapshot']['activity_history']
+    command(case,'C01','assign',{'assessment_id':assessment['id']})
+    assert next(w for w in case.read_case()['request']['snapshot']['workers'] if w['person_id']=='C05')['location_id']=='shelter_a'
+    clock.advance(minutes=2)
+    started=command(case,'C01','start_work',{'assessment_id':assessment['id'],'person_ids':['C05'],
+        'observed_recovery':True,'prerequisites_confirmed':True})
+    assert started['plan_assessment']['started_worker_ids']==['C05']
+    assert next(w for w in started['request']['snapshot']['workers'] if w['person_id']=='C05')['location_id']=='workshop'
+
+
+def test_unapproved_plan_expires(setup_case):
+    case,clock=setup_case
+    view=observed(case,clock)
+    assessment=view['plan_assessment']
+    clock.advance(seconds=31)
+    assert case.read_case()['plan_assessment']['status']=='expired'
+    with pytest.raises(module.CaseError) as exc:
+        command(case,'C01','assign',{'assessment_id':assessment['id']})
+    assert exc.value.status==409
+
+
+def test_late_acknowledgment_still_records_due_escalation(setup_case):
+    case,clock=setup_case
+    command(case,'P03','issue')
+    clock.advance(minutes=3)
+    command(case,'C01','acknowledge')
+    run(case.catch_up())
+    timeline=case.read_case()['story']['events']
+    assert next(e for e in timeline if e['id']=='escalate')['occurred_at']=='2025-08-04T08:02:00+04:00'
+    assert sum(e['id']=='escalate' for e in timeline)==1
+
+
+def test_legacy_case_is_historical_until_reset(setup_case):
+    case,_=setup_case
+    with case._conn() as db:
+        db.execute('UPDATE cases SET started_at=NULL')
+    assert case.read_case()['time']['status']=='historical'
+    with pytest.raises(module.CaseError) as exc:
+        command(case,'P03','issue')
+    assert exc.value.status==409
+    assert run(case.reset())['time']['mode']=='elapsed'
+
+
+def test_observed_work_return_allows_replanning_after_report(setup_case):
+    case,clock=setup_case
+    assessment=observed(case,clock)['plan_assessment']
+    command(case,'C01','assign',{'assessment_id':assessment['id']})
+    clock.advance(minutes=2)
+    command(case,'C01','start_work',{'assessment_id':assessment['id'],'person_ids':['C05'],
+            'observed_recovery':True,'prerequisites_confirmed':True})
+    command(case,'C08','report')
+    command(case,'C01','incident_record')
+    command(case,'C01','remove',{'location_id':'welfare'})
+    command(case,'P06','firstaid')
+    clock.advance(minutes=2)
+    command(case,'C01','start_recovery',{'person_ids':['C05'],'zone_id':'shelter_a','observed_work':True})
+    clock.advance(minutes=2)
+    view=command(case,'C01','activity',{'through_now':True,'observed':True,
+        'groups':[{'person_ids':[f'C{i:02}' for i in range(2,13) if i!=8],
+                   'kind':'recovery','zone_id':'shelter_a'}]},key='activity-after-report')
+    request=view['capture']['request']
+    assert request['planning'] is not None
+    assert {i['person_id'] for i in request['snapshot']['activity_history']}=={f'C{i:02}' for i in range(2,13) if i!=8}
+    assert next(w for w in request['snapshot']['workers'] if w['person_id']=='C05')['location_id']=='shelter_a'
+    pytest.importorskip('ortools')
+    sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'demo/solver'))
+    from operations.contracts import Request
+    from operations.planning import solve_plan
+    assert solve_plan(Request.model_validate(request)).planning_status=='planned'
