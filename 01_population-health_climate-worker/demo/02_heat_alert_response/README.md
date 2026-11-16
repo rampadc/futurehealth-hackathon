@@ -4,6 +4,8 @@ The civil crew is doing heavy outdoor work when Sandline's civil-area monitor re
 
 ## Follow the response
 
+The [interactive presenter guide](scenario-2-new-ui.html) covers the current UI's core response and full journey, including persona tabs, live planning and employer review. Download and open the standalone HTML in a browser. It is excluded from the application image and is not a route in the deployed app; private rehearsal evidence is retained separately.
+
 1. Show the reading's civil-area source, measurement time, quality and units, then show the applicable hold rule. Maya Al Qamar, the safety officer, records the hold at 8:01 a.m. under Rashid Al Wadi's site safety authority. The assistant can connect evidence to the rule and show the required next actions. A recorded hold is still an instruction, not proof that the crew has acted on it.
 2. Huda acknowledges the alert at 8:02 a.m. This shows she has taken ownership of the message. At 8:03 a.m. she separately confirms that heavy civil work stopped. Keeping those entries apart means a later reviewer can see the difference between receiving an instruction and carrying it out.
 3. At 8:04 a.m. Huda records eleven civil workers in the recovery shelter. The site can account for them and provide water, rest and cooling. A shelter headcount is evidence of recovery, not permission to return to the exposed task.
