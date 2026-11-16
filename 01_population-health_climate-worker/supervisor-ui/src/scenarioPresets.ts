@@ -5,7 +5,8 @@ export type ReadingKind = 'valid' | 'fault' | 'stale';
 /** The reading the presenter injects. Faults and stale readings use the same t1 contract as a valid one. */
 export function readingPayload(caseView: CaseView, twl: number, kind: ReadingKind) {
   const current = caseView.capture?.request.snapshot.readings[0];
-  const now = new Date(caseView.time?.server_now ?? caseView.clock);
+  // Sensor events belong to the scenario clock; server_now is only a wall-clock anchor.
+  const now = new Date(caseView.clock);
   const measured = kind === 'stale' ? new Date(now.getTime() - 10 * 60_000) : now;
   const gst = (d: Date) => new Date(d.getTime() + 4 * 3_600_000).toISOString().slice(0, 19) + '+04:00';
   return { twl, sensor_id: current?.sensor_id ?? 't1', zone_id: current?.zone_id ?? 'civil_exposed', unit: 'W/m²', quality: kind === 'fault' ? 'invalid' : 'valid', measured_at: gst(measured), received_at: gst(now) };
@@ -19,7 +20,7 @@ export type ScenarioPreset = {
 };
 
 /**
- * Rehearsal setups. Each one resets the case, then sets the clock and the local reading.
+ * Rehearsal setups. Each one resets the case, then optionally sets the local reading.
  * People still record instructions, stops, headcount and symptom reports; these buttons never do.
  */
 export const SCENARIO_PRESETS: ScenarioPreset[] = [
@@ -34,7 +35,7 @@ type PresetApi = {
   signal: (case_id: string, payload: Record<string, unknown>) => Promise<CaseView>;
 };
 
-/** Reset, then the preset’s clock and reading, in that order. Returns the case after the last step. */
+/** Reset, then optionally inject the preset reading into that case. */
 export async function applyPreset(preset: ScenarioPreset, api: PresetApi): Promise<CaseView> {
   let next = await api.reset();
   if (preset.reading) next = await api.signal(next.case_id, readingPayload(next, preset.reading.twl, preset.reading.kind));

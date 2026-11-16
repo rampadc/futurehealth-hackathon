@@ -8,6 +8,10 @@ describe('presenter reading signal', () => {
   it('sends a valid reading measured at the case clock', () => {
     expect(readingPayload(view, 145, 'valid')).toMatchObject({ quality: 'valid', measured_at: view.clock, received_at: view.clock, sensor_id: 't1', zone_id: 'civil_exposed' });
   });
+  it('uses scenario time even when the server wall clock is in another year', () => {
+    const liveView = { ...view, time: { mode: 'elapsed', status: 'running', server_now: '2026-11-16T00:00:00Z' } } as CaseView;
+    expect(readingPayload(liveView, 145, 'valid')).toMatchObject({ measured_at: view.clock, received_at: view.clock });
+  });
   it('marks a sensor fault invalid', () => {
     expect(readingPayload(view, 145, 'fault').quality).toBe('invalid');
   });
