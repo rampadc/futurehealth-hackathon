@@ -61,6 +61,21 @@ def test_reports_a_solver_rejection():
     assert result['status'] == 'error' and 'HTTP 422' in result['message']
 
 
+def test_elapsed_what_if_uses_the_assessed_cutoff_not_live_safety_request():
+    observed = []
+    async def post(url, body):
+        observed.append(body)
+        return 200, PLAN
+    elapsed = {'version': 12, 'capture': {'request': {'decision_at': 'later-safety-assessment'}},
+               'plan_assessment': {'status': 'proposed', 'request': REQUEST, 'response': {'crew_rest': PLAN}}}
+    tool = what_if.make_tool(lambda: elapsed, 'http://solver', post)
+    assert asyncio.run(tool(ready=['C09']))['status'] == 'ok'
+    assert observed[0]['decision_at'] == REQUEST['decision_at']
+    elapsed['plan_assessment']['status'] = 'expired'
+    assert asyncio.run(tool(ready=['C09']))['status'] == 'error'
+    assert len(observed) == 1
+
+
 @pytest.mark.skipif(os.getenv('RUN_LIVE_APPLICATION') != '1', reason='opt-in live solver check')
 def test_live_solver_accepts_hypothetical_changes():
     url = os.getenv('HEAT_SOLVER_URL', 'http://127.0.0.1:8765').rstrip('/')

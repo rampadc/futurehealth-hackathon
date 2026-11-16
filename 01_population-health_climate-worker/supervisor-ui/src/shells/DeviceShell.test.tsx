@@ -41,11 +41,11 @@ describe('routes', () => {
 describe('screen registry', () => {
   it('lists every wireframe screen once', () => {
     const paths = SCREENS.map(s => `${s.device}/${s.id}`);
-    expect(new Set(paths).size).toBe(29);
+    expect(new Set(paths).size).toBe(32);
     for (const s of SCREENS) expect(s.id, s.name).toMatch(/^[a-z]+(-[a-z]+)*$/);
   });
   it('only names case actions the backend accepts', () => {
-    const backendOnly = ['activity', 'readiness', 'incident_record', 'personnel', 'recovery_check', 'crew_readiness', 'water', 'escalation_followup'];
+    const backendOnly = ['activity', 'readiness', 'incident_record', 'personnel', 'recovery_check', 'crew_readiness', 'water', 'escalation_followup', 'coverage_review', 'start_work', 'start_recovery'];
     const known = new Set([...Object.keys(ACTIONS), ...backendOnly]);
     for (const s of SCREENS) for (const command of s.commands) expect(known, `${s.id} → ${command}`).toContain(command);
   });
@@ -68,8 +68,8 @@ describe('device shell', () => {
     window.history.replaceState(null, '', '/web');
     render(<App />);
     expect(await screen.findByRole('heading', { name: 'Squad Monitoring' })).toBeTruthy();
-    await userEvent.click(screen.getByRole('button', { name: 'Restart review' }));
-    expect(await screen.findByRole('heading', { name: 'Restart review' })).toBeTruthy();
-    expect(window.location.pathname).toBe('/web/restart-review');
+    await userEvent.click(screen.getByRole('button', { name: 'Heat and rest coverage' }));
+    expect(await screen.findByRole('heading', { name: 'Crew heat and rest coverage' })).toBeTruthy();
+    expect(window.location.pathname).toBe('/web/heat-rest');
   });
 });

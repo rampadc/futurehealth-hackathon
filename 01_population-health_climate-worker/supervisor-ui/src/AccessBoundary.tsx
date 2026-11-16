@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { Alert, Box, Button, CircularProgress, Container, Paper, Stack, TextField, Typography } from '@mui/material';
+import { ACCESS_GENERATION_KEY, accessGeneration, clearAccessGeneration, renewAccessGeneration } from './accessGeneration';
 
 type Access = { required: boolean; role: 'viewer' | 'presenter' | null };
 
@@ -13,16 +14,20 @@ export function AccessBoundary({ children }: { children: (lock?: () => void) => 
     try {
       const response = await fetch('/api/access', { credentials: 'same-origin' });
       if (!response.ok) throw new Error('Unable to check workspace access. Please retry.');
-      setAccess(await response.json()); setError('');
+      const result = await response.json() as Access;
+      if (result.required && !result.role) clearAccessGeneration(); else accessGeneration();
+      setAccess(result); setError('');
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'Unable to connect'); }
   };
   useEffect(() => {
     void load();
     const expired = () => { void load(); };
     const changed = () => setPath(window.location.pathname);
+    const sharedAccess = (event: StorageEvent) => { if (event.key === ACCESS_GENERATION_KEY) void load(); };
     window.addEventListener('heat-access-expired', expired);
     window.addEventListener('popstate', changed);
-    return () => { window.removeEventListener('heat-access-expired', expired); window.removeEventListener('popstate', changed); };
+    window.addEventListener('storage', sharedAccess);
+    return () => { window.removeEventListener('heat-access-expired', expired); window.removeEventListener('popstate', changed); window.removeEventListener('storage', sharedAccess); };
   }, []);
   const presenter = path.replace(/\/$/, '') === '/demo-control';
   const allowed = access && (!access.required || access.role === 'presenter' || access.role === 'viewer' && !presenter);
@@ -32,6 +37,7 @@ export function AccessBoundary({ children }: { children: (lock?: () => void) => 
       const response = await fetch('/api/access', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code }) });
       const result = await response.json();
       if (!response.ok) throw new Error(result.detail || 'Unable to unlock workspace');
+      renewAccessGeneration();
       setAccess(result); setCode('');
       if (presenter && result.role !== 'presenter') setError('Use the presenter access code for these controls.');
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'Unable to unlock workspace'); }
@@ -39,7 +45,7 @@ export function AccessBoundary({ children }: { children: (lock?: () => void) => 
   };
   const lock = async () => {
     const response = await fetch('/api/access', { method: 'DELETE', credentials: 'same-origin' });
-    if (response.ok) setAccess({ required: true, role: null });
+    if (response.ok) { clearAccessGeneration(); setAccess({ required: true, role: null }); }
     else { setAccess(null); setError('Unable to lock access. Please retry.'); }
   };
   if (allowed) return <>{children(access.required ? () => { void lock(); } : undefined)}</>;

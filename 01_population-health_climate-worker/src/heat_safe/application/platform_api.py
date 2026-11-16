@@ -171,7 +171,7 @@ def conditions(request: Request):
 def trust_log(request: Request):
     """Solver runs, agent answers and human commands for the active case. Supervisors only."""
     persona = actor(request)
-    if persona in WORKERS:
+    if persona in WORKERS or persona in {'P01', 'P10'}:
         raise HTTPException(403, 'The trust log is for supervisors')
     service = request.app.state.service
     view = service.read_case(None)

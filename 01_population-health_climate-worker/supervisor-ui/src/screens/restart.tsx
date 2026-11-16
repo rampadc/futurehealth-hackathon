@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { atDubai, payloads, toIso } from '../commands';
+import { useState } from 'react';
+import { payloads } from '../commands';
 import { reasonLabel } from '../copy';
 import { nameOf } from '../replay';
 import { navigate } from '../router';
@@ -12,15 +12,13 @@ import type { ScreenProps } from './registry';
 export function FreshReadingScreen({ session }: ScreenProps) {
   const { caseView, person } = session;
   const [twl, setTwl] = useState('175');
-  const [measured, setMeasured] = useState(() => caseView ? atDubai(caseView.clock) : '');
-  useEffect(() => { if (caseView) setMeasured(atDubai(caseView.clock)); }, [caseView?.clock]);
   if (!caseView || !person) return <NoCase session={session} />;
   const heat = heatNow(caseView);
   const r = heat.reading;
   const fresh = taskFor(caseView, 'fresh');
   const mine = fresh?.actor_id === person.id && fresh.status === 'ready';
   const value = Number(twl);
-  const valid = Number.isFinite(value) && value > 0 && !!measured;
+  const valid = Number.isFinite(value) && value > 0;
   return <div className="hs-screen">
     <Head kicker={`Fresh reading · Civil trench · ${time(caseView.clock)}`} title="Fresh reading" />
     <Hero>
@@ -35,10 +33,10 @@ export function FreshReadingScreen({ session }: ScreenProps) {
         <Row title="Forecast" detail="Estimated · never used for a restart." badge={<span className="hs-badge" data-tone="muted">Forecast</span>} />
       </List>
     </Section>
-    {mine ? <form className="hs-form" onSubmit={e => { e.preventDefault(); if (valid) void session.act('fresh', payloads.fresh(caseView, value, toIso(measured))); }}>
+    {mine ? <form className="hs-form" onSubmit={e => { e.preventDefault(); if (valid) void session.act('fresh', payloads.fresh(caseView, value)); }}>
       <div className="hs-form-row">
         <label className="hs-field">Local TWL (W/m²)<input type="number" inputMode="numeric" value={twl} onChange={e => setTwl(e.target.value)} /></label>
-        <label className="hs-field">Measured at (GST)<input type="datetime-local" value={measured} onChange={e => setMeasured(e.target.value)} /></label>
+        <span className="hs-small">Measured now; the server records the time.</span>
       </div>
       <p className="hs-small">Band for this value: <Band band={thermalStatus(value, Number.isFinite(value)).band} label={thermalStatus(value, Number.isFinite(value)).label} />. The heavy-work hold stays until a separate restart review.</p>
       <CtaBar><button type="submit" className="hs-button is-primary" disabled={!valid || session.busy}>Record fresh local reading</button></CtaBar>

@@ -108,13 +108,14 @@ def assess(view: dict) -> tuple[list[WorkerRisk], dict]:
 def case_crew_risk(request: Request):
     """Each worker's band and action for supervisors and responders. No reasons, symptoms or readings."""
     persona = actor(request)
-    if persona in WORKERS:
+    if persona in WORKERS or persona == 'P10':
         raise HTTPException(403, 'Crew heat risk is for supervisors; your own is on your phone')
     view = request.app.state.service.read_case(None)
     if not view:
         return None
     risks, inputs = assess(view)
-    return {'inputs': inputs, 'crew': crew_risk(risks), 'workers': [r.for_supervisor() for r in risks]}
+    return {'inputs': inputs, 'crew': crew_risk(risks),
+            'workers': [] if persona == 'P01' else [r.for_supervisor() for r in risks]}
 
 
 @router.get('/api/worker/risk')

@@ -56,6 +56,9 @@ def test_supervisors_see_band_and_action_only(app, medium):
                             'counts': {'green': 0, 'amber': 9, 'red': 2, 'emergency': 0}}
     assert body['inputs']['local_reading'] == 'used'
     assert client(app, 'C05').get('/api/case/crew-risk').status_code == 403
+    assert client(app, 'P10').get('/api/case/crew-risk').status_code == 403
+    project = client(app, 'P01').get('/api/case/crew-risk').json()
+    assert project['workers'] == [] and project['crew'] == body['crew']
     assert TestClient(app).get('/api/case/crew-risk').status_code == 401
 
 

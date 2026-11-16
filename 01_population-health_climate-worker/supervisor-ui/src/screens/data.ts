@@ -97,6 +97,14 @@ export function heatNow(caseView: CaseView | null) {
 export const assignedIds = (capture: ReplayCapture | null | undefined) =>
   [...new Set(capture?.response.crew_rest.intervals.filter(i => i.kind === 'work' && i.task_id === 'workshop_prep').map(i => i.person_id) ?? [])];
 
+/** The assessed proposal is a distinct, reviewable snapshot, independent of later captures. */
+export const assessmentCapture = (caseView: CaseView): ReplayCapture | null => {
+  if (!caseView.capture) return null;
+  if (!caseView.plan_assessment) return caseView.capture;
+  const { request, response } = caseView.plan_assessment;
+  return request && response ? { ...caseView.capture, request, response } : null;
+};
+
 export const intervalsOf = (capture: ReplayCapture | null | undefined, personId: string): Interval[] =>
   (capture?.response.crew_rest.intervals ?? []).filter(i => i.person_id === personId).sort((a, b) => a.starts_at.localeCompare(b.starts_at));
 
@@ -117,6 +125,7 @@ export const SCREEN_FOR_ACTION: Record<string, { site?: string; web?: string }> 
   recover: { site: 'headcount', web: 'response' }, personnel: { site: 'headcount', web: 'restart-review' }, escalation_followup: { web: 'response' },
   readiness: { site: 'readiness', web: 'crew' }, activity: { site: 'readiness', web: 'crew' }, crew_readiness: { site: 'readiness', web: 'restart-review' }, leila: { site: 'readiness', web: 'crew' },
   assign: { site: 'proposal', web: 'crew' }, incident_record: { site: 'action-card', web: 'response' }, remove: { site: 'action-card', web: 'response' }, firstaid: { site: 'action-card', web: 'response' },
+  start_work: { site: 'proposal', web: 'crew' }, start_recovery: { site: 'proposal', web: 'crew' },
   recovery_check: { site: 'action-card', web: 'restart-review' }, fresh: { site: 'fresh-reading', web: 'restart-review' }, water: { site: 'fresh-reading', web: 'restart-review' },
   permit: { web: 'restart-review' }, review: { web: 'restart-review' }, handover: { web: 'restart-review' },
 };

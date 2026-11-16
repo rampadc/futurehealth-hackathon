@@ -146,6 +146,8 @@ def initialize(db_path: str | Path | None = None):
                 'CREATE TABLE IF NOT EXISTS person_photo(person_id TEXT PRIMARY KEY, content_type TEXT NOT NULL, data TEXT NOT NULL, updated_at TEXT NOT NULL)',
             ):
                 db.execute(statement)
+            db.execute('ALTER TABLE cases ADD COLUMN IF NOT EXISTS started_at TEXT')
+            db.execute('ALTER TABLE events ADD COLUMN IF NOT EXISTS command_payload TEXT')
 
 
 def ping() -> bool:

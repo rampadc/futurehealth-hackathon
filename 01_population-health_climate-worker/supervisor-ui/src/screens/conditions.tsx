@@ -30,7 +30,7 @@ export function useConditions(session: CaseSession) {
  */
 export function ConditionsPanel({ session, compact }: { session: CaseSession; compact?: boolean }) {
   const { conditions, error } = useConditions(session);
-  const label = conditions?.status === 'ok' ? (conditions.kind === 'replay' ? 'ERA5 replay' : 'Forecast') : 'Forecast';
+  const label = conditions?.status === 'ok' ? (conditions.kind === 'replay' ? 'Historical ERA5' : 'Forecast') : 'Forecast';
   return <Section title={`Site conditions · ${label}`} hint="Not a local measurement · never clears a hold">
     {error ? <p role="alert" className="hs-error">{error}</p>
       : !conditions ? <p role="status" className="hs-muted">Loading conditions…</p>
