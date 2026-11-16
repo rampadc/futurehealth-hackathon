@@ -342,6 +342,23 @@ describe('assessed workshop plan', () => {
     await waitFor(() => expect(commands[0]).toMatchObject({ action: 'assign', payload: { assessment_id: 'assessment-1' } }));
   });
 
+  it('keeps Huda’s work-start confirmations through a poll and clears them for a new proposal', async () => {
+    currentCase = await makeCase('incident_substitute', { stopped: true, recovered: true, assigned: true }, [task('start_work', 'C01', 'ready')]);
+    const capture = currentCase.capture!;
+    currentCase.plan_assessment = { id: 'assessment-1', assessed_at: currentCase.clock, observed_through: currentCase.clock, approval_deadline: currentCase.clock, status: 'approved', request: capture.request, response: capture.response };
+    await open('/site/proposal', 'C01');
+    const user = userEvent.setup();
+    const recovery = await screen.findByRole('checkbox', { name: 'I observed the required recovery through now.' }) as HTMLInputElement;
+    const prerequisites = screen.getByRole('checkbox', { name: 'I confirmed workshop permit, resources, supervision and readiness.' }) as HTMLInputElement;
+    await user.click(recovery); await user.click(prerequisites);
+    currentCase.version++;
+    await act(async () => { window.dispatchEvent(new Event('focus')); });
+    expect(recovery.checked).toBe(true); expect(prerequisites.checked).toBe(true);
+    currentCase.plan_assessment = { ...currentCase.plan_assessment, id: 'assessment-2' };
+    await act(async () => { window.dispatchEvent(new Event('focus')); });
+    expect(recovery.checked).toBe(false); expect(prerequisites.checked).toBe(false);
+  });
+
   it('requires Huda to choose the working group before recording their return to recovery', async () => {
     currentCase = await makeCase('incident_substitute', { stopped: true, assigned: true }, [task('start_recovery', 'C01', 'ready')]);
     const capture = currentCase.capture!;

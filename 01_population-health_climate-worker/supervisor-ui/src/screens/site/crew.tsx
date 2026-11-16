@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { atDubai, payloads, toIso } from '../../commands';
 import { EvidenceAction } from '../../EvidenceAction';
 import { ApprovalCountdown } from '../../LiveClock';
@@ -26,6 +26,7 @@ export function ReadinessScreen({ session }: ScreenProps) {
   const [selected, setSelected] = useState<string | null>(null);
   const [basis, setBasis] = useState<Basis>(BASES[0][0]);
   const [hours, setHours] = useState('2');
+  useEffect(() => { setSelected(null); setBasis(BASES[0][0]); setHours('2'); }, [caseView?.case_id]);
   if (!caseView || !person) return <NoCase session={session} />;
   const all = crew(caseView);
   const list = [...all].sort((a, b) => Number(b.qualifications.includes('civil_worker')) - Number(a.qualifications.includes('civil_worker')));
@@ -80,6 +81,9 @@ export function ProposalScreen({ session }: ScreenProps) {
   const [recoveryConfirmed, setRecoveryConfirmed] = useState(false);
   const [prerequisitesConfirmed, setPrerequisitesConfirmed] = useState(false);
   const [returnIds, setReturnIds] = useState<string[]>([]);
+  const workingKey = (caseView?.request?.snapshot.workers ?? caseView?.capture?.request.snapshot.workers ?? []).filter(w => w.location_id === 'workshop').map(w => w.person_id).join(',');
+  useEffect(() => { setRecoveryConfirmed(false); setPrerequisitesConfirmed(false); }, [caseView?.case_id, caseView?.plan_assessment?.id]);
+  useEffect(() => { setReturnIds([]); }, [caseView?.case_id, workingKey]);
   if (!caseView) return <NoCase session={session} />;
   const capture = assessmentCapture(caseView);
   const plan = capture?.response.crew_rest;
