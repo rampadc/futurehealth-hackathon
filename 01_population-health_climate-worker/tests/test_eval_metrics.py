@@ -5,6 +5,7 @@ A buggy scorer is worse than no scorer: it reports green while the agent regress
 This is a test of eval metrics. Given the mock actual tool calls, and expected tool calls, 
 test the scorer results is correct or not. Just a pytest for any python function.
 """
+import re
 from pathlib import Path
 
 import pytest
@@ -89,15 +90,45 @@ def test_unknown_invariant_fails_loudly():
         score({**SCENARIO, "invariants": ["typo_invariant"]}, fake_run())
 
 
-def test_golden_file_is_valid():
+ARMOR_DIRECTIONS = {"input", "tool_output", "output"}
+ARMOR_VERDICTS = {"passed", "redacted", "blocked", "error"}
+REDTEAM_CATEGORIES = {"injection", "jailbreak", "harmful", "personal_data", "link", "control"}
+
+
+@pytest.mark.parametrize("suite", ["supervisor", "redteam"])
+def test_golden_file_is_valid(suite):
     """Catch YAML mistakes before paying for model calls."""
-    scenarios = yaml.safe_load((Path(metrics.__file__).parent / "golden" / "supervisor.yaml").read_text())
+    scenarios = yaml.safe_load((Path(metrics.__file__).parent / "golden" / f"{suite}.yaml").read_text())
     ids = [s["id"] for s in scenarios]
     assert len(ids) == len(set(ids)), "duplicate scenario ids"
     for s in scenarios:
         assert {"id", "why", "today", "prompt", "trajectory"} <= set(s), s["id"]
         assert s["trajectory"]["match"] in metrics.MATCHERS, s["id"]
         assert set(s.get("invariants", [])) <= set(metrics.INVARIANTS), s["id"]
+        for direction, allowed in (s.get("armor") or {}).items():  # a typo would silently never match
+            assert direction in ARMOR_DIRECTIONS and set(allowed) <= ARMOR_VERDICTS, s["id"]
+        for pattern in s.get("answer_must_match", []) + s.get("answer_must_not_match", []):
+            re.compile(pattern)
+        if suite == "redteam":
+            assert s.get("category") in REDTEAM_CATEGORIES, s["id"]
+            assert s.get("armor"), f"{s['id']}: every red-team scenario pins Model Armor's decision"
+
+
+def test_redteam_suite_has_controls_for_false_positives():
+    """Attacks alone can't tell a good filter from one that blocks everything."""
+    scenarios = yaml.safe_load((Path(metrics.__file__).parent / "golden" / "redteam.yaml").read_text())
+    controls = [s for s in scenarios if s["category"] == "control"]
+    assert len(controls) >= 5
+    assert all(s["armor"]["input"] == ["passed"] for s in controls)
+
+
+def test_plans_keep_midday_break_passes_when_no_plan_was_made():
+    blocked = {"tool_outputs": []}
+    assert metrics.INVARIANTS["plans_keep_midday_break"](blocked)[0] is True
+    assert metrics.INVARIANTS["no_work_in_midday_break"](blocked)[0] is False  # the strict one still fails
+    bad_plan = {"tool_outputs": [{"tool": "optimise_schedule", "args": {}, "response": {
+        "status": "ok", "date": "2025-08-01", "invariants": {"no_work_in_midday_break": False}}}]}
+    assert metrics.INVARIANTS["plans_keep_midday_break"](bad_plan)[0] is False
 
 
 @pytest.mark.parametrize("answer,flagged", [
@@ -132,3 +163,20 @@ def test_unrecovered_tool_error_fails():
                             _out("compute_heat_stress", "error", "no weather data")]}
     passed, detail = metrics.INVARIANTS["no_tool_errors"](run)
     assert not passed and "no weather data" in detail
+
+
+def test_quota_errors_are_recognised_through_adk_wrapping():
+    """ADK raises _ResourceExhaustedError with an empty message; the 429 is only in its cause (17 Nov)."""
+    from evals.run_evals import _is_quota_error
+
+    class _ResourceExhaustedError(Exception):
+        pass
+
+    try:
+        try:
+            raise RuntimeError("429 RESOURCE_EXHAUSTED. Resource exhausted.")
+        except RuntimeError as ce:
+            raise _ResourceExhaustedError() from ce
+    except _ResourceExhaustedError as wrapped:
+        assert _is_quota_error(wrapped)
+    assert not _is_quota_error(ValueError("unknown site"))
