@@ -31,7 +31,7 @@ const FIXTURE: Squad[] = [
     alerts: 1, warnings: 1, actions: { open: 2, done: 1 }, responses: { done: 1, total: 2 }, headcount: '12 / 12', breakStart: '12:30', breakEnd: '15:00',
     checks: { done: 5, total: 8 }, members: ['S01', 'S02', 'S03', 'S04', 'S05', 'S06', 'S07', 'S08', 'S09', 'S10', 'S11', 'S12'],
     items: [{ title: 'Base station 2 offline · band raised one level', detail: 'No heartbeat since 07:52 · forecast in use', tone: 'error' }, { title: 'Extra water and rest every 45 min', detail: 'Caution band control · owner Faisal', tone: 'warn' }] },
-  { id: 'mep', name: 'MEP crew', foreman: 'José', foremanId: 'José Ortega', loc: 'Level 2 interior', shelter: 'Shelter B', size: 6,
+  { id: 'mep', name: 'MEP crew', foreman: 'José', foremanId: 'M01', loc: 'Level 2 interior', shelter: 'Shelter B', size: 6,
     twl: 168, band: 'green', hold: false, status: 'Working · covered', sensor: 'm1', reading: { twl: 168, at: '15:00', fresh: true },
     alerts: 0, warnings: 0, actions: { open: 0, done: 1 }, responses: { done: 1, total: 1 }, headcount: '6 / 6', breakStart: '—', breakEnd: '—',
     checks: { done: 0, total: 0 }, members: ['E01', 'E02', 'E03', 'E04', 'E05', 'E06'], items: [] },

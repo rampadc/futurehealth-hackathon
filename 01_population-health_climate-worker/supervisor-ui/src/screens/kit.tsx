@@ -198,7 +198,7 @@ export function TypedConfirm({ word, title, body, onConfirm, onCancel }: { word:
       <h2 id={titleId}>{title}</h2>
       <p>{body}</p>
       <form onSubmit={e => { e.preventDefault(); if (value.trim().toUpperCase() === word) onConfirm(); }}>
-        <label className="hs-field">Type <b>{word}</b> to confirm<input ref={input} value={value} onChange={e => setValue(e.target.value)} autoComplete="off" /></label>
+        <label className="hs-field"><span>Type <b>{word}</b> to confirm</span><input ref={input} value={value} onChange={e => setValue(e.target.value)} autoComplete="off" /></label>
         <div className="hs-dialog-actions">
           <button type="button" className="hs-button" onClick={onCancel}>Cancel</button>
           <button type="submit" className="hs-button is-primary" disabled={value.trim().toUpperCase() !== word}>Confirm</button>
