@@ -133,6 +133,12 @@ describe('every built screen', () => {
 });
 
 describe('stop-work', () => {
+  it('names Rashid’s follow-up when acknowledgement is overdue', async () => {
+    currentCase = await makeCase('heat_trigger', { issued: true }, [task('escalation_followup', 'P02', 'ready')]);
+    await open('/site/stop-work', 'C01');
+    expect(await screen.findByText('Acknowledgement overdue · Rashid to follow up.')).toBeTruthy();
+  });
+
   it('keeps foreman headcount distinct from later crew locations', async () => {
     currentCase = await makeCase('incident_substitute', { stopped: true, recovered: true, assigned: true, reported: true, removed: true }, []);
     currentCase.headcount = { expected_count: 11, checked_in_count: 1, confirmed_count: 11, confirmed_at: '2025-08-04T08:04:00+04:00', arrivals: [] };
@@ -220,7 +226,7 @@ describe('stop-work', () => {
     expect(await screen.findByRole('heading', { name: 'Project evidence' })).toBeTruthy();
     expect(screen.getByText(/Confirmed recovery: 26 worker-minutes/)).toBeTruthy();
     expect(screen.getByText(/Confirmed workshop work: 2 worker-minutes/)).toBeTruthy();
-    expect(screen.getByText('Delivery accepted')).toBeTruthy();
+    expect(screen.getByText('Noura confirmed supplier acceptance')).toBeTruthy();
     expect(screen.getByText('Personal shelter arrival recorded')).toBeTruthy();
     expect(screen.getByText('Has the cost impact been reviewed?')).toBeTruthy();
     expect(screen.queryByText('Private employer note')).toBeNull();
@@ -327,11 +333,23 @@ describe('stop-work', () => {
     currentCase = await makeCase('heat_trigger', { issued: true }, []);
     await open('/worker/now', 'C05');
     expect(await screen.findByText('Stop heavy work')).toBeTruthy();
+    expect(screen.queryByText('Go to Shelter A')).toBeNull();
+    expect(screen.queryByText('Shelter A check-in')).toBeNull();
     expect(screen.queryByText('Work as briefed')).toBeNull();
     currentCase = await makeCase('heat_trigger', { issued: true, stopped: true }, []);
     await open('/worker/now', 'C05');
     expect(await screen.findByText('Go to shelter')).toBeTruthy();
     expect(screen.queryByText('Work as briefed')).toBeNull();
+  });
+
+  it('shows only the stop instruction before Huda confirms the stop', async () => {
+    currentCase = await makeCase('heat_trigger', { issued: true }, []);
+    await open('/worker/alert', 'C05');
+    expect(await screen.findByText('Stop heavy work.')).toBeTruthy();
+    expect(screen.queryByText(/Shelter A/)).toBeNull();
+    await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    expect(commands).toEqual([]);
+    expect(window.location.pathname).toBe('/worker/now');
   });
 
   it('recognises a rostered worker before any instruction or plan', async () => {
@@ -533,6 +551,26 @@ describe('assistance', () => {
     fireEvent.keyDown(send, { key: ' ' });
     await waitFor(() => expect(commands).toEqual([{ action: 'report', payload: {} }]), { timeout: 2000 });
   });
+
+  it('shows a submitted report without promising that help has arrived', async () => {
+    currentCase = await makeCase('canonical_timed', { reported: true }, [task('report', 'C08', 'recorded')]);
+    await open('/worker/check-in', 'C08');
+    expect(await screen.findByText('Report submitted')).toBeTruthy();
+    expect(screen.getByText('Stay with someone')).toBeTruthy();
+    expect(screen.queryByText(/Help is on the way/)).toBeNull();
+  });
+
+  it('keeps an offline report labelled as saved on the phone', async () => {
+    const online = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    currentCase = await makeCase('canonical_timed', { assigned: true }, [task('report', 'C08', 'ready')]);
+    await open('/worker/check-in', 'C08');
+    await userEvent.click(await screen.findByRole('button', { name: 'I feel unwell' }));
+    await userEvent.click(screen.getByRole('button', { name: 'No' }));
+    fireEvent.keyDown(screen.getByRole('button', { name: /Send to my supervisor/ }), { key: ' ' });
+    expect(await screen.findByText('Saved offline')).toBeTruthy();
+    expect(commands).toEqual([]);
+    online.mockRestore();
+  });
 });
 
 describe('worker app languages', () => {
@@ -587,7 +625,7 @@ describe('platform screens', () => {
     expect(screen.getByRole('tab', { name: 'Organisation branding' })).toBeTruthy();
     await userEvent.click(screen.getByRole('tab', { name: 'People and roles' }));
     expect(await screen.findByText(/Hessa Al Qamar · HSE systems admin/)).toBeTruthy();
-    expect(screen.getByText(/not authentication/)).toBeTruthy();
+    expect(screen.getByText(/does not verify identity/)).toBeTruthy();
   });
 
   it('saves worker consent on the server and lets the worker withdraw it', async () => {
