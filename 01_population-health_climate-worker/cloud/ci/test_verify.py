@@ -1,8 +1,5 @@
 import importlib.util
 from http.client import RemoteDisconnected
-import json
-import tarfile
-import tempfile
 import unittest
 from pathlib import Path
 
@@ -18,7 +15,6 @@ def load(name):
 
 
 verify = load("verify")
-artifact = load("verify_artifact")
 comment = load("comment")
 smoke = load("smoke")
 SHA = "a" * 40
@@ -44,18 +40,28 @@ def pr(state="open", head=SHA, head_repo=None):
 
 
 class EventGuardTests(unittest.TestCase):
-    def check(self, data=None, current_pr=None, files=(), artifacts=None):
+    def check(self, data=None, current_pr=None, files=(), tree=None):
         data = data or event()
         current_pr = current_pr or pr()
         current_pr["changed_files"] = len(files)
-        artifacts = artifacts if artifacts is not None else [{"name": f"heat-safe-image-{SHA}", "expired": False}]
-        return verify.validate_run(data, MAIN, lambda _: current_pr, lambda _: files, lambda _: artifacts)
+        tree = tree if tree is not None else {"truncated": False, "tree": [
+            {"path": path, "type": "blob"} for path in verify.DEPLOYABLE_FILES]}
+        return verify.validate_run(data, MAIN, lambda _: current_pr, lambda _: files, lambda _: tree)
 
     def test_current_same_repository_pr_can_deploy(self):
         self.assertEqual(self.check()["ready"], "true")
 
-    def test_missing_image_skips_deployment(self):
-        self.assertEqual(self.check(artifacts=[])["ready"], "false")
+    def test_current_main_can_deploy(self):
+        data = event()
+        data["workflow_run"].update(event="push", head_branch="main", head_sha=MAIN, pull_requests=[])
+        self.assertEqual(self.check(data=data)["ready"], "true")
+
+    def test_missing_app_file_skips_deployment(self):
+        self.assertEqual(self.check(tree={"truncated": False, "tree": []})["ready"], "false")
+
+    def test_incomplete_source_tree_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "incomplete source tree"):
+            self.check(tree={"truncated": True, "tree": []})
 
     def test_failed_ci_is_rejected(self):
         data = event()
@@ -73,9 +79,11 @@ class EventGuardTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "repository ID"):
             self.check(current_pr=pr(head_repo=repo(42)))
         with self.assertRaisesRegex(ValueError, "control plane"):
-            self.check(files=[".github/workflows/ci.yml"])
+            self.check(files=[{"filename": ".github/workflows/ci.yml"}])
         with self.assertRaisesRegex(ValueError, "control plane"):
-            self.check(files=["01_population-health_climate-worker/cloud/deploy.py"])
+            self.check(files=[{"filename": "01_population-health_climate-worker/cloud/deploy.py"}])
+        with self.assertRaisesRegex(ValueError, "control plane"):
+            self.check(files=[{"filename": "safe.py", "previous_filename": ".github/workflows/ci.yml"}])
 
     def test_old_main_run_is_rejected(self):
         data = event()
@@ -159,35 +167,15 @@ class WorkflowAuthTests(unittest.TestCase):
                     self.assertEqual(source.count("google-github-actions/auth@"), 1)
                     if path.name.startswith("deploy-"):
                         self.assertNotIn("id-token: write", source.split("  deploy:\n", 1)[0])
+                        self.assertNotIn("actions/download-artifact@", source)
+                        self.assertNotIn("verify_artifact.py", source)
+                        self.assertNotIn("docker load", source)
+                        self.assertIn("docker build", source)
                 else:
                     self.assertNotIn("id-token: write", source)
                     self.assertNotIn("workload_identity_provider:", source)
                     self.assertNotIn("service_account:", source)
                     self.assertNotIn("environment:", source)
-
-
-class ArtifactTests(unittest.TestCase):
-    def test_archive_origin_and_path_are_checked(self):
-        with tempfile.TemporaryDirectory() as temporary:
-            directory = Path(temporary)
-            payload = directory / "payload"
-            payload.write_text("image")
-            with tarfile.open(directory / "image.tar", "w") as tar:
-                tar.add(payload, arcname="image-layer")
-            import hashlib
-            digest = hashlib.sha256((directory / "image.tar").read_bytes()).hexdigest()
-            (directory / "image.json").write_text(json.dumps({"sha": SHA, "run_id": "91", "tag": f"heat-safe-ci:{SHA}", "sha256": digest}))
-            self.assertEqual(artifact.verify(directory, SHA, "91"), f"heat-safe-ci:{SHA}")
-            with self.assertRaises(ValueError):
-                artifact.verify(directory, "c" * 40, "91")
-            with self.assertRaisesRegex(ValueError, "origin"):
-                artifact.verify(directory, SHA, "92")
-            with tarfile.open(directory / "image.tar", "w") as tar:
-                tar.add(payload, arcname="../escape")
-            digest = hashlib.sha256((directory / "image.tar").read_bytes()).hexdigest()
-            (directory / "image.json").write_text(json.dumps({"sha": SHA, "run_id": "91", "tag": f"heat-safe-ci:{SHA}", "sha256": digest}))
-            with self.assertRaises(ValueError):
-                artifact.verify(directory, SHA, "91")
 
 
 class SmokeTests(unittest.TestCase):

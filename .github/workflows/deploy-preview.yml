@@ -53,29 +53,66 @@ jobs:
       issues: write
       id-token: write
     env:
-      GITHUB_TOKEN: ${{ github.token }}
       GOOGLE_CLOUD_PROJECT: ${{ vars.GCP_PROJECT_ID }}
       CLOUD_RUN_REGION: ${{ vars.GCP_REGION }}
       SOURCE_SHA: ${{ needs.validate.outputs.sha }}
-      RUN_ID: ${{ needs.validate.outputs.run_id }}
       PR_NUMBER: ${{ needs.validate.outputs.pr }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ needs.validate.outputs.trusted_sha }}
           persist-credentials: false
-      - name: Revalidate source before retrieving artifact
+      - name: Revalidate source before checkout
         env:
           TRUSTED_SHA: ${{ needs.validate.outputs.trusted_sha }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: python3 01_population-health_climate-worker/cloud/ci/verify.py run
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - name: Check out validated source separately
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          name: heat-safe-image-${{ needs.validate.outputs.sha }}
-          run-id: ${{ needs.validate.outputs.run_id }}
-          github-token: ${{ github.token }}
-          path: ${{ runner.temp }}/image-artifact
-      - name: Validate OCI archive metadata and contents
-        run: python3 01_population-health_climate-worker/cloud/ci/verify_artifact.py '${{ runner.temp }}/image-artifact' "$SOURCE_SHA" "$RUN_ID"
+          ref: ${{ needs.validate.outputs.sha }}
+          path: source
+          persist-credentials: false
+      - name: Build image without cloud credentials
+        run: |
+          set -euo pipefail
+          cd "source/01_population-health_climate-worker"
+          docker build --pull --file Dockerfile.cloudrun --label "org.opencontainers.image.revision=$SOURCE_SHA" --tag "heat-safe-ci:$SOURCE_SHA" .
+      - name: Smoke test the bundled app and PostgreSQL
+        run: |
+          set -euo pipefail
+          network="heat-safe-deploy-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          db="${network}-db"
+          app="${network}-app"
+          cleanup() {
+            docker rm -f "$app" "$db" >/dev/null 2>&1 || true
+            docker network rm "$network" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          docker network create "$network" >/dev/null
+          docker run -d --name "$db" --network "$network" \
+            -e POSTGRES_USER=heat_safe_smoke -e POSTGRES_PASSWORD=heat_safe_smoke \
+            -e POSTGRES_DB=heat_safe_smoke postgres:16.10 >/dev/null
+          for attempt in {1..30}; do
+            if docker exec "$db" pg_isready -h 127.0.0.1 -U heat_safe_smoke -d heat_safe_smoke >/dev/null 2>&1; then
+              echo "PostgreSQL ready after $attempt checks"
+              break
+            fi
+            sleep 1
+          done
+          docker exec "$db" pg_isready -h 127.0.0.1 -U heat_safe_smoke -d heat_safe_smoke >/dev/null
+          access_hash="$(printf %s ci-viewer-fixture | sha256sum | cut -d' ' -f1)"
+          presenter_hash="$(printf %s ci-presenter-fixture | sha256sum | cut -d' ' -f1)"
+          docker run -d --name "$app" --network "$network" -p 127.0.0.1:8088:8080 \
+            -e K_SERVICE=ci -e PORT=8080 -e STATIC_DIR=/app/static \
+            -e "DATABASE_URL=postgresql://heat_safe_smoke:heat_safe_smoke@${db}:5432/heat_safe_smoke" \
+            -e "HEAT_ACCESS_CODE_SHA256=$access_hash" \
+            -e "HEAT_PRESENTER_CODE_SHA256=$presenter_hash" \
+            "heat-safe-ci:$SOURCE_SHA" >/dev/null
+          if ! python3 01_population-health_climate-worker/cloud/ci/smoke.py; then
+            docker logs --tail 100 "$app"
+            exit 1
+          fi
       - uses: google-github-actions/auth@b7593ed2efd1c1617e1b0254da33b86225adb2a5 # v2.1.12
         with:
           workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
@@ -91,12 +128,13 @@ jobs:
           curl -fsSL -o /tmp/cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.28.0/cloud-sql-proxy.linux.amd64
           echo 'c01a2dc25c5ec6441fb05fe2d23e51e5290b3c06cc56f5e9c749806f335bd82e  /tmp/cloud-sql-proxy' | sha256sum -c -
           sudo install -m 0755 /tmp/cloud-sql-proxy /usr/local/bin/cloud-sql-proxy
-      - name: Import OCI data and push only to private Artifact Registry
+      - name: Push tested image only to private Artifact Registry
         id: image
         run: |
           set -euo pipefail
-          target="${CLOUD_RUN_REGION}-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/heat-safe-previews/pr-${PR_NUMBER}/app:sha-${SOURCE_SHA}"
-          anonymous_manifest="https://${CLOUD_RUN_REGION}-docker.pkg.dev/v2/${GOOGLE_CLOUD_PROJECT}/heat-safe-previews/pr-${PR_NUMBER}/app/manifests/sha-${SOURCE_SHA}"
+          tag="sha-${SOURCE_SHA}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          target="${CLOUD_RUN_REGION}-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/heat-safe-previews/pr-${PR_NUMBER}/app:${tag}"
+          anonymous_manifest="https://${CLOUD_RUN_REGION}-docker.pkg.dev/v2/${GOOGLE_CLOUD_PROJECT}/heat-safe-previews/pr-${PR_NUMBER}/app/manifests/${tag}"
           status="$(curl -sS -o /dev/null -w '%{http_code}' "$anonymous_manifest")"
           if test "$status" = 200; then
             gcloud artifacts docker images delete "$target" --delete-tags --quiet >/dev/null 2>&1 || true
@@ -109,7 +147,6 @@ jobs:
             exit 1
           fi
           gcloud auth configure-docker "${CLOUD_RUN_REGION}-docker.pkg.dev" --quiet
-          docker load -i '${{ runner.temp }}/image-artifact/image.tar'
           label="$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "heat-safe-ci:$SOURCE_SHA")"
           test "$label" = "$SOURCE_SHA"
           docker tag "heat-safe-ci:$SOURCE_SHA" "$target"
@@ -132,6 +169,7 @@ jobs:
       - name: Revalidate immediately before cloud deployment
         env:
           TRUSTED_SHA: ${{ needs.validate.outputs.trusted_sha }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: python3 01_population-health_climate-worker/cloud/ci/verify.py run
       - name: Deploy by private image digest
         id: release
@@ -143,5 +181,6 @@ jobs:
           python3 cloud/deploy.py deploy-preview --pr "$PR_NUMBER" --image "$IMAGE" --sha "$SOURCE_SHA"
       - name: Update one PR preview comment
         env:
+          GITHUB_TOKEN: ${{ github.token }}
           PREVIEW_URL: ${{ steps.release.outputs.url }}
         run: python3 01_population-health_climate-worker/cloud/ci/comment.py --pr "$PR_NUMBER" --status deployed --sha "$SOURCE_SHA" --url "$PREVIEW_URL"
