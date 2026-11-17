@@ -18,10 +18,11 @@ function bandStrip() {
   const holdCell = v => v <= 150 ? `<div class="c-hold" role="img" aria-label="Heavy-work hold">■ Hold</div>` : `<div class="c-ok" role="img" aria-label="No hold">—</div>`;
   const ctrlCell = v => lv(v) === 'caution' ? `<div class="c-ctrl" role="img" aria-label="Caution controls: extra water and rest">▲</div>` : `<div class="c-ok" role="img" aria-label="No extra controls">—</div>`;
   const okCell = () => `<div class="c-ok" role="img" aria-label="No hold">—</div>`;
-  const mid = `<div class="hatch mid"><span>MoHRE midday break · no outdoor work</span></div>`;
-  const r = (name, cell, cls = '') => `<div class="lab ${cls}">${name}</div>${TWL_AM.map(cell).join('')}${mid}${TWL_PM.map(cell).join('')}`;
+  /* One hatched block down all four rows; later rows skip the column it occupies. */
+  const mid = `<div class="hatch mid" role="img" aria-label="12:30 to 15:00: MoHRE midday break, no outdoor work"><span>MoHRE midday break · no outdoor work</span></div>`;
+  const r = (name, cell, cls = '', first = false) => `<div class="lab ${cls}">${name}</div>${TWL_AM.map(cell).join('')}${first ? mid : ''}${TWL_PM.map(cell).join('')}`;
   const legend = `<div class="flex" style="margin-top:8px;font-size:12px;gap:16px">${band('low', 'TWL ≥ 140')}${band('caution', 'below 140')}<span class="flex">${badge('■ Hold', 'b-red')} Sandline rule: heavy exposed work stops at TWL ≤ 150</span><span class="flex">${badge('▲', 'b-amber')} extra water and rest</span></div>`;
-  return `<div class="strip" role="group" aria-label="Hourly band and task holds"${timeDir()}>${head}${r('Band · TWL W/m²', bandCell, 'bandrow')}${r('Heavy exposed · civil crew', holdCell)}${r('Light task', ctrlCell)}${r('Workshop · covered', okCell)}</div>${legend}`;
+  return `<div class="strip" role="group" aria-label="Hourly band and task holds"${timeDir()}>${head}${r('Band · TWL W/m²', bandCell, 'bandrow', true)}${r('Heavy exposed · civil crew', holdCell)}${r('Light task', ctrlCell)}${r('Workshop · covered', okCell)}</div>${legend}`;
 }
 screen('w1', {
   device: 'web', name: 'Squad Monitoring', short: 'Squad Monitoring', clock: '08:18',
@@ -35,7 +36,7 @@ screen('w1', {
     const q = squad();
     const nav = { title: `Squad Monitoring · ${q.name} · 08:18`, back: null, updated: '08:18' };
     /* No summary readouts: a squad selector with each squad's alerts and warnings. */
-    const picker = squadPicker(x => [x.status, band(x.band, 'TWL ' + x.twl + (x.est ? ' · est.' : ''))]);
+    const picker = squadPicker(x => [x.status, twlBar(x.twl, x.band, x.est)]);
     if (q.id !== 'civil') {
       return { nav, filters: ['All squads', 'Alerts only', 'Holds only'], overflow: [{ label: 'Export shift log' }],
         body: [picker, section('Needs action', squadItems(q)), section('Crew by location', list([row({ t: `${q.loc} · ${q.headcount} workers`, d: `${q.status}. Recovery: ${q.shelter}.`, b: B.plain(q.hold ? 'Hold' : 'Working'), static: true })]), 'Aggregates only · no health data'), section('Hourly band · today', bandStrip() + computed())],

@@ -8,7 +8,7 @@ import { useId, useState, type PointerEvent } from 'react';
 export const TWL_HIGH_BELOW = 115;
 export const TWL_LOW_FROM = 140;
 export const TWL_POLICY = 150;
-/* Gauge scale: tight round the band edges so small changes move the needle visibly. Readings outside are pinned to the ends. */
+/* Bar scale: tight round the band edges so small changes move the fill visibly. Readings outside are pinned to the ends. */
 const MIN = 90;
 const MAX = 170;
 
@@ -18,31 +18,33 @@ export const twlTone = (v: number) => v < TWL_HIGH_BELOW ? 'red' : v < TWL_LOW_F
 const TONE_WORD = { red: 'High risk', amber: 'Caution', green: 'Low environmental risk' } as const;
 const SITE_RULE = 'Heavy-work limit: TWL ≤150 W/m²';
 
-/** Small semicircle speedometer: coloured bands, a black policy line and a needle at the reading. */
-export function TwlGauge({ twl, size = 64, label, valid = true }: { twl: number | null; size?: number; label?: string; valid?: boolean }) {
-  const w = 100, h = 60, cx = 50, cy = 54, r = 38;
-  const at = (v: number, rad = r) => {
-    const a = Math.PI * (1 - (clamp(v) - MIN) / (MAX - MIN));
-    return [cx + rad * Math.cos(a), cy - rad * Math.sin(a)] as const;
-  };
-  const arc = (from: number, to: number) => {
-    const [x1, y1] = at(from); const [x2, y2] = at(to);
-    return `M${x1.toFixed(2)} ${y1.toFixed(2)}A${r} ${r} 0 0 1 ${x2.toFixed(2)} ${y2.toFixed(2)}`;
-  };
-  const [p1x, p1y] = at(TWL_POLICY, r - 14); const [p2x, p2y] = at(TWL_POLICY, r + 12);
-  const needle = twl == null ? null : at(twl, r - 12);
-  const name = twl == null ? 'No TWL reading' : `TWL ${twl} W/m², ${valid ? TONE_WORD[twlTone(twl)] : 'Unknown (faulty reading)'}; ${SITE_RULE}; environmental band does not clear site holds`;
-  return <span className="hs-gauge" title={name}>
-    <svg viewBox={`0 0 ${w} ${h}`} width={size} height={size * h / w} role="img" aria-label={label ?? name}>
-      <path d={arc(MIN, MAX)} fill="none" stroke="var(--color-section-frame, #ccc)" strokeWidth="20" />
-      {twl != null && valid && <>
-        <path d={arc(MIN, TWL_HIGH_BELOW)} fill="none" stroke={SIGNAL.red} strokeWidth="20" />
-        <path d={arc(TWL_HIGH_BELOW, TWL_LOW_FROM)} fill="none" stroke={SIGNAL.amber} strokeWidth="20" />
-        <path d={arc(TWL_LOW_FROM, MAX)} fill="none" stroke={SIGNAL.green} strokeWidth="20" />
-      </>}
-      <line x1={p1x} y1={p1y} x2={p2x} y2={p2y} stroke="#000" strokeWidth="4" />
-      {needle && <><line x1={cx} y1={cy} x2={needle[0]} y2={needle[1]} stroke={valid ? "var(--color-ink)" : "var(--color-pencil)"} strokeWidth="3" strokeLinecap="round" strokeDasharray={valid ? undefined : "4 3"} /><circle cx={cx} cy={cy} r="4" fill={valid ? "var(--color-ink)" : "var(--color-pencil)"} /></>}
+/**
+ * Horizontal TWL bar: filled from the scale minimum up to the reading, in the reading's band colour,
+ * with the site heavy-work hold as a black line and the scale ends written underneath.
+ * `size` is the old gauge width; the bar is twice that long.
+ */
+export function TwlGauge({ twl, size = 64, label, valid = true, band }: { twl: number | null; size?: number; label?: string; valid?: boolean; band?: string }) {
+  const W = 200, H = 24, barY = 6, barH = 12;
+  const x = (v: number) => W * (clamp(v) - MIN) / (MAX - MIN);
+  const tone = twl == null ? null : band && band in SIGNAL ? band as keyof typeof SIGNAL : twlTone(twl);
+  const policyX = x(TWL_POLICY);
+  const name = twl == null ? 'No TWL reading' : `TWL ${twl} W/m², ${valid ? TONE_WORD[tone!] : 'Unknown (faulty reading)'}; ${SITE_RULE}; environmental band does not clear site holds`;
+  const width = size * 2;
+  const pct = twl == null ? 0 : x(twl) / W * 100;
+  return <span className="hs-gauge" title={name} style={{ inlineSize: width }}>
+    {twl != null && <span className="hs-gauge-mark" aria-hidden="true">
+      {/* The value stays inside the bar's width; the triangle points at the (clamped) reading. */}
+      <span className="hs-gauge-mark-v" style={{ left: `${pct}%`, transform: `translateX(-${pct}%)` }}>{twl}</span>
+      <span className="hs-gauge-tri" style={{ left: `${pct}%` }} />
+    </span>}
+    <svg viewBox={`0 0 ${W} ${H}`} width={width} height={width * H / W} role="img" aria-label={label ?? name}>
+      <rect x="0" y={barY} width={W} height={barH} fill="var(--color-section-frame, #ccc)" />
+      {twl != null && (valid
+        ? <rect x="0" y={barY} width={x(twl)} height={barH} fill={SIGNAL[tone!]} />
+        : <rect x="1" y={barY + 1} width={Math.max(0, x(twl) - 2)} height={barH - 2} fill="none" stroke="var(--color-pencil)" strokeWidth="2" strokeDasharray="5 4" />)}
+      <line x1={policyX} x2={policyX} y1="0" y2={H} stroke="var(--color-ink)" strokeWidth="3" />
     </svg>
+    <span className="hs-gauge-scale" aria-hidden="true"><span>{MIN}</span><span>{MAX}</span></span>
   </span>;
 }
 
@@ -51,12 +53,14 @@ export function TwlGauge({ twl, size = 64, label, valid = true }: { twl: number 
  * unknown) comes from the reading's own assessment when there is one, so a faulty reading never
  * shows as low risk.
  */
-export function TwlReadout({ twl, estimated, size, band }: { twl: number | null; estimated?: boolean; size?: number; band?: string }) {
+export function TwlReadout({ twl, estimated, size, band, large }: { twl: number | null; estimated?: boolean; size?: number; band?: string; large?: boolean }) {
   const valid = band !== 'unknown';
   const word = twl == null ? '' : !valid ? 'Unknown' : TONE_WORD[(band as keyof typeof TONE_WORD) in TONE_WORD ? band as keyof typeof TONE_WORD : twlTone(twl)];
-  return <span className="hs-twl">
-    <TwlGauge twl={twl} size={size} valid={valid} />
-    <span className="hs-twl-text" data-tone={twl == null ? undefined : valid ? (band && band in TONE_WORD ? band : twlTone(twl)) : 'unknown'}>{twl == null ? 'No reading' : `TWL ${twl} W/m² · ${word}${estimated ? ' · est.' : ''}`}</span>
+  return <span className="hs-twl" data-large={large || undefined}>
+    <TwlGauge twl={twl} size={size} valid={valid} band={band} />
+    <span className="hs-twl-text" data-tone={twl == null ? undefined : valid ? (band && band in TONE_WORD ? band : twlTone(twl)) : 'unknown'}>{twl == null ? 'No reading' : large
+      ? <><span>TWL <b className="hs-twl-num">{twl}</b> W/m²</span><small>{word}{estimated ? ' · est.' : ''}</small></>
+      : `TWL ${twl} W/m² · ${word}${estimated ? ' · est.' : ''}`}</span>
   </span>;
 }
 

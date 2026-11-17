@@ -297,12 +297,22 @@ button.hs-row-body:hover { background: var(--color-base); }
 .hs-tone-key { display: inline-block; inline-size: 0.9rem; block-size: 0.9rem; border: 3px solid; }
 .hs-pin-key { display: inline-block; inline-size: 0.8rem; block-size: 0.8rem; border-radius: 50%; background: var(--color-ink); }
 
-/* TWL speedometer (twl.tsx): small semicircle gauge beside the reading in words. */
-.hs-twl { display: inline-flex; align-items: center; gap: var(--space-1); vertical-align: middle; }
+/* TWL bar (twl.tsx): horizontal bar filled to the reading, beside the reading in words. */
+.hs-twl { display: inline-flex; align-items: center; gap: var(--space-2); vertical-align: middle; }
 .hs-twl > span:last-child { display: inline-flex; flex-direction: column; line-height: var(--lh-title); }
 .hs-twl small { font-size: var(--fs-small); }
-.hs-gauge { display: inline-flex; flex: none; }
+.hs-twl-num { font-size: var(--fs-body); font-variant-numeric: tabular-nums; }
+/* Squad cards: reading on top in large type, bar beneath, band word under the reading. */
+.hs-twl[data-large] { flex-direction: column; align-items: flex-start; gap: var(--space-half); }
+.hs-twl[data-large] > .hs-twl-text { order: -1; gap: var(--space-half); color: var(--color-ink); }
+.hs-twl[data-large] .hs-twl-text[data-tone] { text-decoration-line: none; }
+.hs-twl[data-large] .hs-twl-text > span { white-space: nowrap; }
+.hs-gauge { display: inline-flex; flex-direction: column; flex: none; direction: ltr; }
 .hs-gauge svg { display: block; }
+.hs-gauge-mark { position: relative; display: block; block-size: calc(0.6875rem + 7px); }
+.hs-gauge-mark-v { position: absolute; inset-block-start: 0; font-size: 0.6875rem; line-height: 1; color: var(--color-ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.hs-gauge-tri { position: absolute; inset-block-end: 0; inline-size: 0; block-size: 0; margin-left: -4px; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid var(--color-ink); }
+.hs-gauge-scale { display: flex; justify-content: space-between; font-size: 0.6875rem; line-height: 1; color: var(--color-graphite); font-variant-numeric: tabular-nums; }
 
 /* TWL line chart: historical solid, predicted dashed, policy level as a black line. */
 .hs-chart { margin: 0; display: grid; gap: var(--space-1); }
