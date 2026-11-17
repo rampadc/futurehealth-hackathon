@@ -182,6 +182,16 @@ function badge(text, cls = '', aria) { return `<span class="badge ${cls}"${aria 
 /* Environmental band: a condition (swatch + word). Task holds are separate stamps. */
 const BAND_WORD = { low: 'Low band', caution: 'Caution band', high: 'High band', unknown: 'Unknown band' };
 function band(level, extra = '') { return `<span class="band band--${level}"><span class="band__swatch" aria-hidden="true"></span>${BAND_WORD[level]}${extra ? ' · ' + extra : ''}</span>`; }
+/* Squad TWL: large reading, band word, then a bar filled to the reading in its band colour
+   (scale 90–170) with the site heavy-work hold at 150 as a line. Matches supervisor-ui twl.tsx. */
+const TWL_MIN = 90, TWL_MAX = 170, TWL_HOLD = 150;
+function twlBar(twl, level, est) {
+  const pct = v => (Math.min(TWL_MAX, Math.max(TWL_MIN, v)) - TWL_MIN) / (TWL_MAX - TWL_MIN) * 100;
+  const word = BAND_WORD[level].replace(' band', '');
+  return `<span class="twlr"><span class="twlr__v">TWL <b>${twl}</b> W/m²</span><span class="twlr__w">${word}${est ? ' · est.' : ''}</span>`
+    + `<span class="twlbar band--${level}" role="img" aria-label="TWL ${twl} W/m², ${BAND_WORD[level]}; heavy-work limit TWL ≤${TWL_HOLD} W/m²"><span class="twlbar__fill" style="width:${pct(twl)}%"></span><span class="twlbar__hold" style="left:${pct(TWL_HOLD)}%"></span></span>`
+    + `<span class="twlbar__scale" aria-hidden="true"><span>${TWL_MIN}</span><span>${TWL_MAX}</span></span></span>`;
+}
 function marker(n) { return `<span class="marker m${n}" aria-hidden="true">${n}</span>`; }
 const COMP = { 1: 'Heat controls', 2: 'Protective response', 3: 'Work/rest plan', 4: 'Restart readiness' };
 function compname(n) { return `<span class="compname">${marker(n)}${n} ${COMP[n]}</span>`; }

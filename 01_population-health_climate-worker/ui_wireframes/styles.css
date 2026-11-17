@@ -637,6 +637,19 @@ pre.code { margin: 0; padding: 12px; background: var(--sheet); border: var(--rul
 .sq-n .zero { color: var(--muted); }
 .sq-l { font-size: 12px; color: var(--muted); }
 .sq-l b { color: var(--ink); }
+/* Squad TWL reading and bar (core.js twlBar). The bar is twice the old 56px gauge. */
+.twlr { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 4px; color: var(--ink); }
+.twlr__v { white-space: nowrap; }
+.twlr__v b { font-size: 28px; line-height: 1; font-variant-numeric: tabular-nums; }
+.twlr__w { font-size: 13px; }
+.twlbar { position: relative; display: block; width: 112px; height: 7px; margin-block: 3px; background: var(--color-section-frame); }
+.twlbar__fill { position: absolute; inset-block: 0; left: 0; }
+.band--low .twlbar__fill { background: var(--band-green); }
+.band--caution .twlbar__fill { background: var(--band-amber); }
+.band--high .twlbar__fill { background: var(--band-red); }
+.band--unknown .twlbar__fill { background: var(--hatch-unknown); }
+.twlbar__hold { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: var(--ink); }
+.twlbar__scale { display: flex; justify-content: space-between; width: 112px; font-size: 11px; line-height: 1; color: var(--muted); font-variant-numeric: tabular-nums; }
 
 /* TWL and restart tables by squad: small text, not readouts. */
 .t.sq-twl { font-size: 13px; }

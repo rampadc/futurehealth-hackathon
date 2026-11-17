@@ -35,7 +35,7 @@ screen('w1', {
     const q = squad();
     const nav = { title: `Squad Monitoring · ${q.name} · 08:18`, back: null, updated: '08:18' };
     /* No summary readouts: a squad selector with each squad's alerts and warnings. */
-    const picker = squadPicker(x => [x.status, band(x.band, 'TWL ' + x.twl + (x.est ? ' · est.' : ''))]);
+    const picker = squadPicker(x => [x.status, twlBar(x.twl, x.band, x.est)]);
     if (q.id !== 'civil') {
       return { nav, filters: ['All squads', 'Alerts only', 'Holds only'], overflow: [{ label: 'Export shift log' }],
         body: [picker, section('Needs action', squadItems(q)), section('Crew by location', list([row({ t: `${q.loc} · ${q.headcount} workers`, d: `${q.status}. Recovery: ${q.shelter}.`, b: B.plain(q.hold ? 'Hold' : 'Working'), static: true })]), 'Aggregates only · no health data'), section('Hourly band · today', bandStrip() + computed())],
