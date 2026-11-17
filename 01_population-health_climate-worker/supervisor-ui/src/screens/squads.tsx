@@ -81,7 +81,7 @@ export function SquadPicker({ squads, lines }: { squads: Squad[]; lines?: (q: Sq
     </button>)}</div>;
 }
 
-export const bandOf = (q: Squad) => <TwlReadout twl={q.twl} estimated={q.estimated} band={q.band} size={56} />;
+export const bandOf = (q: Squad) => <TwlReadout twl={q.twl} estimated={q.estimated} band={q.band} size={56} large />;
 
 /** A fixture squad's open items, or a clear "nothing needs action". */
 export function SquadItems({ squad }: { squad: Squad }) {

@@ -16,6 +16,18 @@ describe('TWL graphics', () => {
     expect(within(row).getByText('Heavy-work limit: TWL ≤150 W/m²')).toBeTruthy();
   });
 
+  it('fills the bar to the reading in its band colour, with the hold line and scale ends', () => {
+    const { container } = render(<TwlReadout twl={130} band="amber" size={56} large />);
+    const svg = container.querySelector('svg')!;
+    expect(svg.getAttribute('width')).toBe('112');
+    const fill = svg.querySelectorAll('rect')[1];
+    expect(fill.getAttribute('fill')).toBe('var(--color-signal-yellow)');
+    expect(Number(fill.getAttribute('width'))).toBeCloseTo(200 * (130 - 90) / 80);
+    expect(Number(svg.querySelector('line')!.getAttribute('x1'))).toBeCloseTo(200 * (150 - 90) / 80);
+    expect(container.querySelector('.hs-gauge-scale')!.textContent).toBe('90170');
+    expect(container.querySelector('.hs-twl-num')!.textContent).toBe('130');
+  });
+
   it('keeps a faulty 218 sensor value as unknown in its dot, table, and gauge', () => {
     render(<>
       <TwlChart hourly={hourly} now="08:30" kindLabel="Site" readings={[{ at: '08:15', twl: 218, sensor: 'S1', quality: 'invalid' }]} />
