@@ -18,9 +18,17 @@ from google.genai import types
 
 from .agent import MODEL, app
 
-ASK_KEYS = ("session_id", "model", "answer", "tool_calls", "tool_outputs", "grounding", "citations", "tokens",
-            "latency_s")
+ASK_KEYS = ("session_id", "model", "answer", "tool_calls", "tool_outputs", "grounding", "citations", "armor",
+            "tokens", "latency_s")
 PASSED = {"passed": True, "ungrounded": [], "checked": 0}
+
+
+def _armor_this_turn(state, invocation_id: str | None) -> dict | None:
+    """Model Armor's decisions for this turn only (agents/supervisor/armor.py); None when Armor is off."""
+    armor = state.get("armor")
+    if not armor or (invocation_id and armor.get("invocation") != invocation_id):
+        return None
+    return {k: v for k, v in armor.items() if k != "invocation"}
 
 
 class UnknownSession(KeyError):
@@ -35,7 +43,10 @@ async def turn(runner: InMemoryRunner, question: str, user_id: str = "supervisor
         {"type": "tool_call", "name", "args"}       the agent asked for a tool
         {"type": "tool_result", "name", "status"}   the tool answered ("ok", "error", "no_sensor", ...)
         {"type": "done", "answer", "tool_calls", "tool_outputs", "grounding", "citations", "links",
-         "tokens", "latency_s", "session_id", "model"}
+         "armor", "tokens", "latency_s", "session_id", "model"}
+
+    "armor" is Model Armor's decision for this turn, e.g. {"input": "redacted", "output": "passed"}, or None
+    when screening is off (agents/supervisor/armor.py).
 
     The answer arrives whole, in `done`, after the grounding check (agent.check_grounding) has run on it.
     Streaming the text token by token would show the user words before they were checked.
@@ -50,11 +61,12 @@ async def turn(runner: InMemoryRunner, question: str, user_id: str = "supervisor
                                                session_id=f"s-{uuid.uuid4().hex[:12]}")
     yield {"type": "session", "session_id": session.id}
 
-    calls, answer = [], ""
+    calls, answer, invocation_id = [], "", None
     tokens = {"prompt": 0, "output": 0, "thinking": 0}
     started = time.perf_counter()
     async for event in runner.run_async(user_id=user_id, session_id=session.id,
                                         new_message=types.Content(role="user", parts=[types.Part(text=question)])):
+        invocation_id = event.invocation_id or invocation_id
         for fc in event.get_function_calls():
             calls.append({"name": fc.name, "args": dict(fc.args or {})})
             yield {"type": "tool_call", **calls[-1]}
@@ -80,6 +92,7 @@ async def turn(runner: InMemoryRunner, question: str, user_id: str = "supervisor
         "grounding": session.state.get("grounding") or PASSED,
         "citations": session.state.get("citations") or PASSED,
         "links": session.state.get("links") or PASSED,
+        "armor": _armor_this_turn(session.state, invocation_id),
         "tokens": tokens,
         "latency_s": round(latency_s, 2),
     }

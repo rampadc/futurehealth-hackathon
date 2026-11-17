@@ -45,7 +45,7 @@ BQ_SCHEMA = [
     ("prompt_tokens", "INTEGER"), ("output_tokens", "INTEGER"), ("thinking_tokens", "INTEGER"),
     ("latency_s", "FLOAT"), ("model", "STRING"), ("rules_version", "STRING"),
     ("git_sha", "STRING"), ("git_dirty", "BOOLEAN"), ("session_id", "STRING"),
-    ("prompt", "STRING"), ("answer", "STRING"),
+    ("prompt", "STRING"), ("answer", "STRING"), ("armor_json", "STRING"),
 ]
 
 
@@ -79,6 +79,7 @@ def to_row(run_id, started_at, scenario, repeat, run, result, git_sha, dirty) ->
         "thinking_tokens": run["tokens"]["thinking"], "latency_s": run["latency_s"],
         "model": run["model"], "rules_version": RULES_VERSION, "git_sha": git_sha, "git_dirty": dirty,
         "session_id": run["session_id"], "prompt": scenario["prompt"].strip(), "answer": run["answer"],
+        "armor_json": json.dumps(run.get("armor")),  # Model Armor's decision, "null" when screening is off
     }
 
 
@@ -92,7 +93,9 @@ def write_bigquery(rows: list[dict]) -> None:
     client.create_table(table, exists_ok=True)
     # A load job, not streaming inserts: free, atomic per batch, and rows are queryable immediately
     job = client.load_table_from_json(rows, BQ_TABLE, job_config=bigquery.LoadJobConfig(
-        schema=schema, write_disposition="WRITE_APPEND"))
+        schema=schema, write_disposition="WRITE_APPEND",
+        # new columns (armor_json, 16 Nov) are added to the existing table; renames or type changes still fail
+        schema_update_options=[bigquery.SchemaUpdateOption.ALLOW_FIELD_ADDITION]))
     job.result()
     print(f"\n{len(rows)} rows appended to {BQ_TABLE}")
 

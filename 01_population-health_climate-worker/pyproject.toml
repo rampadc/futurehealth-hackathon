@@ -22,6 +22,7 @@ dependencies = [
     "pyyaml>=6.0.3",
     "requests>=2.34.2",
     "thermofeel==2.3.0",
+    "google-cloud-modelarmor>=0.7.5,<0.8",  # Model Armor screening (agents/supervisor/armor.py)
 ]
 
 [dependency-groups]
