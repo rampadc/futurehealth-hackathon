@@ -59,7 +59,7 @@ export function StopWorkScreen({ session }: ScreenProps) {
     <Section title="What worker phones receive">
       <SmsPreview workerIds={people.map(p => p.id)} names={people.map(p => p.name)} />
     </Section>
-    <Note>Nothing is sent from this demo. The preview shows the message size each crew language would need.</Note>
+    <Note>SMS preview only. No messages have been sent.</Note>
     <CtaBar>
       {safety ? <ActionButton session={session} action="issue" label="Record instruction issued" primary />
         : !story.acknowledged ? <ActionButton session={session} action="acknowledge" label="Acknowledge" primary />
