@@ -303,7 +303,9 @@ describe('stop-work', () => {
     currentCase.request!.snapshot.readings[0] = { ...currentCase.request!.snapshot.readings[0], twl: 145, quality: 'invalid' };
     await open('/web/monitoring', 'P03');
     expect((await screen.findAllByText(/TWL 145 W\/m² · Unknown/)).length).toBeGreaterThan(0);
-    expect(screen.queryByText(/Low environmental risk/)).toBeNull();
+    const sensor = currentCase.request!.snapshot.readings[0].sensor_id;
+    const readingRow = (await screen.findByText(`Sensor ${sensor} · quality invalid`)).closest('tr')!;
+    expect(within(readingRow).getByText('Unknown')).toBeTruthy();
   });
 
   it('warns that every band is raised while the local reading is lost', async () => {

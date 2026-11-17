@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { SiteConditions } from '../contract';
 import { live } from '../live';
 import type { CaseSession } from '../session';
-import { Band, Badge, Computed, List, Note, Row, Section } from './kit';
+import { Band, Badge, List, Note, Row, Section } from './kit';
 import { time } from './data';
 import { TwlChart, type TwlReadingPoint } from './twl';
 
@@ -53,7 +53,7 @@ function ConditionsBody({ conditions: c, compact, readings, label, now: clock }:
         badge={c.summary.heat_programme_required ? <Badge tone="wait">Heat programme</Badge> : undefined} />
     </List>
     <TwlChart kindLabel={label} now={clock ?? c.clock_hour} hourly={c.hourly.filter(h => SHIFT(h.hour)).map(h => ({ hour: h.hour, twl: h.twl_sun_wm2 }))} readings={readings} />
-    <Computed>Computed by the heat-stress rules ({c.rules_version}) from {c.source.replace(/^cache:/, '')} · {c.site} · not AI</Computed>
+    <p className="hs-muted">{c.kind === 'replay' ? 'Historical weather data' : 'Weather forecast'} · {c.site === 'mussafah' ? 'Mussafah' : c.site} · For planning only</p>
     {!compact && c.citation.length > 0 && <p className="hs-muted">Zones: {c.citation.map((x, i) => <span key={x.cite}>{i ? '; ' : ''}{x.url ? <a href={x.url} target="_blank" rel="noreferrer">{x.cite}</a> : x.cite}</span>)}</p>}
   </>;
 }

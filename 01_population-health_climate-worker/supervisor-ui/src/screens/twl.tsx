@@ -3,18 +3,20 @@ import { useId, useState, type PointerEvent } from 'react';
 /**
  * Thermal Work Limit graphics for the supervisor screens. A lower TWL is more heat stress:
  * below 115 W/m² is the high-risk band, 115–140 caution, 140 and above low risk (thermal.ts).
- * The policy level is where caution controls start; it is drawn as a black line.
+ * Environmental colours are separate from the site heavy-work hold, drawn as a black line.
  */
 export const TWL_HIGH_BELOW = 115;
-export const TWL_POLICY = 140;
+export const TWL_LOW_FROM = 140;
+export const TWL_POLICY = 150;
 /* Gauge scale: tight round the band edges so small changes move the needle visibly. Readings outside are pinned to the ends. */
 const MIN = 90;
 const MAX = 170;
 
 const clamp = (v: number) => Math.min(MAX, Math.max(MIN, v));
 const SIGNAL = { red: 'var(--color-signal-red)', amber: 'var(--color-signal-yellow)', green: 'var(--color-signal-green)' };
-export const twlTone = (v: number) => v < TWL_HIGH_BELOW ? 'red' : v < TWL_POLICY ? 'amber' : 'green';
-const TONE_WORD = { red: 'High risk', amber: 'Caution', green: 'Low risk' } as const;
+export const twlTone = (v: number) => v < TWL_HIGH_BELOW ? 'red' : v < TWL_LOW_FROM ? 'amber' : 'green';
+const TONE_WORD = { red: 'High risk', amber: 'Caution', green: 'Low environmental risk' } as const;
+const SITE_RULE = 'Heavy-work limit: TWL ≤150 W/m²';
 
 /** Small semicircle speedometer: coloured bands, a black policy line and a needle at the reading. */
 export function TwlGauge({ twl, size = 64, label, valid = true }: { twl: number | null; size?: number; label?: string; valid?: boolean }) {
@@ -29,14 +31,14 @@ export function TwlGauge({ twl, size = 64, label, valid = true }: { twl: number 
   };
   const [p1x, p1y] = at(TWL_POLICY, r - 14); const [p2x, p2y] = at(TWL_POLICY, r + 12);
   const needle = twl == null ? null : at(twl, r - 12);
-  const name = twl == null ? 'No TWL reading' : `TWL ${twl} W/m², ${valid ? TONE_WORD[twlTone(twl)] : 'Unknown (faulty reading)'}; policy level ${TWL_POLICY} W/m²`;
+  const name = twl == null ? 'No TWL reading' : `TWL ${twl} W/m², ${valid ? TONE_WORD[twlTone(twl)] : 'Unknown (faulty reading)'}; ${SITE_RULE}; environmental band does not clear site holds`;
   return <span className="hs-gauge" title={name}>
     <svg viewBox={`0 0 ${w} ${h}`} width={size} height={size * h / w} role="img" aria-label={label ?? name}>
       <path d={arc(MIN, MAX)} fill="none" stroke="var(--color-section-frame, #ccc)" strokeWidth="20" />
       {twl != null && valid && <>
         <path d={arc(MIN, TWL_HIGH_BELOW)} fill="none" stroke={SIGNAL.red} strokeWidth="20" />
-        <path d={arc(TWL_HIGH_BELOW, TWL_POLICY)} fill="none" stroke={SIGNAL.amber} strokeWidth="20" />
-        <path d={arc(TWL_POLICY, MAX)} fill="none" stroke={SIGNAL.green} strokeWidth="20" />
+        <path d={arc(TWL_HIGH_BELOW, TWL_LOW_FROM)} fill="none" stroke={SIGNAL.amber} strokeWidth="20" />
+        <path d={arc(TWL_LOW_FROM, MAX)} fill="none" stroke={SIGNAL.green} strokeWidth="20" />
       </>}
       <line x1={p1x} y1={p1y} x2={p2x} y2={p2y} stroke="#000" strokeWidth="4" />
       {needle && <><line x1={cx} y1={cy} x2={needle[0]} y2={needle[1]} stroke={valid ? "var(--color-ink)" : "var(--color-pencil)"} strokeWidth="3" strokeLinecap="round" strokeDasharray={valid ? undefined : "4 3"} /><circle cx={cx} cy={cy} r="4" fill={valid ? "var(--color-ink)" : "var(--color-pencil)"} /></>}
@@ -59,7 +61,7 @@ export function TwlReadout({ twl, estimated, size, band }: { twl: number | null;
 }
 
 export type TwlPoint = { hour: string; twl: number };
-export type TwlReadingPoint = { at: string; twl: number; sensor: string };
+export type TwlReadingPoint = { at: string; twl: number; sensor: string; quality: string };
 
 const minutes = (hhmm: string) => { const [h, m] = hhmm.split(':').map(Number); return h * 60 + (m || 0); };
 
@@ -93,7 +95,7 @@ export function TwlChart({ hourly, now, readings = [], kindLabel }: { hourly: Tw
   const futurePath = path([[nowM, interp], ...future.map(p => [minutes(p.hour), p.twl] as [number, number])]);
   const ticks: number[] = []; for (let v = lo; v <= hi; v += 20) ticks.push(v);
   const band = (from: number, to: number) => { const a = Math.max(lo, from), b = Math.min(hi, to); return b > a ? { y: y(b), h: y(a) - y(b) } : null; };
-  const red = band(lo, TWL_HIGH_BELOW), amber = band(TWL_HIGH_BELOW, TWL_POLICY);
+  const red = band(lo, TWL_HIGH_BELOW), amber = band(TWL_HIGH_BELOW, TWL_LOW_FROM);
   const hp = hover == null ? null : hourly[hover];
   const onMove = (e: PointerEvent<SVGSVGElement>) => {
     const box = e.currentTarget.getBoundingClientRect();
@@ -106,8 +108,9 @@ export function TwlChart({ hourly, now, readings = [], kindLabel }: { hourly: Tw
       <span><i className="hs-key-line" />{kindLabel} · up to now</span>
       <span><i className="hs-key-line" data-dashed />Predicted</span>
       {readings.length > 0 && <span><i className="hs-key-dot" />Local sensor</span>}
-      <span><i className="hs-key-policy" />Policy level {TWL_POLICY} W/m²</span>
+      <span><i className="hs-key-policy" />Site {SITE_RULE}</span>
     </div>
+    <p className="hs-muted">Environmental band does not clear site holds.</p>
     <div className="hs-chart-plot">
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`TWL by hour, ${hourly[0].hour} to ${hourly[hourly.length - 1].hour}. Lowest ${Math.min(...hourly.map(p => p.twl))} W/m².`} onPointerMove={onMove} onPointerLeave={() => setHover(null)}>
         {red && <rect x={L} width={W - L - R} y={red.y} height={red.h} fill="var(--color-signal-red)" opacity=".12" />}
@@ -119,18 +122,18 @@ export function TwlChart({ hourly, now, readings = [], kindLabel }: { hourly: Tw
         <text x={x(nowM) + 4} y={T + 10} className="hs-chart-tick">now {now}</text>
         <path d={pastPath} fill="none" stroke="var(--color-ink)" strokeWidth="2" strokeLinejoin="round" />
         <path d={futurePath} fill="none" stroke="var(--color-ink)" strokeWidth="2" strokeDasharray="6 5" strokeLinejoin="round" />
-        {readings.map(r => { const m = minutes(r.at); return m >= t0 && m <= t1 ? <circle key={`${r.sensor}${r.at}`} cx={x(m)} cy={y(r.twl)} r="5" fill="var(--color-sheet)" stroke="var(--color-ink)" strokeWidth="2"><title>{`${r.at} · ${r.sensor} · TWL ${r.twl} W/m²`}</title></circle> : null; })}
+        {readings.map(r => { const m = minutes(r.at); return m >= t0 && m <= t1 ? <circle key={`${r.sensor}${r.at}`} cx={x(m)} cy={y(r.twl)} r="5" fill="var(--color-sheet)" stroke="var(--color-ink)" strokeWidth="2" strokeDasharray={r.quality === 'valid' ? undefined : '3 2'}><title>{`${r.at} · ${r.sensor} · TWL ${r.twl} W/m² · ${r.quality === 'valid' ? TONE_WORD[twlTone(r.twl)] : 'Unknown'} · quality: ${r.quality}`}</title></circle> : null; })}
         {hp && <g pointerEvents="none"><line x1={x(minutes(hp.hour))} x2={x(minutes(hp.hour))} y1={T} y2={H - B} stroke="var(--color-ink)" strokeWidth="1" /><circle cx={x(minutes(hp.hour))} cy={y(hp.twl)} r="5" fill="var(--color-ink)" stroke="var(--color-sheet)" strokeWidth="2" /></g>}
       </svg>
       {hp && <div className="hs-chart-tip" style={{ insetInlineStart: `${(x(minutes(hp.hour)) / W) * 100}%` }} role="status">
-        <b>{hp.hour}</b> · TWL {hp.twl} W/m² · {TONE_WORD[twlTone(hp.twl)]}<br /><small>{minutes(hp.hour) > nowM ? 'Predicted' : kindLabel}</small>
+        <b>{hp.hour}</b> · TWL {hp.twl} W/m² · {TONE_WORD[twlTone(hp.twl)]} · check site holds<br /><small>{minutes(hp.hour) > nowM ? 'Predicted' : kindLabel}</small>
       </div>}
     </div>
-    <figcaption id={`${id}-cap`} className="hs-visually-hidden">TWL in sun by hour against the policy level of {TWL_POLICY} W/m².</figcaption>
+    <figcaption id={`${id}-cap`} className="hs-visually-hidden">TWL in sun by hour. Environmental band does not clear site holds. Site {SITE_RULE}.</figcaption>
     <details className="hs-chart-table"><summary>Show as table</summary>
-      <table className="hs-table hs-table-sm"><thead><tr><th>Hour</th><th>TWL W/m²</th><th>Band</th><th>Source</th></tr></thead>
-        <tbody>{hourly.map(p => <tr key={p.hour}><td>{p.hour}</td><td>{p.twl}</td><td>{TONE_WORD[twlTone(p.twl)]}</td><td>{minutes(p.hour) > nowM ? 'Predicted' : kindLabel}</td></tr>)}
-          {readings.map(r => <tr key={`r${r.sensor}${r.at}`}><td>{r.at}</td><td>{r.twl}</td><td>{TONE_WORD[twlTone(r.twl)]}</td><td>Sensor {r.sensor}</td></tr>)}</tbody></table>
+      <table className="hs-table hs-table-sm"><thead><tr><th>Hour</th><th>TWL W/m²</th><th>Environmental band</th><th>Site heavy work</th><th>Source</th><th>Quality</th></tr></thead>
+        <tbody>{hourly.map(p => <tr key={p.hour}><td>{p.hour}</td><td>{p.twl}</td><td>{TONE_WORD[twlTone(p.twl)]}</td><td>{SITE_RULE}</td><td>{minutes(p.hour) > nowM ? 'Predicted' : kindLabel}</td><td>—</td></tr>)}
+          {readings.map(r => <tr key={`r${r.sensor}${r.at}`}><td>{r.at}</td><td>{r.twl}</td><td>{r.quality === 'valid' ? TONE_WORD[twlTone(r.twl)] : 'Unknown'}</td><td>{SITE_RULE}</td><td>Sensor {r.sensor} · quality {r.quality}</td><td>{r.quality}</td></tr>)}</tbody></table>
     </details>
   </figure>;
 }
