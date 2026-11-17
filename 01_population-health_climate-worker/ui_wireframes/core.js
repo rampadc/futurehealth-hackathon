@@ -189,6 +189,7 @@ function twlBar(twl, level, est) {
   const pct = v => (Math.min(TWL_MAX, Math.max(TWL_MIN, v)) - TWL_MIN) / (TWL_MAX - TWL_MIN) * 100;
   const word = BAND_WORD[level].replace(' band', '');
   return `<span class="twlr"><span class="twlr__v">TWL <b>${twl}</b> W/m²</span><span class="twlr__w">${word}${est ? ' · est.' : ''}</span>`
+    + `<span class="twlmark" aria-hidden="true"><span class="twlmark__v" style="left:${pct(twl)}%;transform:translateX(-${pct(twl)}%)">${twl}</span><span class="twlmark__tri" style="left:${pct(twl)}%"></span></span>`
     + `<span class="twlbar band--${level}" role="img" aria-label="TWL ${twl} W/m², ${BAND_WORD[level]}; heavy-work limit TWL ≤${TWL_HOLD} W/m²"><span class="twlbar__fill" style="width:${pct(twl)}%"></span><span class="twlbar__hold" style="left:${pct(TWL_HOLD)}%"></span></span>`
     + `<span class="twlbar__scale" aria-hidden="true"><span>${TWL_MIN}</span><span>${TWL_MAX}</span></span></span>`;
 }
