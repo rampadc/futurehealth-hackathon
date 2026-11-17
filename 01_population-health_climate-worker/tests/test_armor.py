@@ -1,11 +1,13 @@
 """Model Armor screening (agents/supervisor/armor.py) with a fake Model Armor client: no cloud calls.
 
 What is tested is our code around ADK's plugin: the recorded decision per direction, which tools are
-screened, the cache, the global endpoint, and the eval check that reads the decision. Whether Model
+screened, the cache, the regional endpoint, and the eval check that reads the decision. Whether Model
 Armor's classifiers catch a real injection is tested by the red-team golden scenarios (evals/).
+
+Needs no Google credentials, so it runs in CI.
 """
 import asyncio
-import sys
+import importlib.util
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -15,10 +17,21 @@ from google.auth.credentials import AnonymousCredentials
 from google.cloud import modelarmor_v1 as ma
 from google.genai import types
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "agents"))
-from supervisor import armor  # noqa: E402
+from evals.metrics import score
 
-from evals.metrics import score  # noqa: E402
+
+def _load_armor():
+    """Load agents/supervisor/armor.py on its own. `from supervisor import armor` would run the package's
+    __init__, which imports agent.py, which checks Google credentials at import time and fails in CI
+    (found 16 Nov: the first CI run of this file). armor.py itself needs no credentials."""
+    path = Path(__file__).resolve().parents[1] / "agents" / "supervisor" / "armor.py"
+    spec = importlib.util.spec_from_file_location("supervisor_armor_under_test", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+armor = _load_armor()
 
 MATCH, NO_MATCH = ma.FilterMatchState.MATCH_FOUND, ma.FilterMatchState.NO_MATCH_FOUND
 
