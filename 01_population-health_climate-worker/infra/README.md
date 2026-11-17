@@ -19,8 +19,19 @@ uv run --env-file ../.env terraform -chdir=infra apply -var demo_today=""
 gcloud run services logs read supervisor-demo --region me-central1 --limit 50
 ```
 
-Deployed 7 Nov 2026: `https://heat-safe.example.invalid` (pick `supervisor` in the
-top-left). It runs with `HEAT_SAFE_TODAY=2025-07-31`, so "tomorrow" is the hot 1 Aug 2025 replay day.
+Deployed 7 Nov 2026 (`adk web`), redeployed 17 Nov with the API and Model Armor:
+`https://heat-safe.example.invalid`. Start at `/docs`; the ADK chat page is at `/dev-ui`.
+It runs with `HEAT_SAFE_TODAY=2025-07-31`, so "tomorrow" is the hot 1 Aug 2025 replay day.
+
+Verified on 17 Nov:
+- `/docs` and `/dev-ui` return 200.
+- `/sites/mussafah/conditions` returns 24 hours.
+- `/monitor/replay` streams `plan`, 24 `reading`, 2 `alert`, `replan`, `done`.
+- `/agent/chat`:
+  - a normal plan in 18.5 s (armor passed, grounding passed)
+  - a phone and passport number replaced before Gemini (`input: redacted`)
+  - an injection blocked in 2.1 s
+- No raw personal data in that session's `telemetry.agent_events` rows.
 
 **Tell teammates two things:**
 - **Everyone shares one session list.** `adk web` keeps sessions in memory under one user, so you may
@@ -31,9 +42,10 @@ top-left). It runs with `HEAT_SAFE_TODAY=2025-07-31`, so "tomorrow" is the hot 1
 |---|---|
 | `../Dockerfile` | The image: Python 3.12, `uv sync --frozen`, the code, the runtime data, `uvicorn server:app` |
 | `../.gcloudignore` | What `gcloud builds submit` uploads (and what it must not: `.env`, `.venv`, most of `data/`) |
-| `versions.tf` | Terraform and provider versions; local state |
+| `versions.tf` | Terraform and provider versions; local state; the quota project Sensitive Data Protection needs |
 | `variables.tf` | Project, region, demo date |
 | `main.tf` | APIs, image registry, build account and bucket, the build step, the agent's account and roles, the Cloud Run service, public access |
+| `model_armor.tf` | Model Armor and Sensitive Data Protection templates that screen the agent's input, guidance text and answers (note 9) |
 | `outputs.tf` | `url`, `image` |
 | `.terraform.lock.hcl` | Exact provider version and checksums (commit it, like `uv.lock`) |
 | `terraform.tfstate` | What Terraform created (gitignored, local, **don't delete it**: without it Terraform forgets it owns these resources) |
@@ -181,6 +193,28 @@ without owning them. Exercise 6 practises adopting a resource properly.
 - 32 rows in `telemetry.agent_events` for user `deploy-check` (the plugin's grant works);
 - `credentials ok` in the logs, and `plan` → "No changes" (no drift, no rebuild loop).
 
+### 9. Model Armor: a guardrail is infrastructure too (16 Nov)
+
+The agent (`../agents/supervisor/armor.py`) screens three things through Model Armor, using templates defined here:
+
+| Template | Applied to | Filters | On a match |
+|---|---|---|---|
+| `heat-safe-input` | The supervisor's message, before every model call | Prompt injection and jailbreak, personal data (SDP), harmful content | Personal data alone: **replaced** (`[PHONE_NUMBER]`) and the turn continues. Anything else: blocked. |
+| `heat-safe-tool` | `search_guidance` results only | Injection | Blocked (the agent sees "withheld") |
+| `heat-safe-output` | The final answer | Personal data, harmful content | Replaced or blocked |
+
+Decisions that shaped it, all found by trying:
+- **Location `asia-south1` (Mumbai).** Model Armor isn't offered in `me-central1`. The `global` location lists as supported and answers reads, but creating a template there fails with "not supported in 'global' location": it takes only project-wide floor settings. Mumbai is the nearest region with templates, so screened text is processed in India. The SDP templates must be in the same location as the Model Armor ones.
+- **Mumbai lacks two filters**: malicious URLs and multi-language detection ("Region 'asia-south1' does not support the requested capabilities"). Both are left out. Links are still covered by our own `check_link_grounding` (an answer may only contain URLs a tool returned), and the agent has no tool that opens a link. The gap: injection detection is strongest on English, so an attack written in Arabic or Hindi is less likely to be caught.
+- **A quota project** (`user_project_override`, `billing_project`). Sensitive Data Protection refuses user credentials without one. The provider then reads project services through the Cloud Resource Manager API, which must be enabled.
+- **The service agent is created explicitly** (`google_project_service_identity`, so `google-beta`). Model Armor's own account calls DLP with our templates. It only exists after first use, and you can't grant roles to an account that doesn't exist.
+- **No `PERSON_NAME` detector.** It would rewrite site names and crew roles ("Mussafah", "steel fixer") and break planning. Names are the known gap: phone, email, passport, date of birth, address and Emirates ID (a custom regex) are covered.
+- **No personal-data filter on guidance text.** The plugin can only block tool output, not de-identify it, and the PDFs legitimately contain phone numbers.
+- **`DANGEROUS` at `HIGH` only.** First aid for heat stroke is legitimately about danger to life.
+- **Fail closed** (`block_on_screening_failure`). If Model Armor is down, the agent doesn't answer. For a live demo, `HEAT_SAFE_ARMOR=0` is the documented fallback.
+
+Telemetry: ADK keeps the original user text in the session even after Model Armor replaces it in the model request. So `telemetry.agent_events` would still store it. `armor.redact_for_log` (the analytics plugin's `content_formatter`) redacts the same types locally before any row is written, whether or not Armor is on.
+
 ## What changes for production
 
 | Demo (now) | Production (with the real frontend) |
@@ -191,6 +225,7 @@ without owning them. Exercise 6 practises adopting a resource properly.
 | Image built by `local-exec` in `apply` | CI (Cloud Build trigger or GitHub Actions) builds on merge; Terraform gets the tag |
 | Local `terraform.tfstate` | GCS backend (`heat-safe-example-tfstate`, versioned) so the team shares state with locking |
 | One environment | `dev` and `prod` workspaces or folders, same modules, different variables |
+| Model Armor in `asia-south1` | A UAE region once Model Armor offers one; `PERSON_NAME` with a custom dictionary of site and role words to exclude |
 | Demo and eval traffic mixed in `telemetry.agent_events` | A source label per environment |
 | Pinned `HEAT_SAFE_TODAY` | Real date and live forecast |
 | The hand-made data bucket | Imported into Terraform (exercise 6) |

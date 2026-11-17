@@ -178,12 +178,35 @@ root_agent = Agent(
 )
 
 
+ARMOR_LOCATION = os.getenv("HEAT_SAFE_ARMOR_LOCATION", "asia-south1")  # not offered in me-central1; global takes no templates
+
+
+def _armor() -> list:
+    """Model Armor screening (armor.py). HEAT_SAFE_ARMOR=0 turns it off: offline runs, or a demo fallback."""
+    if os.getenv("HEAT_SAFE_ARMOR", "1") == "0":
+        return []
+    from .armor import HeatSafeArmor
+    return [HeatSafeArmor(PROJECT, ARMOR_LOCATION)]
+
+
 def _plugins() -> list:
     if os.getenv("HEAT_SAFE_TELEMETRY", "1") == "0":
         return []
-    from google.adk.plugins.bigquery_agent_analytics_plugin import BigQueryAgentAnalyticsPlugin
+    from google.adk.plugins.bigquery_agent_analytics_plugin import BigQueryAgentAnalyticsPlugin, BigQueryLoggerConfig
+
+    from .armor import redact_for_log
+    # Redaction applies whether or not Model Armor is on: telemetry is long-lived, so personal data typed
+    # into the chat must not be stored there (armor.redact_for_log)
+    # create_views=False: the plugin otherwise re-creates its 25 per-event views (v_llm_request, v_state_delta,
+    # ...) at every process start, which cost ~38 s on the first turn of every run (measured 16 Nov: 43 s ->
+    # 5 s). The views already exist; set it to True once after an ADK upgrade that adds event types.
     return [BigQueryAgentAnalyticsPlugin(project_id=PROJECT, dataset_id=TELEMETRY_DATASET,
-                                         table_id="agent_events", location=TELEMETRY_LOCATION)]
+                                         table_id="agent_events", location=TELEMETRY_LOCATION,
+                                         config=BigQueryLoggerConfig(content_formatter=redact_for_log,
+                                                                     create_views=False))]
 
 
-app = App(name="supervisor", root_agent=root_agent, plugins=_plugins())
+# Order matters: plugins run in list order and before the agent's own callbacks. Armor first, so the
+# analytics plugin logs the model request after personal data has been replaced; check_grounding (an
+# agent callback) runs last, on the answer as screened.
+app = App(name="supervisor", root_agent=root_agent, plugins=[*_armor(), *_plugins()])

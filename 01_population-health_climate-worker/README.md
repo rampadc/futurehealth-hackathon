@@ -103,7 +103,7 @@ uv run --env-file ../.env uvicorn server:app --reload --port 8010
 | `POST /plans` | A crew plan or a mid-shift re-plan (`agent_tools.optimise_schedule`) | no |
 | `GET /sites/{site}/sensor?date=&until=` | Site sensor vs forecast, the monitor's alerts so far (`agent_tools.get_site_sensor`) | no |
 | `GET /monitor/replay` (SSE) | The risk monitor replayed live on the synthetic feed: `plan`, `reading`, `alert` (all languages), `replan`, `done` | no |
-| `POST /agent/chat` (SSE) | The supervisor agent: `session`, `tool_call` / `tool_result`, then `done` with the answer and its grounding checks | yes |
+| `POST /agent/chat` (SSE) | The supervisor agent: `session`, `tool_call` / `tool_result`, then `done` with the answer, its grounding checks and Model Armor's decision (`armor`) | yes |
 | `/run_sse`, `/apps/supervisor/...`, `/dev-ui`, `/health` | ADK's own routes (`get_fast_api_app`) | yes |
 
 ```bash
@@ -123,6 +123,10 @@ Notes:
   stream with `fetch()` and `response.body.getReader()`.
 - **Sessions are in memory**, so there's one Cloud Run instance, and a restart forgets chats (a 404 for an
   old `session_id`). ADK's `/run_sse` and our `/agent/chat` keep separate sessions.
+- **Model Armor screens the chat** (`agents/supervisor/armor.py`, templates in `infra/model_armor.tf`): prompt
+  injection and jailbreaks are blocked, personal data such as phone and passport numbers is replaced before
+  Gemini sees it, and guidance text is checked for hidden instructions. `done.armor` says what happened, e.g.
+  `{"input": "redacted", "output": "passed"}`. `HEAT_SAFE_ARMOR=0` turns it off.
 - **CORS:** `localhost:5173` and `5174` (the Vite dev servers) are allowed. Add a deployed frontend with
   `HEAT_SAFE_ALLOWED_ORIGINS=https://...`.
 - **Deploy:** `infra/README.md` (the same Cloud Run service, now running `uvicorn server:app`).

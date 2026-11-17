@@ -10,7 +10,7 @@ locals {
     [for f in fileset(local.repo_root, "{src,agents}/**/*.{py,yaml}") : f],
     [for f in fileset(local.repo_root, "data/heat_safe/raw/weather/*.csv") : f],
     ["data/heat_safe/processed/onet_work_context_plan_roles.csv", "server.py", "Dockerfile", ".gcloudignore",
-     "pyproject.toml", "uv.lock"],
+    "pyproject.toml", "uv.lock"],
   ))
   image_hash = substr(sha256(join("", [for f in local.image_inputs : filesha256("${local.repo_root}/${f}")])), 0, 12)
   image      = "${var.region}-docker.pkg.dev/${var.project}/${google_artifact_registry_repository.images.repository_id}/supervisor:${local.image_hash}"
