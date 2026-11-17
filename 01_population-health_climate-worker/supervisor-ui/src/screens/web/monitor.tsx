@@ -63,7 +63,7 @@ export function SquadMonitoringScreen({ session }: ScreenProps) {
         <List>{[...byLocation.entries()].map(([where, n]) => <Row key={where} title={nameOf(where)} badge={<Badge tone="muted">{n}</Badge>} />)}</List>
       </Section>
     </div>
-    <ConditionsPanel session={session} compact readings={(caseView.request?.snapshot.readings ?? caseView.capture?.request.snapshot.readings ?? []).map(r => ({ at: time(r.measured_at), twl: r.twl, sensor: r.sensor_id }))} />
+    <ConditionsPanel session={session} compact readings={(caseView.request?.snapshot.readings ?? caseView.capture?.request.snapshot.readings ?? []).map(r => ({ at: time(r.measured_at), twl: r.twl, sensor: r.sensor_id, quality: r.quality }))} />
     <CrewRiskPanel session={session} />
   </div>;
 }
