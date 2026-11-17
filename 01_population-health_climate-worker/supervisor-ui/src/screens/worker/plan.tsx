@@ -22,9 +22,8 @@ function CheckIn({ session }: ScreenProps) {
   const canSend = report?.status === 'ready' && !session.busy && !queued;
   if (sent || queued) return <div className="hs-screen">
     <h1 id="hs-title"><T k="p4.title" /></h1>
-    <Statement tone="black" source={<T k="p4.rule" />}><T k="p4.sys" /></Statement>
-    {queued && <Note tone="amber"><T k="p4.offline" /></Note>}
-    <Note><En>Help is on the way. Stay where you are and with someone.</En></Note>
+    <Statement tone="black"><T k={sent ? 'p4.submitted' : 'p4.saved'} /></Statement>
+    <Note><T k="p4.stay" /></Note>
     <CtaBar><button type="button" className="hs-button" onClick={() => navigate('/worker/now')}><T k="p6.back" /></button></CtaBar>
   </div>;
   return <div className="hs-screen">

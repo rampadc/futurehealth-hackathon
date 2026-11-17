@@ -43,7 +43,7 @@ function Now({ session }: ScreenProps) {
     <h1 id="hs-title"><T k="p2.title" /></h1>
     {story.issued && !story.stopped && <button type="button" className="hs-button is-danger" onClick={() => navigate('/worker/alert')}><T k="stopwork" /> · {t('p2.stop.d')}</button>}
     <Hero>
-      <Metric label={<T k="p2.status" />} value={excluded ? <En>Rest now</En> : stopOrdered ? <En>Stop heavy work</En> : goToShelter ? <En>Go to shelter</En> : stopWorkshop ? <En>Stop workshop work</En> : workingNow ? <En>Workshop work</En> : planNeedsUpdate ? <En>Await updated plan</En> : actualCurrent ? <En>{kindLabel(actualCurrent.kind)}</En> : recovering ? t('p2.inrec') : heat.heavyHeld ? <En>Hold heavy work</En> : <En>Work as briefed</En>} sub={excluded ? <En>Stay with the site support team</En> : stopOrdered || goToShelter ? <En>Go to Shelter A</En> : stopWorkshop ? <En>Follow your foreman’s recovery instruction</En> : workingNow ? <En>Cooled workshop preparation</En> : planNeedsUpdate ? <En>Follow your foreman until current times are confirmed</En> : recovering ? t('shelterA') : undefined} tone={excluded || stopOrdered || stopWorkshop ? 'red' : goToShelter || planNeedsUpdate || heat.heavyHeld && !recovering ? 'amber' : recovering && !workingNow ? 'ok' : undefined} />
+      <Metric label={<T k="p2.status" />} value={excluded ? <En>Rest now</En> : stopOrdered ? <En>Stop heavy work</En> : goToShelter ? <En>Go to shelter</En> : stopWorkshop ? <En>Stop workshop work</En> : workingNow ? <En>Workshop work</En> : planNeedsUpdate ? <En>Await updated plan</En> : actualCurrent ? <En>{kindLabel(actualCurrent.kind)}</En> : recovering ? t('p2.inrec') : heat.heavyHeld ? <En>Hold heavy work</En> : <En>Work as briefed</En>} sub={excluded ? <En>Stay with the site support team</En> : goToShelter ? <En>Go to Shelter A</En> : stopWorkshop ? <En>Follow your foreman’s recovery instruction</En> : workingNow ? <En>Cooled workshop preparation</En> : planNeedsUpdate ? <En>Follow your foreman until current times are confirmed</En> : recovering && !stopOrdered ? t('shelterA') : undefined} tone={excluded || stopOrdered || stopWorkshop ? 'red' : goToShelter || planNeedsUpdate || heat.heavyHeld && !recovering ? 'amber' : recovering && !workingNow ? 'ok' : undefined} />
       <Metric label={<T k="p2.heat" />} value={heat.reading ? `${heat.reading.twl} W/m²` : '—'} sub={<><En><Band band={heat.band.band} label={heat.band.label} /></En>{heat.heavyHeld && <> · {t('p2.heatq')}</>}</>} />
       <Metric label={<T k="p2.next" />} value={next ? <><En>{kindLabel(next.kind)}</En> {time(next.starts_at)}</> : '—'} sub={next ? (next.kind === 'work' ? t('workshop') : t('shelterA')) : <En>Wait for your foreman</En>} />
     </Hero>
@@ -51,7 +51,7 @@ function Now({ session }: ScreenProps) {
       <List>
         {story.issued && <Row title={<T k="stopwork" />} detail={<T k="p2.stop.d" />} badge={<span className="hs-badge" data-tone="over">■</span>} onClick={() => navigate('/worker/alert')} />}
         {recovering && <Row title={<T k="p2.water" />} detail={<En>One cup now, then every 15 minutes.</En>} badge={<span className="hs-badge" data-tone="muted"><T k="reminder" /></span>} />}
-        {person.id === 'C05' && <Row title={<T k="p2.ci" />} detail={checkedIn ? <T k="p2.ci.d" /> : <En>Not checked in yet.</En>} badge={checkedIn ? <span className="hs-badge" data-tone="done">✓</span> : undefined} onClick={checkedIn ? undefined : () => navigate('/worker/shelter')} />}
+        {person.id === 'C05' && story.stopped && <Row title={<T k="p2.ci" />} detail={checkedIn ? <T k="p2.ci.d" /> : <En>Not checked in yet.</En>} badge={checkedIn ? <span className="hs-badge" data-tone="done">✓</span> : undefined} onClick={checkedIn ? undefined : () => navigate('/worker/shelter')} />}
         {story.assigned && <Row title={<T k="p2.plan" />} detail={<En>{current ? `${kindLabel(current.kind)} until ${time(current.ends_at)}` : 'See My plan'}</En>} onClick={() => navigate('/worker/my-plan')} />}
       </List>
       {!story.issued && !story.assigned && <Empty>{onRoster ? <En>You are on the Dune civil crew. Wait for your foreman’s instruction; your work and recovery plan will appear here when confirmed.</En> : <T k="p2.empty" />}</Empty>}
@@ -78,12 +78,11 @@ function Alert({ session }: ScreenProps) {
   if (!caseView.story.issued) return <div className="hs-screen"><h1 id="hs-title"><T k="stopwork" /></h1><Empty><En>No stop-work notice is active.</En></Empty></div>;
   return <div className="hs-screen">
     <h1 id="hs-title" className="hs-label"><T k="stopwork" /> · {time(caseView.clock)}</h1>
-    <Statement tone="red" source={<T k="alert.fixed" />}><T k="alert.stop" /></Statement>
+    <Statement tone="red"><T k="alert.stop" /></Statement>
     <div className="hs-pictos" aria-hidden="true">
-      <span><b>✋</b>{t('pic.stop')}</span><span><b>⌂</b>{t('pic.shelter')}</span><span><b>💧</b>{t('pic.water')}</span><span><b>✚</b>{t('pic.help')}</span>
+      <span><b>✋</b>{t('pic.stop')}</span>{caseView.story.stopped && <><span><b>⌂</b>{t('pic.shelter')}</span><span><b>💧</b>{t('pic.water')}</span><span><b>✚</b>{t('pic.help')}</span></>}
     </div>
-    <Note><En>This notice is a fixed template. Your supervisor sees that it was shown, not anything you say.</En></Note>
-    <CtaBar><button type="button" className="hs-button is-primary" onClick={() => navigate(session.person?.id === 'C05' ? '/worker/shelter' : '/worker/now')}><T k="alert.go" /></button></CtaBar>
+    <CtaBar><button type="button" className="hs-button is-primary" onClick={() => navigate(caseView.story.stopped && session.person?.id === 'C05' ? '/worker/shelter' : '/worker/now')}><T k="alert.go" /></button></CtaBar>
   </div>;
 }
 

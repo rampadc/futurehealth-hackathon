@@ -125,7 +125,7 @@ export function SystemTrustScreen({ session }: ScreenProps) {
         <Row title="Proposals are never applied" detail="Solver responses carry applied: false; assignments, holds and restarts need a named person." badge={<Badge tone="done">Enforced</Badge>} />
         <Row title="Purpose limitation" detail="The agent refuses worker ranking, discipline, attendance and contract decisions, and does not diagnose." badge={<Badge tone="done">Enforced</Badge>} />
         <Row title="Health data stays with the worker" detail="Supervisors see “needs rest now”, never answers or body data." badge={<Badge tone="done">Enforced</Badge>} />
-        <Row title="Demo sign-in" detail="Named personas are demo selection, not authentication." badge={<Badge tone="muted">Demo</Badge>} />
+        <Row title="Role selection" detail="Role selection does not verify identity; case actions follow server-side role rules." badge={<Badge tone="muted">Access</Badge>} />
       </List>
     </Section>
   </div>;
