@@ -30,7 +30,13 @@ export function TwlGauge({ twl, size = 64, label, valid = true, band }: { twl: n
   const policyX = x(TWL_POLICY);
   const name = twl == null ? 'No TWL reading' : `TWL ${twl} W/m², ${valid ? TONE_WORD[tone!] : 'Unknown (faulty reading)'}; ${SITE_RULE}; environmental band does not clear site holds`;
   const width = size * 2;
+  const pct = twl == null ? 0 : x(twl) / W * 100;
   return <span className="hs-gauge" title={name} style={{ inlineSize: width }}>
+    {twl != null && <span className="hs-gauge-mark" aria-hidden="true">
+      {/* The value stays inside the bar's width; the triangle points at the (clamped) reading. */}
+      <span className="hs-gauge-mark-v" style={{ left: `${pct}%`, transform: `translateX(-${pct}%)` }}>{twl}</span>
+      <span className="hs-gauge-tri" style={{ left: `${pct}%` }} />
+    </span>}
     <svg viewBox={`0 0 ${W} ${H}`} width={width} height={width * H / W} role="img" aria-label={label ?? name}>
       <rect x="0" y={barY} width={W} height={barH} fill="var(--color-section-frame, #ccc)" />
       {twl != null && (valid
