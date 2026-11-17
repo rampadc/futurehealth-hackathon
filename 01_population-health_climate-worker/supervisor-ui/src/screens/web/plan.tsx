@@ -60,9 +60,9 @@ export function CrewWorkshopScreen({ session }: ScreenProps) {
       </Section>
       <Section title="Requirement checks">
         <List>
-          <Row title="Permit" detail={ws ? status(ws.permit_status) : '—'} badge={ws?.permit_status === 'valid' ? <span className="hs-badge" data-tone="done">✓</span> : <span className="hs-badge" data-tone="wait">Check</span>} />
-          <Row title="Resources" detail={ws ? status(ws.resource_status) : '—'} badge={ws?.resource_status === 'available' ? <span className="hs-badge" data-tone="done">✓</span> : <span className="hs-badge" data-tone="wait">Check</span>} />
-          <Row title="Supervision" detail={ws ? status(ws.supervision_status) : '—'} badge={ws?.supervision_status === 'confirmed' || ws?.supervision_status === 'available' ? <span className="hs-badge" data-tone="done">✓</span> : <span className="hs-badge" data-tone="wait">Check</span>} />
+          <Row title="Permit" detail={ws ? status(ws.permit_status) : '—'} badge={ws?.permit_status === 'valid' ? <span className="hs-badge" data-tone="done" aria-hidden="true" /> : <span className="hs-badge" data-tone="wait">Check</span>} />
+          <Row title="Resources" detail={ws ? status(ws.resource_status) : '—'} badge={ws?.resource_status === 'available' ? <span className="hs-badge" data-tone="done" aria-hidden="true" /> : <span className="hs-badge" data-tone="wait">Check</span>} />
+          <Row title="Supervision" detail={ws ? status(ws.supervision_status) : '—'} badge={ws?.supervision_status === 'confirmed' || ws?.supervision_status === 'available' ? <span className="hs-badge" data-tone="done" aria-hidden="true" /> : <span className="hs-badge" data-tone="wait">Check</span>} />
         </List>
       </Section>
     </div>

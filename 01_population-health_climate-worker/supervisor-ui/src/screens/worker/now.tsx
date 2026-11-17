@@ -51,7 +51,7 @@ function Now({ session }: ScreenProps) {
       <List>
         {story.issued && <Row title={<T k="stopwork" />} detail={<T k="p2.stop.d" />} badge={<span className="hs-badge" data-tone="over">■</span>} onClick={() => navigate('/worker/alert')} />}
         {recovering && <Row title={<T k="p2.water" />} detail={<En>One cup now, then every 15 minutes.</En>} badge={<span className="hs-badge" data-tone="muted"><T k="reminder" /></span>} />}
-        {person.id === 'C05' && story.stopped && <Row title={<T k="p2.ci" />} detail={checkedIn ? <T k="p2.ci.d" /> : <En>Not checked in yet.</En>} badge={checkedIn ? <span className="hs-badge" data-tone="done">✓</span> : undefined} onClick={checkedIn ? undefined : () => navigate('/worker/shelter')} />}
+        {person.id === 'C05' && story.stopped && <Row title={<T k="p2.ci" />} detail={checkedIn ? <T k="p2.ci.d" /> : <En>Not checked in yet.</En>} badge={checkedIn ? <span className="hs-badge" data-tone="done" aria-hidden="true" /> : undefined} onClick={checkedIn ? undefined : () => navigate('/worker/shelter')} />}
         {story.assigned && <Row title={<T k="p2.plan" />} detail={<En>{current ? `${kindLabel(current.kind)} until ${time(current.ends_at)}` : 'See My plan'}</En>} onClick={() => navigate('/worker/my-plan')} />}
       </List>
       {!story.issued && !story.assigned && <Empty>{onRoster ? <En>You are on the Dune civil crew. Wait for your foreman’s instruction; your work and recovery plan will appear here when confirmed.</En> : <T k="p2.empty" />}</Empty>}

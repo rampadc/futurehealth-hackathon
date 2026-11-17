@@ -434,7 +434,7 @@ describe('assessed workshop plan', () => {
     await open('/site/proposal', 'C01');
     await screen.findByRole('heading', { name: 'Proposal review' });
     expect(screen.getAllByText('Proposed').length).toBeGreaterThan(0);
-    expect(screen.queryByText('✓ Assigned')).toBeNull();
+    expect(screen.queryByText('Assigned')).toBeNull();
     await userEvent.click(await screen.findByRole('button', { name: 'Approve assessed proposal' }));
     await waitFor(() => expect(commands[0]).toMatchObject({ action: 'assign', payload: { assessment_id: 'assessment-1' } }));
   });
@@ -447,7 +447,7 @@ describe('assessed workshop plan', () => {
     expect(await screen.findByText('This previous proposal is no longer current. Record fresh observations and recalculate.')).toBeTruthy();
     expect(screen.queryByText(/workers meet every requirement/)).toBeNull();
     expect(screen.getAllByText('Previous assignment').length).toBeGreaterThan(0);
-    expect(screen.queryByText('✓ Assigned')).toBeNull();
+    expect(screen.queryByText('Assigned')).toBeNull();
   });
 
   it('keeps a new web proposal unassigned despite an older assignment', async () => {
