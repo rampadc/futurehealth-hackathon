@@ -12,6 +12,12 @@ REPO_ID = 1444949018
 OWNER_ID = 5560025
 CI_NAME = "Heat Safe CI"
 PROTECTED = (".github/workflows/", ".github/security/", "01_population-health_climate-worker/cloud/")
+APP = "01_population-health_climate-worker/"
+DEPLOYABLE_FILES = (
+    APP + "Dockerfile.cloudrun",
+    APP + "src/heat_safe/application/api.py",
+    APP + "supervisor-ui/package-lock.json",
+)
 
 
 def require(condition, reason):
@@ -31,7 +37,7 @@ def validate_repository(repo):
     require(repo.get("owner", {}).get("id") == OWNER_ID, "unexpected owner ID")
 
 
-def validate_run(event, current_main, get_pr, get_files, get_artifacts):
+def validate_run(event, current_main, get_pr, get_files, get_tree):
     validate_repository(event["repository"])
     run = event["workflow_run"]
     validate_repository(run["repository"])
@@ -58,13 +64,15 @@ def validate_run(event, current_main, get_pr, get_files, get_artifacts):
         require(pr["head"]["sha"] == run["head_sha"], "PR head changed after CI")
         files = list(get_files(number))
         require(len(files) == pr["changed_files"], "incomplete PR file list")
-        for filename in files:
-            require(not filename.startswith(PROTECTED), f"PR changes trusted control plane: {filename}")
+        for item in files:
+            for filename in (item["filename"], item.get("previous_filename")):
+                if filename:
+                    require(not filename.startswith(PROTECTED), f"PR changes trusted control plane: {filename}")
         values = {"kind": "preview", "sha": run["head_sha"], "run_id": str(run["id"]), "pr": str(number)}
-    artifacts = get_artifacts(run["id"])
-    matching = [item for item in artifacts if item["name"] == f"heat-safe-image-{run['head_sha']}" and not item["expired"]]
-    require(len(matching) <= 1, "ambiguous image artifact")
-    values["ready"] = "true" if matching else "false"
+    tree = get_tree(run["head_sha"])
+    require(not tree["truncated"], "incomplete source tree")
+    paths = {item["path"] for item in tree["tree"] if item["type"] == "blob"}
+    values["ready"] = "true" if all(path in paths for path in DEPLOYABLE_FILES) else "false"
     return values
 
 
@@ -97,7 +105,7 @@ def pr_files(number):
     while True:
         items = api(f"pulls/{number}/files?per_page=100&page={page}")
         for item in items:
-            yield item["filename"]
+            yield item
         if len(items) < 100:
             break
         page += 1
@@ -118,7 +126,7 @@ def main():
     if args.mode == "run":
         current_main = api("git/ref/heads/main")["object"]["sha"]
         require(current_main == os.environ["TRUSTED_SHA"], "trusted checkout is no longer current main")
-        values = validate_run(event, current_main, lambda n: api(f"pulls/{n}"), pr_files, lambda n: api(f"actions/runs/{n}/artifacts?per_page=100")["artifacts"])
+        values = validate_run(event, current_main, lambda n: api(f"pulls/{n}"), pr_files, lambda sha: api(f"git/trees/{sha}?recursive=1"))
         values["trusted_sha"] = current_main
     else:
         values = validate_closed(event, lambda n: api(f"pulls/{n}"))

@@ -212,7 +212,7 @@ The main deployment role is bound directly to `heat-safe-app`. Cloud Run does no
 
 ## Trusted deployment controller
 
-Only execute `cloud/deploy.py` from the checked-out default branch in privileged workflows. PR code is built without GCP credentials into an OCI archive; the trusted workflow verifies provenance and pushes it into the private preview repository. The controller never builds source. Its image input must be a digest in `heat-safe-main/app` or that PR's exact `heat-safe-previews/pr-N/app` path. CI checks anonymous manifest retrieval before and after push and deletes the just-pushed digest if it becomes public.
+Only execute `cloud/deploy.py` from the checked-out default branch in privileged workflows. CI runs application and security tests. After validating the CI run and source, the trusted deployment workflow checks out the source separately, builds and smoke-tests its image before Google Cloud authentication, then pushes it directly to the private Google Artifact Registry repository. It does not use a GitHub Actions image artifact. Main images go to `heat-safe-main/app`; preview images go to that PR's exact `heat-safe-previews/pr-N/app` path. The controller never builds source and accepts only a digest in the corresponding repository. The deployment workflow checks anonymous manifest retrieval before and after push and deletes the just-pushed digest if it becomes public.
 
 ```sh
 cd 01_population-health_climate-worker
