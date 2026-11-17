@@ -591,8 +591,39 @@ describe('restart review', () => {
     currentCase = await makeCase('restart_ready', { fresh: true, permit: true, removed: true, firstaid: true }, [task('review', 'P02', 'ready')]);
     await open('/web/restart-review', 'P02');
     expect(await screen.findByText('Crew readiness check')).toBeTruthy();
-    expect(screen.getAllByRole('listitem').filter(li => /check|reading|removal|contact/i.test(li.textContent ?? '')).length).toBeGreaterThanOrEqual(8);
+    const checks = screen.getByRole('table', { name: /Restart checks, Civil crew/ });
+    const rows = within(checks).getAllByRole('row').filter(r => within(r).queryAllByRole('cell').length >= 4);
+    expect(rows).toHaveLength(8);
+    // The squad leader's group comes first, and each row names a person, the check and what it confirms.
+    const groups = within(checks).getAllByRole('columnheader').filter(h => h.getAttribute('scope') === 'colgroup');
+    expect(groups[0].textContent).toMatch(/Squad leader · Civil crew/);
+    expect(within(rows[0]).getByText(/Personnel check|Worker removal|Recovery check|Crew readiness check/)).toBeTruthy();
+    expect(within(checks).getByText('Every crew member is accounted for.')).toBeTruthy();
+    const handover = screen.getByRole('table', { name: 'Decisions carried forward' });
+    expect(within(handover).getAllByRole('row')).toHaveLength(6);
+    expect(within(handover).getByText('Restart review')).toBeTruthy();
+    expect(screen.getByText(/Decisions carried forward · \d open of 5/)).toBeTruthy();
     expect(screen.getByText(/stays stopped/)).toBeTruthy();
+  });
+
+  it('sorts restart status by any column and keeps other squads on the same layout', async () => {
+    currentCase = await makeCase('restart_ready', { fresh: true, permit: true, removed: true, firstaid: true }, [task('review', 'P02', 'ready')]);
+    await open('/web/restart-review', 'P02');
+    const table = (await screen.findAllByRole('table'))[0];
+    const names = () => within(table).getAllByRole('row').slice(1).map(r => within(r).getAllByRole('cell')[0].textContent?.trim());
+    await userEvent.click(within(table).getByRole('button', { name: /Squad/ }));
+    expect(names()).toEqual(['Civil crew', 'Formwork crew', 'MEP crew', 'Steel fixing crew']);
+    await userEvent.click(within(table).getByRole('button', { name: /Squad/ }));
+    expect(names()).toEqual(['Steel fixing crew', 'MEP crew', 'Formwork crew', 'Civil crew']);
+    await userEvent.click(within(table).getByRole('button', { name: /Latest reading/ }));
+    expect(names()[0]).toBe('Steel fixing crew');
+    expect(within(table).getByRole('columnheader', { name: /Latest reading/ }).getAttribute('aria-sort')).toBe('ascending');
+    await userEvent.click(within(table).getAllByRole('row').find(r => /Formwork crew/.test(r.textContent ?? ''))!);
+    expect(screen.queryByRole('radiogroup', { name: 'Squad' })).toBeNull();
+    expect(screen.getByText(/No restart review for the formwork crew/)).toBeTruthy();
+    expect(screen.getByRole('group', { name: /Breaks and latest TWL readings/ })).toBeTruthy();
+    // The squad choice is shared across screens in this tab; put it back for later tests.
+    await userEvent.click(within(screen.getAllByRole('table')[0]).getAllByRole('row').find(r => /Civil crew/.test(r.textContent ?? ''))!);
   });
 });
 

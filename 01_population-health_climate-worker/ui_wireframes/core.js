@@ -146,7 +146,7 @@ const attr = (k, v) => (v === undefined || v === null || v === false || v === ''
 /* ───────── components ───────── */
 /* Person key → the ID whose photo they wear. Amal has no ID in this story; this Noura is
    drawn with the Noura photo the rest of the product uses, so a name always has one face. */
-const PHOTO_ID = { amal: 'P01', noura: 'P05', karim: 'L02', faisal: 'L04' };
+const PHOTO_ID = { amal: 'P01', noura: 'P05', karim: 'L02', faisal: 'L04', jose: 'M01' };
 function photoId(key) { const p = PEOPLE[key]; return p && !p.machine ? PHOTO_ID[key] || p.id || null : null; }
 /* Crew photo for people (round, ui_design_system/people.js); a square ⚙ tile for software. */
 function av(key, { sm, size, cls } = {}) {
