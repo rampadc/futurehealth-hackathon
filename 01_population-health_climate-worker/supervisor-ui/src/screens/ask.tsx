@@ -5,13 +5,31 @@ import { Computed, Draft, Head, NoCase, Note, Section } from './kit';
 import type { ScreenProps } from './registry';
 import { AgentIntro } from './squads';
 
-type Message = { id: string; author: 'user' | 'assistant'; text: string; case_clock?: string; tools?: string[] };
+/** One guardrail result from check_grounding (agents/supervisor/agent.py): values in the answer vs tool outputs. */
+type Check = { checked: number; passed: boolean; ungrounded: string[] };
+type Grounding = { grounding?: Check | null; citations?: Check | null; links?: Check | null };
+type Message = { id: string; author: 'user' | 'assistant'; text: string; case_clock?: string; tools?: string[]; grounding?: Grounding };
 const SUGGESTIONS = ['Who can work in the workshop?', 'What needs attention?', 'Can trench work restart?', 'What if Rana were unavailable?'];
 const HYPOTHETICAL = new Set(['what_if_crew_plan']);
 
 /** A what-if answer is a solver draft that was never recorded; it says so on the answer itself. */
 function Hypothetical({ tools }: { tools?: string[] }) {
   return tools?.some(t => HYPOTHETICAL.has(t)) ? <p><span className="hs-badge" data-tone="wait">Hypothetical · not recorded</span></p> : null;
+}
+
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+
+/**
+ * The guardrail made visible: every number, page citation and link in the answer was checked against what
+ * the tools returned (check_grounding on the backend). Shows nothing when there was nothing to check.
+ */
+function Checked({ g }: { g?: Grounding }) {
+  const checks: Array<[Check | null | undefined, string, string]> = [
+    [g?.grounding, 'number', 'match tool results'], [g?.citations, 'citation', 'verified'], [g?.links, 'link', 'verified']];
+  const bad = checks.flatMap(([c]) => c && !c.passed ? c.ungrounded : []);
+  if (bad.length) return <p aria-label="Checks on this answer"><span className="hs-badge" data-tone="wait">⚠ Not found in tool results: {bad.join(', ')} · check before acting</span></p>;
+  const done = checks.filter(([c]) => c && c.checked > 0).map(([c, word, verb]) => `✓ ${plural(c!.checked, word)} ${verb}`);
+  return done.length ? <p className="hs-computed" aria-label="Checks on this answer">{done.join(' · ')}</p> : null;
 }
 
 /** The latest answer's sources: one small row at the base of the conversation, above the suggestions. */
@@ -51,7 +69,7 @@ export function Conversation({ session, compact }: ScreenProps & { compact?: boo
       await readChatStream(response, (kind, data) => {
         if (kind === 'error') throw new Error(String(data.message));
         if (kind === 'tool' && data.phase === 'started') { setTools(t => [...t, String(data.name)]); if (!used.includes(String(data.name))) used.push(String(data.name)); }
-        if (kind === 'answer') { answered = true; setMessages(m => [...m.filter(x => x.id !== String(data.id)), { id: String(data.id), author: 'assistant', text: String(data.text), case_clock: data.case_clock as string | undefined, tools: Array.isArray(data.tools) ? data.tools.map(String) : used }]); }
+        if (kind === 'answer') { answered = true; setMessages(m => [...m.filter(x => x.id !== String(data.id)), { id: String(data.id), author: 'assistant', text: String(data.text), case_clock: data.case_clock as string | undefined, tools: Array.isArray(data.tools) ? data.tools.map(String) : used, grounding: data.grounding as Grounding | undefined }]); }
       });
       if (!answered) throw new Error('The connection closed before an answer arrived.');
     } catch (e) {
@@ -66,7 +84,7 @@ export function Conversation({ session, compact }: ScreenProps & { compact?: boo
       {messages.length === 0 && loaded && <Note>Ask about today’s heat, the plan or the rules. Answers use the live case and cite the tools they called.</Note>}
       <div className="hs-chat" aria-live="polite">
         {messages.map(m => m.author === 'assistant'
-          ? <Draft key={m.id} title={`Planning Agent · AI${m.case_clock ? ` · case at ${m.case_clock.slice(11, 16)}` : ''}`}><p className="hs-msg-text">{m.text}</p><Hypothetical tools={m.tools} /></Draft>
+          ? <Draft key={m.id} title={`Planning Agent · AI${m.case_clock ? ` · case at ${m.case_clock.slice(11, 16)}` : ''}`}><p className="hs-msg-text">{m.text}</p><Hypothetical tools={m.tools} /><Checked g={m.grounding} /></Draft>
           : <p key={m.id} className="hs-msg" data-author="user">{m.text}</p>)}
         {pending && <p className="hs-computed" role="status">Thinking…{tools.length ? ` · tools: ${tools.join(', ')}` : ''}</p>}
       </div>
@@ -80,7 +98,7 @@ export function Conversation({ session, compact }: ScreenProps & { compact?: boo
       <input aria-label="Your question" placeholder="Ask a question" value={draft} onChange={e => setDraft(e.target.value)} autoComplete="off" disabled={!loaded} />
       <button type="submit" className="hs-button is-primary" disabled={pending || !draft.trim() || !loaded}>Send</button>
     </form>
-    {!compact && <Computed>Answers are AI and may be wrong. They never change the case; only people record actions. Worker ranking, discipline and diagnosis are refused.</Computed>}
+    {!compact && <Computed>Answers are AI and may be wrong. Numbers and citations are checked against tool results. They never change the case; only people record actions. Worker ranking, discipline and diagnosis are refused.</Computed>}
   </div>;
 }
 
