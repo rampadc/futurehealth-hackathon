@@ -129,6 +129,7 @@ class CaseService:
                 CREATE UNIQUE INDEX IF NOT EXISTS one_active_case ON cases(active) WHERE active=1;
                 CREATE TABLE IF NOT EXISTS events(id INTEGER PRIMARY KEY AUTOINCREMENT, case_id TEXT NOT NULL REFERENCES cases(id), command_id TEXT NOT NULL, actor_id TEXT NOT NULL, action TEXT NOT NULL, occurred_at TEXT NOT NULL, payload TEXT NOT NULL, UNIQUE(case_id,command_id));
                 CREATE TABLE IF NOT EXISTS sessions(token TEXT PRIMARY KEY, persona_id TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS demo_settings(id INTEGER PRIMARY KEY, settings TEXT NOT NULL, applied_key TEXT);
                 CREATE TABLE IF NOT EXISTS runs(id TEXT PRIMARY KEY, case_id TEXT NOT NULL REFERENCES cases(id), version INTEGER NOT NULL, status TEXT NOT NULL, started_at TEXT NOT NULL, finished_at TEXT, request TEXT NOT NULL, response TEXT, http_status INTEGER, graph_events TEXT, error TEXT, applied INTEGER NOT NULL DEFAULT 0);
                 CREATE INDEX IF NOT EXISTS runs_case ON runs(case_id,version);
             ''')

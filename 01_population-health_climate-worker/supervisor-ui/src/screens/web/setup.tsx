@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { heatNow, time } from '../data';
 import { Badge, Head, List, Row, Section, Person } from '../kit';
 import type { ScreenProps } from '../registry';
-import { PINS, SENSORS, squadsFor, TONE, ZONES } from '../squads';
+import { PINS, sensorsNow, squadsFor, TONE, ZONES } from '../squads';
 
 /**
  * Site setup: which sensors serve which squads and locations on the construction site.
@@ -12,6 +12,7 @@ import { PINS, SENSORS, squadsFor, TONE, ZONES } from '../squads';
 export function SiteSetupScreen({ session }: ScreenProps) {
   const [selected, setSelected] = useState('t1');
   const squads = squadsFor(session.caseView);
+  const SENSORS = sensorsNow();
   const heat = heatNow(session.caseView);
   const squadNames = (ids: string[]) => ids.length ? ids.map(id => squads.find(q => q.id === id)?.name ?? id).join(', ') : '—';
   const statusOf = (id: string, base: string) => id === 't1' && heat.reading ? `Live · ${heat.reading.twl} W/m² at ${time(heat.reading.measured_at)}` : base;
@@ -32,7 +33,7 @@ export function SiteSetupScreen({ session }: ScreenProps) {
         {SENSORS.map(x => { const [cx, cy] = PINS[x.id]; const on = x.id === sensor.id;
           return <g key={x.id} className="hs-pin" role="button" tabIndex={0} aria-label={`${x.id.toUpperCase()} · ${x.type} · ${x.loc}`} aria-pressed={on}
             onClick={() => setSelected(x.id)} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') setSelected(x.id); }}>
-            <circle cx={cx} cy={cy} r={on ? 13 : 11} fill={x.off ? 'var(--color-signal-red)' : 'currentColor'} stroke="var(--color-base)" strokeWidth="2" />
+            <circle cx={cx} cy={cy} r={on ? 13 : 11} fill={x.off || x.stale ? 'var(--color-signal-red)' : 'currentColor'} stroke="var(--color-base)" strokeWidth="2" />
             <text x={cx} y={cy + 4} textAnchor="middle" fontSize="9" fontWeight="700" fill="var(--color-base)">{x.id.toUpperCase()}</text>
             {on && <circle cx={cx} cy={cy} r={17} fill="none" stroke="currentColor" strokeWidth="2" />}
           </g>; })}
@@ -43,10 +44,10 @@ export function SiteSetupScreen({ session }: ScreenProps) {
       <List>
         <Row title="Location" detail={sensor.loc} />
         <Row title="Squads" detail={squadNames(sensor.squads)} />
-        <Row title="Relay" detail={sensor.relay} badge={<Badge tone={sensor.off ? 'over' : 'done'}>{sensor.off ? 'Offline' : 'Live'}</Badge>} />
+        <Row title="Relay" detail={sensor.relay} badge={<Badge tone={sensor.off || sensor.stale ? 'over' : 'done'}>{sensor.off ? 'Offline' : sensor.stale ? 'Stale' : 'Live'}</Badge>} />
         <Row title="Status" detail={statusOf(sensor.id, sensor.status)} />
       </List>
-      {sensor.off && <p className="hs-error">No heartbeat since 07:52. Squads it covers fall back to the forecast and their band rises one level.</p>}
+      {(sensor.off || sensor.stale) && <p className="hs-error">{sensor.off ? 'No valid reading.' : 'The latest reading is more than 5 minutes old.'} Squads it covers fall back to the forecast and their band rises one level.</p>}
     </Section>
     <Section title="Squads and locations">
       <div className="hs-scroll"><table className="hs-table hs-table-sm">
@@ -60,7 +61,7 @@ export function SiteSetupScreen({ session }: ScreenProps) {
         <thead><tr><th>Sensor</th><th>Type</th><th>Location</th><th>Squads</th><th>Relay</th><th>Status</th></tr></thead>
         <tbody>{SENSORS.map(x => <tr key={x.id} className="hs-pick" aria-selected={x.id === sensor.id} onClick={() => setSelected(x.id)}>
           <td><b>{x.id.toUpperCase()}</b></td><td>{x.type}</td><td>{x.loc}</td><td>{squadNames(x.squads)}</td><td>{x.relay}</td>
-          <td><Badge tone={x.off ? 'over' : 'done'}>{x.off ? 'Offline' : 'Live'}</Badge> {statusOf(x.id, x.status)}</td></tr>)}</tbody>
+          <td><Badge tone={x.off || x.stale ? 'over' : 'done'}>{x.off ? 'Offline' : x.stale ? 'Stale' : 'Live'}</Badge> {statusOf(x.id, x.status)}</td></tr>)}</tbody>
       </table></div>
     </Section>
     <Section title="Locations">

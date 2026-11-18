@@ -35,9 +35,12 @@ The `.env` file supplies the personal `heat-safe-example` project and the
 separate ADC path described below. Keep its credentials out of source control.
 The named roles are fictional demo personas, not authenticated users. A fresh
 case starts at 08:00 GST on 4 August 2025 and advances with real elapsed time to
-10:30; there is no manual clock control. Presenter controls can start or reset a
-case and inspect executions. Open separate browser tabs to select different
-personas without changing the other tabs. The backend and solver compute responses
+10:30. Presenter controls show a timeline of the case day (click to move case
+time; an earlier time starts the day again), a site map of people and sensors,
+hourly Thermal Work Limit per squad sensor, sensor faults (stale or offline) and
+worker health conditions, and open each persona's screens in a new signed-in
+window. **Reset to start of day** restores 08:00 and the default site settings.
+See [presenter controls](supervisor-ui/README.md#presenter-controls). The backend and solver compute responses
 for recorded inputs. A solver plan remains a proposal (`applied: false`): a
 separate human confirmation records assignment, and another confirmation records
 the actual start of work when its proposed start time arrives. This demo does not

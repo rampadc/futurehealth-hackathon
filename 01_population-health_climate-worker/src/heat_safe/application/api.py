@@ -13,7 +13,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from .service import CaseError, CaseService, PEOPLE
-from . import access, crew_risk, people_api, platform_api, storage
+from . import access, crew_risk, demo_site, people_api, platform_api, storage
 
 
 def check_hosted_config() -> None:
@@ -35,6 +35,7 @@ async def lifespan(app: FastAPI):
             await asyncio.sleep(1)
             try:
                 await app.state.service.catch_up()
+                await demo_site.sync(app.state.service)
             except Exception:
                 # Reads and commands also catch up; a transient DB/solver failure must not stop the monitor.
                 import logging
@@ -59,6 +60,7 @@ app.include_router(access.router)
 app.include_router(platform_api.router)
 app.include_router(people_api.router)
 app.include_router(crew_risk.router)
+app.include_router(demo_site.router)
 
 
 @app.exception_handler(CaseError)
@@ -177,8 +179,9 @@ async def start(body: StartInput):
 
 
 @app.post('/api/demo/clock')
-async def clock(body: ClockInput):
-    raise CaseError(409, 'Case time runs automatically. Start a new rehearsal instead of changing its clock.')
+async def clock(body: ClockInput, request: Request):
+    """Presenter: move case time to a minute in the case window. Earlier times start the day again."""
+    return await demo_site.jump(request.app.state.service, body.at)
 
 
 @app.post('/api/demo/signals')

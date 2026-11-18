@@ -51,6 +51,12 @@ def acclimatisation_for(person_id: str, day: date) -> Acclimatisation:
 
 def site_twl(day: str, hour: int) -> dict[str, float] | None:
     """The case site's TWL in the sun for one hour, per clothing ensemble in the TWL model."""
+    heat = _site_twl(day, hour)
+    return dict(heat) if heat is not None else None
+
+
+@cache
+def _site_twl(day: str, hour: int) -> dict[str, float] | None:
     import pandas as pd
 
     from heat_safe.agent_tools import _weather
@@ -84,7 +90,9 @@ def _local_reading(snapshot: dict, clock: datetime) -> tuple[float | None, str]:
     return float(r['twl']), 'used'
 
 
-def assess(view: dict) -> tuple[list[WorkerRisk], dict]:
+def assess(view: dict, conditions: dict[str, list[str]] | None = None) -> tuple[list[WorkerRisk], dict]:
+    """Bands for the case crew. ``conditions`` are presenter-assigned health conditions (demo_site.CONDITIONS)."""
+    conditions = conditions or {}
     clock = datetime.fromisoformat(view['clock'])
     snapshot = view['request']['snapshot']
     heat = site_twl(clock.date().isoformat(), clock.hour)
@@ -92,16 +100,29 @@ def assess(view: dict) -> tuple[list[WorkerRisk], dict]:
     if heat is not None:
         heat = with_local_reading(heat, local)
     reported = {e['actorId'] for e in view['story']['events'] if e['id'] == 'report'}
-    risks = [compute_worker_risk(heat, WorkerFactors(
-        pid,
-        work_intensity='light' if pid in LIGHT_WORK else 'heavy',
-        clothing=CLOTHING.get(pid, rules.DEFAULT_CLOTHING),
-        acclimatisation=acclimatisation_for(pid, clock.date()),
-        symptoms_reported=pid in reported,
-    ), environment_ok=local_status != 'lost') for pid in (w['person_id'] for w in snapshot['workers'])]
+    def factors(pid: str) -> WorkerFactors:
+        has = set(conditions.get(pid, ()))
+        return WorkerFactors(
+            pid,
+            work_intensity='light' if pid in LIGHT_WORK else 'heavy',
+            clothing=CLOTHING.get(pid, rules.DEFAULT_CLOTHING),
+            acclimatisation=(acclimatisation_status(clock.date(), new_starter_since=clock.date()) if 'not_acclimatised' in has
+                             else acclimatisation_for(pid, clock.date())),
+            symptoms_reported=pid in reported or 'unwell' in has,
+            low_fluid='low_fluid' in has,
+            heat_sensitive='heat_sensitive' in has,
+            red_flag='red_flag' in has,
+        )
+    risks = [compute_worker_risk(heat, factors(pid), environment_ok=local_status != 'lost')
+             for pid in (w['person_id'] for w in snapshot['workers'])]
     inputs = {'hour': f'{clock.hour:02}:00', 'site': CASE_SITE, 'weather': 'ok' if heat is not None else 'unavailable',
               'local_reading': local_status, 'rules_version': rules.RULES_VERSION}
     return risks, inputs
+
+
+def _conditions(request: Request) -> dict[str, list[str]]:
+    from .demo_site import load
+    return load(request.app.state.service)[0]['conditions']
 
 
 @router.get('/api/case/crew-risk')
@@ -113,7 +134,7 @@ def case_crew_risk(request: Request):
     view = request.app.state.service.read_case(None)
     if not view:
         return None
-    risks, inputs = assess(view)
+    risks, inputs = assess(view, _conditions(request))
     return {'inputs': inputs, 'crew': crew_risk(risks),
             'workers': [] if persona == 'P01' else [r.for_supervisor() for r in risks]}
 
@@ -127,6 +148,6 @@ def own_risk(request: Request):
     view = request.app.state.service.read_case(None)
     if not view:
         return None
-    risks, inputs = assess(view)
+    risks, inputs = assess(view, _conditions(request))
     mine = next((r for r in risks if r.person_id == persona), None)
     return mine and {'inputs': inputs, **mine.for_worker()}
