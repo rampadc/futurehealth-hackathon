@@ -122,7 +122,7 @@ export const kindLabel = (kind: string) => kind === 'work' ? 'Work' : kind === '
 /** Wireframe screen that handles each case action, for inbox links. */
 export const SCREEN_FOR_ACTION: Record<string, { site?: string; web?: string }> = {
   issue: { site: 'stop-work', web: 'heat-controls' }, acknowledge: { site: 'stop-work', web: 'response' }, stop: { site: 'stop-work', web: 'response' },
-  recover: { site: 'headcount', web: 'response' }, personnel: { site: 'headcount', web: 'restart-review' }, escalation_followup: { web: 'response' },
+  recover: { site: 'account-for-crew', web: 'response' }, personnel: { site: 'account-for-crew', web: 'restart-review' }, escalation_followup: { web: 'response' },
   readiness: { site: 'readiness', web: 'crew' }, activity: { site: 'readiness', web: 'crew' }, crew_readiness: { site: 'readiness', web: 'restart-review' }, leila: { site: 'readiness', web: 'crew' },
   assign: { site: 'proposal', web: 'crew' }, incident_record: { site: 'action-card', web: 'response' }, remove: { site: 'action-card', web: 'response' }, firstaid: { site: 'action-card', web: 'response' },
   start_work: { site: 'proposal', web: 'crew' }, start_recovery: { site: 'proposal', web: 'crew' },

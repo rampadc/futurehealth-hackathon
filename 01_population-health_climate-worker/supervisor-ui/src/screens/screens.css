@@ -391,3 +391,20 @@ button.hs-row-body:hover { background: var(--color-base); }
 .hs-handover-h { margin: var(--space-2) 0 0; font-size: var(--fs-body); }
 .hs-review-hold { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-2); margin: var(--space-1) 0 0; font-size: var(--fs-small); }
 .hs-checks-table td.hs-check-person { background: var(--color-base); }
+
+/* Phone summaries: one metric per row, label and note on the left, value on the right. */
+.hs-shell:is([data-device='site'], [data-device='worker']) .hs-hero { grid-template-columns: minmax(0, 1fr); }
+.hs-shell:is([data-device='site'], [data-device='worker']) .hs-metric { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-2); align-items: center; padding-block: var(--space-1); }
+.hs-shell:is([data-device='site'], [data-device='worker']) .hs-metric > .hs-label { grid-column: 1; }
+.hs-shell:is([data-device='site'], [data-device='worker']) .hs-metric > .hs-readout { grid-column: 2; grid-row: 1 / span 2; text-align: end; }
+.hs-shell:is([data-device='site'], [data-device='worker']) .hs-metric > .hs-small { grid-column: 1; }
+.hs-shell:is([data-device='site'], [data-device='worker']) .hs-metric:is([data-tone='red'], [data-tone='amber'], [data-tone='ok']) { padding-block-start: var(--space-1); padding-inline-start: calc(var(--space-3) + var(--signal-width)); box-shadow: inset 0 0 0 var(--signal-hair) var(--_sig), inset var(--signal-width) 0 0 0 var(--_sig); }
+
+/* A checkbox sits before its label text. */
+.hs-field:has(> input[type='checkbox']) { flex-direction: row; align-items: flex-start; gap: var(--space-1); font-weight: var(--weight-regular, 400); }
+.hs-field > input[type='checkbox'] { flex: none; inline-size: 1.25rem; block-size: 1.25rem; min-block-size: 0; margin: 0.15em 0 0; padding: 0; }
+
+/* Expandable row detail (readiness list). */
+.hs-row-more { padding: 0 var(--space-2) var(--space-2); display: flex; flex-direction: column; gap: var(--space-1); }
+.hs-stop-twl { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.hs-shell .hs-cta-bar[data-inline] { position: static; }

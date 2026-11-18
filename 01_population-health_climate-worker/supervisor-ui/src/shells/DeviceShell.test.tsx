@@ -41,7 +41,7 @@ describe('routes', () => {
 describe('screen registry', () => {
   it('lists every wireframe screen once', () => {
     const paths = SCREENS.map(s => `${s.device}/${s.id}`);
-    expect(new Set(paths).size).toBe(33);
+    expect(new Set(paths).size).toBe(36);
     for (const s of SCREENS) expect(s.id, s.name).toMatch(/^[a-z]+(-[a-z]+)*$/);
   });
   it('only names case actions the backend accepts', () => {
