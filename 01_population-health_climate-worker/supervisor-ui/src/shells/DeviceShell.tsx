@@ -77,8 +77,8 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
   </nav>;
   return <div className="hs-shell" data-theme={info.theme} data-device={device} data-layout={side ? 'side' : undefined}>
     <a href="#hs-main" className="skip-link">Skip to screen</a>
-    {side && <aside className="hs-side" style={railTint}>
-      <div className="hs-side-brand">
+    {side && <aside className="hs-sidebar" style={railTint}>
+      <div className="hs-sidebar-brand">
         <img className="hs-logo" src={heatSafeLogo} alt="" width="72" height="72" />
         <p className="hs-product">Heat-Safe Crew</p>
         {!['stop-work', 'alert'].includes(screen.id) && <p className="hs-company">{brand?.name ?? session.person.organisation}</p>}
