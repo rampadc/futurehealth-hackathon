@@ -7,9 +7,6 @@
 | Idea and full plan | First sale and distribution | Expansion mechanism | Competition thesis |
 |---|---|---|---|
 | [Heat-Safe Crew](../01_population-health_climate-worker/business/OPPORTUNITY_PLAN.md) | Founder-led sale to one contractor's HSE and project-commercial owners. Deliver through site induction, supervisors and existing instruments. | Replicate from a successful site to the contractor's portfolio; later equip HSE advisers and instrumentation partners to implement it. | Show a work-front decision changing safely as heat, workload and sensor reliability change, with an inspectable action record. |
-| [Physical Health Companion](../02_wellbeing_sustaining-behaviors/business/OPPORTUNITY_PLAN.md) | A provider buys a bounded evaluation and issues devices to an opted-in participant cohort during routine onboarding. | Repeat cohorts within the provider network; use programme procurement only after measured benefit and delivery cost are known. | Show a tangible companion responding constructively to a lapse and a changed barrier, with a real interaction and transparent evidence types. |
-| [Sitr](../03_fertility/business/OPPORTUNITY_PLAN.md) | One licensed provider embeds a private intake into its existing booking and referral channels; users enter free. | Reuse a governed workflow across sites, then add primary-care referral partners under agreed clinical ownership. | Show a private concern becoming a consented, appropriate, human-owned next step; demonstrate the refusal and failure cases as well as the normal path. |
-
 These are recommended commercial motions, not existing partnerships. A regulator's strategic interest can open a conversation but does not distribute a product, allocate a budget or complete a sale. Likewise, building an app does not acquire users: each plan names the point where a real organisation introduces it into an existing workflow.
 
 ## What we must prove to make the plan investable
