@@ -116,3 +116,9 @@
   .hs-sidebar { border-inline-end: 0; border-block-end: var(--rule-hair); }
   .hs-sidebar .hs-rail { flex-direction: row; }
 }
+
+/* Phone apps: section tabs at the top, under the title bar. */
+.hs-tabs[data-place='top'] { inset-block: 0 auto; z-index: 2; border-block-start: 0; border-block-end: var(--rule-structure); padding-block-end: 0; }
+.hs-shell:is([data-device='site'], [data-device='worker']) .hs-body { grid-template-rows: 1fr; }
+.hs-shell:is([data-device='site'], [data-device='worker']) .hs-cta-bar { inset-block-end: 0; }
+.hs-back { display: inline-flex; align-items: center; margin-block-end: var(--space-2); font-weight: var(--weight-medium); }

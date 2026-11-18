@@ -2,12 +2,14 @@ import { reasonLabel } from '../../copy';
 import { nameOf } from '../../replay';
 import { navigate } from '../../router';
 import { crew, heatNow, progress, time } from '../data';
-import { ActionButton, Band, Computed, Draft, Empty, Head, Hero, Hold, List, Metric, NoCase, Note, Row, Section, taskBadge, taskLine, Person } from '../kit';
+import { ActionButton, Avatar, Band, Computed, Draft, Empty, Head, Hero, Hold, List, Metric, NoCase, Note, Row, Section, Statement, taskBadge, taskLine, Person } from '../kit';
 import type { ScreenProps } from '../registry';
 import { ConditionsPanel } from '../conditions';
 import { bandOf, OtherSquadScreen, SquadItems, SquadPicker, squadsFor, useSquad } from '../squads';
 
 const FRESH_MS = 5 * 60_000;
+const CONTROL_LABEL: Record<string, string> = { hold_required: 'Hold required', held: 'Held', stopped: 'Stopped', clearance_blocked: 'Clearance blocked', no_new_hold: 'No hold' };
+const controlLabel = (state: string) => CONTROL_LABEL[state] ?? state.replaceAll('_', ' ').replace(/^./, c => c.toUpperCase());
 
 /** Heat controls: what must stop, why, and what evidence will clear it. */
 export function HeatControlsScreen({ session }: ScreenProps) {
@@ -19,22 +21,31 @@ export function HeatControlsScreen({ session }: ScreenProps) {
   const controls = response?.heat.controls ?? [];
   const heavy = controls.find(c => c.task_id === 'civil_heavy');
   const siteLimit = heavy?.reason_codes.includes('twl_heavy_limit');
+  const story = caseView.story;
+  const issuedAt = story.events.find(e => e.id === 'issue')?.occurred_at;
+  const held = squadsFor(caseView).filter(q => q.hold);
+  const nextStep: { tone: 'red' | 'amber' | undefined; text: string } = held.length && !story.issued
+    ? { tone: 'red', text: `Heavy-work limit reached for the ${held.map(q => q.name.toLowerCase()).join(', ')}. Issue the stop-work instruction below.` }
+    : story.issued && !story.acknowledged ? { tone: 'amber', text: 'Stop-work instruction issued. Huda acknowledges it next; Rashid follows up if it is overdue.' }
+      : story.issued ? { tone: undefined, text: 'Stop-work instruction acknowledged. Keep heavy work held until the restart review clears it.' }
+        : { tone: undefined, text: 'No squad needs a stop-work instruction. Continue to monitor readings.' };
   return <div className="hs-screen">
     <Head kicker={`Heat controls · Civil trench · ${time(caseView.clock)} GST`} title="Heat controls" sub="The environmental band and the site’s heavy-work hold are separate decisions." />
-    {/* TWL per squad in small text; no big readouts. */}
-    <Section title="TWL by squad">
-      <div className="hs-scroll"><table className="hs-table hs-table-sm">
-        <thead><tr><th>Squad</th><th>Location</th><th>TWL W/m²</th><th>Band</th><th>Source</th><th>Heavy exposed work</th></tr></thead>
-        <tbody>{squadsFor(caseView).map(q => <tr key={q.id}>
-          <td><Person id={q.foremanId} size="md"><b>{q.name}</b></Person></td><td>{q.loc}</td><td>{q.twl ?? '—'}</td><td>{bandOf(q)}</td>
-          <td>{q.live ? `Sensor ${r?.sensor_id ?? '—'} · ${time(r?.measured_at)}` : q.estimated ? `Forecast · ${q.sensor} offline` : `Sensor ${q.sensor}`}</td>
-          <td>{q.hold ? <Hold /> : '— No hold'}</td></tr>)}</tbody>
-      </table></div>
-      <Computed />
+    <Statement tone={nextStep.tone}>{nextStep.text}</Statement>
+    <Section title="Stop-work by squad" icon="stop">
+      <List>{squadsFor(caseView).map(q => {
+        const issuedHere = q.live && story.issued;
+        return <Row key={q.id} lead={<Avatar id={q.foremanId} size="md" />} title={q.name} detail={`${q.loc} · foreman ${q.foreman} · TWL ${q.twl ?? '—'} W/m²${q.estimated ? ' (forecast)' : ''}`}
+          badge={q.hold ? <Hold /> : <span className="hs-badge" data-tone="muted">No hold</span>}>
+          {q.live && q.hold && !issuedHere && <ActionButton session={session} action="issue" label={`Issue stop-work to ${q.name}`} primary />}
+          {issuedHere && <p className="hs-statusline">Stop-work instruction issued{issuedAt ? ` at ${time(issuedAt)}` : ''} · {story.acknowledged ? 'acknowledged by Huda' : 'awaiting Huda’s acknowledgement'}</p>}
+        </Row>;
+      })}</List>
+      <Computed>Holds are computed by the site rules · not AI. Only a squad with a heavy-work hold needs a stop-work instruction.</Computed>
     </Section>
     <div className="hs-grid">
       <Section title="Task controls">
-        {controls.length ? <List>{controls.map(c => <Row key={c.task_id} title={nameOf(c.task_id)} detail={c.reason_codes.map(reasonLabel).join(' · ') || 'No restriction'} badge={c.state === 'held' || c.state === 'stopped' ? <Hold>{c.state}</Hold> : <span className="hs-badge" data-tone="muted">{c.state}</span>} />)}</List>
+        {controls.length ? <List>{controls.map(c => <Row key={c.task_id} title={nameOf(c.task_id)} detail={c.reason_codes.map(reasonLabel).join(' · ') || 'No restriction'} badge={c.state === 'held' || c.state === 'stopped' || c.state === 'hold_required' ? <Hold>{controlLabel(c.state)}</Hold> : <span className="hs-badge" data-tone="muted">{controlLabel(c.state)}</span>} />)}</List>
           : <Empty>The solver has not assessed this case yet.</Empty>}
         <Computed />
       </Section>
@@ -59,7 +70,6 @@ export function HeatControlsScreen({ session }: ScreenProps) {
       </Section>
     </div>
     <ConditionsPanel session={session} />
-    <ActionButton session={session} action="issue" label="Issue stop-work instruction" primary />
   </div>;
 }
 
@@ -103,7 +113,7 @@ export function ProtectiveResponseScreen({ session }: ScreenProps) {
       <List>{rows.map(r => <Row key={r.action} title={LABELS[r.action] ?? r.action} detail={taskLine(session, r.action)} badge={taskBadge(session, r.action)} />)}</List>
     </Section>
     {mine.length > 0 && <Section title="Record yours">
-      {mine.map(t => t.action === 'recover' ? <button key={t.action} type="button" className="hs-button is-primary" onClick={() => navigate('/site/headcount')}>Open physical headcount</button> : <ActionButton key={t.action} session={session} action={t.action} label={t.label} primary
+      {mine.map(t => t.action === 'recover' ? <button key={t.action} type="button" className="hs-button is-primary" onClick={() => navigate('/site/account-for-crew')}>Open physical headcount</button> : <ActionButton key={t.action} session={session} action={t.action} label={t.label} primary
         confirm={t.action === 'remove' ? { word: 'REMOVED', title: 'Confirm the worker is out of the heat', body: 'This records your human confirmation for the protective response. Software cannot record it for you.' } : undefined} />)}
     </Section>}
     {protective && protective.actions.length > 0 && <Section title="Solver’s protective actions">

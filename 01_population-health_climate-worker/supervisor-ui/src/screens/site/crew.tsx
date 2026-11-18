@@ -24,9 +24,10 @@ const readinessBadge = (p: CrewMember) => p.excluded ? <span className="hs-badge
 export function ReadinessScreen({ session }: ScreenProps) {
   const { caseView, person } = session;
   const [selected, setSelected] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
   const [basis, setBasis] = useState<Basis>(BASES[0][0]);
   const [hours, setHours] = useState('2');
-  useEffect(() => { setSelected(null); setBasis(BASES[0][0]); setHours('2'); }, [caseView?.case_id]);
+  useEffect(() => { setSelected(null); setExpanded(null); setBasis(BASES[0][0]); setHours('2'); }, [caseView?.case_id]);
   if (!caseView || !person) return <NoCase session={session} />;
   const all = crew(caseView);
   const list = [...all].sort((a, b) => Number(b.qualifications.includes('civil_worker')) - Number(a.qualifications.includes('civil_worker')));
@@ -63,7 +64,16 @@ export function ReadinessScreen({ session }: ScreenProps) {
       <Metric label="Workshop places" value={workshop ? `${workshop.capacity - fixed.length} of ${workshop.capacity}` : '—'} sub={fixed.length ? `${fixed.length} fixed occupants` : undefined} />
     </Hero>
     <Section title="Affected workers">
-      <List>{list.map(p => <Row key={p.id} lead={<Avatar id={p.id} size="md" excluded={p.excluded} />} title={who(p.id)} detail={`${p.qualifications.map(reasonLabel).join(', ') || 'No qualification on record'} · ${p.readiness === 'ready' ? `ready${p.readinessUntil ? ` until ${time(p.readinessUntil)}` : ''}` : p.reason ?? 'no readiness confirmation yet'}`} badge={readinessBadge(p)} onClick={canConfirm && !p.excluded && p.readiness !== 'ready' ? () => setSelected(p.id) : undefined} />)}</List>
+      <List>{list.map(p => {
+        const isOpen = expanded === p.id;
+        const confirmable = canConfirm && !p.excluded && p.readiness !== 'ready';
+        return <Row key={p.id} lead={<Avatar id={p.id} size="sm" excluded={p.excluded} />} title={who(p.id)} badge={readinessBadge(p)} expanded={isOpen} onClick={() => setExpanded(isOpen ? null : p.id)}>
+          {isOpen && <>
+            <span className="hs-small hs-muted">{`${p.qualifications.map(reasonLabel).join(', ') || 'No qualification on record'} · ${p.readiness === 'ready' ? `ready${p.readinessUntil ? ` until ${time(p.readinessUntil)}` : ''}` : p.reason ?? 'no readiness confirmation yet'}`}</span>
+            {confirmable && <button type="button" className="hs-button" onClick={() => setSelected(p.id)}>Confirm {p.name.split(' ')[0]}’s readiness</button>}
+          </>}
+        </Row>;
+      })}</List>
     </Section>
     <Section title="Other confirmations">
       <div className="hs-mui"><EvidenceAction action="leila" caseView={caseView} person={person} onAction={session.act} busy={session.busy} /></div>

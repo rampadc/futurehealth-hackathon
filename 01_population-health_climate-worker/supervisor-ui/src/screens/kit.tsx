@@ -49,13 +49,13 @@ export function List({ children, label }: { children: ReactNode; label?: string 
   return <ul className="hs-list" aria-label={label}>{children}</ul>;
 }
 
-export function Row({ title, detail, badge, onClick, lead }: { title: ReactNode; detail?: ReactNode; badge?: ReactNode; onClick?: () => void; lead?: ReactNode }) {
+export function Row({ title, detail, badge, onClick, lead, expanded, children }: { title: ReactNode; detail?: ReactNode; badge?: ReactNode; onClick?: () => void; lead?: ReactNode; expanded?: boolean; children?: ReactNode }) {
   const body = <>
     {lead && <span className="hs-lead">{lead}</span>}
     <span className="hs-row-text"><span className="hs-row-title">{title}</span>{detail && <span className="hs-small hs-muted">{detail}</span>}</span>
     {badge && <span className="hs-row-badge">{badge}</span>}
   </>;
-  return <li className="hs-row">{onClick ? <button type="button" className="hs-row-body" onClick={onClick}>{body}<span aria-hidden="true" className="hs-chev">›</span></button> : <div className="hs-row-body">{body}</div>}</li>;
+  return <li className="hs-row">{onClick ? <button type="button" className="hs-row-body" aria-expanded={expanded} onClick={onClick}>{body}<span aria-hidden="true" className="hs-chev">{expanded === undefined ? '›' : expanded ? '▾' : '▸'}</span></button> : <div className="hs-row-body">{body}</div>}{children && <div className="hs-row-more">{children}</div>}</li>;
 }
 
 export type BadgeTone = 'done' | 'wait' | 'over' | 'muted' | 'plan';

@@ -5,7 +5,7 @@ import { CrewWorkshopScreen, WorkRestPlanScreen } from './web/plan';
 import { SquadMonitoringScreen, SystemTrustScreen } from './web/monitor';
 import { AdminSettingsScreen } from './web/settings';
 import { SiteSetupScreen } from './web/setup';
-import { TodayScreen, StopWorkScreen, HeadcountScreen } from './site/today';
+import { TodayScreen, ActionsScreen, StopWorkScreen, CrewMessageScreen, HeadcountScreen, AffectedWorkersScreen, AccountForCrewScreen } from './site/today';
 import { ReadinessScreen, ProposalScreen, ActionCardScreen } from './site/crew';
 import { FreshReadingScreen, RestartReviewScreen } from './restart';
 import { SiteAskScreen, WebAskScreen } from './ask';
@@ -27,8 +27,10 @@ export type ScreenDef = {
   id: string;
   device: Device;
   name: string;
-  /** Bottom-tab group on phone shells. */
+  /** Section tab on phone shells. */
   tab?: string;
+  /** Phone sub-screen: opened from this screen, which its back link returns to. */
+  parent?: string;
   /** `admin` screens sit in their own group at the end of the rail; `account` is reached from your photo in the title bar. */
   group?: 'admin' | 'account';
   /** Scenario time the wireframe is drawn at (GST, 4 August). */
@@ -64,25 +66,28 @@ export const SCREENS: ScreenDef[] = [
   s('settings', { device: 'web', group: 'admin', name: 'Admin settings', clock: '16:40', slice: 5, owner: 'C', personas: ['P09', 'P02'], reads: ['GET /api/brand', 'POST /api/brand/check'], commands: [], needs: 'PUT /api/brand · admin only, typed PUBLISH', component: AdminSettingsScreen }),
   s('account', { device: 'web', group: 'account', name: 'My account', clock: '16:45', slice: 5, owner: 'C', personas: [], reads: ['GET /api/people/photos'], commands: [], needs: 'PUT/DELETE /api/people/me/photo · own photo only', component: AccountScreen }),
   // Site app · owner B
-  s('today', { device: 'site', tab: 'today', name: 'Today (alert inbox)', clock: '08:00', slice: 1, owner: 'B', personas: ['C01', 'P03', 'P06'], reads: ['tasks', 'story'], commands: [] , component: TodayScreen }),
-  s('stop-work', { device: 'site', tab: 'today', name: 'Stop-work instruction', clock: '08:01', slice: 1, owner: 'B', personas: ['P03', 'C01'], reads: ['story', 'capture.response.heat.controls'], commands: ['issue', 'acknowledge', 'stop'], needs: 'SMS part count is display-only; nothing is sent' , component: StopWorkScreen }),
-  s('headcount', { device: 'site', tab: 'crew', name: 'Headcount', clock: '08:04', slice: 1, owner: 'B', personas: ['C01'], reads: ['workers', 'capture.request.snapshot.workers'], commands: ['recover', 'personnel'] , component: HeadcountScreen }),
-  s('heat-rest', { device: 'site', tab: 'crew', name: 'Heat and rest coverage', clock: '08:18', slice: 4, owner: 'B', personas: ['C01'], reads: ['GET /api/case/heat-rest', 'headcount'], commands: [], component: HeatRestScreen }),
-  s('readiness', { device: 'site', tab: 'crew', name: 'Readiness confirmation', clock: '08:10', slice: 2, owner: 'B', personas: ['C01'], reads: ['workers'], commands: ['readiness', 'activity', 'crew_readiness'] , component: ReadinessScreen }),
+  s('today', { device: 'site', tab: 'today', name: 'Today', clock: '08:00', slice: 1, owner: 'B', personas: ['C01', 'P03', 'P06'], reads: ['tasks', 'story'], commands: [] , component: TodayScreen }),
+  s('actions', { device: 'site', tab: 'today', parent: 'today', name: 'Your actions', clock: '08:00', slice: 1, owner: 'B', personas: ['C01', 'P03', 'P06'], reads: ['tasks'], commands: [], component: ActionsScreen }),
+  s('stop-work', { device: 'site', tab: 'today', parent: 'today', name: 'Stop-work instruction', clock: '08:01', slice: 1, owner: 'B', personas: ['P03', 'C01'], reads: ['story', 'capture.response.heat.controls'], commands: ['issue', 'acknowledge', 'stop'] , component: StopWorkScreen }),
+  s('crew-message', { device: 'site', tab: 'today', parent: 'stop-work', name: 'Crew communications preview', clock: '08:01', slice: 1, owner: 'B', personas: ['P03', 'C01'], reads: ['story', 'workers'], commands: [], needs: 'SMS part count is display-only; nothing is sent', component: CrewMessageScreen }),
+  s('headcount', { device: 'site', tab: 'crew', name: 'Headcount', clock: '08:04', slice: 1, owner: 'B', personas: ['C01'], reads: ['workers', 'capture.request.snapshot.workers'], commands: [] , component: HeadcountScreen }),
+  s('affected-workers', { device: 'site', tab: 'crew', parent: 'headcount', name: 'Affected workers', clock: '08:04', slice: 1, owner: 'B', personas: ['C01'], reads: ['workers', 'headcount'], commands: [], component: AffectedWorkersScreen }),
+  s('account-for-crew', { device: 'site', tab: 'crew', parent: 'headcount', name: 'Account for the crew', clock: '08:04', slice: 1, owner: 'B', personas: ['C01'], reads: ['workers', 'headcount'], commands: ['recover', 'personnel'], component: AccountForCrewScreen }),
+  s('readiness', { device: 'site', tab: 'crew', parent: 'headcount', name: 'Readiness confirmation', clock: '08:10', slice: 2, owner: 'B', personas: ['C01'], reads: ['workers'], commands: ['readiness', 'activity', 'crew_readiness'] , component: ReadinessScreen }),
   s('proposal', { device: 'site', tab: 'plan', name: 'Proposal review', clock: '08:11', slice: 2, owner: 'B', personas: ['C01'], reads: ['plan_assessment', 'workers'], commands: ['assign', 'start_work', 'start_recovery'] , component: ProposalScreen }),
-  s('action-card', { device: 'site', tab: 'today', name: 'Worker action card', clock: '08:18', slice: 2, owner: 'B', personas: ['C01', 'P06'], reads: ['story', 'tasks'], commands: ['incident_record', 'remove', 'firstaid'] , component: ActionCardScreen }),
-  s('fresh-reading', { device: 'site', tab: 'today', name: 'Fresh reading', clock: '15:06', slice: 3, owner: 'B', personas: ['P03'], reads: ['capture.request.snapshot.readings'], commands: ['fresh', 'water'] , component: FreshReadingScreen }),
+  s('action-card', { device: 'site', tab: 'today', parent: 'actions', name: 'Worker action card', clock: '08:18', slice: 2, owner: 'B', personas: ['C01', 'P06'], reads: ['story', 'tasks'], commands: ['incident_record', 'remove', 'firstaid'] , component: ActionCardScreen }),
+  s('fresh-reading', { device: 'site', tab: 'today', parent: 'actions', name: 'Fresh reading', clock: '15:06', slice: 3, owner: 'B', personas: ['P03'], reads: ['capture.request.snapshot.readings'], commands: ['fresh', 'water'] , component: FreshReadingScreen }),
   s('ask', { device: 'site', tab: 'ask', name: 'Ask (Planning Agent)', clock: '08:20', slice: 4, owner: 'B', personas: ['C01', 'P03'], reads: ['GET /api/chat/history'], commands: [], needs: 'Uses existing POST /api/chat' , component: SiteAskScreen }),
   s('account', { device: 'site', group: 'account', name: 'My account', clock: '16:45', slice: 5, owner: 'C', personas: [], reads: ['GET /api/people/photos'], commands: [], needs: 'PUT/DELETE /api/people/me/photo · own photo only', component: AccountScreen }),
   // Worker app · owner B
   s('welcome', { device: 'worker', name: 'Welcome: language, then consent', clock: '07:30', slice: 4, owner: 'B', personas: ['C05', 'C08'], reads: ['GET /api/worker/consent', 'PUT /api/worker/consent'], commands: [], needs: 'GET/PUT /api/worker/consent' , component: WelcomeScreen }),
   s('now', { device: 'worker', tab: 'now', name: 'Now (home)', clock: '08:04', slice: 1, owner: 'B', personas: ['C05', 'C08'], reads: ['story', 'capture.response.crew_rest.intervals'], commands: [] , component: NowScreen }),
-  s('alert', { device: 'worker', name: 'Alert (full screen)', clock: '08:01', slice: 1, owner: 'B', personas: ['C05', 'C08'], reads: ['story'], commands: [] , component: AlertScreen }),
+  s('alert', { device: 'worker', parent: 'now', name: 'Alert (full screen)', clock: '08:01', slice: 1, owner: 'B', personas: ['C05', 'C08'], reads: ['story'], commands: [] , component: AlertScreen }),
   s('check-in', { device: 'worker', tab: 'check', name: 'Check in (voice and tap)', clock: '08:18', slice: 2, owner: 'B', personas: ['C05', 'C08'], reads: ['story'], commands: ['checkin', 'report'] , component: CheckInScreen }),
   s('my-plan', { device: 'worker', tab: 'plan', name: 'My plan', clock: '08:12', slice: 2, owner: 'B', personas: ['C05', 'C08'], reads: ['capture.response.crew_rest.intervals'], commands: [] , component: MyPlanScreen }),
-  s('heat-rest', { device: 'worker', tab: 'plan', name: 'My heat and rest coverage', clock: '08:18', slice: 4, owner: 'B', personas: ['C05', 'C08'], reads: ['GET /api/case/heat-rest'], commands: [], component: HeatRestScreen }),
-  s('shelter', { device: 'worker', tab: 'now', name: 'Shelter check-in', clock: '08:04', slice: 1, owner: 'B', personas: ['C05'], reads: ['story'], commands: ['checkin'] , component: ShelterScreen }),
-  s('offline', { device: 'worker', name: 'Offline state', clock: '08:04', slice: 5, owner: 'B', personas: ['C05', 'C08'], reads: [], commands: [], needs: 'Check-ins and reports queue on the phone; supervisor decisions are never queued', component: OfflineScreen }),
+  s('heat-rest', { device: 'worker', tab: 'plan', parent: 'my-plan', name: 'My heat and rest coverage', clock: '08:18', slice: 4, owner: 'B', personas: ['C05', 'C08'], reads: ['GET /api/case/heat-rest'], commands: [], component: HeatRestScreen }),
+  s('shelter', { device: 'worker', parent: 'now', tab: 'now', name: 'Shelter check-in', clock: '08:04', slice: 1, owner: 'B', personas: ['C05'], reads: ['story'], commands: ['checkin'] , component: ShelterScreen }),
+  s('offline', { device: 'worker', parent: 'now', name: 'Offline state', clock: '08:04', slice: 5, owner: 'B', personas: ['C05', 'C08'], reads: [], commands: [], needs: 'Check-ins and reports queue on the phone; supervisor decisions are never queued', component: OfflineScreen }),
   s('my-data', { device: 'worker', tab: 'me', name: 'Me: privacy and my data', clock: '17:10', slice: 4, owner: 'B', personas: ['C05', 'C08'], reads: ['GET /api/worker/data'], commands: [], needs: 'GET /api/worker/data, DELETE /api/worker/consent' , component: MyDataScreen }),
   s('account', { device: 'worker', tab: 'me', group: 'account', name: 'Me: my photo', clock: '17:12', slice: 5, owner: 'C', personas: [], reads: ['GET /api/people/photos'], commands: [], needs: 'PUT/DELETE /api/people/me/photo · own photo only', component: AccountScreen }),
   // Kiosk · owner B

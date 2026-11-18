@@ -68,12 +68,21 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
   const tabs = info.tabs;
   // Supervisor web: the side panel runs to the top-left corner and carries the product and company.
   const side = device === 'web';
+  // Phone apps: the section tabs sit at the top; sub-screens open from their parent screen.
+  const topTabs = phone;
+  const parent = screen.parent ? allowed.find(s => s.id === screen.parent) : undefined;
   const railTint = showBrand && brand.rail_tint ? { borderInlineStart: `4px solid ${brand.primary}` } : undefined;
   const rail = <nav className="hs-rail" aria-label={`${info.name} screens`} style={side ? undefined : railTint}>
     {allowed.filter(s => !s.group).map(railButton)}
     {allowed.some(s => s.group === 'admin') && <p className="hs-rail-group">Admin</p>}
     {allowed.filter(s => s.group === 'admin').map(railButton)}
     <DeviceSwitch current={device} personId={session.person.id} />
+  </nav>;
+  const tabBar = tabs && <nav className="hs-tabs" data-place={topTabs ? 'top' : undefined} aria-label="Sections" lang={lang} dir={langOf(lang).dir}>
+    {tabs.map(([id, label]) => {
+      const first = allowed.find(s => s.tab === id);
+      return <button key={id} type="button" disabled={!first} aria-current={screen.tab === id ? 'page' : undefined} onClick={() => first && go(first)}>{device === 'worker' ? tr(`tab.${id}`, lang).text : label}</button>;
+    })}
   </nav>;
   return <div className="hs-shell" data-theme={info.theme} data-device={device} data-layout={side ? 'side' : undefined}>
     <a href="#hs-main" className="skip-link">Skip to screen</a>
@@ -98,20 +107,17 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
       <button type="button" className="hs-link" disabled={session.busy} onClick={() => void session.signOut()}>Sign out</button>
       {onLockAccess && <button type="button" className="hs-link" onClick={onLockAccess}>Lock access</button>}
     </header>
+    {tabs && topTabs && tabBar}
     <div className="hs-body">
-      {!side && rail}
+      {!side && !topTabs && rail}
       <main id="hs-main" tabIndex={-1} className="hs-main">
         {session.error && <p role="alert" className="hs-error">{session.error} <button type="button" className="hs-link" onClick={() => void session.refreshCase()}>Retry</button></p>}
         {session.feedback && <p role="status" className="hs-ok">{session.feedback}</p>}
+        {permitted && parent && <button type="button" className="hs-link hs-back" lang={lang} dir={langOf(lang).dir} onClick={() => go(parent)}>‹ {device === 'worker' && parent.tab ? tr(`tab.${parent.tab}`, lang).text : parent.name}</button>}
         {!permitted ? <section className="hs-screen"><h1>This screen belongs to another role</h1>{device === 'site' && screen.id === 'headcount' && session.person.id === 'C05' && <p>Your own arrival is {session.caseView?.headcount?.arrivals.some(a => a.person_id === 'C05') ? 'recorded' : 'not yet recorded'}. Huda confirms the full crew headcount.</p>}<button type="button" className="hs-button" onClick={() => ownScreen ? go(ownScreen) : navigate(session.person?.id.startsWith('C') ? '/worker/now' : '/web/monitoring')}>Go to my screen</button></section> : Screen ? <Screen session={session} /> : <Placeholder screen={screen} session={session} />}
       </main>
     </div>
-    {tabs && <nav className="hs-tabs" aria-label="Sections" lang={lang} dir={langOf(lang).dir}>
-      {tabs.map(([id, label]) => {
-        const first = allowed.find(s => s.tab === id);
-        return <button key={id} type="button" disabled={!first} aria-current={screen.tab === id ? 'page' : undefined} onClick={() => first && go(first)}>{device === 'worker' ? tr(`tab.${id}`, lang).text : label}</button>;
-      })}
-    </nav>}
+    {tabs && !topTabs && tabBar}
   </div>;
 }
 
