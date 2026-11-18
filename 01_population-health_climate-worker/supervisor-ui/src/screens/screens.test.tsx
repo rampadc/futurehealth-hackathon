@@ -552,6 +552,17 @@ describe('assistance', () => {
     await waitFor(() => expect(commands).toEqual([{ action: 'report', payload: {} }]), { timeout: 2000 });
   });
 
+  it('sends an unwell worker without a report task to the foreman in person', async () => {
+    currentCase = await makeCase('canonical_timed', { assigned: true }, [task('checkin', 'C05', 'ready')]);
+    await open('/worker/check-in', 'C05');
+    await userEvent.click(await screen.findByRole('button', { name: 'I feel unwell' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Yes, one of these' }));
+    expect(screen.queryByRole('button', { name: /Send to my supervisor/ })).toBeNull();
+    expect(screen.queryByText(/has been told/)).toBeNull();
+    expect(screen.getByText(/Ask your foreman or the nearest person to call 998/)).toBeTruthy();
+    expect(screen.getByText(/Tell your foreman in person/)).toBeTruthy();
+  });
+
   it('shows a submitted report without promising that help has arrived', async () => {
     currentCase = await makeCase('canonical_timed', { reported: true }, [task('report', 'C08', 'recorded')]);
     await open('/worker/check-in', 'C08');
