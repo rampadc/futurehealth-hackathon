@@ -174,7 +174,7 @@ export function useCaseSession({ onSignedIn, onSignedOut }: Options = {}) {
     actionError.current = false; setBusy(true); setError(''); setFeedback('');
     try {
       await live.command(caseView, action, payload, command_id);
-      if (await refreshCase(caseView.case_id)) setFeedback(`${caseView.tasks.find(task => task.action === action)?.label ?? action}.`);
+      if (await refreshCase(caseView.case_id)) setFeedback(`Recorded: ${caseView.tasks.find(task => task.action === action)?.label ?? action}.`);
     } catch (cause) {
       if (QUEUEABLE.has(action) && isNetworkError(cause)) { queue({ command_id, case_id: caseView.case_id, action, payload, queued_at: new Date().toISOString() }); return; }
       if (await refreshCase(caseView.case_id)) { actionError.current = true; setError(cause instanceof Error ? cause.message : 'The action could not be recorded'); }

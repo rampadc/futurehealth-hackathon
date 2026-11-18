@@ -468,6 +468,21 @@ describe('assessed workshop plan', () => {
     expect(screen.queryByText('Workshop')).toBeNull();
   });
 
+  it('records observed activity from the button after the form on the crew phone', async () => {
+    currentCase = await makeCase('heat_trigger', { stopped: true, recovered: true }, [task('activity', 'C01', 'ready')]);
+    await open('/site/readiness', 'C01');
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole('button', { name: /Choose recovery for all after observing/ }));
+    const observed = screen.getByRole('checkbox', { name: /active workers through now/ });
+    await user.click(observed);
+    expect(screen.queryByRole('button', { name: 'Review proposal' })).toBeNull();
+    const record = screen.getByRole('button', { name: 'Record observed crew activity' }) as HTMLButtonElement;
+    expect(observed.compareDocumentPosition(record) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(record.disabled).toBe(false);
+    await user.click(record);
+    await waitFor(() => expect(commands[0]).toMatchObject({ action: 'activity', payload: { through_now: true, observed: true } }));
+  });
+
   it('excludes Bilal from the workshop readiness count after his report', async () => {
     currentCase = await makeCase('incident_substitute', { reported: true }, []);
     currentCase.workers = currentCase.request!.snapshot.workers.map(worker => ({ person_id: worker.person_id, last_observed_at: null, readiness: ['C05', 'C06', 'C07', 'C08'].includes(worker.person_id) ? 'ready' : 'unconfirmed' }));
@@ -550,6 +565,17 @@ describe('assistance', () => {
     const send = screen.getByRole('button', { name: /Send to my supervisor/ });
     fireEvent.keyDown(send, { key: ' ' });
     await waitFor(() => expect(commands).toEqual([{ action: 'report', payload: {} }]), { timeout: 2000 });
+  });
+
+  it('sends an unwell worker without a report task to the foreman in person', async () => {
+    currentCase = await makeCase('canonical_timed', { assigned: true }, [task('checkin', 'C05', 'ready')]);
+    await open('/worker/check-in', 'C05');
+    await userEvent.click(await screen.findByRole('button', { name: 'I feel unwell' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Yes, one of these' }));
+    expect(screen.queryByRole('button', { name: /Send to my supervisor/ })).toBeNull();
+    expect(screen.queryByText(/has been told/)).toBeNull();
+    expect(screen.getByText(/Ask your foreman or the nearest person to call 998/)).toBeTruthy();
+    expect(screen.getByText(/Tell your foreman in person/)).toBeTruthy();
   });
 
   it('shows a submitted report without promising that help has arrived', async () => {

@@ -44,12 +44,14 @@ function CheckIn({ session }: ScreenProps) {
         <button type="button" className="hs-button" aria-pressed={step === 'unwell'} onClick={() => setStep('unwell')}><T k="no" /></button>
         <button type="button" className="hs-button is-danger" aria-pressed={step === 'emergency'} onClick={() => setStep('emergency')}><T k="p4.yes" /></button>
       </div>
-      {step === 'emergency' && <Statement tone="red"><T k="alert.em" /></Statement>}
-      <Note><T k="p1.sees" /></Note>
+      {step === 'emergency' && (report
+        ? <Statement tone="red"><T k="alert.em" /></Statement>
+        : <Statement tone="red"><En>Get help now. Stay with someone and do not walk alone. Ask your foreman or the nearest person to call 998.</En></Statement>)}
+      {report && <Note><T k="p1.sees" /></Note>}
     </Section>}
     {!online && <Note tone="amber"><T k="p4.offline" /></Note>}
     {!report && (step === 'unwell' || step === 'emergency') && <Note tone="amber"><En>Tell your foreman in person so the site support team can help you.</En></Note>}
-    {(step === 'unwell' || step === 'emergency') && <CtaBar>
+    {report && (step === 'unwell' || step === 'emergency') && <CtaBar>
       <HoldButton disabled={!canSend} onConfirm={() => void session.act('report', {})} hint={t('hold')}><T k="p4.send" /></HoldButton>
     </CtaBar>}
     <Computed><T k="p4.rule" /></Computed>

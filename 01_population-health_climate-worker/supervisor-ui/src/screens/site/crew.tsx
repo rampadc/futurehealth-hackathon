@@ -56,6 +56,7 @@ export function ReadinessScreen({ session }: ScreenProps) {
     </div>;
   }
   const next = list.find(p => p.readiness !== 'ready' && !p.excluded);
+  const activityDue = caseView.tasks.some(t => t.action === 'activity' && t.actor_id === person.id && t.status === 'ready');
   return <div className="hs-screen">
     <Head kicker={`Readiness · ${time(caseView.clock)} GST`} title="Confirm readiness" sub="Workshop preparation" />
     <Hero>
@@ -79,11 +80,11 @@ export function ReadinessScreen({ session }: ScreenProps) {
       <div className="hs-mui"><EvidenceAction action="leila" caseView={caseView} person={person} onAction={session.act} busy={session.busy} /></div>
       <ActionButton session={session} action="crew_readiness" label="Confirm crew readiness check for restart" />
     </Section>
-    {caseView.tasks.some(t => t.action === 'activity' && t.actor_id === person.id && t.status === 'ready') && <Section title="Observed activity">
+    {activityDue && <Section title="Observed activity">
       <div className="hs-mui"><EvidenceAction action="activity" caseView={caseView} person={person} onAction={session.act} busy={session.busy} /></div>
     </Section>}
     {canConfirm && next && <CtaBar><button type="button" className="hs-button is-primary" onClick={() => setSelected(next.id)}>Confirm next: {next.name.split(' ')[0]}</button></CtaBar>}
-    {!canConfirm && <CtaBar><button type="button" className="hs-button" onClick={() => navigate('/site/proposal')}>Review proposal</button></CtaBar>}
+    {!canConfirm && !activityDue && <CtaBar><button type="button" className="hs-button" onClick={() => navigate('/site/proposal')}>Review proposal</button></CtaBar>}
   </div>;
 }
 
