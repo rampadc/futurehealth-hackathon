@@ -7,7 +7,6 @@ import { crew, heatNow, SCREEN_FOR_ACTION, time, who } from '../data';
 import { nextHandoff } from '../../story';
 import { ActionButton, Badge, Band, Computed, Empty, Head, Hero, Hold, List, Metric, NoCase, Note, Row, Section, taskBadge, Avatar, Avatars, Person } from '../kit';
 import type { ScreenProps } from '../registry';
-import { ConditionsPanel } from '../conditions';
 import { CrewRiskPanel } from '../risk';
 import { TwlReadout } from '../twl';
 import { bandOf, OtherSquadScreen, SquadItems, SquadPicker, squadsFor, useSquad, SENSORS } from '../squads';
@@ -63,7 +62,6 @@ export function SquadMonitoringScreen({ session }: ScreenProps) {
         <List>{[...byLocation.entries()].map(([where, n]) => <Row key={where} title={nameOf(where)} badge={<Badge tone="muted">{n}</Badge>} />)}</List>
       </Section>
     </div>
-    <ConditionsPanel session={session} compact readings={(caseView.request?.snapshot.readings ?? caseView.capture?.request.snapshot.readings ?? []).map(r => ({ at: time(r.measured_at), twl: r.twl, sensor: r.sensor_id, quality: r.quality }))} />
     <CrewRiskPanel session={session} />
   </div>;
 }

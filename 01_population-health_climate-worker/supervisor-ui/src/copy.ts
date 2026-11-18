@@ -28,6 +28,7 @@ export const buttonLabels: Record<ActionId, string> = {
 
 const reasonLabels: Record<string, string> = {
   reading_stale: 'Local reading is out of date',
+  twl_heavy_limit: 'TWL at or below the heavy-work limit (150 W/m²)',
   permit_confirmation_required: 'Permit confirmation is needed',
   midday_restriction: 'Outdoor work is restricted at this time',
   optimizer_unknown: 'The crew planner could not establish a reliable result',
