@@ -1,5 +1,6 @@
-import { useSyncExternalStore, type ReactNode } from 'react';
-import type { CaseView } from '../live';
+import { useEffect, useSyncExternalStore, type ReactNode } from 'react';
+import { live, type CaseView, type SensorState, type SiteSensors } from '../live';
+import { thermalStatus } from '../thermal';
 import { crew, heatNow, time } from './data';
 import { Avatar, Badge, Band, List, Row } from './kit';
 import { StatusIcon } from '../shared/icons';
@@ -37,9 +38,62 @@ const FIXTURE: Squad[] = [
     checks: { done: 0, total: 0 }, members: ['E01', 'E02', 'E03', 'E04', 'E05', 'E06'], items: [] },
 ];
 
+/* Site sensor settings for the current case hour (GET /api/case/site-sensors), shared by every screen in this tab. */
+let siteSensors: SiteSensors | null = null;
+const sensorListeners = new Set<() => void>();
+const setSiteSensors = (next: SiteSensors | null) => { siteSensors = next; sensorListeners.forEach(l => l()); };
+export const currentSiteSensors = () => siteSensors;
+
+/** Keep the site sensor settings current while signed in. */
+export function useSiteSensors(enabled: boolean, version?: number) {
+  useEffect(() => {
+    if (!enabled) return;
+    let current = true;
+    const load = () => live.siteSensors().then(v => { if (current && v && typeof v === 'object' && 'squads' in v) setSiteSensors(v); }).catch(() => { /* Keep the last known settings. */ });
+    load();
+    const timer = window.setInterval(load, 5_000);
+    return () => { current = false; window.clearInterval(timer); };
+  }, [enabled, version]);
+  return useSyncExternalStore(l => { sensorListeners.add(l); return () => { sensorListeners.delete(l); }; }, () => siteSensors, () => siteSensors);
+}
+
+const RAISE: Record<string, string> = { green: 'amber', amber: 'red', red: 'red', unknown: 'unknown' };
+const STATE_LABEL: Record<SensorState, string> = { live: 'Live', stale: 'Reading stale', offline: 'Offline' };
+
+/** A fixture squad at the current case hour: its sensor's TWL and state from the site settings. */
+function withSensor(q: Squad, settings: SiteSensors): Squad {
+  const twl = settings.squads[q.id]?.[q.sensor];
+  const state = settings.sensors[q.sensor] ?? 'live';
+  if (twl === undefined) return q;
+  const lost = state !== 'live';
+  const base = thermalStatus(twl).band;
+  const band = lost ? RAISE[base] : base;
+  const sensorItems = lost ? [{ title: `${q.sensor.toUpperCase()} ${state === 'offline' ? 'offline' : 'reading stale'} · band raised one level`, detail: state === 'offline' ? 'No valid reading · forecast in use' : 'Last reading over 5 minutes old · forecast in use', tone: 'error' as const }] : [];
+  const items = [...sensorItems, ...q.items.filter(i => !/offline|stale/i.test(i.title) && (!/caution band/i.test(i.detail) || band !== 'green'))];
+  const hour = `${String(settings.hour).padStart(2, '0')}:00`;
+  return { ...q, twl, band, estimated: lost,
+    status: lost ? `${band === 'green' ? 'Working' : 'Caution controls'} · sensor ${STATE_LABEL[state].toLowerCase()}` : band === 'red' ? 'High-risk controls' : band === 'amber' ? 'Caution controls' : q.status.replace(/^Caution controls · sensor offline$/, 'Working'),
+    reading: { twl, at: lost ? state === 'stale' ? 'stale' : 'forecast' : hour, fresh: !lost },
+    items, alerts: items.filter(i => i.tone === 'error').length, warnings: items.filter(i => i.tone === 'warn').length };
+}
+
+/** Sensors with their current state from the site settings. */
+export function sensorsNow() {
+  const settings = siteSensors;
+  if (!settings) return SENSORS;
+  return SENSORS.map(x => {
+    // Base station 2 relays T3: it follows T3's state.
+    const state = settings.sensors[x.id === 'bs2' ? 't3' : x.id];
+    if (!state) return x;
+    const twl = Object.values(settings.squads).map(by => by[x.id]).find(v => v !== undefined);
+    return { ...x, off: state === 'offline', stale: state === 'stale', status: state === 'live' ? `Live${twl !== undefined && x.id !== 't1' ? ` · ${twl} W/m²` : ''}` : STATE_LABEL[state] };
+  });
+}
+
 /** The civil crew from the live case, then the fixture squads. */
 export function squadsFor(caseView: CaseView | null): Squad[] {
-  if (!caseView) return FIXTURE;
+  const fixture = siteSensors ? FIXTURE.map(q => withSensor(q, siteSensors!)) : FIXTURE;
+  if (!caseView) return fixture;
   const heat = heatNow(caseView);
   const people = crew(caseView);
   const story = caseView.story;
@@ -56,7 +110,7 @@ export function squadsFor(caseView: CaseView | null): Squad[] {
     headcount: `${caseView.headcount?.confirmed_count ?? 0} / ${caseView.headcount?.expected_count ?? people.length}`,
     breakStart: '12:30', breakEnd: '15:00', checks: { done: 0, total: 8 }, members: people.map(p => p.id), items: [], live: true,
   };
-  return [civil, ...FIXTURE];
+  return [civil, ...fixture];
 }
 
 /* The selected squad carries across screens for this tab. */
@@ -90,7 +144,7 @@ export function SquadItems({ squad }: { squad: Squad }) {
 }
 
 /** Sensors and base stations on the site. t1 is the live case's sensor. */
-export const SENSORS = [
+export const SENSORS: Array<{ id: string; type: string; loc: string; squads: string[]; relay: string; status: string; off: boolean; stale?: boolean }> = [
   { id: 't1', type: 'Wet-bulb globe sensor', loc: 'Civil trench', squads: ['civil'], relay: 'Base station 1', status: 'Live', off: false },
   { id: 't2', type: 'Wet-bulb globe sensor', loc: 'Podium deck', squads: ['form'], relay: 'Base station 1', status: 'Live', off: false },
   { id: 't3', type: 'Wet-bulb globe sensor', loc: 'Laydown yard', squads: ['steel'], relay: 'Base station 2', status: 'Offline since 07:52', off: true },

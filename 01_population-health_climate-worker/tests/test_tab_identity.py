@@ -102,12 +102,12 @@ def test_tab_ids_and_personas_are_validated_and_mutations_remain_same_origin(cli
     assert client.get('/api/session', headers=HUDA).json()['person'] is None
 
 
-def test_public_mutations_require_case_binding_and_clock_cannot_be_advanced(client):
+def test_public_mutations_require_case_binding_and_clock_stays_in_the_case_window(client):
     client.post('/api/session', headers=HUDA, json={'persona_id': 'C01'})
     assert client.post('/api/case/commands', headers=HUDA,
                        json={'command_id': 'old-command', 'expected_version': 0, 'action': 'recover', 'payload': {}}).status_code == 422
     assert client.post('/api/case/retry', headers=HUDA, json={'expected_version': 0}).status_code == 422
     client.post('/api/access', json={'code': 'presenter-code'})
     assert client.post('/api/demo/signals', headers=HUDA, json={'kind': 'reading', 'payload': {}}).status_code == 422
-    response = client.post('/api/demo/clock', headers=HUDA, json={'at': '2025-08-04T08:30:00+04:00'})
-    assert response.status_code == 409 and 'automatically' in response.json()['detail']
+    response = client.post('/api/demo/clock', headers=HUDA, json={'at': '2025-08-04T11:30:00+04:00'})
+    assert response.status_code == 422 and 'case window' in response.json()['detail']
