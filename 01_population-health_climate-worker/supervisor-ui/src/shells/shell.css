@@ -101,3 +101,18 @@
 
 /* Heat-Safe Crew logo in the title bar, before the product name. */
 .hs-logo { inline-size: 4.5rem; block-size: 4.5rem; border-radius: 50%; flex: none; display: block; }
+
+/* Supervisor web: the side panel runs from the top-left corner; product and company sit above the screen list. */
+.hs-shell[data-layout='side'] { display: grid; grid-template-columns: minmax(12rem, 16rem) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+.hs-side { grid-column: 1; grid-row: 1 / -1; display: flex; flex-direction: column; background: var(--color-sheet); border-inline-end: var(--rule-hair); min-inline-size: 0; }
+.hs-side .hs-rail { border-inline-end: 0; flex: 1; }
+.hs-side-brand { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); padding: var(--space-2); border-block-end: var(--rule-hair); }
+.hs-product { margin: 0; font-size: var(--fs-heading); line-height: var(--lh-title); font-weight: var(--weight-bold); }
+.hs-company { margin: 0; align-self: stretch; padding: 10px; border: 1px solid #000; font-weight: var(--weight-bold); }
+.hs-shell[data-layout='side'] .hs-bar { grid-column: 2; }
+.hs-shell[data-layout='side'] .hs-body { grid-column: 2; display: block; }
+@media (max-width: 720px) {
+  .hs-shell[data-layout='side'] { display: flex; }
+  .hs-side { border-inline-end: 0; border-block-end: var(--rule-hair); }
+  .hs-side .hs-rail { flex-direction: row; }
+}
