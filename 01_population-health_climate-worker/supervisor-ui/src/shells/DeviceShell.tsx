@@ -42,6 +42,9 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
   usePhotoSync(!!session.person, session.caseView?.version);
   useSiteSensors(!!session.person, session.caseView?.version);
   usePersonaFromLink(session, screens.flatMap(s => s.personas));
+  // A record confirmation belongs to the screen where it was made.
+  const { setFeedback } = session;
+  useEffect(() => { setFeedback(''); }, [screen.id, setFeedback]);
   const account = screens.find(s => s.id === 'account');
   // Stop-work and emergency screens drop the brand entirely.
   const showBrand = brand && !['stop-work', 'alert'].includes(screen.id);
