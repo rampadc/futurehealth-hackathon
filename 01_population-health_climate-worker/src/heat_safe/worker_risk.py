@@ -2,7 +2,7 @@
 
 Same air, different answers: the site's heat is recomputed for the worker's clothing, then raised for what
 is true about them (README_WORKER_RISK.md, "The six layers"). Built here: L1 environment, L2 clothing, L3
-modifiers (acclimatisation, reported symptoms, low fluid), L4 as a strain flag from a consented wearable,
+modifiers (acclimatisation, reported symptoms, low fluid, a heat-sensitive health condition), L4 as a strain flag from a consented wearable,
 L5 fail-safe for lost inputs, the red-flag rule and the L6 crew roll-up. Not built: the planned-baseline
 table and the alert triggers. This module gives the state (band), never the events (alerts).
 
@@ -32,6 +32,7 @@ class WorkerFactors:
     acclimatisation: Acclimatisation = ACCLIMATISED
     symptoms_reported: bool = False  # a non-red-flag symptom at a check-in or report
     low_fluid: bool = False
+    heat_sensitive: bool = False  # a health condition or medicine on record that lowers heat tolerance
     red_flag: bool = False  # confusion, collapse, vomiting, stopped sweating
     wearable: str = 'not_used'  # only 'ok' when consented, paired and sending
     strain_rising: bool = False  # read only from a working wearable
@@ -136,6 +137,8 @@ def compute_worker_risk(twl_by_clothing: Mapping[str, float] | None, worker: Wor
         modifiers.append('You reported feeling unwell')
     if worker.low_fluid:
         modifiers.append('You have drunk less than this heat needs')
+    if worker.heat_sensitive:
+        modifiers.append('A health condition on your record lowers your heat tolerance')
     band = band.raised(len(modifiers))
     factors += modifiers
 
