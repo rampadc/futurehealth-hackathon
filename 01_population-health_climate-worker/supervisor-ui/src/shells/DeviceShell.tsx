@@ -66,12 +66,29 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
   const railButton = (s: ScreenDef) => <button key={s.id} type="button" aria-current={s.id === screen.id ? 'page' : undefined} onClick={() => go(s)}>{NAV_ICON[s.id] && <Icon name={NAV_ICON[s.id]} />}<span>{s.name}{!s.component && <small> · planned</small>}</span></button>;
   const Screen = permitted ? screen.component : undefined;
   const tabs = info.tabs;
-  return <div className="hs-shell" data-theme={info.theme} data-device={device}>
+  // Supervisor web: the side panel runs to the top-left corner and carries the product and company.
+  const side = device === 'web';
+  const railTint = showBrand && brand.rail_tint ? { borderInlineStart: `4px solid ${brand.primary}` } : undefined;
+  const rail = <nav className="hs-rail" aria-label={`${info.name} screens`} style={side ? undefined : railTint}>
+    {allowed.filter(s => !s.group).map(railButton)}
+    {allowed.some(s => s.group === 'admin') && <p className="hs-rail-group">Admin</p>}
+    {allowed.filter(s => s.group === 'admin').map(railButton)}
+    <DeviceSwitch current={device} personId={session.person.id} />
+  </nav>;
+  return <div className="hs-shell" data-theme={info.theme} data-device={device} data-layout={side ? 'side' : undefined}>
     <a href="#hs-main" className="skip-link">Skip to screen</a>
+    {side && <aside className="hs-side" style={railTint}>
+      <div className="hs-side-brand">
+        <img className="hs-logo" src={heatSafeLogo} alt="" width="72" height="72" />
+        <p className="hs-product">Heat-Safe Crew</p>
+        {!['stop-work', 'alert'].includes(screen.id) && <p className="hs-company">{brand?.name ?? session.person.organisation}</p>}
+      </div>
+      {rail}
+    </aside>}
     <header className="hs-bar">
-      {showBrand && <BrandMark palette={brand} />}
-      <img className="hs-logo" src={heatSafeLogo} alt="" width="72" height="72" />
-      <strong>Heat-Safe Crew</strong>
+      {!side && showBrand && <BrandMark palette={brand} />}
+      {!side && <img className="hs-logo" src={heatSafeLogo} alt="" width="72" height="72" />}
+      {!side && <strong>Heat-Safe Crew</strong>}
       <span className="hs-muted">{info.name}</span>
       {session.caseView && <span className="hs-muted"><LiveClock view={session.caseView} /></span>}
       <span className="hs-grow" />
@@ -82,12 +99,7 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
       {onLockAccess && <button type="button" className="hs-link" onClick={onLockAccess}>Lock access</button>}
     </header>
     <div className="hs-body">
-      <nav className="hs-rail" aria-label={`${info.name} screens`} style={showBrand && brand.rail_tint ? { borderInlineStart: `4px solid ${brand.primary}` } : undefined}>
-        {allowed.filter(s => !s.group).map(railButton)}
-        {allowed.some(s => s.group === 'admin') && <p className="hs-rail-group">Admin</p>}
-        {allowed.filter(s => s.group === 'admin').map(railButton)}
-        <DeviceSwitch current={device} personId={session.person.id} />
-      </nav>
+      {!side && rail}
       <main id="hs-main" tabIndex={-1} className="hs-main">
         {session.error && <p role="alert" className="hs-error">{session.error} <button type="button" className="hs-link" onClick={() => void session.refreshCase()}>Retry</button></p>}
         {session.feedback && <p role="status" className="hs-ok">{session.feedback}</p>}
