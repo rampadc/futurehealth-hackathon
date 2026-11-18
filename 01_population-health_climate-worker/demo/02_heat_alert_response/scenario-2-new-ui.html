@@ -12,7 +12,7 @@
 </head>
 <body>
 <div class="page">
-<header class="top"><div><div class="eyebrow">Private presenter guide · Heat-Safe Crew</div><h1>Scenario 02: heat response</h1><p class="lede">A click-by-click guide for the real-time device UI. The core response includes a recorded employer coverage review, worker feedback and project readback. Continue into planning, assistance and restart review when time allows.</p></div><div class="stamp"><strong>Browser rehearsed · PR #24</strong>Main release 8bf0e78<br>Core and full journeys checked with real elapsed time, live solver calculations and Gemini. 16 November 2026.</div></header>
+<header class="top"><div><div class="eyebrow">Private presenter guide · Heat-Safe Crew</div><h1>Scenario 02: heat response</h1><p class="lede">A click-by-click guide for the real-time device UI. The core response includes a recorded employer coverage review, worker feedback and project readback. Continue into planning, assistance and restart review when time allows.</p></div><div class="stamp"><strong>UI guide updated · 18 November 2026</strong>Current main reviewed: e3eda28<br>Core and full journeys were browser rehearsed on PR #24, 16 November 2026.</div></header>
 <section class="access-setup" aria-labelledby="access-title"><h2 id="access-title">Before you start: URLs and access codes</h2>
 <p>Run these commands in Terminal on your laptop. Each prints the current code from Secret Manager using your existing Google Cloud sign-in. Open presenter controls first and enter the <b>presenter code</b>; it unlocks the product screens in the same browser. Then open and sign in every named actor tab before starting the shared case.</p>
 <ul><li><b>Main app:</b> <a data-route="/" data-actor="P03" href="https://heat-safe-app-6zb6rqbehq-ww.a.run.app/">https://heat-safe-app-6zb6rqbehq-ww.a.run.app/</a></li><li><b>Supervisor web:</b> <a data-route="/web/monitoring" data-actor="P03" href="https://heat-safe-app-6zb6rqbehq-ww.a.run.app/web/monitoring">https://heat-safe-app-6zb6rqbehq-ww.a.run.app/web/monitoring</a></li><li><b>Site app:</b> <a data-route="/site/today" data-actor="C01" href="https://heat-safe-app-6zb6rqbehq-ww.a.run.app/site/today">https://heat-safe-app-6zb6rqbehq-ww.a.run.app/site/today</a></li><li><b>Worker app:</b> <a data-route="/worker/now" data-actor="C05" href="https://heat-safe-app-6zb6rqbehq-ww.a.run.app/worker/now">https://heat-safe-app-6zb6rqbehq-ww.a.run.app/worker/now</a></li><li><b>Presenter controls:</b> <a data-route="/demo-control" href="https://heat-safe-app-6zb6rqbehq-ww.a.run.app/demo-control">https://heat-safe-app-6zb6rqbehq-ww.a.run.app/demo-control</a></li></ul>
@@ -51,7 +51,7 @@ const steps=[
       "Open presenter controls in its own tab and enter the presenter code. The code unlocks the product in this browser; never put it in the guide.",
       "Use the staging links above to open one separate tab for each actor. In each product tab choose that named person once. Stage Maya, Huda, Rana, Mina and Amal for core; also stage Bilal, Salim, Noura, Tariq and Rashid for full journey.",
       "Before starting the case, open Welcome: language, then consent on Rana’s worker tab (/worker/welcome). Let Rana choose a ready language, review the optional check-in and wearable choices, and save her choice. For the full journey, let Bilal do the same in his own tab. These personal choices do not start the case.",
-      "Keep these tabs open. Each has its own named session. Return to the existing actor tab at each step; do not routinely Sign out between people. Sign out only when changing the person inside one tab."
+      "Keep these tabs open. Each has its own named session. On web, the screen links sit below the product and company in the left sidebar; the named actor and case clock remain in the top bar. Return to the existing actor tab at each step; sign out only when changing the person inside one tab."
     ],
     "say": "Each person makes their own recorded decision in their own tab.",
     "expect": "Product tabs show their named person, usually with No active case before start. Presenter controls have a separate tab.",
@@ -86,7 +86,7 @@ const steps=[
     "title": "Maya issues the instruction",
     "clicks": [
       "Switch to Maya’s already signed-in tab. Open Heat controls.",
-      "In Reading source, check the civil sensor, measured/received times and valid quality. In TWL by squad, show 145 W/m² alongside Low environmental risk and the heavy-work hold. The black chart line marks the separate ≤ 150 W/m² site limit; the green environmental band starts at 140. Click “Issue stop-work instruction”."
+      "In Reading source, check the civil sensor, measured/received times and valid quality. In TWL by squad, show the filled bar at 145 W/m² alongside Low environmental risk and the heavy-work hold. Its black marker and the black line on the hourly chart show the separate ≤ 150 W/m² site limit; the green environmental band starts at 140. Click “Issue stop-work instruction”."
     ],
     "say": "The site limit requires a stop even if the display band looks less severe.",
     "expect": "The named instruction is recorded; heavy work remains held.",
@@ -463,8 +463,8 @@ const steps=[
     "route": "/web/restart-review",
     "title": "Record shift handover",
     "clicks": [
-      "Switch to Rashid’s tab. In Restart review, use “Record shift handover” when ready.",
-      "Keep open restart decisions visible; handover does not clear the heavy-work hold."
+      "Switch to Rashid’s tab. In Restart review, select Civil crew in Today by squad or Restart status by squad. The timeline shows the break, latest reading and now; the status table can be sorted by its headings.",
+      "Scroll to Shift handover. Check the heavy-work status, latest reading, owner and five Decisions carried forward, including the separate site decision to resume work. Use “Record shift handover” when ready."
     ],
     "say": "The next shift receives named open decisions and the current stop.",
     "expect": "Handover is recorded with restart still open.",
@@ -531,7 +531,7 @@ const steps=[
     "route": "/web/restart-review",
     "title": "Tariq confirms the permit",
     "clicks": [
-      "In Tariq’s Restart review tab click “Confirm permit check”."
+      "In Tariq’s Restart review tab, select Civil crew in the squad overview. Scroll below the named restart checks to Your checks and click “Confirm permit check”."
     ],
     "say": "Permit confirmation is owned by Tariq.",
     "expect": "The permit line is confirmed while the heavy-work hold still applies.",
@@ -547,8 +547,9 @@ const steps=[
     "route": "/web/restart-review",
     "title": "Rashid records the restart review",
     "clicks": [
-      "In Rashid’s Restart review screen, read all eight checks and blockers.",
-      "If ready, click “Record restart review”, type RESTART in the confirmation and submit. State clearly that this records a review; heavy exposed work remains stopped pending a separate site decision."
+      "In Rashid’s Restart review screen, select Civil crew. Show Today by squad: the hatched midday break, latest TWL marker and now line. In Restart status by squad, show the reading, status and readiness count; headings can sort the squads.",
+      "Read all eight named checks in the Squad leader and Other people groups, including their explanation, observed time and status. Check any blockers.",
+      "In Your checks, confirm the heavy-work hold remains. If ready, click “Record restart review”, type RESTART and submit. This records a review; a separate site decision is still required to resume work."
     ],
     "say": "A named review is recorded without automatic release of the stop-work instruction.",
     "expect": "Review status updates; the heavy-work hold remains visible.",

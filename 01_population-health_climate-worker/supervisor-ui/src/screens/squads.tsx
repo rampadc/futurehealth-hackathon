@@ -22,7 +22,7 @@ export type Squad = {
 
 const FIXTURE: Squad[] = [
   { id: 'form', name: 'Formwork crew', foreman: 'Karim', foremanId: 'L02', loc: 'Podium deck', shelter: 'Shelter B', size: 9,
-    twl: 156, band: 'green', hold: false, status: 'Working · shade rotation', sensor: 't2', reading: { twl: 158, at: '15:05', fresh: true },
+    twl: 156, band: 'green', hold: false, status: 'Working · shade rotation', sensor: 't2', reading: { twl: 158, at: '07:55', fresh: false },
     alerts: 0, warnings: 1, actions: { open: 1, done: 2 }, responses: { done: 2, total: 2 }, headcount: '9 / 9', breakStart: '12:30', breakEnd: '15:00',
     checks: { done: 3, total: 3 }, members: ['F01', 'F02', 'F03', 'F04', 'F05', 'F06', 'F07', 'F08', 'F09'],
     items: [{ title: 'Refill the deck water cooler', detail: 'Below 10 L at 08:12 · owner Karim · due 08:30', tone: 'warn' }] },
@@ -32,7 +32,7 @@ const FIXTURE: Squad[] = [
     checks: { done: 5, total: 8 }, members: ['S01', 'S02', 'S03', 'S04', 'S05', 'S06', 'S07', 'S08', 'S09', 'S10', 'S11', 'S12'],
     items: [{ title: 'Base station 2 offline · band raised one level', detail: 'No heartbeat since 07:52 · forecast in use', tone: 'error' }, { title: 'Extra water and rest every 45 min', detail: 'Caution band control · owner Faisal', tone: 'warn' }] },
   { id: 'mep', name: 'MEP crew', foreman: 'José', foremanId: 'M01', loc: 'Level 2 interior', shelter: 'Shelter B', size: 6,
-    twl: 168, band: 'green', hold: false, status: 'Working · covered', sensor: 'm1', reading: { twl: 168, at: '15:00', fresh: true },
+    twl: 168, band: 'green', hold: false, status: 'Working · covered', sensor: 'm1', reading: { twl: 168, at: '07:55', fresh: false },
     alerts: 0, warnings: 0, actions: { open: 0, done: 1 }, responses: { done: 1, total: 1 }, headcount: '6 / 6', breakStart: '—', breakEnd: '—',
     checks: { done: 0, total: 0 }, members: ['E01', 'E02', 'E03', 'E04', 'E05', 'E06'], items: [] },
 ];
@@ -94,7 +94,7 @@ export const SENSORS = [
   { id: 't1', type: 'Wet-bulb globe sensor', loc: 'Civil trench', squads: ['civil'], relay: 'Base station 1', status: 'Live', off: false },
   { id: 't2', type: 'Wet-bulb globe sensor', loc: 'Podium deck', squads: ['form'], relay: 'Base station 1', status: 'Live', off: false },
   { id: 't3', type: 'Wet-bulb globe sensor', loc: 'Laydown yard', squads: ['steel'], relay: 'Base station 2', status: 'Offline since 07:52', off: true },
-  { id: 'm1', type: 'Handheld heat meter', loc: 'Level 2 interior', squads: ['mep'], relay: 'Manual · José', status: 'Read 15:00', off: false },
+  { id: 'm1', type: 'Handheld heat meter', loc: 'Level 2 interior', squads: ['mep'], relay: 'Manual · José', status: 'Read 07:55', off: false },
   { id: 'bs1', type: 'Base station', loc: 'Site cabin roof', squads: [], relay: 'LTE', status: 'Live', off: false },
   { id: 'bs2', type: 'Base station', loc: 'Laydown yard gate', squads: [], relay: 'LTE', status: 'Offline since 07:52', off: true },
   { id: 'k1', type: 'NFC check-in kiosk', loc: 'Shelter A', squads: ['civil'], relay: 'Site Wi-Fi', status: 'Live', off: false },

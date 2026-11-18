@@ -94,7 +94,7 @@ function DayTimeline({ squads, now, selected, choose }: { squads: Squad[]; now: 
         const b0 = minutes(q.breakStart), b1 = minutes(q.breakEnd), at = minutes(q.reading.at);
         const tone = q.band === 'red' || q.band === 'amber' || q.band === 'green' ? q.band : 'unknown';
         return <div key={q.id} className="hs-day-row" aria-selected={q.id === selected} onClick={() => choose(q.id)}>
-          <span className="hs-day-lab"><Avatar id={q.foremanId} size="sm" /> <b>{q.name}</b></span>
+          <span className="hs-day-lab"><Avatar id={q.foremanId} size="sm" /> <button type="button" className="hs-link" aria-pressed={q.id === selected} onClick={() => choose(q.id)}>{q.name}</button></span>
           <span className="hs-day-track">
             {hours.map(h => <span key={h} className="hs-day-grid" style={{ left: pct(h * 60) }} />)}
             {b0 != null && b1 != null && <span className="hs-day-break" style={{ left: pct(b0), width: `calc(${pct(b1)} - ${pct(b0)})` }} title={`Midday break ${q.breakStart}–${q.breakEnd}`}><span>Break {q.breakStart}–{q.breakEnd}</span></span>}
@@ -124,7 +124,7 @@ function SquadRestartTable({ squads, selected, choose, freshness }: { squads: Sq
         {label}<span aria-hidden="true">{sort?.key === key ? (sort.dir === 1 ? ' ▲' : ' ▼') : ' ↕'}</span>
       </button></th>)}</tr></thead>
     <tbody>{rows.map(q => <tr key={q.id} aria-selected={q.id === selected} onClick={() => choose(q.id)} className="hs-pick">
-      <td><span className="hs-squad-cell"><Avatar id={q.foremanId} size="md" /> <b>{q.name}</b></span></td>
+      <td><span className="hs-squad-cell"><Avatar id={q.foremanId} size="md" /> <button type="button" className="hs-link" aria-pressed={q.id === selected} onClick={() => choose(q.id)}>{q.name}</button></span></td>
       <td className="hs-reading-cell"><TwlGauge twl={q.reading.twl} band={q.band} valid={q.band !== 'unknown'} size={56} /><small className="hs-muted">{q.reading.at}{q.estimated ? ' · est.' : ''}{q.reading.fresh ? ' · fresh' : q.live ? ` · ${freshness}` : ''}</small></td>
       <td><span className="hs-status-cell">{statusIcon(q)} {q.status}</span></td><td>{q.breakStart}</td><td>{q.breakEnd}</td>
       <td>{q.checks.total ? <><StatusIcon status={q.checks.done === q.checks.total ? 'ok' : 'warn'} /> <b>{q.checks.done} of {q.checks.total}</b></> : '—'}</td></tr>)}</tbody>
@@ -145,6 +145,7 @@ function ShiftHandover({ session, restartStatus }: { session: ScreenProps['sessi
   const heat = heatNow(caseView);
   const eventAt = (id: string) => caseView.story.events.find(e => e.id === id)?.occurred_at;
   const stoppedAt = eventAt('stop');
+  const stopped = caseView.story.stopped || caseView.story.events.some(e => e.id === 'stop');
   const rows = HANDOVER.map(h => {
     const p = h.action ? progress(caseView, h.action) : null;
     return { ...h, owner: p?.owner ?? 'P02', done: p?.status === 'recorded', at: h.action ? eventAt(h.action) : undefined };
@@ -153,7 +154,7 @@ function ShiftHandover({ session, restartStatus }: { session: ScreenProps['sessi
   const handover = progress(caseView, 'handover');
   return <Section title="Shift handover">
     <dl className="hs-handover-facts">
-      <div><dt>Heavy exposed civil work</dt><dd><Hold>Stopped</Hold>{stoppedAt ? ` since ${time(stoppedAt)}` : ''}</dd></div>
+      <div><dt>Heavy exposed civil work</dt><dd><Hold>{stopped ? 'Stopped' : heat.heavyHeld ? 'Held · cessation not confirmed' : 'Cessation not confirmed'}</Hold>{stoppedAt ? ` since ${time(stoppedAt)}` : ''}</dd></div>
       <div><dt>Restart review</dt><dd>{restartStatus.charAt(0).toUpperCase() + restartStatus.slice(1)}</dd></div>
       <div><dt>Latest reading</dt><dd>{heat.reading ? `TWL ${heat.reading.twl} W/m² · ${time(heat.reading.measured_at)} · ${heat.freshness === 'current' ? 'fresh' : heat.freshness}` : 'No reading'}</dd></div>
       <div><dt>Handover owner</dt><dd><Person id={handover.owner ?? 'P02'} size="sm">{who(handover.owner ?? 'P02')}</Person> · {handover.status === 'recorded' ? `recorded${eventAt('handover') ? ` at ${time(eventAt('handover')!)}` : ''}` : 'not recorded yet'}</dd></div>
@@ -182,6 +183,7 @@ export function RestartReviewScreen({ session }: ScreenProps) {
   const checks = capture?.request.restart;
   const heat = heatNow(caseView);
   const story = caseView.story;
+  const stopped = story.stopped || story.events.some(e => e.id === 'stop');
   if (!restart) return <div className="hs-screen"><Head title="Restart review" /><Empty>No restart has been proposed for this case.</Empty></div>;
   const recorded = (action: string) => progress(caseView, action).status === 'recorded';
   const passing = CHECKS.filter(([, a]) => recorded(a)).length;
@@ -245,8 +247,8 @@ export function RestartReviewScreen({ session }: ScreenProps) {
     <Section title="Your checks">
       <ActionButton session={session} action="permit" label="Confirm permit check" />
       {/* The hold stamp sits with the review button: recording the review does not lift it. */}
-      <p className="hs-review-hold"><Hold>Heavy exposed civil work stays stopped</Hold><span>Recording the restart review does not lift this hold. Resuming work is a separate decision made on site.</span></p>
-      <ActionButton session={session} action="review" label="Record restart review" primary confirm={rashid ? { word: 'RESTART', title: 'Record your restart review', body: 'This records your review as superintendent. Heavy work stays stopped; the restart decision itself is made on site.' } : undefined} />
+      <p className="hs-review-hold"><Hold>{stopped ? 'Heavy exposed civil work stays stopped' : heat.heavyHeld ? 'Heavy exposed civil work held' : 'Cessation not confirmed'}</Hold><span>Recording the review does not release the hold. Resuming work requires a separate site decision.</span></p>
+      <ActionButton session={session} action="review" label="Record restart review" primary confirm={rashid ? { word: 'RESTART', title: 'Record your restart review', body: `This records your review as superintendent. ${stopped ? 'Heavy work remains stopped.' : 'Cessation is not confirmed.'} Resuming work requires a separate site decision.` } : undefined} />
     </Section>
     <ShiftHandover session={session} restartStatus={story.reviewed ? 'Review recorded' : restart.status.replaceAll('_', ' ')} />
     {!rashid && <Note>Only Rashid (superintendent) records the restart review.</Note>}
