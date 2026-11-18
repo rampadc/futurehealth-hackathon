@@ -134,11 +134,11 @@ Status as of 30 Oct 2026.
 | `src/heat_safe/schedule.py` | `optimise_schedule` (first version: best hours within zone limits, midday break, unacclimatised rule, shortfall) |
 | `src/heat_safe/grounding.py` | Numeric and citation grounding checks on agent answers |
 | `src/heat_safe/corpus.py` | Guidance documents with authority tiers; PDF extraction, header removal, page-bounded chunking |
-| `src/heat_safe/guidance.py` | `search_guidance`: query embedding, BigQuery `VECTOR_SEARCH`, authority re-rank; learning notes in `src/heat_safe/README_RAG.md` |
+| `src/heat_safe/guidance.py` | `search_guidance`: query embedding, BigQuery `VECTOR_SEARCH`, authority re-rank; design in `src/heat_safe/README_RAG.md` |
 | `tools/build_corpus.py` | Embeds chunks (cached by content hash) and loads `vectors.guidance_chunks` |
 | `src/heat_safe/agent_tools.py` | JSON wrappers the supervisor agent calls |
 | `agents/supervisor/` | Supervisor planning agent (ADK, Gemini via `global`), BigQuery telemetry plugin |
-| `evals/` | Golden scenarios (9 supervisor, 21 retrieval), scorers and runners; learning notes in `evals/README.md` |
+| `evals/` | Golden scenarios (9 supervisor, 21 retrieval), scorers and runners; results in `evals/README.md` |
 | `tools/ask_supervisor.py` | Ask the agent from the terminal (`HEAT_SAFE_TODAY=2025-07-31` for the replay demo) |
 
 ### Risk model (code, not LLM)
@@ -306,7 +306,7 @@ In `data/raw/regulatory/manual/`, listed in the manifest with status `manual`.
 
 #### Real data: still to collect by hand
 
-Steps and file names: `doc/manual-data-collection.md`. These sites block scripts or have no stable file link.
+What was collected: `data/heat_safe/README.md`, "Collected by hand". These sites block scripts or have no stable file link.
 
 | Priority | Data | Needed for | By |
 |---|---|---|---|

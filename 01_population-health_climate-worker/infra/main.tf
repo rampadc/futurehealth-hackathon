@@ -5,7 +5,7 @@ locals {
   repo_root = abspath("${path.module}/..")
 
   # Everything that goes into the image. The hash names the image, so a change here builds a new
-  # image and a new Cloud Run revision, and no change means no rebuild (README note 1)
+  # image and a new Cloud Run revision, and no change means no rebuild (README "Design decisions")
   image_inputs = sort(concat(
     [for f in fileset(local.repo_root, "{src,agents}/**/*.{py,yaml}") : f],
     [for f in fileset(local.repo_root, "data/heat_safe/raw/weather/*.csv") : f],
@@ -38,7 +38,7 @@ resource "google_artifact_registry_repository" "images" {
   depends_on    = [google_project_service.apis]
 }
 
-# --- Identity the agent runs as: only what its tools call (README note 4) ------------------------
+# --- Identity the agent runs as: only what its tools call (README "Design decisions") ---
 resource "google_service_account" "supervisor" {
   account_id   = "supervisor-demo"
   display_name = "Heat-Safe supervisor agent (Cloud Run demo)"
@@ -67,7 +67,7 @@ resource "google_bigquery_dataset_iam_member" "telemetry_write" {
   member     = google_service_account.supervisor.member
 }
 
-# --- Build identity and staging (README note 2) --------------------------------------------------
+# --- Build identity and staging (README "Design decisions") ---
 # Without these, Cloud Build runs as the Compute Engine default account (no roles here: 403) and
 # stages the source in an auto-created US bucket. A dedicated account and a UAE bucket fix both.
 resource "google_service_account" "build" {
@@ -111,7 +111,7 @@ resource "google_project_iam_member" "build_logs" {
   member  = google_service_account.build.member
 }
 
-# --- Build: a demo shortcut. Real projects build in CI and pass Terraform the tag (README note 1) -
+# --- Build: a demo shortcut. Real projects build in CI and pass Terraform the tag (README "Design decisions") ---
 resource "terraform_data" "image" {
   triggers_replace = local.image_hash
   input            = local.image
@@ -147,7 +147,7 @@ resource "google_cloud_run_v2_service" "supervisor" {
 
     scaling {
       min_instance_count = 0 # scale to zero: free when nobody is using it
-      max_instance_count = 1 # adk web keeps sessions in memory; one instance, and a cost cap (README note 5)
+      max_instance_count = 1 # adk web keeps sessions in memory; one instance, and a cost cap (README "Design decisions")
     }
 
     containers {
@@ -183,7 +183,7 @@ resource "google_cloud_run_v2_service" "supervisor" {
   ]
 }
 
-# Public: anyone with the URL, no login. Deliberate for a short demo (README note 6)
+# Public: anyone with the URL, no login. Deliberate for a short demo (README "Design decisions")
 resource "google_cloud_run_v2_service_iam_member" "public" {
   name     = google_cloud_run_v2_service.supervisor.name
   location = var.region

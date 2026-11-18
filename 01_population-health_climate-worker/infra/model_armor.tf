@@ -1,5 +1,5 @@
 # Model Armor: screens what goes into and comes out of the supervisor agent (agents/supervisor/armor.py).
-# Decisions and what each was learned from: README note 9.
+# Decisions: infra/README.md, "Design decisions".
 #
 # Location: Model Armor is not offered in me-central1, and `global` takes only floor settings, not
 # templates ("not supported in 'global' location"). asia-south1 (Mumbai) is the nearest region that has
