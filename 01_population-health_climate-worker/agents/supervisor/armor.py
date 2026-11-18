@@ -13,7 +13,7 @@ match blocks the turn with a fixed message. If Model Armor itself fails, the tur
 closed): an unscreened answer is worse than no answer.
 
 Location: Model Armor is not offered in me-central1, and `global` takes no templates, so they are in
-asia-south1 (Mumbai), the nearest region that has it (infra/model_armor.tf, README note 9).
+asia-south1 (Mumbai), the nearest region that has it (infra/model_armor.tf).
 
 The three changes to the stock plugin, and why:
 1. Only search_guidance output is screened. The other tools return numbers our own code computed; the

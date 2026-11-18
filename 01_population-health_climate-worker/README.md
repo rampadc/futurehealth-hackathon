@@ -135,11 +135,11 @@ Notes:
 
 | Path | What |
 |---|---|
-| `src/heat_safe/` | Risk core (TWL, rules, scheduler, grounding), guidance search (RAG) and the agent's tool wrappers; RAG reading order and learning notes in `src/heat_safe/README_RAG.md` |
+| `src/heat_safe/` | Risk core (TWL, rules, scheduler, grounding), guidance search (RAG) and the agent's tool wrappers; RAG design in `src/heat_safe/README_RAG.md` |
 | `agents/supervisor/` | Supervisor planning agent (ADK, Gemini) |
 | `server.py`, `src/heat_safe/api.py` | The HTTP API (FastAPI): endpoints, the monitor stream, the agent chat |
-| `evals/` | Golden scenarios, scorer, runner; learning notes in `evals/README.md` |
+| `evals/` | Golden scenarios, red-team suite, scorer, runner; results in `evals/README.md` |
 | `tests/` | Unit tests |
 | `tools/` | Data download, BigQuery load, corpus build (`build_corpus.py`), terminal client |
-| `infra/`, `Dockerfile`, `.gcloudignore` | Short-lived public team demo on Cloud Run with the ADK dev UI (Terraform); commands, risks and learning notes in `infra/README.md` |
+| `infra/`, `Dockerfile`, `.gcloudignore` | Short-lived public team demo on Cloud Run with the ADK dev UI (Terraform); commands, risks and design decisions in `infra/README.md` |
 | `data/` | Downloaded data (gitignored) and `README.md` inventory |

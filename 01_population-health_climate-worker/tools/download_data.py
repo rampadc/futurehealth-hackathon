@@ -26,7 +26,7 @@ ROOT = DATA
 RAW = ROOT / "raw"
 TZ = "Asia/Dubai"
 
-REPLAY_DAY = "2025-08-01"       # heat replay, Mussafah (plan, week 1)
+REPLAY_DAY = "2025-08-01"       # heat replay, Mussafah
 DUST_REPLAY_DAY = "2024-08-04"  # dust replay
 SUMMERS = [2023, 2024, 2025]    # backtest window; CAMS air-quality history starts Aug 2022
 SUMMER_START, SUMMER_END = "06-01", "09-30"
@@ -76,7 +76,7 @@ GUIDANCE_DOCS = {
 }
 
 # UAE / Abu Dhabi regulation and policy. Sites that block scripted downloads are collected by hand
-# (see doc/manual-data-collection.md) and dropped into data/heat_safe/raw/regulatory/manual/.
+# (see data/heat_safe/README.md, "Collected by hand") and dropped into data/heat_safe/raw/regulatory/manual/.
 ADPHC = "https://www.adphc.gov.ae/-/media/Project/ADPHC/ADPHC/PDF/OSHAD-SF/"
 REGULATORY_DOCS = {
     "adosh_sf_cop_11_safety_in_the_heat_v4_2024_en.pdf":
@@ -240,7 +240,7 @@ def regulatory(sess, force: bool) -> None:
     manual = out / "manual"
     manual.mkdir(parents=True, exist_ok=True)
     for path in sorted(p for p in manual.iterdir() if not p.name.startswith(".")):
-        record(path, "collected by hand, see doc/manual-data-collection.md", "manual")
+        record(path, "collected by hand, see data/heat_safe/README.md", "manual")
 
 
 def main() -> None:

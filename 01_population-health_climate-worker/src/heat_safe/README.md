@@ -4,194 +4,22 @@
 |---|---|
 | `rules.py`, `twl.py`, `thermal.py`, `heat_stress.py`, `schedule.py` | Deterministic risk core: TWL, zones, midday break, scheduler |
 | `acclimatisation.py` | Who counts as acclimatised today, and their share of a full workload (from dates) |
-| `README_WORKER_RISK.md` | **Spec for `compute_worker_risk`** (not built yet): the six layers, band vs reminder vs alert, the 1 Aug walkthrough, clothing values (`rules.CLOTHING`) |
+| `README_WORKER_RISK.md` | **Spec for `compute_worker_risk`** (`worker_risk.py`): the six layers, band vs reminder vs alert, the 1 Aug walkthrough, clothing values (`rules.CLOTHING`) |
 | `forecast.py`, `sites.py`, `job_profile.py` | Inputs: weather, sites, roles |
 | `grounding.py` | Output guardrails: numbers and page references must come from tool outputs |
 | `agent_tools.py` | The agent's tools: thin wrappers with the same names as the core functions |
-| `corpus.py`, `guidance.py` | Guidance search (RAG): **see [`README_RAG.md`](README_RAG.md)** for the design, reading order and learning notes |
+| `corpus.py`, `guidance.py` | Guidance search (RAG): **see [`README_RAG.md`](README_RAG.md)** for the design and retrieval results |
 | `gcp.py` | Fail-fast credentials check |
 
-## Risk core learning notes
+## Design decisions
 
-The full set (TWL, fail-safe, scheduler, grounding) is still to be written. This one comes from 6 Nov.
-
-### 1. When the documents disagree, decide once, in code, and write down why
-
-"When does a new starter count as acclimatised?" has no single answer in the binding documents:
-
-| Source | Says |
-|---|---|
-| ADOSH-SF CoP 11.0 §3.2(b)(i), p. 7 | "allowance of 5-7 days for acclimatization before starting hard work" |
-| ADOSH-SF TG §3, p. 6 | New employee: 20/40/60/80/100% of a full workload, so 100% on day 5 |
-| ADOSH-SF TG §5.1, p. 10 | Full acclimatisation "takes over two weeks" |
-| ADOSH-SF TG Table 1 note b, p. 5 (an image) | "Unacclimatised workers are defined as new workers or those who have been off work for more than 14 days due to illness or on vacation leave" |
-
-Before 6 Nov the agent passed `acclimatised=true/false` itself. So **the model** was choosing between
-these readings, differently from run to run. In one answer it said a day-5 roofer was at "100%"
-and then still restricted them. A safety cutoff chosen by the model is not a cutoff.
-
-The fix (option B, chosen by the team):
-- **New starters may work only in the Low zone through day 7**, the protective end of the binding
-  "5-7 days", at the TG day-by-day workload share.
-- **Returning workers follow the TG re-acclimatisation table** for their workload, and anyone off
-  **more than 14 days** is unacclimatised (note b), so Low zone only for 7 days, like a new starter.
-
-It lives in three places, each doing one job:
-- **`rules.py`** holds the numbers, with the sources and the reasoning in comments, and a new `RULES_VERSION`.
-- **`acclimatisation.py`** turns dates into a status. The model converts "started on Monday" to a
-  date, but **never counts days or decides**: date arithmetic is code.
-- **`schedule.py`** blocks hours outside the Low zone and caps total work at the share. It reports the
-  result in its output and checks it with an invariant (`within_acclimatisation_share`).
-
-Three things worth copying:
-- **Reading the documents properly found a hidden gap.** The old rule ("off > 14 days = unacclimatised")
-  gave 100% to someone back after 10 days. The TG table says 80% from 6 days away. Old code that
-  passed every test was less protective than the source it cited.
-- **Then I made the opposite mistake.** The 14-day rule's comment cited "Table 1 note b". Table 1 is an
-  image, so text extraction couldn't see the note, and I treated the citation as unverifiable and
-  replaced the rule. Rendering the page (`pdftoppm -f 5 -l 5 -png`) showed note b is the *official
-  definition* of unacclimatised. For about an hour, workers back after more than 14 days could be
-  scheduled in the High zone (at reduced workload) against a binding rule. No test caught it, because
-  the tests encoded my reading. **If you can't see a source, look harder (render it, open it); never
-  treat "can't verify" as "not there".** And when replacing a rule, find out why it existed first.
-- **Interpretations are labelled as interpretations.** The TG says "R/E, reduced expectations" without
-  a number; `REDUCED_EXPECTATIONS_SHARE = 0.80` says in its comment that it is our reading. Where the
-  TG's rows overlap (6-12 and 12-20 days), 12 goes to the stricter row, and that is written down too.
-  Both, plus "returning workers are not limited to the Low zone", are listed for review with an
-  occupational health and safety advisor.
-- **Every boundary has a test** (`tests/test_acclimatisation.py`): day 7 vs 8, 3 vs 4 days away, 11
-  vs 12, 20 vs 21, the illness column, and invalid input. The test names say *why*, e.g.
-  `test_ten_days_leave_is_now_reduced_where_the_old_14_day_rule_gave_100_percent` and
-  `test_off_more_than_14_days_is_unacclimatised_per_table_1_note_b`.
-
-### 2. Give the model numbers in the form it will say them
-
-The first eval run of option B failed 2 of 3 `returning_after_leave` runs on numeric grounding. Neither
-number was wrong: the agent turned `workload_share: 0.8`-style fields into "100 %", and 288 minutes
-into "4 hours 48 minutes". Both are conversions, which the instruction forbids, because a converted
-number can't be checked against the tool output. (The crew's "5 hours 20 minutes" passed only by
-coincidence: "20 min" appears in the work/rest column.)
-
-There were two ways to make it pass:
-- **Loosen the guardrail** (allow percentages of fractions, minutes from hours). That makes it weaker
-  for every answer, to fix one.
-- **Change the tool output** to carry the forms people say: `workload_percent: 80` and
-  `work_scheduled_hm: "4 h 48 min"`. The model then copies instead of calculating, and the guardrail
-  stays strict.
-
-We took the second. **When a model keeps doing arithmetic, give it the answer instead.** It is the
-same principle as moving thresholds out of the prompt: anything code can compute, code should.
-
-### 3. A heat spike runs two loops at different speeds (13–14 Nov)
-
-A forecast describes each hour with one value. A sensor on site can show it is hotter than that, so
-the plan has to change during the shift. That needs two loops:
-
-```
-sensor reading ─► sensor.measured_twl ─► spike.adjust_for_observation   FAST: every reading, no LLM
-                                            continue / tighten / rest_now / sensor_fault / withdraw + alert
-             └──► sensor.apply_measurements ─► schedule.optimise_schedule(from_hour, already_worked_minutes)
-                                                                         SLOW: re-plan the rest of the day
-```
-
-| File | Role |
-|---|---|
-| `spike.py` | Fast loop. A pure function: one reading and a small state in, one decision out. Only ever stricter than the plan |
-| `sensor.py` | Measured TWL (same model as the forecast), conversion of readings for the fast loop, forecast correction, synthetic feed, `replay_fast_loop` |
-| `schedule.py` | `from_hour` and `already_worked_minutes`: re-plan without touching past hours or exceeding the acclimatisation share |
-| `tools/replay_heat_spike.py` | The demo: morning plan, then the alerts during the spike, then the re-plan |
-| `rules.py` | `STEP_DOWN_AFTER_MINUTES`, `SENSOR_MAX_CHANGE_C_PER_MIN` and `SENSOR_BIAS_FADE_HOURS`: design choices, not ADOSH-SF |
-
-What the replay day taught us:
-- **An hourly forecast is not the whole hour.** Even without the synthetic spike, the shade sensor
-  drifts into High during the 10:00 hour as the air heats towards 11:00, while the forecast says
-  Medium (122.8). That is the case for site sensors in the pitch.
-- **The spike had to be placed with care.** In the sun, 07:00–17:00 is already High (the TWL floor), so
-  a spike changes nothing there. After 10:00 a +3 °C spike crosses the 44 °C withdrawal limit. The demo
-  spike is 08:15–09:15 for a crew in shade, where the plan assumed Medium.
-- **Raise fast, lower slowly; a bad input moves toward safety.** A stricter zone applies from the first
-  reading and is lifted only after 30 minutes of better readings (15 until 14 Nov; see `rules.py`). An implausible jump is a fault: it
-  raises the zone by one and alerts, but it never triggers a withdrawal and never relaxes anything.
-- **The correction is one-sided.** Hotter than forecast lowers the next hours' TWL (fading over 3 hours).
-  A cooler reading never raises it.
-
-**Connected to the agent (14 Nov).** `get_site_sensor` gives the agent what the sensor measured per hour
-against the forecast, the faulty readings it excluded, and (given the crew) what the risk monitor already
-told the crew plus whether it recommends a re-plan (`sensor.replan_recommendation`: measured worse than
-the plan for 30 min, or a withdrawal). `optimise_schedule(replan_from, use_site_sensor)` then re-plans
-from the next whole hour. Eval scenarios: `spike_replan`, `sensor_fault_not_heat`.
-
-What connecting it taught us:
-- **The re-plan nearly used a faulty reading.** It dropped only self-reported faults, so the sun-struck
-  70 °C would have become an hour's "worst TWL". Now both loops use one check (`spike.reading_fault`).
-- **Hold back deviations, not the plan's own changes.** The fast loop first held the plan's High zone
-  (07:00) into its Medium hour (08:00) and sent a "tighten" before any spike. "Lower slowly" now applies
-  only while a deviation is in force.
-- **The synthetic feed must match the forecast's assumptions** (each hour's values held, shade globe =
-  air temperature). Otherwise its own drift fires alerts and the spike is no longer the only cause.
-- **Give numbers in the form people say them.** The agent wrote "the remaining 150 minutes" (its own
-  subtraction), "115 W/m² (High)" (114.96 rounded up across the threshold) and "19 W/m² worse" (the tool
-  had -19). Fixed in the tools, not the guardrail: `work_still_needed_hm`, `rules.display_twl` (rounds
-  down, so the number always agrees with its zone) and positive `worse_than_forecast_wm2`.
-- **The first eval failure was the eval.** `within_acclimatisation_share` only applies to a
-  reduced-share worker; the scenario's crew was acclimatised.
-
-**Rolling 60-minute work limit (15 Nov).** The fast loop first reset "minutes worked" at each clock
-hour, so a crew could work 08:00-08:30, rest 30 minutes and work again from 09:00: 50 minutes in 80
-under a "20 min work / 40 min rest" cycle. Now work counts over the last 60 minutes, and the alert gives
-how long the crew can work **in one stretch** from now (`sensor.available_work_minutes`): earlier
-minutes drop out of the window as the stretch goes on, so after 08:00-08:30 the answer is 0 until 09:10
-and then a full 20. A first version reported "20 minus what is in the window" (5 minutes at 09:15), which
-was correct for that instant but told a crew to stop after 5 minutes they did not need to stop.
-A supervisor's question about one alert found this.
-
-**The monitor follows the plan in force (15 Nov).** The demo's monitor kept following the morning plan
-after the 09:00 re-plan, so at 09:10 it told the crew "work 20 minutes" while the re-plan had moved
-that work to the afternoon. Now `replay_fast_loop(replans=...)` switches to a re-plan from its first
-hour, an alert never offers more minutes than the plan in force still schedules, and "tighten" /
-"rest now" are held back while the plan has the crew resting (sent when work resumes, if they still
-apply). Sensor faults and withdrawals always alert. Two loops that act on the same crew must read the
-same plan.
-
-### 4. Alert text is reviewed data, not generated text (14 Nov)
-
-`alert_templates.yaml` holds what a worker receives for each fast-loop action, in English, Mandarin,
-Hindi, Urdu, Malayalam and Bengali, and a crew-level line for the supervisor. `alerts.py` only fills in
-values code computed (`{minutes}`, `{time}`, `{crew}`, `{zone}`); the agent quotes `worker_message`
-and never writes or translates alert text.
-
-- **Languages follow the workforce.** Abu Dhabi crews are mostly South Asian (Indian, especially from
-  Kerala; Pakistani; Bangladeshi), and Chinese contractors bring Chinese crews. Spoken Hindi reaches Urdu
-  speakers, but written alerts need both scripts.
-- **Review status is recorded, and decides how a text is sent.** `reviewed` (a native speaker, name and
-  date required): sent alone. `back_translated` (Google Translate back to English matched; who and when
-  required): always sent together with the English text. `draft`: marked in demo mode, refused in
-  production (English instead). State on 14 Nov: Mandarin reviewed by a native speaker on the team;
-  Hindi, Urdu, Malayalam and Bengali back-translated, still waiting for native-speaker review.
-- **Back-translation is not a review.** It catches large meaning errors, not unnatural or ambiguous
-  wording. So those texts never travel without the English original, and the docs never call them
-  reviewed.
-- **The checks run when the file loads, not mid-shift:** every action exists in every language, and every
-  translation fills the same values as the English. A translation that drops `{minutes}` fails at start-up.
-- **Short, literal sentences** ("Stop work now. Rest in the shade. Drink water.") translate more reliably
-  and suit workers with limited literacy.
-
-### 5. Measuring it on the replay day (15 Nov)
-
-`metrics.py` and `tools/replay_metrics.py` compare one crew under no plan, the morning plan, and
-Heat-Safe, judged against measured heat (`doc/metrics_replay_2025-08-01.md`). Headline: minutes worked
-over the ADOSH-SF work limit, A 280, B 20, C 0, with C's shortfall reported as the cost of protection.
-
-Building the measure found three real problems, each now fixed and tested:
-- **Our own planner broke the limit.** It placed a full Low-zone hour (60 min) straight before a Medium hour
-  (45 per 60). Even with no spike, following the plan gave 45 minutes over. `optimise_schedule` now caps
-  the earlier hour when the next one has work (`within_rolling_work_limit` invariant).
-- **The withdrawal limit flapped.** At 44 °C plus sensor noise the crew got 5 "withdraw" alerts in an
-  hour. A withdrawal now holds until the readings are below the limits for 30 minutes, and the zone's
-  step-down clock runs during it, so the two waits do not stack.
-- **The re-plan assumed the morning plan was followed.** The fast loop had cut 15 minutes, so the
-  assumption hid a 15-minute shortfall. The replay now re-plans with the minutes actually worked
-  (`replay_fast_loop`'s `worked_now`).
-- And one in the metric itself: its window was one 5-minute block too wide (65 minutes), so even
-  continuous Low-zone work looked "over". A wrong number that favours you is still wrong; check the
-  measure before you believe it.
+- **Safety numbers come from code, never from the model.** TWL, zones, the midday break and the schedule are
+  deterministic and unit-tested (`tests/`). The agent only calls them and explains the result.
+- **Where the documents disagree, we decide once, in code, and cite why.** Acclimatisation follows the protective end
+  of the binding ADOSH-SF text (`acclimatisation.py`), interpretations are labelled as such, and every boundary has a test.
+- **Tools return numbers in the form people say them** (clock times, minutes, "of 60"), so the model doesn't do arithmetic.
+- **Two loops at different speeds.** The forecast plans the day; the site sensor (`sensor.py`, `spike.py`) corrects
+  it during the shift. Zones go up at once and come down slowly, and a faulty reading moves toward safety, not away.
+- **Alert text is reviewed data, not generated text** (`alert_templates.yaml`). Each language records its review
+  status, and the checks run when the file loads.
+- **Every number and page citation in an answer is checked** against tool outputs (`grounding.py`).
