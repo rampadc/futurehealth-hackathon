@@ -9,6 +9,7 @@ import { ADMIN, PERSONAS } from '../story';
 import { DEVICE_INFO, findScreen, screensFor, type Device, type ScreenDef } from '../screens/registry';
 import { Placeholder } from '../screens/Placeholder';
 import { Avatar } from '../screens/kit';
+import { useSiteSensors } from '../screens/squads';
 import { usePhotoSync } from '../people';
 import './fonts';
 import './shell.css';
@@ -39,6 +40,8 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
   const lang = device === 'worker' ? workerLang ?? 'en' : 'en';
   const brand = usePublishedBrand(!!session.person, device === 'web' ? 'platform' : 'mobile');
   usePhotoSync(!!session.person, session.caseView?.version);
+  useSiteSensors(!!session.person, session.caseView?.version);
+  usePersonaFromLink(session, screens.flatMap(s => s.personas));
   const account = screens.find(s => s.id === 'account');
   // Stop-work and emergency screens drop the brand entirely.
   const showBrand = brand && !['stop-work', 'alert'].includes(screen.id);
@@ -113,6 +116,24 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
       })}
     </nav>}
   </div>;
+}
+
+/**
+ * Presenter links (`?persona=C01`) open a persona's own screens in a new window: sign that persona in once,
+ * then drop the parameter so a reload or sign-out behaves normally.
+ */
+function usePersonaFromLink(session: ReturnType<typeof useCaseSession>, users: string[]) {
+  const [requested] = useState(() => new URLSearchParams(window.location.search).get('persona'));
+  const [done, setDone] = useState(false);
+  useEffect(() => {
+    if (!requested || done || session.initialising || session.busy) return;
+    setDone(true);
+    const url = new URL(window.location.href);
+    url.searchParams.delete('persona');
+    window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+    const persona = [...PERSONAS, ADMIN].find(p => p.id === requested && users.includes(p.id));
+    if (persona && session.person?.id !== persona.id) void session.signIn(persona);
+  }, [requested, done, session.initialising, session.busy, session.person?.id]);
 }
 
 function DeviceSwitch({ current, personId }: { current: Device; personId?: string }) {

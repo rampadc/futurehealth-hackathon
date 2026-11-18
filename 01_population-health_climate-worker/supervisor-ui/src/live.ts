@@ -64,6 +64,12 @@ export const live = {
   demoState: () => request<CaseView | null>('/demo/state'),
   agentRuns: () => request<unknown>('/demo/agent-runs'),
   reset: () => request<CaseView>('/demo/reset', { method: 'POST' }),
+  jumpClock: (at: string) => request<CaseView>('/demo/clock', { method: 'POST', body: json({ at }) }),
+  demoSite: () => request<DemoSite>('/demo/site'),
+  saveDemoSite: (settings: SiteSettings) => request<DemoSite>('/demo/site', { method: 'PUT', body: json(settings) }),
+  restoreDemoSite: () => request<DemoSite>('/demo/site/defaults', { method: 'POST' }),
+  demoCrewRisk: () => request<PresenterCrewRisk | null>('/demo/crew-risk'),
+  siteSensors: () => request<SiteSensors>('/case/site-sensors'),
   consent: () => request<WorkerConsent>('/worker/consent'),
   saveConsent: (language: string, scopes: ConsentScope[]) => request<WorkerConsent>('/worker/consent', { method: 'PUT', body: json({ language, scopes }) }),
   withdrawConsent: () => request<WorkerConsent>('/worker/consent', { method: 'DELETE' }),
@@ -95,3 +101,11 @@ export type HeatRestView = {
   };
   [key: string]: unknown;
 };
+
+export type SensorState = 'live' | 'stale' | 'offline';
+/** squad → sensor → hour ("8") → TWL in W/m²; sensor → state; worker → health condition ids. */
+export type SiteSettings = { twl: Record<string, Record<string, Record<string, number>>>; sensors: Record<string, SensorState>; conditions: Record<string, string[]> };
+/** What any signed-in screen reads: each squad sensor's TWL for the current case hour, and sensor states. */
+export type SiteSensors = { hour: number; hours: number[]; sensors: Record<string, SensorState>; squads: Record<string, Record<string, number>>; live_sensor_edited: boolean };
+export type DemoSite = SiteSensors & { settings: SiteSettings; defaults: SiteSettings; conditions: Record<string, string>; workers: string[] };
+export type PresenterCrewRisk = { inputs: Record<string, string>; workers: Array<{ person_id: string; band: string; twl_wm2: number | null; factors: string[]; missing_inputs: string[]; action: string; supervisor_action: string }> };

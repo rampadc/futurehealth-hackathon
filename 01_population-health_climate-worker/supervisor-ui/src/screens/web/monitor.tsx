@@ -10,7 +10,7 @@ import type { ScreenProps } from '../registry';
 import { ConditionsPanel } from '../conditions';
 import { CrewRiskPanel } from '../risk';
 import { TwlReadout } from '../twl';
-import { bandOf, OtherSquadScreen, SquadItems, SquadPicker, squadsFor, useSquad, SENSORS } from '../squads';
+import { bandOf, OtherSquadScreen, SquadItems, SquadPicker, squadsFor, useSquad, sensorsNow } from '../squads';
 
 /** Squad Monitoring: within five seconds, does anyone need action now? */
 export function SquadMonitoringScreen({ session }: ScreenProps) {
@@ -94,7 +94,7 @@ export function SystemTrustScreen({ session }: ScreenProps) {
     <Section title="System map">
       {/* The system map as a list of lists: one list per lane. */}
       <ul className="hs-syslist">
-        <li><h3>Inputs</h3><ul>{SENSORS.filter(x => !x.id.startsWith('k')).map(x => <li key={x.id}><span><b>{x.id.toUpperCase()} · {x.type}</b><small>{x.loc} · {x.relay}</small></span><Badge tone={x.off ? 'over' : 'done'}>{x.off ? 'Offline' : 'Live'}</Badge></li>)}
+        <li><h3>Inputs</h3><ul>{sensorsNow().filter(x => !x.id.startsWith('k')).map(x => <li key={x.id}><span><b>{x.id.toUpperCase()} · {x.type}</b><small>{x.loc} · {x.relay}</small></span><Badge tone={x.off || x.stale ? 'over' : 'done'}>{x.off ? 'Offline' : x.stale ? 'Stale' : 'Live'}</Badge></li>)}
           <li><span><b>Weather forecast</b><small>Hourly, Mussafah · planning context only</small></span><Badge tone="muted">Context</Badge></li></ul></li>
         <li><h3>Rules (no AI)</h3><ul>
           <li><span><b>Risk monitor and heat rules</b><small>Bands, holds and escalations · deterministic</small></span><Badge tone={ready === false ? 'over' : 'done'}>{ready === null ? 'Checking' : ready ? 'Ready' : 'Degraded'}</Badge></li>
