@@ -709,6 +709,22 @@ describe('platform screens', () => {
     expect(await screen.findByText('Used: get_case, what_if_crew_plan', { exact: false })).toBeTruthy();
     expect(screen.getByText('Hypothetical · not recorded')).toBeTruthy();
   });
+
+  it('shows the grounding checks under each agent answer', async () => {
+    currentCase = await makeCase('heat_trigger', {}, []);
+    const ok = (checked: number) => ({ checked, passed: true, ungrounded: [] });
+    chatHistory = [
+      { id: 'a1', author: 'assistant', text: 'TWL 120 W/m² at 17:00.', grounding: { grounding: ok(9), citations: ok(1), links: ok(0) } },
+      { id: 'a2', author: 'assistant', text: 'Peak 47 °C.', grounding: { grounding: { checked: 2, passed: false, ungrounded: ['47 °C'] }, citations: ok(0), links: ok(0) } },
+      { id: 'a3', author: 'assistant', text: 'I cannot rank workers.', grounding: { grounding: ok(0), citations: ok(0), links: ok(0) } },
+      { id: 'a4', author: 'assistant', text: 'An answer saved before the checks were shown.' },
+    ];
+    await open('/web/ask', 'P02');
+    expect(await screen.findByText('✓ 9 numbers match tool results · ✓ 1 citation verified')).toBeTruthy();
+    expect(screen.getByText('⚠ Not found in tool results: 47 °C · check before acting')).toBeTruthy();
+    // a refusal (nothing to check) and old history (no grounding data) show no line
+    expect(screen.getAllByLabelText('Checks on this answer')).toHaveLength(2);
+  });
 });
 
 describe('offline worker actions', () => {
