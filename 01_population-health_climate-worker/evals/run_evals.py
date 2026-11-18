@@ -3,6 +3,7 @@
     uv run --env-file .env python evals/run_evals.py                      # all scenarios, once each
     uv run --env-file .env python evals/run_evals.py -k new_starter -n 3  # one scenario, three repeats
     uv run --env-file .env python evals/run_evals.py --no-bq              # local only (JSON in evals/results/)
+    uv run --env-file .env python evals/run_evals.py --suite redteam --pause 10  # attacks + controls (Model Armor)
 
 Exit code is 1 if any scenario run fails, so this can gate CI or a deploy.
 """
@@ -27,8 +28,8 @@ sys.path.insert(0, str(ROOT))
 from evals.metrics import score  # noqa: E402
 from heat_safe.rules import RULES_VERSION  # noqa: E402
 
-## all goldend dataset stored in supervisor.yaml for eval
-GOLDEN = ROOT / "evals" / "golden" / "supervisor.yaml"
+# supervisor: the regression gate. redteam: attacks and look-alike controls, for Model Armor coverage (17 Nov)
+SUITES = {name: ROOT / "evals" / "golden" / f"{name}.yaml" for name in ("supervisor", "redteam")}
 RESULTS_DIR = ROOT / "evals" / "results"
 PROJECT = os.getenv("GOOGLE_CLOUD_PROJECT", "future-health-513202")
 BQ_LOCATION = os.getenv("GOOGLE_CLOUD_LOCATION", "me-central1")
@@ -45,8 +46,19 @@ BQ_SCHEMA = [
     ("prompt_tokens", "INTEGER"), ("output_tokens", "INTEGER"), ("thinking_tokens", "INTEGER"),
     ("latency_s", "FLOAT"), ("model", "STRING"), ("rules_version", "STRING"),
     ("git_sha", "STRING"), ("git_dirty", "BOOLEAN"), ("session_id", "STRING"),
-    ("prompt", "STRING"), ("answer", "STRING"), ("armor_json", "STRING"),
+    ("prompt", "STRING"), ("answer", "STRING"), ("armor_json", "STRING"), ("category", "STRING"),
 ]
+
+RETRIES = 3  # Gemini returns 429 RESOURCE_EXHAUSTED under load (16 Nov); quota noise is not an agent failure
+
+
+def _is_quota_error(exc: BaseException | None) -> bool:
+    """ADK wraps the 429 in _ResourceExhaustedError, whose own message is empty: check the type and the cause."""
+    while exc is not None:
+        if "ResourceExhausted" in type(exc).__name__ or "429" in str(exc) or "RESOURCE_EXHAUSTED" in str(exc):
+            return True
+        exc = exc.__cause__ or exc.__context__
+    return False
 
 
 def git_state() -> tuple[str, bool]:
@@ -60,14 +72,23 @@ async def run_scenario(scenario: dict, repeat: int) -> tuple[dict, dict]:
     # "today" is read by the agent's instruction on every model call, so set it before asking
     os.environ["HEAT_SAFE_TODAY"] = str(scenario["today"])
     from supervisor.session import ask  # imported late: the agent module reads env at import
-    run = await ask(scenario["prompt"].strip(), user_id="eval-runner")
+    for attempt in range(RETRIES + 1):
+        try:
+            run = await ask(scenario["prompt"].strip(), user_id="eval-runner")
+            break
+        except Exception as exc:  # noqa: BLE001 - only quota errors are retried, the rest re-raise
+            if attempt == RETRIES or not _is_quota_error(exc):
+                raise
+            wait = 30 * 2 ** attempt
+            print(f"      quota error, retrying in {wait}s ({attempt + 1}/{RETRIES})")
+            await asyncio.sleep(wait)
     return run, score(scenario, run)
 
 
-def to_row(run_id, started_at, scenario, repeat, run, result, git_sha, dirty) -> dict:
+def to_row(run_id, started_at, scenario, repeat, run, result, git_sha, dirty, suite="supervisor") -> dict:
     failed = [f"{c['kind']}:{c['name']}" for c in result["checks"] if not c["passed"]]
     return {
-        "run_id": run_id, "started_at": started_at, "suite": "supervisor", "scenario_id": scenario["id"],
+        "run_id": run_id, "started_at": started_at, "suite": suite, "scenario_id": scenario["id"],
         "repeat": repeat, "passed": result["passed"], "failed_checks": ", ".join(failed),
         "checks_json": json.dumps(result["checks"]),
         "trajectory_exact": result["trajectory_exact"], "trajectory_in_order": result["trajectory_in_order"],
@@ -80,6 +101,7 @@ def to_row(run_id, started_at, scenario, repeat, run, result, git_sha, dirty) ->
         "model": run["model"], "rules_version": RULES_VERSION, "git_sha": git_sha, "git_dirty": dirty,
         "session_id": run["session_id"], "prompt": scenario["prompt"].strip(), "answer": run["answer"],
         "armor_json": json.dumps(run.get("armor")),  # Model Armor's decision, "null" when screening is off
+        "category": scenario.get("category"),  # redteam suite: injection, personal_data, control, ...
     }
 
 
@@ -105,16 +127,18 @@ async def main() -> int:
     ap.add_argument("-k", help="only scenarios whose id contains this text")
     ap.add_argument("-n", "--repeats", type=int, default=1, help="runs per scenario (LLMs are not deterministic)")
     ap.add_argument("--no-bq", action="store_true", help="do not write to BigQuery")
+    ap.add_argument("--suite", choices=sorted(SUITES), default="supervisor", help="which golden file to run")
+    ap.add_argument("--pause", type=float, default=0, help="seconds between runs, to stay under the Gemini quota")
     args = ap.parse_args()
 
-    scenarios = [s for s in yaml.safe_load(GOLDEN.read_text()) if not args.k or args.k in s["id"]]
+    scenarios = [s for s in yaml.safe_load(SUITES[args.suite].read_text()) if not args.k or args.k in s["id"]]
     if not scenarios:
         print(f"no scenario matches {args.k!r}")
         return 2
     run_id = f"eval-{datetime.now(timezone.utc):%Y%m%d-%H%M%S}-{uuid.uuid4().hex[:6]}"
     started_at = datetime.now(timezone.utc).isoformat()
     git_sha, dirty = git_state()
-    print(f"{run_id}  git {git_sha}{' (dirty)' if dirty else ''}  rules {RULES_VERSION}\n")
+    print(f"{run_id}  suite {args.suite}  git {git_sha}{' (dirty)' if dirty else ''}  rules {RULES_VERSION}\n")
 
     rows = []
     # Sequential on purpose: easier to read, and it avoids rate-limit noise looking like agent failures
@@ -124,12 +148,14 @@ async def main() -> int:
             # ask() also collect information that eval checks, e.g. tools trajectory and adk web don't print
             # including some intermediate states, tool calling and arguments, 
             # grounding and citations, token usage and latency
+            if rows and args.pause:
+                await asyncio.sleep(args.pause)
             run, result = await run_scenario(s, r)
-            rows.append(to_row(run_id, started_at, s, r, run, result, git_sha, dirty))
+            rows.append(to_row(run_id, started_at, s, r, run, result, git_sha, dirty, args.suite))
             mark = "PASS" if result["passed"] else "FAIL"
             print(f"{mark}  {s['id']} #{r}  tools={[c['name'] for c in run['tool_calls']]}  "
                   f"P={result['trajectory_precision']} R={result['trajectory_recall']}  "
-                  f"tokens={sum(run['tokens'].values())}  {run['latency_s']}s")
+                  f"tokens={sum(run['tokens'].values())}  {run['latency_s']}s  armor={run.get('armor')}")
             for c in result["checks"]:
                 if not c["passed"]:
                     print(f"      x {c['kind']}: {c['name']}  {c['detail']}")
