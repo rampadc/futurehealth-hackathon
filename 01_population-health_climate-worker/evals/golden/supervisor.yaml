@@ -17,7 +17,7 @@
 #                                 verdict must be one listed (passed | redacted | blocked | error)
 
 - id: exit_roofing_plan
-  title: Week 1 exit test - plan tomorrow for a roofing crew on the replay day
+  title: Core loop - plan tomorrow for a roofing crew on the replay day
   why: >
     The core loop end to end. Protects tool order (profile -> heat stress -> schedule), the midday
     break, numeric grounding, and reporting a shortfall instead of adding unsafe hours.

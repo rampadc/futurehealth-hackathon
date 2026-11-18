@@ -130,7 +130,7 @@ planned-baseline table.
 | W07 | 144 (Low) | new starter +1 | Amber | no: the plan assumed it |
 | W09 | **112 (High)** | none | Red | **only if the plan assumed work wear** (trigger 1). A plan that knew about the coveralls already moved the welding |
 
-The crew band is Red, with 2 of 3 at Amber or above. This is the Week 2 exit test: same air, three
+The crew band is Red, with 2 of 3 at Amber or above. This is the key test: same air, three
 answers. (These TWL values are pinned in `tests/test_clothing.py`.)
 
 **06:00:** the site is Medium (126). W07 is Medium + new starter → Red, but `optimise_schedule` already
@@ -179,62 +179,3 @@ cool down"**. **16:30:** W09's wearable disconnects → **supervisor alert (trig
 - **Low fluid:** the threshold against the TG fluid rates (litres per hour by zone) and how to judge a
   self-reported volume.
 - **Rate limit:** 30 minutes is a starting value, not a sourced one.
-
-## Reading order (the built parts)
-
-| # | File | Lines | Question to answer |
-|---|---|---|---|
-| 1 | `rules.py` | `class Band` | How does `raised()` make "only up, never to Emergency" a property of the type? |
-| 2 | `rules.py` | Clothing section | Why a difference from NIOSH work wear, and not NIOSH's absolute clo? |
-| 3 | `twl.py` | `thermal_work_limit` clothing lines | Where do `icl` and `icl_perm` enter the heat balance? |
-| 4 | `tests/test_clothing.py` | all | Which test would fail if someone set coveralls to NIOSH's raw 1.1? |
-| 5 | `acclimatisation.py` | all | Which layer-3 modifier is already built, and what does it return? |
-| 6 | This file | alert triggers | Which trigger fires for W09 at 05:00, and when does it not? |
-
-## Exercises
-
-1. Run `test_replay_day_0500_same_air_three_zones`. Then change `cloth_coveralls` to NIOSH's raw
-   0.80 clo and run it again. What zone does 05:00 become, and why is mixing scales the bug?
-2. In a Python shell, compute 05:00 TWL for `icl` from 0.60 to 0.70 in steps of 0.01. At which value
-   does it cross 140? What does that say about precision near a zone boundary?
-3. Write `test_adding_any_modifier_never_lowers_the_band` before the function exists, against a stub
-   `compute_worker_risk` that returns Green. Watch it fail for the right reason.
-
-## Learning notes
-
-### 1. Separate state from events, or the alerts become noise
-
-The first design had one word, Red, meaning both "conditions are High zone" and "stop now". Writing
-out a real day showed the problem: Red is planned for 10 hours on 1 Aug, so "Red → alert" fires all
-day. Safety systems in other fields (hospital monitors, aviation) learned this the hard way: people
-stop responding to alarms that are usually expected. The fix is a pattern: **show the state, push the
-events**, and define an event as a deviation from an expected baseline. Here the baseline is the stored
-plan.
-
-### 2. Don't mix scales from two sources; anchor to your model and take differences
-
-Our TWL baseline is 0.6 clo (Brake & Bates convention, validated by `tests/test_twl.py`). NIOSH says
-ordinary work wear is 0.75. Using NIOSH's 1.1 for coveralls directly would add 0.5 clo, of which 0.15
-is just the two sources disagreeing about the same shirt and trousers. So the table takes NIOSH's
-*difference* (+0.35) and adds it to our baseline. Work wear stays exactly where it was, which
-`test_work_wear_is_the_twl_baseline_so_existing_results_do_not_change` guards.
-
-### 3. Zone boundaries amplify small inputs
-
-Cloth coveralls are only +0.05 clo, yet 05:00 goes from 144 to 139 W/m², from Low to Medium, and so from
-"new starter may work" to "new starter may not". Near a threshold, an input's small uncertainty becomes
-a different decision. That's why the clothing values carry sources and tests, and why "PPE unknown" uses
-the role's typical ensemble and *says so*, rather than silently assuming the lightest.
-
-### 4. Know where your model stops being valid
-
-TWL is a heat-balance model that assumes sweat evaporates through clothing. A vapour-barrier suit
-breaks that assumption, so any TWL number would be precise and wrong. Outside a model's validity range,
-**don't extrapolate: fail safe and say why** (Red, "special controls"). It's the same rule as "missing
-weather → Red", applied to a different unknown.
-
-### 5. At a cap, triggers must look at causes, not levels
-
-The bands cap at Red, so "alert when the band rises" is silent for a worker already at Red who reports
-drinking almost nothing. Trigger 2 fires on a *new factor*, whatever the band. Whenever a scale
-saturates, check what your rules can no longer see.

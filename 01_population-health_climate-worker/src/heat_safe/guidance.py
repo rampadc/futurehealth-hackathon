@@ -6,7 +6,7 @@
 
 Index: tools/build_corpus.py writes `vectors.guidance_chunks` (one row per chunk from heat_safe.corpus).
 Embeddings and data stay in me-central1; only the model's generation call goes to the global endpoint.
-Design, reading order and learning notes: src/heat_safe/README_RAG.md.
+Design and retrieval results: src/heat_safe/README_RAG.md.
 """
 from __future__ import annotations
 

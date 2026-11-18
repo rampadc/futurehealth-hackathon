@@ -24,7 +24,7 @@ from heat_safe.paths import DATA  # noqa: E402
 
 RAW = DATA / "raw"
 
-# Plan, Week 1: raw, analytics, vectors, telemetry, metrics
+# Datasets: raw, analytics, vectors, telemetry, metrics
 DATASETS = {
     "raw": "Source data as downloaded (Open-Meteo, NOAA, NASA POWER, O*NET). Rebuilt by tools/load_bigquery.py.",
     "analytics": "Derived, aggregated views. The supervisor agent's read-only service account reads only this dataset.",

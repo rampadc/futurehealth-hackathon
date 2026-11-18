@@ -79,7 +79,7 @@ How to read the decisions:
 |---|---|
 | Bar | Dimension `tool`, metrics `Record Count` and `latency_ms` (**Average**) |
 
-## Learning notes
+## Design decisions
 
 1. **Model the data before charting.** Looker Studio is good at grouping and counting tidy rows, and bad at parsing
    JSON. Every piece of shaping lives in SQL (`views.sql`), which is version-controlled and reviewable. The dashboard
