@@ -139,7 +139,7 @@ button.hs-row-body:hover { background: var(--color-base); }
 .hs-button:active:not(:disabled, .is-danger) { background: var(--color-ink); color: var(--color-on-ink); }
 .hs-button:disabled { background: var(--color-base); color: var(--color-pencil); border-color: var(--color-pencil); border-block-end-width: 2px; cursor: not-allowed; }
 .hs-shell[data-device='site'] .hs-button, .hs-shell[data-device='worker'] .hs-button, .hs-shell[data-device='kiosk'] .hs-button { min-block-size: var(--target-glove); }
-.hs-cta-bar { position: sticky; inset-block-end: 0; display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-2) 0; background: var(--color-base); border-block-start: var(--rule-structure); }
+.hs-cta-bar { position: sticky; inset-block-end: 0; z-index: 2; display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-2) 0; background: var(--color-base); border-block-start: var(--rule-structure); }
 .hs-cta-bar .hs-button { min-block-size: var(--target-cta); font-size: var(--fs-title); }
 .hs-shell[data-device='worker'] .hs-cta-bar, .hs-shell[data-device='site'] .hs-cta-bar { inset-block-end: calc(var(--target-glove) + var(--edge-safe)); }
 

@@ -53,11 +53,14 @@ export function EvidenceAction({ action, caseView, person, onAction, busy }: {
     (action === 'readiness' && !selected.length) ||
     ((action === 'readiness' || action === 'leila') && (!basis.trim() || !validUntil)) ||
     (action === 'activity' && (activeWorkers.some(w => !activity[w.person_id]) || !observed));
+  // Long forms put the submit button after the inputs, where the person finishes.
+  const bottomSubmit = status === 'ready' && action === 'activity';
+  const submit = <Button variant="contained" disabled={status !== 'ready' || busy || invalid} onClick={() => void onAction(action, payload())} aria-label={displayLabel}>{buttonLabels[action as ActionId] ?? 'Record'}</Button>;
   return <Box sx={{ py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
     <Stack direction="row" spacing={2} sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
       <Box><Typography variant="body2" sx={{ fontWeight: 600 }}>{displayLabel}</Typography>
         <Typography variant="caption" color="text.secondary">{status === 'recorded' ? 'Recorded' : taskReason(task?.reason) || (status === 'ready' ? 'Ready for your confirmation' : 'Waiting for the required evidence or handoff')}{task?.due_at ? ` · due ${atDubai(task.due_at).replace('T', ' ')} GST` : ''}</Typography></Box>
-      {status === 'recorded' ? <Typography color="success.main" variant="caption">Recorded</Typography> : <Button variant="contained" disabled={status !== 'ready' || busy || invalid} onClick={() => void onAction(action, payload())} aria-label={displayLabel}>{buttonLabels[action as ActionId] ?? 'Record'}</Button>}
+      {status === 'recorded' ? <Typography color="success.main" variant="caption">Recorded</Typography> : !bottomSubmit && submit}
     </Stack>
     {status === 'ready' && action === 'fresh' && <Stack direction="row" spacing={2} sx={{ mt: 2 }}><TextField label="Local TWL (W/m²)" type="number" value={twl} onChange={e => setTwl(e.target.value)} size="small" /><Typography variant="caption">Measured now</Typography></Stack>}
     {status === 'ready' && action === 'recover' && <Stack sx={{ mt: 2 }}><Typography variant="caption" color="text.secondary">{caseView.headcount?.checked_in_count ?? 0} personal arrivals are recorded. Huda confirms the full {caseView.headcount?.expected_count ?? 11}-person roster from direct observation, including anyone in Welfare.</Typography><FormControlLabel control={<Checkbox checked={accounted} onChange={e => setAccounted(e.target.checked)} />} label="I personally accounted for all affected workers at their current safe locations" /></Stack>}
@@ -72,6 +75,8 @@ export function EvidenceAction({ action, caseView, person, onAction, busy }: {
       <Button size="small" onClick={() => setActivity(Object.fromEntries(activeWorkers.map(w => [w.person_id, 'recovery'])))}>Choose recovery for all after observing</Button>
       <Stack spacing={1}>{activeWorkers.map(w => <TextField key={w.person_id} select size="small" label={nameOf(w.person_id)} value={activity[w.person_id] ?? ''} onChange={e => setActivity(old => ({ ...old, [w.person_id]: e.target.value as 'work' | 'recovery' }))}><MenuItem value="recovery">Recovery · Shelter A</MenuItem><MenuItem value="work">Workshop work</MenuItem></TextField>)}</Stack>
       <FormControlLabel control={<Checkbox checked={observed} onChange={e => setObserved(e.target.checked)} />} label={`I observed all ${activeWorkers.length} active workers through now`} />
+      <Typography variant="caption" color="text.secondary">Record this after readiness confirmations. A later readiness confirmation requires a new observation.</Typography>
+      {submit}
     </Stack>}
   </Box>;
 }
