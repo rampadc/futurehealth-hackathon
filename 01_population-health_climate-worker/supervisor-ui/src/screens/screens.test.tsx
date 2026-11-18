@@ -588,7 +588,7 @@ describe('worker app languages', () => {
 
 describe('restart review', () => {
   it('lists all eight checks and keeps heavy work stopped', async () => {
-    currentCase = await makeCase('restart_ready', { fresh: true, permit: true, removed: true, firstaid: true }, [task('review', 'P02', 'ready')]);
+    currentCase = await makeCase('restart_ready', { stopped: true, fresh: true, permit: true, removed: true, firstaid: true, events: [{ id: 'stop', actorId: 'C01', title: 'Stop confirmed', occurred_at: '2025-08-04T08:03:00+04:00' }] }, [task('review', 'P02', 'ready')]);
     await open('/web/restart-review', 'P02');
     expect(await screen.findByText('Crew readiness check')).toBeTruthy();
     const checks = screen.getByRole('table', { name: /Restart checks, Civil crew/ });
@@ -604,6 +604,34 @@ describe('restart review', () => {
     expect(within(handover).getByText('Restart review')).toBeTruthy();
     expect(screen.getByText(/Decisions carried forward · \d open of 5/)).toBeTruthy();
     expect(screen.getByText(/stays stopped/)).toBeTruthy();
+    expect(screen.getByText(/since 08:03/)).toBeTruthy();
+  });
+
+  it.each([false, true])('does not claim cessation before a stop record (instruction issued: %s)', async issued => {
+    currentCase = await makeCase('heat_trigger', { issued }, []);
+    await open('/web/restart-review', 'P02');
+    expect(await screen.findByText('Held · cessation not confirmed')).toBeTruthy();
+    expect(screen.getByText('Heavy exposed civil work held')).toBeTruthy();
+    expect(screen.queryByText('Stopped', { exact: true })).toBeNull();
+    expect(screen.queryByText(/stays stopped/)).toBeNull();
+    expect(screen.queryByText(/since \d\d:\d\d/)).toBeNull();
+  });
+
+  it.each(['timeline', 'table'] as const)('allows keyboard selection of Civil crew from the %s', async overview => {
+    currentCase = await makeCase('restart_ready', { stopped: true }, []);
+    await open('/web/restart-review', 'P02');
+    const statusTable = (await screen.findAllByRole('table'))[0];
+    await userEvent.click(within(statusTable).getAllByRole('row').find(r => /Formwork crew/.test(r.textContent ?? ''))!);
+    expect(screen.queryByRole('table', { name: /Restart checks, Civil crew/ })).toBeNull();
+    const container = overview === 'timeline'
+      ? screen.getByRole('group', { name: /Breaks and latest TWL readings/ })
+      : screen.getAllByRole('table')[0];
+    const civil = within(container).getByRole('button', { name: 'Civil crew' });
+    expect(civil.tabIndex).toBe(0);
+    civil.focus();
+    await userEvent.keyboard(overview === 'timeline' ? '{Enter}' : ' ');
+    expect(screen.getByRole('table', { name: /Restart checks, Civil crew/ })).toBeTruthy();
+    expect(civil.getAttribute('aria-pressed')).toBe('true');
   });
 
   it('sorts restart status by any column and keeps other squads on the same layout', async () => {
