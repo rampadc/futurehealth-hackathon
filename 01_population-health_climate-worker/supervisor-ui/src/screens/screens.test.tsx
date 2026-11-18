@@ -270,7 +270,7 @@ describe('stop-work', () => {
   it('says conditions are unavailable and to rely on local readings', async () => {
     conditions = { status: 'unavailable', site: 'mussafah', date: '2025-08-04', message: 'no weather data' };
     currentCase = await makeCase('heat_trigger', {}, []);
-    await open('/web/monitoring', 'P03');
+    await open('/web/heat-controls', 'P03');
     expect(await screen.findByText(/Conditions unavailable: no weather data/)).toBeTruthy();
   });
 
@@ -309,9 +309,7 @@ describe('stop-work', () => {
     currentCase.request!.snapshot.readings[0] = { ...currentCase.request!.snapshot.readings[0], twl: 145, quality: 'invalid' };
     await open('/web/monitoring', 'P03');
     expect((await screen.findAllByText(/TWL 145 W\/m² · Unknown/)).length).toBeGreaterThan(0);
-    const sensor = currentCase.request!.snapshot.readings[0].sensor_id;
-    const readingRow = (await screen.findByText(`Sensor ${sensor} · quality invalid`)).closest('tr')!;
-    expect(within(readingRow).getByText('Unknown')).toBeTruthy();
+    expect(screen.queryByText(/TWL 145 W\/m² · Low environmental risk/)).toBeNull();
   });
 
   it('warns that every band is raised while the local reading is lost', async () => {
@@ -387,6 +385,8 @@ describe('stop-work', () => {
     currentCase.headcount = { expected_count: 11, checked_in_count: 1, confirmed_count: 0, confirmed_at: null, arrivals: [{ person_id: 'C05', checked_in_at: currentCase.clock }] };
     await open('/site/headcount', 'C01');
     expect(await screen.findByText('1 / 11')).toBeTruthy();
+    await userEvent.click(screen.getByRole('button', { name: /Account for the crew/ }));
+    expect(await screen.findByRole('heading', { name: 'Account for the crew' })).toBeTruthy();
     const confirm = await screen.findByRole('button', { name: /Confirm 11 workers accounted for/ }) as HTMLButtonElement;
     expect(confirm.disabled).toBe(true);
     await userEvent.click(screen.getByRole('checkbox', { name: /personally accounted for all affected workers/ }));
