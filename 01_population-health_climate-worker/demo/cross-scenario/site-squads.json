@@ -1,0 +1,245 @@
+[
+  {
+    "id": "form",
+    "name": "Formwork crew",
+    "foreman": "Karim",
+    "sensor": "t2",
+    "location": "Podium deck",
+    "workers": [
+      {
+        "id": "F01",
+        "name": "Rami Al Wadi",
+        "role": "carpenter",
+        "work_intensity": "heavy",
+        "clothing": "work_wear",
+        "acclimatisation": "complete"
+      },
+      {
+        "id": "F02",
+        "name": "Sami Al Qamar",
+        "role": "carpenter",
+        "work_intensity": "heavy",
+        "clothing": "work_wear",
+        "acclimatisation": "complete"
+      },
+      {
+        "id": "F03",
+        "name": "Hadi Al Safa",
+        "role": "carpenter",
+        "work_intensity": "heavy",
+        "clothing": "work_wear",
+        "acclimatisation": "complete"
+      },
+      {
+        "id": "F04",
+        "name": "Yara Al Nadir",
+        "role": "carpenter",
+        "work_intensity": "heavy",
+        "clothing": "cloth_coveralls",
+        "acclimatisation": "complete"
+      },
+      {
+        "id": "F05",
+        "name": "Adel Al Wadi",
+        "role": "carpenter",
+        "work_intensity": "heavy",
+        "clothing": "work_wear",
+        "acclimatisation": "complete"
+      },
+      {
+        "id": "F06",
+        "name": "Nadia Al Qamar",
+        "role": "formwork_assistant",
+        "work_intensity": "heavy",
+        "clothing": "work_wear",
+        "acclimatisation": "complete"
+      },
+      {
+        "id": "F07",
+        "name": "Ziad Al Safa",
+        "role": "formwork_assistant",
+        "work_intensity": "heavy",
+        "clothing": "work_wear",
+        "acclimatisation": "complete"
+      },
+      {
+        "id": "F08",
+        "name": "Laith Al Nadir",
+        "role": "banksman",
+        "work_intensity": "light",
+        "clothing": "work_wear",
+        "acclimatisation": "complete"
+      },
+      {
+        "id": "F09",
+        "name": "Tamer Al Wadi",
+        "role": "formwork_assistant",
+        "work_intensity": "heavy",
+        "clothing": "work_wear",
+        "acclimatisation": "restricted_day_3"
+      }
+    ]
+  },
+  {
+    "id": "steel",
+    "name": "Steel fixing crew",
+    "foreman": "Faisal",
+    "sensor": "t3",
+    "location": "Laydown yard",
+    "workers": [
+      {
+        "id": "S01",
+        "name": "Bassam Al Qamar",
+        "role": "steel_fixer",
+        "work_intensity": "heavy",
+        "clothing": "work_wear",
+        "acclimatisation": "complete"
+      },
+      {
+        "id": "S02",
+        "name": "Hala Al Safa",
+        "role": "steel_fixer",
+        "work_intensity": "heavy",
+        "clothing": "work_wear",
+        "acclimatisation": "complete"
+      },
+      {
+        "id": "S03",
+        "name": "Majid Al Nadir",
+        "role": "steel_fixer",
+        "work_intensity": "heavy",
+        "clothing": "coveralls_over_work_wear",
+        "acclimatisation": "complete"
+      },
+      {
+        "id": "S04",
+        "name": "Salma Al Wadi",
+        "role": "steel_fixer",
+        "work_intensity": "heavy",
+        "clothing": "work_wear",
+        "acclimatisation": "complete"
+      },
+      {
+        "id": "S05",
+        "name": "Imad Al Qamar",
+        "role": "crane_signaller",
+        "work_intensity": "light",
+        "clothing": "work_wear",
+        "acclimatisation": "complete"
+      },
+      {
+        "id": "S06",
+        "name": "Wael Al Safa",
+        "role": "steel_fixer",
+        "work_intensity": "heavy",
+        "clothing": "work_wear",
+        "acclimatisation": "complete"
+      },
+      {
+        "id": "S07",
+        "name": "Dina Al Nadir",
+        "role": "steel_fixer",
+        "work_intensity": "heavy",
+        "clothing": "coveralls_over_work_wear",
+        "acclimatisation": "complete"
+      },
+      {
+        "id": "S08",
+        "name": "Ghassan Al Wadi",
+        "role": "steel_fixer",
+        "work_intensity": "heavy",
+        "clothing": "work_wear",
+        "acclimatisation": "complete"
+      },
+      {
+        "id": "S09",
+        "name": "Fadi Al Qamar",
+        "role": "steel_fixer",
+        "work_intensity": "heavy",
+        "clothing": "work_wear",
+        "acclimatisation": "complete"
+      },
+      {
+        "id": "S10",
+        "name": "Lama Al Safa",
+        "role": "steel_fixer",
+        "work_intensity": "heavy",
+        "clothing": "work_wear",
+        "acclimatisation": "complete"
+      },
+      {
+        "id": "S11",
+        "name": "Khalil Al Nadir",
+        "role": "steel_fixer",
+        "work_intensity": "heavy",
+        "clothing": "work_wear",
+        "acclimatisation": "restricted_day_2"
+      },
+      {
+        "id": "S12",
+        "name": "Tarek Al Wadi",
+        "role": "steel_fixer",
+        "work_intensity": "heavy",
+        "clothing": "work_wear",
+        "acclimatisation": "complete"
+      }
+    ]
+  },
+  {
+    "id": "mep",
+    "name": "MEP crew",
+    "foreman": "José",
+    "sensor": "m1",
+    "location": "Level 2 interior",
+    "workers": [
+      {
+        "id": "M02",
+        "name": "Ali Al Safa",
+        "role": "electrician",
+        "work_intensity": "light",
+        "clothing": "work_wear",
+        "acclimatisation": "complete"
+      },
+      {
+        "id": "M03",
+        "name": "Mira Al Wadi",
+        "role": "electrician",
+        "work_intensity": "light",
+        "clothing": "work_wear",
+        "acclimatisation": "complete"
+      },
+      {
+        "id": "M04",
+        "name": "Kamal Al Qamar",
+        "role": "plumber",
+        "work_intensity": "light",
+        "clothing": "work_wear",
+        "acclimatisation": "complete"
+      },
+      {
+        "id": "M05",
+        "name": "Samer Al Nadir",
+        "role": "pipe_fitter",
+        "work_intensity": "heavy",
+        "clothing": "work_wear",
+        "acclimatisation": "complete"
+      },
+      {
+        "id": "M06",
+        "name": "Rasha Al Safa",
+        "role": "electrician",
+        "work_intensity": "light",
+        "clothing": "work_wear",
+        "acclimatisation": "complete"
+      },
+      {
+        "id": "M07",
+        "name": "Nizar Al Wadi",
+        "role": "duct_installer",
+        "work_intensity": "light",
+        "clothing": "work_wear",
+        "acclimatisation": "complete"
+      }
+    ]
+  }
+]

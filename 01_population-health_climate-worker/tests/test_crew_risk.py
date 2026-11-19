@@ -116,3 +116,35 @@ def test_real_replay_weather_at_0800_separates_the_crew(app):
     """4 Aug 2025, 08:00, Mussafah ERA5: work wear Medium (127), coveralls over work wear High (94)."""
     workers = by_id(client(app, 'P02').get('/api/case/crew-risk').json())
     assert workers['C04']['band'] == 'amber' and workers['C06']['band'] == 'red' and workers['C10']['band'] == 'red'
+
+
+def test_other_squads_use_their_roster_and_own_sensor(app, medium):
+    # Formwork: sensor t2 is live (156 W/m² at 08:00, Low zone in work wear).
+    form = client(app, 'P03').get('/api/case/crew-risk', params={'squad': 'form'}).json()
+    workers = by_id(form)
+    assert len(workers) == 9 and form['inputs']['squad'] == 'form' and form['inputs']['local_reading'] == 'used'
+    assert workers['F01']['band'] == 'green' and workers['F01']['action'] == 'Work as planned'
+    assert workers['F09']['band'] == 'amber'  # day 3 of acclimatisation: one level higher
+    assert all(set(w) == {'person_id', 'band', 'action', 'needs_rest', 'check_in_person'} for w in workers.values())
+
+    # Steel fixing: sensor t3 is offline, so the forecast stands and every band is one level higher.
+    steel = client(app, 'P03').get('/api/case/crew-risk', params={'squad': 'steel'}).json()
+    workers = by_id(steel)
+    assert len(workers) == 12 and steel['inputs']['local_reading'] == 'lost'
+    assert workers['S01']['band'] == 'red' and steel['crew']['band'] == 'red'
+
+
+def test_other_squads_keep_access_rules(app, medium):
+    assert client(app, 'C05').get('/api/case/crew-risk', params={'squad': 'steel'}).status_code == 403
+    assert client(app, 'P03').get('/api/case/crew-risk', params={'squad': 'nope'}).status_code == 404
+    project = client(app, 'P01').get('/api/case/crew-risk', params={'squad': 'steel'}).json()
+    assert project['workers'] == [] and project['crew']['total'] == 12
+
+
+def test_presenter_conditions_reach_other_squads(app, medium):
+    from heat_safe.application import demo_site
+    settings = demo_site.defaults()
+    settings['conditions'] = {'S02': ['unwell']}
+    demo_site.save(app.state.service, settings)
+    workers = by_id(client(app, 'P03').get('/api/case/crew-risk', params={'squad': 'steel'}).json())
+    assert workers['S02']['needs_rest'] and not workers['S01']['needs_rest']

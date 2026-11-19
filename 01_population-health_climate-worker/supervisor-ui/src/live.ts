@@ -75,7 +75,8 @@ export const live = {
   withdrawConsent: () => request<WorkerConsent>('/worker/consent', { method: 'DELETE' }),
   workerData: () => request<WorkerDataExport>('/worker/data'),
   conditions: () => request<SiteConditions | null>('/case/conditions'),
-  crewRisk: () => request<CrewRisk | null>('/case/crew-risk'),
+  /** Without a squad: the case crew. With one: one of the site's other squads, from its roster and own sensor. */
+  crewRisk: (squad?: string) => request<CrewRisk | null>(squad ? `/case/crew-risk?squad=${encodeURIComponent(squad)}` : '/case/crew-risk'),
   ownRisk: () => request<OwnRisk | null>('/worker/risk'),
   heatRest: () => request<HeatRestView>('/case/heat-rest'),
   trustLog: () => request<TrustLogEntry[]>('/trust-log'),

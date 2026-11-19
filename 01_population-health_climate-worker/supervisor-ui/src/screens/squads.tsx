@@ -5,12 +5,16 @@ import { crew, heatNow, time } from './data';
 import { Avatar, Badge, Band, List, Row } from './kit';
 import { StatusIcon } from '../shared/icons';
 import { TwlReadout } from './twl';
+import siteSquads from '../../../demo/cross-scenario/site-squads.json';
+
+/** Roster of each squad that is not on the case (shared with the backend's per-worker heat risk). */
+const rosterOf = (id: string) => siteSquads.find(q => q.id === id)?.workers.map(w => w.id) ?? [];
 
 /**
  * Squads on the Sandline–Dune site. The live case covers the civil crew; the backend has no
- * other squads yet, so the formwork, steel-fixing and MEP squads are a fictional fixture that
- * lets supervisors compare squads side by side (as in ui_wireframes). Replace the fixture with
- * an API read when the backend models more than one squad.
+ * other squads on the case, so the formwork, steel-fixing and MEP squads' status is a fictional fixture
+ * that lets supervisors compare squads side by side (as in ui_wireframes). Their rosters are in
+ * demo/cross-scenario/site-squads.json, which the backend also reads for each worker's heat risk.
  */
 export type Squad = {
   id: string; name: string; foreman: string; foremanId: string; loc: string; shelter: string; size: number;
@@ -25,17 +29,17 @@ const FIXTURE: Squad[] = [
   { id: 'form', name: 'Formwork crew', foreman: 'Karim', foremanId: 'L02', loc: 'Podium deck', shelter: 'Shelter B', size: 9,
     twl: 156, band: 'green', hold: false, status: 'Working · shade rotation', sensor: 't2', reading: { twl: 158, at: '07:55', fresh: false },
     alerts: 0, warnings: 1, actions: { open: 1, done: 2 }, responses: { done: 2, total: 2 }, headcount: '9 / 9', breakStart: '12:30', breakEnd: '15:00',
-    checks: { done: 3, total: 3 }, members: ['F01', 'F02', 'F03', 'F04', 'F05', 'F06', 'F07', 'F08', 'F09'],
+    checks: { done: 3, total: 3 }, members: rosterOf('form'),
     items: [{ title: 'Refill the deck water cooler', detail: 'Below 10 L at 08:12 · owner Karim · due 08:30', tone: 'warn' }] },
   { id: 'steel', name: 'Steel fixing crew', foreman: 'Faisal', foremanId: 'L04', loc: 'Laydown yard', shelter: 'Shelter B', size: 12,
     twl: 138, band: 'amber', estimated: true, hold: false, status: 'Caution controls · sensor offline', sensor: 't3', reading: { twl: 138, at: 'forecast', fresh: false },
     alerts: 1, warnings: 1, actions: { open: 2, done: 1 }, responses: { done: 1, total: 2 }, headcount: '12 / 12', breakStart: '12:30', breakEnd: '15:00',
-    checks: { done: 5, total: 8 }, members: ['S01', 'S02', 'S03', 'S04', 'S05', 'S06', 'S07', 'S08', 'S09', 'S10', 'S11', 'S12'],
+    checks: { done: 5, total: 8 }, members: rosterOf('steel'),
     items: [{ title: 'Base station 2 offline · band raised one level', detail: 'No heartbeat since 07:52 · forecast in use', tone: 'error' }, { title: 'Extra water and rest every 45 min', detail: 'Caution band control · owner Faisal', tone: 'warn' }] },
   { id: 'mep', name: 'MEP crew', foreman: 'José', foremanId: 'M01', loc: 'Level 2 interior', shelter: 'Shelter B', size: 6,
     twl: 168, band: 'green', hold: false, status: 'Working · covered', sensor: 'm1', reading: { twl: 168, at: '07:55', fresh: false },
     alerts: 0, warnings: 0, actions: { open: 0, done: 1 }, responses: { done: 1, total: 1 }, headcount: '6 / 6', breakStart: '—', breakEnd: '—',
-    checks: { done: 0, total: 0 }, members: ['E01', 'E02', 'E03', 'E04', 'E05', 'E06'], items: [] },
+    checks: { done: 0, total: 0 }, members: rosterOf('mep'), items: [] },
 ];
 
 /* Site sensor settings for the current case hour (GET /api/case/site-sensors), shared by every screen in this tab. */

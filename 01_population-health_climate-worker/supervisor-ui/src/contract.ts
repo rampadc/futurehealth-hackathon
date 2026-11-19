@@ -65,7 +65,7 @@ export type SiteConditions =
   | { status: 'unavailable'; site: string; date: string; message: string };
 
 export type RiskBand = 'green' | 'amber' | 'red' | 'emergency';
-export type RiskInputs = { hour: string; site: string; weather: 'ok' | 'unavailable'; local_reading: 'used' | 'lost' | 'none'; rules_version: string };
+export type RiskInputs = { hour: string; site: string; weather: 'ok' | 'unavailable'; local_reading: 'used' | 'lost' | 'none'; rules_version: string; squad?: string; sensor?: string };
 /** GET /api/case/crew-risk: supervisors and responders. Band and action only, never the reasons. */
 export type CrewRisk = {
   inputs: RiskInputs;
