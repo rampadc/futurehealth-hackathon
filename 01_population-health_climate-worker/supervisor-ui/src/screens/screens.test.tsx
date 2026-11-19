@@ -11,6 +11,7 @@ import { outboxScope, readOutbox } from '../offline';
 import { renewAccessGeneration } from '../accessGeneration';
 import type { CaseSession } from '../session';
 import { ActionCardScreen } from './site/crew';
+import { tr } from '../i18n';
 
 const reply = (value: unknown, status = 200) => new Response(JSON.stringify(value), { status, headers: { 'Content-Type': 'application/json' } });
 let currentCase: CaseView | null;
@@ -24,7 +25,7 @@ let conditions: unknown;
 let crewRisk: CrewRisk;
 let chatHistory: unknown[];
 const riskInputs = { hour: '08:00', site: 'mussafah', weather: 'ok', local_reading: 'used', rules_version: 'rules-test' } as const;
-const ownRisk = { inputs: riskInputs, person_id: 'C05', band: 'amber', twl_wm2: 138, zone: 'medium', factors: ['Cloth coveralls over a shirt lower your work limit to 138 W/m² (medium zone; work wear is low)'],
+let ownRisk = { inputs: riskInputs, person_id: 'C05', band: 'amber', twl_wm2: 138, zone: 'medium', factors: ['Cloth coveralls over a shirt lower your work limit to 138 W/m² (medium zone; work wear is low)'],
   missing_inputs: [], special_controls: false, may_work_here: true, work_rest: '45 min work / 15 min rest (paced work)', action: 'Paced work: 45 min work / 15 min rest (paced work). Drink 1.0-1.2 light; >1.2 heavy L an hour.' };
 let consent: { person_id: string; language: string; scopes: string[]; consented_at: string | null };
 let photos: Record<string, string>;
@@ -72,6 +73,10 @@ beforeEach(() => {
     if (path === '/api/ready') return reply({ ok: true });
     if (path === '/api/case/conditions') return reply(conditions);
     if (path === '/api/case/crew-risk') return reply(crewRisk);
+    if (path === '/api/case/crew-risk?squad=steel') return reply({ inputs: { ...riskInputs, local_reading: 'lost', squad: 'steel', sensor: 't3' },
+      crew: { band: 'red', at_or_above_amber: 2, total: 2, counts: { green: 0, amber: 0, red: 2, emergency: 0 } },
+      workers: [{ person_id: 'S01', band: 'red', action: 'Strict work and rest: 20 min work / 40 min rest', needs_rest: false, check_in_person: false },
+        { person_id: 'S05', band: 'red', action: 'Strict work and rest: 45 min work / 15 min rest', needs_rest: false, check_in_person: false }] });
     if (path === '/api/worker/risk') return reply(ownRisk);
     if (path === '/api/brand') {
       if (method === 'PUT') { brand = { version: brand.version + 1, published_at: '2025-08-04T16:40:00+04:00', published_by: 'P09', platform: body.platform, mobile: body.mobile }; brandCalls.push(body); return reply(brand); }
@@ -289,6 +294,18 @@ describe('stop-work', () => {
     for (const t of [red, amber]) expect(t.textContent).not.toMatch(/unwell|coverall|TWL/i);
   });
 
+  it('shows heat risk by worker for another squad from its own roster and sensor', async () => {
+    currentCase = await makeCase('heat_trigger', {}, []);
+    await open('/web/monitoring', 'P03');
+    await userEvent.click(await screen.findByRole('radio', { name: /Steel fixing crew/ }));
+    const red = await screen.findByRole('table', { name: 'Red band workers' });
+    expect(red.textContent).toMatch(/Bassam \(S01\).*20 min work/);
+    expect(screen.getByText('Crew band Red · 2 of 2 at Amber or above')).toBeTruthy();
+    expect(screen.getByText(/Sensor T3 offline or stale: forecast in use/)).toBeTruthy();
+    // The squad choice is shared across screens in this tab; put it back for later tests.
+    await userEvent.click(screen.getByRole('radio', { name: /Civil crew/ }));
+  });
+
   it('sorts a band table by any column and greys out "work as planned"', async () => {
     crewRisk = { ...crewRisk, workers: [...crewRisk.workers, { person_id: 'C05', band: 'green', action: 'Work as planned', needs_rest: false, check_in_person: false }] };
     currentCase = await makeCase('heat_trigger', {}, []);
@@ -325,6 +342,26 @@ describe('stop-work', () => {
     expect(await screen.findByRole('heading', { name: 'My heat risk' })).toBeTruthy();
     expect(screen.getByText(/Cloth coveralls over a shirt lower your work limit to 138/)).toBeTruthy();
     expect(screen.getByText(/Your supervisor sees your band and action, never the reasons/)).toBeTruthy();
+  });
+
+  it('shows the Now screen and the worker’s own heat risk in the chosen language', async () => {
+    currentCase = await makeCase('heat_trigger', {}, []);
+    const english = ownRisk;
+    ownRisk = { ...english, action: 'Paced work: 45 min work / 15 min rest. Drink more than 1.2 litres an hour.', factors: ['Still acclimatising: day 2 since starting in the heat'] };
+    localStorage.setItem('hs-worker-lang:C05', 'ar');
+    try {
+      await open('/worker/now', 'C05');
+      expect(await screen.findByRole('heading', { name: 'خطر الحرارة الخاص بي' })).toBeTruthy();
+      expect(screen.getByText('عمل بوتيرة محددة: 45 دقيقة عمل / 15 دقيقة راحة. اشرب أكثر من 1.2 لتر كل ساعة.')).toBeTruthy();
+      expect(screen.getByText(/ما زلت في فترة التأقلم/)).toBeTruthy();
+      expect(screen.getByText('كهرماني')).toBeTruthy();
+      expect(screen.queryByText('My heat risk')).toBeNull();
+      expect(screen.queryByText('Wait for your foreman')).toBeNull();
+      expect(screen.queryByText(/Your supervisor sees your band/)).toBeNull();
+    } finally {
+      localStorage.removeItem('hs-worker-lang:C05');
+      ownRisk = english;
+    }
   });
 
   it('tells a worker to stop and reach shelter before recovery is confirmed', async () => {
@@ -878,6 +915,16 @@ describe('voice and badges', () => {
     expect(await screen.findByText(/Are you confused/)).toBeTruthy();
     expect(commands).toEqual([]);
     vi.unstubAllGlobals();
+  });
+
+  it('greets a worker at the kiosk in the language they saved, not the site default', async () => {
+    consent = { person_id: 'C05', language: 'ar', scopes: ['heat_alerts'], consented_at: '2025-08-04T07:30:00+04:00' };
+    currentCase = await makeCase('heat_trigger', { stopped: true }, [task('checkin', 'C05', 'ready')]);
+    await open('/kiosk/check-in', 'C05');
+    await userEvent.click(await screen.findByRole('button', { name: /^Rana/ }));
+    const status = await screen.findByText(new RegExp(tr('kiosk.checked', 'ar').text));
+    expect(status.closest('[lang]')!.getAttribute('lang')).toBe('ar');
+    expect(screen.queryByText(new RegExp(tr('kiosk.checked', 'hi').text))).toBeNull();
   });
 
   it('checks a worker in from an NFC badge', async () => {

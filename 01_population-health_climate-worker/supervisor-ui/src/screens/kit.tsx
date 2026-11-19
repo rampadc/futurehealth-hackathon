@@ -23,8 +23,8 @@ export function Head({ kicker, title, sub }: { kicker?: ReactNode; title: ReactN
   </header>;
 }
 
-export function Hero({ children }: { children: ReactNode }) {
-  return <div className="hs-hero" role="group" aria-label="Summary">{children}</div>;
+export function Hero({ children, rows }: { children: ReactNode; rows?: boolean }) {
+  return <div className="hs-hero" role="group" aria-label="Summary" data-layout={rows ? 'rows' : undefined}>{children}</div>;
 }
 
 export function Metric({ label, value, sub, tone }: { label: ReactNode; value: ReactNode; sub?: ReactNode; tone?: Tone }) {
@@ -113,7 +113,7 @@ export function Computed({ children = 'Computed by the site rules and solver · 
 
 const BAND_TONE: Record<string, string> = { green: 'low', amber: 'caution', red: 'high', emergency: 'high', unknown: 'unknown' };
 /** Environmental band: a swatch with a word, never colour alone. */
-export function Band({ band, label }: { band: string; label: string }) {
+export function Band({ band, label }: { band: string; label: ReactNode }) {
   return <span className="hs-band" data-band={BAND_TONE[band] ?? 'unknown'}><span className="hs-swatch" aria-hidden="true" />{label}</span>;
 }
 

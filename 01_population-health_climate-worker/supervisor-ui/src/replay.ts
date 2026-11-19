@@ -1,4 +1,5 @@
 import personnel from '../../demo/cross-scenario/personnel.json'
+import siteSquads from '../../demo/cross-scenario/site-squads.json'
 
 export const CASE_IDS = [
   'heat_trigger', 'canonical_timed', 'removal_unconfirmed', 'incident_no_substitute',
@@ -198,4 +199,5 @@ const names: Record<string, string> = {
   workshop: 'Cooled preparation workshop', shelter_a: 'Cooled recovery shelter A', shelter_b: 'Cooled recovery shelter B', welfare: 'Welfare and first aid',
   civil_heavy: 'Civil heavy work', civil_light: 'Civil light work', workshop_prep: 'Workshop preparation',
 }
-export function nameOf(id: string): string { return personnel.find((person) => person.id === id)?.name ?? names[id] ?? id }
+const squadNames: Record<string, string> = Object.fromEntries(siteSquads.flatMap((squad) => squad.workers.map((worker) => [worker.id, worker.name])))
+export function nameOf(id: string): string { return personnel.find((person) => person.id === id)?.name ?? squadNames[id] ?? names[id] ?? id }
