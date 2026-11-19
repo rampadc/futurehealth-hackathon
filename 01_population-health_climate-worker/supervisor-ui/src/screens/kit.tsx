@@ -23,8 +23,8 @@ export function Head({ kicker, title, sub }: { kicker?: ReactNode; title: ReactN
   </header>;
 }
 
-export function Hero({ children }: { children: ReactNode }) {
-  return <div className="hs-hero" role="group" aria-label="Summary">{children}</div>;
+export function Hero({ children, rows }: { children: ReactNode; rows?: boolean }) {
+  return <div className="hs-hero" role="group" aria-label="Summary" data-layout={rows ? 'rows' : undefined}>{children}</div>;
 }
 
 export function Metric({ label, value, sub, tone }: { label: ReactNode; value: ReactNode; sub?: ReactNode; tone?: Tone }) {

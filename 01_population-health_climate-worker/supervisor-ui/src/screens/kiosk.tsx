@@ -34,9 +34,9 @@ export function KioskScreen({ session }: ScreenProps) {
   const gl = g ? stored ?? saved ?? preferredLanguage(g.name, g.id) : 'en';
   return <div className="hs-screen">
     <Head kicker={`Shelter A · ${time(caseView.clock)}`} title={<>{tr('kiosk.tap', 'en').text} · <span lang="ar" dir="rtl">{tr('kiosk.tap', 'ar').text}</span></>} />
-    <Hero>
+    <Hero rows>
       <Metric label={<>My arrival · <span lang="ar">في الملجأ</span></>} value={arrived.size ? 'Recorded' : 'Not recorded'} tone="ok" />
-      <Metric label={<>Water · <span lang="ar">ماء</span></>} value="💧" sub="Cooler checked by Maya" />
+      <Metric label={<>Water · <span lang="ar">ماء</span></>} value="💧" sub="Drink one cup now, then every 15 minutes." />
       <Metric label="Next" value={ownApprovedWorkshop ? 'Workshop' : 'Follow foreman'} sub="your foreman will call you" />
     </Hero>
     {greeting && !g && <p className="hs-statusline" role="status">Badge {greeting.id} is not on this crew. Please see Huda.</p>}
