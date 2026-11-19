@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import type { CrewRisk, OwnRisk, RiskBand } from '../contract';
 import { live } from '../live';
 import type { CaseSession } from '../session';
@@ -26,7 +26,7 @@ function useRisk<T>(session: CaseSession, load: () => Promise<T | null>) {
 function InputNotes({ inputs }: { inputs: CrewRisk['inputs'] }) {
   return <>
     {inputs.weather === 'unavailable' && <Note tone="red">Site weather unavailable: every band is Red until it returns.</Note>}
-    {inputs.local_reading === 'lost' && <Note tone="red">Local reading faulty or stale: every band is one level higher until a valid reading arrives.</Note>}
+    {inputs.local_reading === 'lost' && <Note tone="red">{inputs.sensor ? `Sensor ${inputs.sensor.toUpperCase()} offline or stale: forecast in use, every band is one level higher until a valid reading arrives.` : 'Local reading faulty or stale: every band is one level higher until a valid reading arrives.'}</Note>}
   </>;
 }
 
@@ -34,8 +34,9 @@ function InputNotes({ inputs }: { inputs: CrewRisk['inputs'] }) {
  * Each worker's heat-risk band and action for supervisors: the site's heat recomputed for their clothing,
  * work type and acclimatisation, raised for a report or a lost input. Never the reasons or health detail.
  */
-export function CrewRiskPanel({ session }: { session: CaseSession }) {
-  const { value: risk, error } = useRisk(session, live.crewRisk);
+export function CrewRiskPanel({ session, squad }: { session: CaseSession; squad?: string }) {
+  const load = useCallback(() => live.crewRisk(squad), [squad]);
+  const { value: risk, error } = useRisk(session, load);
   return <Section title="Heat risk by worker">
     {error ? <p role="alert" className="hs-error">{error}</p>
       : !risk ? <p role="status" className="hs-muted">Loading heat risk…</p>
@@ -86,17 +87,20 @@ function BandTable({ band, workers }: { band: RiskBand; workers: CrewWorker[] })
   </div>;
 }
 
+/** Copy the worker's phone translates: a string key, its English text and any values in it. */
+export type Say = (key: string, english: string, vars?: Record<string, string | number>) => ReactNode;
+
 /** The worker's own band with the reasons, which only they see. */
-export function OwnRiskPanel({ session, title, wrap = (s: string) => s }: { session: CaseSession; title: ReactNode; wrap?: (s: string) => ReactNode }) {
+export function OwnRiskPanel({ session, title, wrap = (s: string) => s, say = (_k, english) => english }: { session: CaseSession; title: ReactNode; wrap?: (s: string) => ReactNode; say?: Say }) {
   const { value: risk, error } = useRisk<OwnRisk>(session, live.ownRisk);
-  if (!risk) return error ? <Section title={title}><Note tone="amber">{wrap('Heat risk unavailable. Follow your foreman and the work/rest times.')}</Note></Section> : null;
+  if (!risk) return error ? <Section title={title}><Note tone="amber">{say('risk.unavailable', 'Heat risk unavailable. Follow your foreman and the work/rest times.')}</Note></Section> : null;
   const why = risk.factors.length ? risk.factors
     : [risk.zone ? `${risk.zone[0].toUpperCase()}${risk.zone.slice(1)} zone in the sun at ${risk.inputs.hour} for your clothing (TWL ${risk.twl_wm2} W/m²)` : 'Site heat unknown'];
   return <Section title={title}>
     <List label="My heat risk">
-      <Row title={wrap(risk.action)} badge={<Band band={risk.band} label={LABEL[risk.band]} />} />
+      <Row title={wrap(risk.action)} badge={<Band band={risk.band} label={say(`band.${risk.band}`, LABEL[risk.band])} />} />
       {why.map(f => <Row key={f} title={wrap(f)} />)}
     </List>
-    <Computed>{wrap(`Your supervisor sees your band and action, never the reasons · rules ${risk.inputs.rules_version}`)}</Computed>
+    <Computed>{say('risk.sees', `Your supervisor sees your band and action, never the reasons · rules ${risk.inputs.rules_version}`, { rules: risk.inputs.rules_version })}</Computed>
   </Section>;
 }

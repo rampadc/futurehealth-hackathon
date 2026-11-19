@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { langOf, preferredLanguage, tr } from '../i18n';
+import { langOf, preferredLanguage, tr, useWorkerLanguage } from '../i18n';
+import { live } from '../live';
 import { assessmentCapture, assignedIds, crew, time } from './data';
 import { Computed, Head, Hero, Metric, NoCase, Note, Avatar } from './kit';
 import type { ScreenProps } from './registry';
@@ -14,6 +15,8 @@ export function KioskScreen({ session }: ScreenProps) {
   const [greeting, setGreeting] = useState<{ id: string; ok: boolean } | null>(null);
   const tapRef = useRef<(id: string) => void>(() => {});
   const nfc = useNfcBadges(id => tapRef.current(id));
+  const [stored] = useWorkerLanguage(person?.id);
+  const saved = useSavedLanguage(person?.id);
   if (!caseView || !person) return <NoCase session={session} />;
   const people = crew(caseView).filter(p => p.id === person.id);
   const checkin = caseView.tasks.find(t => t.action === 'checkin');
@@ -27,12 +30,13 @@ export function KioskScreen({ session }: ScreenProps) {
   };
   tapRef.current = id => { if (people.some(p => p.id === id)) tap(id); else setGreeting({ id, ok: false }); };
   const g = greeting && people.find(p => p.id === greeting.id);
-  const gl = g ? preferredLanguage(g.name, g.id) : 'en';
+  // The worker's own choice: on this device, then the one saved with their consent, then the site default.
+  const gl = g ? stored ?? saved ?? preferredLanguage(g.name, g.id) : 'en';
   return <div className="hs-screen">
     <Head kicker={`Shelter A · ${time(caseView.clock)}`} title={<>{tr('kiosk.tap', 'en').text} · <span lang="ar" dir="rtl">{tr('kiosk.tap', 'ar').text}</span></>} />
-    <Hero>
+    <Hero rows>
       <Metric label={<>My arrival · <span lang="ar">في الملجأ</span></>} value={arrived.size ? 'Recorded' : 'Not recorded'} tone="ok" />
-      <Metric label={<>Water · <span lang="ar">ماء</span></>} value="💧" sub="Cooler checked by Maya" />
+      <Metric label={<>Water · <span lang="ar">ماء</span></>} value="💧" sub="Drink one cup now, then every 15 minutes." />
       <Metric label="Next" value={ownApprovedWorkshop ? 'Workshop' : 'Follow foreman'} sub="your foreman will call you" />
     </Hero>
     {greeting && !g && <p className="hs-statusline" role="status">Badge {greeting.id} is not on this crew. Please see Huda.</p>}
@@ -49,6 +53,19 @@ export function KioskScreen({ session }: ScreenProps) {
     <Note>{nfc.supported ? 'Your badge can be read here. Your tile also works.' : 'Tap your tile to check in.'} Huda records the full crew headcount.</Note>
     <Computed>Check-ins feed the site headcount live.</Computed>
   </div>;
+}
+
+/** The language a signed-in worker saved with their consent, or null when none is saved or they are not a worker. */
+function useSavedLanguage(personId: string | undefined) {
+  const [language, setLanguage] = useState<string | null>(null);
+  useEffect(() => {
+    setLanguage(null);
+    if (!personId) return;
+    let current = true;
+    live.consent().then(c => { if (current && (c.consented_at || c.language !== 'en')) setLanguage(c.language); }).catch(() => {});
+    return () => { current = false; };
+  }, [personId]);
+  return language;
 }
 
 type NdefReader = { scan: (options?: { signal?: AbortSignal }) => Promise<void>; onreading: ((event: { message: { records: Array<{ recordType: string; data?: DataView; encoding?: string }> } }) => void) | null; onreadingerror: (() => void) | null };

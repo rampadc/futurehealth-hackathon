@@ -45,6 +45,7 @@ export function SquadMonitoringScreen({ session }: ScreenProps) {
   if (!sq.live) return <OtherSquadScreen title="Squad Monitoring" squad={sq} squads={squads} lines={lines}>
     <Section title="Needs action"><SquadItems squad={sq} /></Section>
     <Section title="Crew by location"><List><Row title={`${sq.loc} · ${sq.headcount} workers`} detail={`${sq.status}. Recovery: ${sq.shelter}.`} badge={<Badge tone="muted">{sq.hold ? 'Hold' : 'Working'}</Badge>} /></List></Section>
+    <CrewRiskPanel session={session} squad={sq.id} />
   </OtherSquadScreen>;
   return <div className="hs-screen">
     <Head kicker={`Squad Monitoring · Civil crew · ${time(caseView.clock)} GST`} title="Squad Monitoring" />

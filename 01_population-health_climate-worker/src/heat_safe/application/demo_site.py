@@ -51,6 +51,11 @@ CONDITIONS = {
 CASE_WORKERS = [w['person_id'] for w in SEED['snapshot']['workers']]
 
 
+def _squad_workers() -> set[str]:
+    from .crew_risk import squad_worker_ids
+    return squad_worker_ids()
+
+
 def defaults() -> dict:
     return {'twl': {q: {s: {str(h): v for h, v in hours.items()} for s, hours in sensors.items()} for q, sensors in DEFAULT_TWL.items()},
             'sensors': dict(DEFAULT_SENSORS), 'conditions': {}}
@@ -78,7 +83,7 @@ def _validate(settings: dict) -> dict:
             raise CaseError(422, f'Unknown sensor state {sensor}={state}')
         base['sensors'][sensor] = state
     for person, items in conditions.items():
-        if person not in CASE_WORKERS or not isinstance(items, list) or any(i not in CONDITIONS for i in items):
+        if person not in CASE_WORKERS and person not in _squad_workers() or not isinstance(items, list) or any(i not in CONDITIONS for i in items):
             raise CaseError(422, f'Unknown health condition for {person}')
         if items:
             base['conditions'][person] = sorted(set(items))

@@ -36,6 +36,7 @@ export function CrewWorkshopScreen({ session }: ScreenProps) {
   const lines = (q: typeof sq) => q.live ? [`${ready.length} eligible · ${workshop ? `${workshop.capacity - fixed.length} of ${workshop.capacity}` : '—'} workshop places free`] : [`${q.loc} · ${q.size} workers`];
   if (!sq.live) return <OtherSquadScreen title="Crew & workshop" squad={sq} squads={squads} lines={lines}>
     <Section title={`Crew · ${sq.name}`}><div className="hs-crew-grid">{sq.members.map(id => <div key={id} className="hs-crew-card"><Avatar id={id} size="lg" /><b>{id}</b><Badge tone={sq.hold ? 'muted' : 'done'}>{sq.hold ? 'Recovery' : 'Working'}</Badge><span className="hs-small hs-muted">{sq.loc}</span></div>)}</div></Section>
+    <CrewRiskPanel session={session} squad={sq.id} />
   </OtherSquadScreen>;
   return <div className="hs-screen">
     <Head kicker={`Crew & workshop · Civil crew · ${time(caseView.clock)} GST`} title="Crew & workshop" sub="Decide who can move to covered work. A proposal is not an assignment until Huda records it." />
