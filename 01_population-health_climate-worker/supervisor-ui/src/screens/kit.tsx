@@ -107,8 +107,8 @@ export function Draft({ title = 'Proposal · not applied', children }: { title?:
 }
 
 /** Rule output, labelled so it is never mistaken for an AI answer. */
-export function Computed({ children = 'Computed by the site rules and solver · not AI' }: { children?: ReactNode }) {
-  return <p className="hs-computed">⚙ {children}</p>;
+export function Computed({ children = 'Computed by the site rules and solver · not AI', tight }: { children?: ReactNode; tight?: boolean }) {
+  return <p className="hs-computed" data-tight={tight || undefined}>⚙ {children}</p>;
 }
 
 const BAND_TONE: Record<string, string> = { green: 'low', amber: 'caution', red: 'high', emergency: 'high', unknown: 'unknown' };
