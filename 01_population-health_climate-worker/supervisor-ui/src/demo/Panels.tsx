@@ -1,13 +1,13 @@
 import { Box, Button, Chip, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import type { CaseView, DemoSite, PresenterCrewRisk, SiteSettings } from '../live';
 import { nameOf } from '../replay';
-import { ADMIN, PERSONAS } from '../story';
+import { ADMIN, isStanding, PERSONAS } from '../story';
 import { PersonAvatar } from '../shared/ui';
 import { BAND_COLOR, BAND_LABEL, BAND_TEXT, DEVICE_LABEL, devicesFor, homeDevice, MAP_ZONES, openPersona } from './model';
 
 /** One card per persona. Each opens that persona's own screens in a new window, already signed in. */
 export function PersonaLauncher({ caseView }: { caseView: CaseView | null }) {
-  const ready = (id: string) => caseView?.tasks.filter(t => t.actor_id === id && t.status === 'ready').length ?? 0;
+  const ready = (id: string) => caseView?.tasks.filter(t => t.actor_id === id && t.status === 'ready' && !isStanding(t.action)).length ?? 0;
   return <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: 1.5 }}>
     {[...PERSONAS, ADMIN].map(p => {
       const open = ready(p.id);

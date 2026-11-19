@@ -25,7 +25,17 @@ type Flag = 'issued' | 'acknowledged' | 'stopped' | 'checkedIn' | 'recovered' | 
 export const ADMIN: Persona = { id: 'P09', name: 'Hessa Al Qamar', role: 'HSE systems admin', organisation: 'Sandline', description: 'Publishes company branding and reviews the trust log.' }
 
 export interface StoryEvent { id: string; actorId: string; title: string; occurred_at?: string }
-export type StoryState = Record<Flag, boolean> & { events: StoryEvent[] }
+/** A crew member reported unwell: by themselves on their phone or the shelter kiosk, or by the foreman. */
+export interface WorkerReport { person_id: string; via: 'phone' | 'kiosk' | 'foreman'; reported_by: string; occurred_at: string }
+/** `incident_person_id`: the worker the first report is about, whose removal and first-aid steps the case records. */
+export type StoryState = Record<Flag, boolean> & { events: StoryEvent[]; reports?: WorkerReport[]; incident_person_id?: string | null }
+
+/** The worker whose removal and first-aid steps the case records: the first one reported. Older cases recorded only Bilal. */
+export const incidentPersonId = (story: Pick<StoryState, 'reported' | 'reports' | 'incident_person_id'>): string | null =>
+  story.reported ? story.incident_person_id ?? story.reports?.[0]?.person_id ?? 'C08' : null
+
+/** Always available rather than an open to-do: never counted as a person's next action or notification. */
+export const isStanding = (action: string) => action === 'report'
 
 export type ActionId = 'issue' | 'acknowledge' | 'stop' | 'checkin' | 'recover' | 'assign' | 'report' | 'remove' | 'firstaid' | 'leila' | 'draftDelivery' | 'approveDelivery' | 'sendDelivery' | 'acceptDelivery' | 'fresh' | 'permit' | 'review' | 'handover' | 'costReview'
 interface StoryAction { label: string; actorId: string; prerequisites: Flag[]; title: string; flag: Flag }
@@ -36,7 +46,7 @@ export const ACTIONS: Record<ActionId, StoryAction> = {
   checkin: { label: 'Check in to cooled recovery', actorId: 'C05', prerequisites: ['stopped'], title: 'Rana checked in to cooled recovery', flag: 'checkedIn' },
   recover: { label: 'Account for crew in recovery', actorId: 'C01', prerequisites: ['checkedIn'], title: 'Huda accounted for the affected crew in recovery', flag: 'recovered' },
   assign: { label: 'Confirm workshop assignment', actorId: 'C01', prerequisites: ['recovered'], title: 'Huda confirmed the supervised workshop move', flag: 'assigned' },
-  report: { label: 'Report dizziness', actorId: 'C08', prerequisites: ['assigned'], title: 'Bilal requested assistance', flag: 'reported' },
+  report: { label: 'Report feeling unwell', actorId: 'C08', prerequisites: ['assigned'], title: 'Bilal requested assistance', flag: 'reported' },
   remove: { label: 'Confirm removal from work', actorId: 'C01', prerequisites: ['reported'], title: 'Huda confirmed Bilal’s removal from work', flag: 'removed' },
   firstaid: { label: 'Record first aid contact', actorId: 'P06', prerequisites: ['removed'], title: 'Salim recorded first aid contact', flag: 'firstaid' },
   leila: { label: 'Confirm Leila’s workshop readiness', actorId: 'C01', prerequisites: ['removed', 'firstaid'], title: 'Huda confirmed Leila’s workshop readiness', flag: 'leila' },

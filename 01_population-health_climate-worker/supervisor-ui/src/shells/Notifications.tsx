@@ -3,7 +3,7 @@ import { tr } from '../i18n';
 import type { CaseView } from '../live';
 import { nameOf as personnelName } from '../replay';
 import { navigate } from '../router';
-import { ADMIN, PERSONAS, type StoryEvent } from '../story';
+import { ADMIN, isStanding, PERSONAS, type StoryEvent } from '../story';
 import { DEVICE_INFO, screensFor, type Device } from '../screens/registry';
 import { time } from '../screens/data';
 
@@ -48,7 +48,7 @@ export function noticesFor(view: CaseView, personId: string, device: Device, lan
   const worker = isWorker(personId);
   const home = homeOf(device, personId);
   const tasks: Notice[] = view.tasks
-    .filter(t => t.actor_id === personId && t.status === 'ready' && (!worker || WORKER_TASKS[t.action]))
+    .filter(t => t.actor_id === personId && t.status === 'ready' && !isStanding(t.action) && (!worker || WORKER_TASKS[t.action]))
     .map(t => ({
       id: `task:${t.action}`,
       text: worker ? tr(WORKER_TASKS[t.action], lang).text : t.label,

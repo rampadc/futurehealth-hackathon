@@ -466,3 +466,59 @@ def test_rana_does_not_receive_bilals_health_flags(setup_case):
     assert all(rana[key] is False for key in ('reported','removed','firstaid','leila'))
     assert all(bilal[key] is True for key in ('reported','removed','firstaid'))
     assert not {'report','incident_record','remove','firstaid'} & {item['id'] for item in rana['events']}
+
+
+def test_foreman_reports_a_worker_without_a_phone(setup_case):
+    case,_=setup_case
+    recovered(case)
+    command(case,'C01','report',{'person_id':'C03','note':'private-symptom-marker'})
+    view=case.read_case('C01')
+    assert view['story']['reports']==[{'person_id':'C03','via':'foreman','reported_by':'C01','occurred_at':view['clock']}]
+    assert view['story']['incident_person_id']=='C03'
+    assert view['story']['events'][-1]['title']=='Huda reported that Sara is unwell'
+    assert next(w for w in view['request']['snapshot']['workers'] if w['person_id']=='C03')['availability']=='unavailable'
+    assert 'private-symptom-marker' not in json.dumps(view)
+    command(case,'C01','incident_record')
+    command(case,'C01','remove',{'location_id':'welfare'})
+    view=case.read_case('C01')
+    assert view['request']['snapshot']['incidents'][-1]['person_id']=='C03'
+    assert next(w for w in view['request']['snapshot']['workers'] if w['person_id']=='C03')['location_id']=='welfare'
+    assert next(w for w in view['request']['snapshot']['workers'] if w['person_id']=='C08')['availability']=='available'
+    # Workers on the app do not see another worker's report or incident steps.
+    for persona in ('C05','C08'):
+        story=case.read_case(persona)['story']
+        assert story['reports']==[] and story['incident_person_id'] is None and story['reported'] is False
+        assert not {'report','incident_record','remove'} & {item['id'] for item in story['events']}
+    with pytest.raises(module.CaseError) as again:
+        command(case,'C01','report',{'person_id':'C03'},key='again')
+    assert again.value.status==409
+
+
+def test_kiosk_report_is_the_workers_own_and_others_stay_reportable(setup_case):
+    case,_=setup_case
+    recovered(case)
+    command(case,'C05','report',{'via':'kiosk'})
+    rana=case.read_case('C05')
+    assert rana['story']['reports'][0]['via']=='kiosk' and rana['story']['reported'] is True
+    assert next(t for t in rana['tasks'] if t['action']=='report')['status']=='recorded'
+    assert rana['story']['events'][-1]['title']=='Rana requested assistance at the Shelter A kiosk'
+    assert next(t for t in case.read_case('C08')['tasks'] if t['action']=='report')['status']=='ready'
+    assert next(t for t in case.read_case('C01')['tasks'] if t['action']=='report')['status']=='ready'
+    command(case,'C01','report',{'person_id':'C08'},key='bilal')
+    assert {r['person_id'] for r in case.read_case('C01')['story']['reports']}=={'C05','C08'}
+    assert case.read_case('C08')['story']['reported'] is True
+
+
+@pytest.mark.parametrize('actor,payload,status',[
+    ('C05',{'person_id':'C08'},403),
+    ('C08',{'via':'foreman'},422),
+    ('C01',{},422),
+    ('C01',{'person_id':'C01'},422),
+    ('C01',{'person_id':'C04','via':'kiosk'},422),
+    ('P03',{'person_id':'C04'},403),
+])
+def test_report_rejects_other_reporters_and_channels(setup_case,actor,payload,status):
+    case,_=setup_case
+    with pytest.raises(module.CaseError) as error:
+        command(case,actor,'report',payload)
+    assert error.value.status==status

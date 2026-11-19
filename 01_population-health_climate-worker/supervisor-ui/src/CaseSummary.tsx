@@ -2,16 +2,20 @@ import {
   Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle,
   Divider, Stack, Typography,
 } from '@mui/material';
-import { type Persona, type StoryState } from './story';
+import { incidentPersonId, isStanding, type Persona, type StoryState } from './story';
 import { nameOf, type ReplayCapture } from './replay';
 import type { Task } from './live';
 import { taskReason } from './copy';
 
 export function caseSituation(story: StoryState): string {
   if (story.handover) return 'Rashid has recorded the shift handover. The next shift inherits the stopped trench work, crew recovery arrangements and the delivery booking.';
-  if (story.reported) return story.firstaid
-    ? 'Bilal’s removal from work and contact with Salim are recorded. His return to work has not been confirmed. The remaining crew plan can be reviewed separately.'
-    : 'Bilal has requested assistance. Huda needs to confirm his removal and location, and Salim needs to record first-aid contact.';
+  const reported = incidentPersonId(story);
+  if (reported) {
+    const name = nameOf(reported).split(' ')[0];
+    return story.firstaid
+      ? `${name}’s removal from work and contact with Salim are recorded. ${name}’s return to work has not been confirmed. The remaining crew plan can be reviewed separately.`
+      : `${name} is reported unwell. Huda needs to confirm ${name}’s removal and location, and Salim needs to record first-aid contact.`;
+  }
   if (story.assigned) return 'Huda has confirmed the workshop assignment. The crew’s work and recovery times are available in the schedule. Heavy trench work remains stopped.';
   if (story.recovered) return 'Huda has accounted for the affected crew in cooled recovery. The next decision is who can move to workshop preparation.';
   if (story.stopped) return 'Huda has confirmed that heavy trench work has stopped. The crew’s recovery headcount still needs confirmation.';
@@ -25,15 +29,15 @@ type Props = {
 };
 
 export function CaseSummary({ open, onClose, story, person, capture, tasks, onWorkspace, onActivity }: Props) {
-  const next = tasks.find(task => task.status === 'ready');
+  const next = tasks.find(task => task.status === 'ready' && !isStanding(task.action));
   const waiting = tasks.find(task => task.status === 'waiting');
   const isWorker = person.id === 'C05' || person.id === 'C08';
-  const mine = tasks.filter(task => task.actor_id === person.id && task.status === 'ready');
+  const mine = tasks.filter(task => task.actor_id === person.id && task.status === 'ready' && !isStanding(task.action));
   const progress = [
     ['Heavy work stopped', story.stopped ? 'Confirmed by Huda' : 'Awaiting Huda’s confirmation'],
     ['Crew in cooled recovery', story.recovered ? 'Headcount confirmed by Huda' : 'Headcount not yet confirmed'],
     ['Workshop assignment', story.assigned ? 'Confirmed by Huda' : 'Not yet confirmed'],
-    ...(story.reported && !isWorker ? [['Assistance for Bilal', story.firstaid ? 'Contact with Salim recorded' : 'Waiting for first-aid contact']] : []),
+    ...(story.reported && !isWorker ? [[`Assistance for ${nameOf(incidentPersonId(story) ?? 'C08').split(' ')[0]}`, story.firstaid ? 'Contact with Salim recorded' : 'Waiting for first-aid contact']] : []),
     ...(story.deliveryDrafted ? [['Materials delivery', story.deliveryAccepted ? '15:30 booking accepted by the supplier' : story.deliverySent ? 'Supplier response pending; 11:30 remains booked' : 'Later booking request being prepared']] : []),
   ];
   return <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth aria-labelledby="case-summary-title">
