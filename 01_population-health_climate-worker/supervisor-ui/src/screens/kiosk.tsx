@@ -1,22 +1,34 @@
 import { useEffect, useRef, useState } from 'react';
-import { langOf, preferredLanguage, tr, useWorkerLanguage } from '../i18n';
+import { LANGS, langOf, preferredLanguage, tr, useWorkerLanguage } from '../i18n';
 import { live } from '../live';
 import { assessmentCapture, assignedIds, crew, time } from './data';
 import { Computed, Head, Hero, Metric, NoCase, Note, Avatar } from './kit';
 import type { ScreenProps } from './registry';
 import { StatusIcon } from '../shared/icons';
 
+/** A kiosk visit returns to the badge screen after this long without a tap. */
+const IDLE_MS = 60_000;
+const READY = LANGS.filter(l => l.status === 'ready');
+
 /**
- * Shelter A kiosk: a worker taps their badge and is checked in within three seconds,
- * without reading. Badges are read with Web NFC where the browser has it; name tiles always work.
+ * Shelter A kiosk. Every visit starts the same way: the worker taps their badge (Web NFC where the
+ * browser has it; name tiles always work), then picks a language. The summary is shown in that
+ * language only. The tap records the worker's own shelter arrival when that task is ready.
  */
 export function KioskScreen({ session }: ScreenProps) {
   const { caseView, person } = session;
-  const [greeting, setGreeting] = useState<{ id: string; ok: boolean } | null>(null);
+  const [visit, setVisit] = useState<{ id: string; step: 'lang' | 'summary'; lang: string } | null>(null);
+  const [unknown, setUnknown] = useState<string | null>(null);
   const tapRef = useRef<(id: string) => void>(() => {});
   const nfc = useNfcBadges(id => tapRef.current(id));
   const [stored] = useWorkerLanguage(person?.id);
   const saved = useSavedLanguage(person?.id);
+  // A shared wall tablet: an unattended visit goes back to the badge screen.
+  useEffect(() => {
+    if (!visit) return;
+    const timer = window.setTimeout(() => setVisit(null), IDLE_MS);
+    return () => window.clearTimeout(timer);
+  }, [visit]);
   if (!caseView || !person) return <NoCase session={session} />;
   const people = crew(caseView).filter(p => p.id === person.id);
   const checkin = caseView.tasks.find(t => t.action === 'checkin');
@@ -24,23 +36,47 @@ export function KioskScreen({ session }: ScreenProps) {
   const arrived = new Set(caseView.headcount?.arrivals.filter(a => a.person_id === person.id).map(a => a.person_id) ?? []);
   if (checkin?.status === 'recorded') arrived.add(checkin.actor_id);
   const tap = (id: string) => {
-    const own = checkin && checkin.actor_id === id && checkin.status === 'ready';
-    if (own) void session.act('checkin', {});
-    setGreeting({ id, ok: !!own || arrived.has(id) });
+    setUnknown(null);
+    if (checkin && checkin.actor_id === id && checkin.status === 'ready') void session.act('checkin', {});
+    const p = people.find(x => x.id === id);
+    // The worker's own choice is offered first: on this device, then the one saved with their consent, then the site default.
+    setVisit({ id, step: 'lang', lang: stored ?? saved ?? (p ? preferredLanguage(p.name, p.id) : 'en') });
   };
-  tapRef.current = id => { if (people.some(p => p.id === id)) tap(id); else setGreeting({ id, ok: false }); };
-  const g = greeting && people.find(p => p.id === greeting.id);
-  // The worker's own choice: on this device, then the one saved with their consent, then the site default.
-  const gl = g ? stored ?? saved ?? preferredLanguage(g.name, g.id) : 'en';
+  tapRef.current = id => { if (people.some(p => p.id === id)) tap(id); else { setVisit(null); setUnknown(id); } };
+  const who = visit && people.find(p => p.id === visit.id);
+
+  if (visit && who && visit.step === 'lang') return <div className="hs-screen" lang={visit.lang} dir={langOf(visit.lang).dir}>
+    <Head kicker={<><Avatar id={who.id} size="sm" /> {who.name.split(' ')[0]} · {who.id}</>} title={tr('lang.choose', visit.lang).text} sub={tr('lang.hint', visit.lang).text} />
+    <ul className="hs-langs">{READY.map(l => <li key={l.code}>
+      <button type="button" lang={l.code} dir={l.dir} aria-pressed={visit.lang === l.code} onClick={() => setVisit({ ...visit, step: 'summary', lang: l.code })}>
+        {l.endonym}<small lang="en" dir="ltr">{l.english}</small>
+      </button></li>)}
+    </ul>
+  </div>;
+
+  if (visit && who) {
+    const l = visit.lang;
+    const t = (k: string) => tr(k, l).text;
+    const here = arrived.has(who.id);
+    return <div className="hs-screen" lang={l} dir={langOf(l).dir}>
+      <Head kicker={<>{t('shelterA')} · {time(caseView.clock)} · <button type="button" className="hs-link" onClick={() => setVisit({ ...visit, step: 'lang' })}>🌐 {langOf(l).endonym}</button></>} title={who.name.split(' ')[0]} />
+      {here ? <p className="hs-statusline" role="status"><StatusIcon status="ok" /> {t('kiosk.checked')}</p>
+        : !session.busy && <p className="hs-statusline" role="status">{t('k.seeHuda')}</p>}
+      <Hero rows numbered>
+        <Metric label={t('hr.arrival')} value={here ? t('k.recorded') : t('k.notRecorded')} tone={here ? 'ok' : undefined} />
+        <Metric label={t('k.water')} value="💧" sub={t('w.cup')} />
+        <Metric label={t('p2.next')} value={ownApprovedWorkshop ? t('workshop') : t('k.follow')} sub={t('k.call')} />
+      </Hero>
+      <Note>{t('k.huda')}</Note>
+      <button type="button" className="hs-button is-primary hs-kiosk-done" onClick={() => setVisit(null)}>{t('k.done')}</button>
+      <Computed>{t('k.feeds')}</Computed>
+    </div>;
+  }
+
   return <div className="hs-screen">
     <Head kicker={`Shelter A · ${time(caseView.clock)}`} title={<>{tr('kiosk.tap', 'en').text} · <span lang="ar" dir="rtl">{tr('kiosk.tap', 'ar').text}</span></>} />
-    <Hero rows>
-      <Metric label={<>My arrival · <span lang="ar">في الملجأ</span></>} value={arrived.size ? 'Recorded' : 'Not recorded'} tone="ok" />
-      <Metric label={<>Water · <span lang="ar">ماء</span></>} value="💧" sub="Drink one cup now, then every 15 minutes." />
-      <Metric label="Next" value={ownApprovedWorkshop ? 'Workshop' : 'Follow foreman'} sub="your foreman will call you" />
-    </Hero>
-    {greeting && !g && <p className="hs-statusline" role="status">Badge {greeting.id} is not on this crew. Please see Huda.</p>}
-    {g && <p className="hs-statusline" role="status" lang={gl} dir={langOf(gl).dir}>{greeting!.ok ? <><StatusIcon status="ok" /> {tr('kiosk.checked', gl).text} · {g.name.split(' ')[0]}</> : `${g.name.split(' ')[0]}: please see Huda`}</p>}
+    <ul className="hs-kiosk-langs" aria-label="Tap your badge">{READY.filter(l => l.code !== 'en' && l.code !== 'ar').map(l => <li key={l.code} lang={l.code} dir={l.dir}>{tr('kiosk.tap', l.code).text}</li>)}</ul>
+    {unknown && <p className="hs-statusline" role="status">Badge {unknown} is not on this crew. Please see Huda.</p>}
     <ul className="hs-tiles" aria-label="Badges">{people.map(p => <li key={p.id}>
       <button type="button" data-in={arrived.has(p.id) || undefined} disabled={session.busy} onClick={() => tap(p.id)} aria-label={`${p.name}${arrived.has(p.id) ? ', checked in' : ''}`}>
         <Avatar id={p.id} size="lg" /><span aria-hidden="true">{arrived.has(p.id) && <><StatusIcon status="ok" /> </>}{p.name.split(' ')[0]}</span><small>{p.id}</small>
@@ -50,8 +86,6 @@ export function KioskScreen({ session }: ScreenProps) {
       <button type="button" className="hs-button" disabled={nfc.state === 'listening'} onClick={() => void nfc.start()}>{nfc.state === 'listening' ? '◉ NFC reader on · tap a badge' : 'Start NFC badge reader'}</button>
       {nfc.error && <p role="alert" className="hs-error">{nfc.error}</p>}
     </div>}
-    <Note>{nfc.supported ? 'Your badge can be read here. Your tile also works.' : 'Tap your tile to check in.'} Huda records the full crew headcount.</Note>
-    <Computed>Check-ins feed the site headcount live.</Computed>
   </div>;
 }
 

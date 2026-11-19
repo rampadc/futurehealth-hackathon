@@ -5,15 +5,24 @@ import { PERSONAS } from '../story';
 import { time } from './data';
 import { CtaBar, Head, Hero, List, Metric, NoCase, Note, Row, Section } from './kit';
 import type { ScreenProps } from './registry';
+import { useT, WorkerFrame } from './worker/frame';
 
 const CREW_IDS = Array.from({ length: 11 }, (_, i) => `C${String(i + 2).padStart(2, '0')}`);
-const coverageLabel = (status?: string) => status === 'confirmed' ? 'Coverage confirmed' : status === 'needs_verification' ? 'Needs employer verification' : 'Awaiting employer review';
+/** Coverage status in the viewer's language (English outside the worker app). */
+const coverageKey = (status?: string) => status === 'confirmed' ? 'cov.confirmed' : status === 'needs_verification' ? 'cov.verify' : 'cov.await';
+const coverageLabel = (status?: string) => ({ 'cov.confirmed': 'Coverage confirmed', 'cov.verify': 'Needs employer verification', 'cov.await': 'Awaiting employer review' })[coverageKey(status)];
 const assessmentLabel = (status?: string) => ({ awaiting_observations: 'Current observed activity needed', proposed: 'Proposal ready for Huda review', approved: 'Proposal approved', expired: 'Proposal expired', blocked: 'Plan review blocked' })[status ?? ''] ?? 'No proposal yet';
 const deliveryLabel = (status?: string) => ({ not_started: 'Not started', drafted: 'Drafted', approved: 'Approved', sent: 'Sent', accepted: 'Accepted' })[status ?? ''] ?? 'Not started';
 const milestoneLabel = (action: string) => ({ draftDelivery: 'Delivery drafted', approveDelivery: 'Delivery approved', sendDelivery: 'Noura confirmed sending', acceptDelivery: 'Noura confirmed supplier acceptance' })[action] ?? 'Delivery update';
 const chronologyLabel = (action: string) => ({ issue: 'Stop-work instruction issued', acknowledge: 'Stop-work instruction acknowledged', stop: 'Heavy work stopped', checkin: 'Personal shelter arrival recorded', recover: 'Crew headcount confirmed', activity: 'Observed crew activity recorded', assign: 'Workshop proposal approved', start_work: 'Workshop work started', start_recovery: 'Workshop work stopped and recovery began', coverage_review: 'Employer coverage reviewed', draftDelivery: 'Delivery drafted', approveDelivery: 'Delivery approved', sendDelivery: 'Noura confirmed sending', acceptDelivery: 'Noura confirmed supplier acceptance', handover: 'Shift handover recorded', costReview: 'Cost impact reviewed' })[action] ?? 'Case milestone';
 
+/** The worker's own coverage, in the worker's language. */
+export function WorkerHeatRestScreen(props: ScreenProps) {
+  return <WorkerFrame session={props.session}><HeatRestScreen {...props} /></WorkerFrame>;
+}
+
 export function HeatRestScreen({ session }: ScreenProps) {
+  const t = useT();
   const { caseView, person } = session;
   const [loadedPolicy, setPolicy] = useState<{ caseId: string; viewerId: string; value: HeatRestView } | null>(null);
   const [error, setError] = useState('');
@@ -38,18 +47,18 @@ export function HeatRestScreen({ session }: ScreenProps) {
   const commercial = person.id === 'P01' ? policy?.commercial_summary : null;
   const send = () => { if (!policy || status === 'confirmed' && !rosterVerified || !note.trim()) return; void session.act('coverage_review', { policy_id: policy.policy_id, status, crew_ids: CREW_IDS, roster_verified: rosterVerified, note: note.trim() }); };
   return <div className="hs-screen">
-    <Head kicker="Employer · Dune Civil Works" title={mina ? 'Heat and rest coverage review' : worker ? 'My heat and rest coverage' : person.id === 'P01' ? 'Project heat and rest view' : 'Crew heat and rest coverage'} />
+    <Head kicker={<>{t('hr.employer')} · Dune Civil Works</>} title={mina ? 'Heat and rest coverage review' : worker ? t('hr.title') : person.id === 'P01' ? 'Project heat and rest view' : 'Crew heat and rest coverage'} />
     {error && <p role="alert" className="hs-error">{error}</p>}
     <Section title="Sandline–Dune Heat Rest Schedule">
-      <p>Employer heat and rest schedule · {worker ? 'your own coverage' : policy?.scope ?? 'Dune Civil Works crew'}</p>{policy?.commitment && <p><b>{policy.commitment}</b></p>}
-      <p>{policy?.payroll_verified ? 'Payroll payment verified.' : 'Payroll payment has not been verified.'}</p>
-      {policy && <details><summary>Policy version and source record</summary><p>Version 1 · policy {policy.policy_id} · source {policy.source} · case {policy.case_id ?? caseView.case_id}</p></details>}
-      <Note>Coverage review is an employer record. Safety actions and recovery continue independently.</Note>
+      <p>{worker ? t('hr.line') : `Employer heat and rest schedule · ${policy?.scope ?? 'Dune Civil Works crew'}`}</p>{policy?.commitment && <p><b>{policy.commitment}</b></p>}
+      <p>{policy?.payroll_verified ? t('hr.paid') : t('hr.unpaid')}</p>
+      {policy && <details><summary>{t('hr.source')}</summary><p dir="ltr" lang="en">Version 1 · policy {policy.policy_id} · source {policy.source} · case {policy.case_id ?? caseView.case_id}</p></details>}
+      <Note>{t('hr.note')}</Note>
     </Section>
     <Hero>
-      <Metric label="Stop-work" value={policy?.records?.stop?.confirmed_at ? 'Confirmed' : policy?.records?.instruction?.issued_at ? 'Issued' : 'Pending'} sub={time(policy?.records?.stop?.confirmed_at)} />
-      <Metric label={worker ? 'My arrival' : 'Shelter arrivals'} value={worker ? arrival || policy?.records?.arrivals?.some(a => a.person_id === person.id) ? 'Recorded' : 'Not recorded' : `${policy?.records?.headcount?.checked_in_count ?? caseView.headcount?.checked_in_count ?? 0} / ${policy?.records?.headcount?.expected_count ?? caseView.headcount?.expected_count ?? 11}`} />
-      <Metric label="Coverage review" value={coverageLabel(review?.status)} sub={review?.reviewed_at ? time(review.reviewed_at) : undefined} />
+      <Metric label={t('hr.stop')} value={policy?.records?.stop?.confirmed_at ? t('hr.confirmed') : policy?.records?.instruction?.issued_at ? t('hr.issued') : t('hr.pending')} sub={time(policy?.records?.stop?.confirmed_at)} />
+      <Metric label={worker ? t('hr.arrival') : 'Shelter arrivals'} value={worker ? arrival || policy?.records?.arrivals?.some(a => a.person_id === person.id) ? t('k.recorded') : t('k.notRecorded') : `${policy?.records?.headcount?.checked_in_count ?? caseView.headcount?.checked_in_count ?? 0} / ${policy?.records?.headcount?.expected_count ?? caseView.headcount?.expected_count ?? 11}`} />
+      <Metric label={t('hr.coverage')} value={t(coverageKey(review?.status))} sub={review?.reviewed_at ? time(review.reviewed_at) : undefined} />
     </Hero>
     {!worker && person.id !== 'P01' && <Section title="Case-linked operations">
       <p>Foreman headcount: {policy?.records?.headcount?.confirmed_count ?? caseView.headcount?.confirmed_count ?? 0} / {policy?.records?.headcount?.expected_count ?? caseView.headcount?.expected_count ?? 11} confirmed. Observed activity records: {policy?.records?.observed_time?.length ?? 0}.</p>
@@ -83,7 +92,7 @@ export function HeatRestScreen({ session }: ScreenProps) {
       <label className="hs-field">Basis or unresolved item<textarea value={note} onChange={e => setNote(e.target.value)} rows={3} /></label>
       <button type="button" className="hs-button is-primary" disabled={task?.status !== 'ready' || status === 'confirmed' && !rosterVerified || !note.trim() || session.busy} onClick={send}>Record employer coverage review</button>
     </Section>}
-    {review && <Section title="Recorded employer review"><p>{coverageLabel(review.status)}{mina && review.note ? ` · ${review.note}` : ''}</p><p className="hs-small">{PERSONAS.find(persona => persona.id === review.reviewed_by)?.name ?? 'Mina Rahman'} · {time(review.reviewed_at)}</p></Section>}
-    <CtaBar>{worker ? <button type="button" className="hs-button" onClick={() => navigate('/worker/my-plan')}>Back to my plan</button> : person.id === 'C01' ? <button type="button" className="hs-button" onClick={() => navigate('/site/headcount')}>Back to headcount</button> : person.id === 'P01' ? <button type="button" className="hs-button" onClick={() => navigate('/web/monitoring')}>Back to project monitoring</button> : null}</CtaBar>
+    {review && <Section icon="calc" title={worker ? t('hr.reviewed') : 'Recorded employer review'}><p>{t(coverageKey(review.status))}{mina && review.note ? ` · ${review.note}` : ''}</p><p className="hs-small">{PERSONAS.find(persona => persona.id === review.reviewed_by)?.name ?? 'Mina Rahman'} · {time(review.reviewed_at)}</p></Section>}
+    <CtaBar>{worker ? <button type="button" className="hs-button" onClick={() => navigate('/worker/my-plan')}>{t('hr.back')}</button> : person.id === 'C01' ? <button type="button" className="hs-button" onClick={() => navigate('/site/headcount')}>Back to headcount</button> : person.id === 'P01' ? <button type="button" className="hs-button" onClick={() => navigate('/web/monitoring')}>Back to project monitoring</button> : null}</CtaBar>
   </div>;
 }

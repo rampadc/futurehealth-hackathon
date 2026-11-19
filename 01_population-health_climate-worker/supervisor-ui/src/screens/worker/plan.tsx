@@ -6,6 +6,8 @@ import type { ScreenProps } from '../registry';
 import { En, T, useT, useWorker, WorkerFrame } from './frame';
 import { VoiceCheckIn } from './voice';
 
+const KIND_KEY: Record<string, string> = { work: 'kind.work', recovery: 'kind.recovery', unavailable: 'kind.unavailable' };
+
 /** Check in: tell the supervisor you feel unwell. Fixed red-flag question, no diagnosis. */
 export function CheckInScreen(props: ScreenProps) {
   return <WorkerFrame session={props.session}><CheckIn {...props} /></WorkerFrame>;
@@ -37,7 +39,7 @@ function CheckIn({ session }: ScreenProps) {
       </div>
       <VoiceCheckIn onUnderstood={() => setStep('unwell')} />
     </Section>}
-    {step === 'ok' && <Note><En>Noted on this phone. Drink water and keep to your rest times. Only “I feel unwell” asks your supervisor for help.</En></Note>}
+    {step === 'ok' && <Note><T k="p4.noted" /></Note>}
     {(step === 'unwell' || step === 'emergency') && <Section icon="message" title={<T k="p4.fixedq" />}>
       <Statement><T k="p4.q" /></Statement>
       <div className="hs-form-row">
@@ -46,11 +48,11 @@ function CheckIn({ session }: ScreenProps) {
       </div>
       {step === 'emergency' && (report
         ? <Statement tone="red"><T k="alert.em" /></Statement>
-        : <Statement tone="red"><En>Get help now. Stay with someone and do not walk alone. Ask your foreman or the nearest person to call 998.</En></Statement>)}
+        : <Statement tone="red"><T k="p4.getHelp" /></Statement>)}
       {report && <Note><T k="p1.sees" /></Note>}
     </Section>}
     {!online && <Note tone="amber"><T k="p4.offline" /></Note>}
-    {!report && (step === 'unwell' || step === 'emergency') && <Note tone="amber"><En>Tell your foreman in person so the site support team can help you.</En></Note>}
+    {!report && (step === 'unwell' || step === 'emergency') && <Note tone="amber"><T k="p4.tellForeman" /></Note>}
     {report && (step === 'unwell' || step === 'emergency') && <CtaBar>
       <HoldButton disabled={!canSend} onConfirm={() => void session.act('report', {})} hint={t('hold')}><T k="p4.send" /></HoldButton>
     </CtaBar>}
@@ -75,21 +77,22 @@ function MyPlan({ session }: ScreenProps) {
   const location = caseView.request?.snapshot.workers.find(worker => worker.person_id === person.id)?.location_id;
   const actuallyCurrent = current?.kind === 'work' && location === 'workshop' || current?.kind === 'recovery' && (location === 'shelter_a' || location === 'shelter_b') ? current : null;
   const work = mine.filter(i => i.kind === 'work').reduce((sum, i) => sum + minutes(i), 0);
+  const kind = (k: string) => KIND_KEY[k] ? t(KIND_KEY[k]) : kindLabel(k);
   const nextRest = mine.find(i => i.kind === 'recovery' && Date.parse(i.starts_at) >= Date.parse(caseView.clock));
   return <div className="hs-screen">
     <h1 id="hs-title"><T k="p5.title" /></h1>
-    {!mine.length ? <Empty><En>{pending ? 'Your times are being updated after a report on your crew. Follow your foreman’s recovery instruction.' : planNeedsUpdate ? 'Current observations are needed for an updated plan. Follow your foreman until new times are confirmed.' : story.assigned ? 'You have no work assigned in this plan. Stay in recovery.' : 'Your foreman has not confirmed the plan yet.'}</En></Empty> : <>
+    {!mine.length ? <Empty><T k={pending ? 'p5.updating' : planNeedsUpdate ? 'p5.needObs' : story.assigned ? 'p5.noWork' : 'p5.wait'} /></Empty> : <>
       <Hero>
-        <Metric label={<T k="p5.now" />} value={actuallyCurrent ? kindLabel(actuallyCurrent.kind) : current?.kind === 'work' ? 'Await foreman’s start' : '—'} sub={actuallyCurrent ? `until ${time(actuallyCurrent.ends_at)}` : current?.kind === 'work' ? 'Approved plan; work begins after a separate confirmation' : next ? `next at ${time(next.starts_at)}` : undefined} tone={actuallyCurrent?.kind === 'recovery' ? 'ok' : undefined} />
-        <Metric label={<T k="p5.nextrest" />} value={nextRest ? `${time(nextRest.starts_at)}–${time(nextRest.ends_at)}` : '—'} sub={t('shelterA')} />
-        <Metric label="Work in plan" value={`${work} min`} />
+        <Metric label={<T k="p5.now" />} value={actuallyCurrent ? kind(actuallyCurrent.kind) : current?.kind === 'work' ? t('p5.awaitStart') : '—'} sub={actuallyCurrent ? t('p5.until', { time: time(actuallyCurrent.ends_at) }) : current?.kind === 'work' ? t('p5.awaitStart.d') : next ? t('p5.nextAt', { time: time(next.starts_at) }) : undefined} tone={actuallyCurrent?.kind === 'recovery' ? 'ok' : undefined} />
+        <Metric label={<T k="p5.nextrest" />} value={nextRest ? <bdi dir="ltr">{time(nextRest.starts_at)}–{time(nextRest.ends_at)}</bdi> : '—'} sub={t('shelterA')} />
+        <Metric label={<T k="p5.workIn" />} value={t('p5.min', { n: work })} />
       </Hero>
       <Section icon="calendar" title={<T k="p5.hour" />}>
-        <List>{mine.map(i => <Row key={i.starts_at} title={`${time(i.starts_at)}–${time(i.ends_at)} · ${i.kind === 'work' ? t('work') : t('rest')}`} detail={i.kind === 'work' ? t('p5.prep') : t('p5.rec')} badge={actuallyCurrent === i ? <span className="hs-badge" data-tone="plan"><T k="p5.now" /></span> : undefined} />)}</List>
+        <List>{mine.map(i => <Row key={i.starts_at} title={<><bdi dir="ltr">{time(i.starts_at)}–{time(i.ends_at)}</bdi> · {i.kind === 'work' ? t('work') : t('rest')}</>} detail={i.kind === 'work' ? t('p5.prep') : t('p5.rec')} badge={actuallyCurrent === i ? <span className="hs-badge" data-tone="plan"><T k="p5.now" /></span> : undefined} />)}</List>
       </Section>
     </>}
     <Note><T k="p5.midday" /></Note>
-    {(person.id === 'C05' || person.id === 'C08') && <button type="button" className="hs-button" onClick={() => navigate('/worker/heat-rest')}>View my heat and rest coverage</button>}
+    {(person.id === 'C05' || person.id === 'C08') && <button type="button" className="hs-button" onClick={() => navigate('/worker/heat-rest')}><T k="p5.coverage" /></button>}
     <Computed><T k="p5.own" /></Computed>
   </div>;
 }
