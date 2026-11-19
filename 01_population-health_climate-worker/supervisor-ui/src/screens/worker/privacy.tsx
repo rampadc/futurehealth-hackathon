@@ -4,7 +4,7 @@ import { LANGS, langOf } from '../../i18n';
 import { live as api } from '../../live';
 import { navigate } from '../../router';
 import { time } from '../data';
-import { Computed, CtaBar, Head, Hero, HoldButton, List, Metric, NoCase, Note, Row, Section } from '../kit';
+import { Computed, CtaBar, Head, Hero, ConfirmButton, List, Metric, NoCase, Note, Row, Section } from '../kit';
 import type { ScreenProps } from '../registry';
 import { En, T, useT, useWorker, WorkerFrame } from './frame';
 
@@ -114,7 +114,7 @@ function MyData({ session }: ScreenProps) {
     <Section icon="people" title={<T k="p8.who" />}><p className="hs-muted"><T k="p8.none" /></p></Section>
     <CtaBar>
       <button type="button" className="hs-button is-primary" onClick={() => void download()}><T k="p8.download" /></button>
-      <HoldButton className="hs-button is-danger" onConfirm={() => void withdraw()} hint={t('hold')} disabled={!consent.checkins && !consent.wearable}><T k="p8.delete" /></HoldButton>
+      <ConfirmButton className="hs-button is-danger" onConfirm={() => void withdraw()} body={t('confirm.body')} confirmLabel={t('confirm')} cancelLabel={t('cancel')} disabled={!consent.checkins && !consent.wearable}><T k="p8.delete" /></ConfirmButton>
     </CtaBar>
     {(error || failed) && <p role="alert" className="hs-error">{error || failed}</p>}
     <Note><T k="p8.deletebody" /></Note>

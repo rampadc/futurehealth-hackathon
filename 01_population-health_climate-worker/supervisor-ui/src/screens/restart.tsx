@@ -192,17 +192,18 @@ export function RestartReviewScreen({ session }: ScreenProps) {
   /* Per squad: latest reading, status, the midday break and readiness checks done. */
   const squads = squadsFor(caseView).map(q => q.live ? { ...q, status: story.reviewed ? 'Review recorded' : `Stop-work · ${restart.status.replaceAll('_', ' ')}`, checks: { done: passing, total: CHECKS.length }, reading: { twl: heat.reading?.twl ?? null, at: time(heat.reading?.measured_at), fresh: heat.freshness === 'current' } } : q);
   const sq = squads.find(q => q.id === squadId) ?? squads[0];
-  const overview = <>
-    <Section title="Today by squad"><DayTimeline squads={squads} now={time(caseView.clock)} selected={sq.id} choose={choose} /></Section>
-    <Section title="Restart status by squad">
-      <SquadRestartTable squads={squads} selected={sq.id} choose={choose} freshness={heat.freshness} />
-      <Computed>MoHRE midday break 12:30–15:00{checks?.proposed_at ? ` · proposed restart ${time(checks.proposed_at)}${midday ? ' is inside the break' : ''}` : ''}</Computed>
-    </Section>
-  </>;
+  const today = <Section title="Today by squad"><DayTimeline squads={squads} now={time(caseView.clock)} selected={sq.id} choose={choose} /></Section>;
+  const status = <Section title="Restart status by squad">
+    <SquadRestartTable squads={squads} selected={sq.id} choose={choose} freshness={heat.freshness} />
+    <Computed>MoHRE midday break 12:30–15:00{checks?.proposed_at ? ` · proposed restart ${time(checks.proposed_at)}${midday ? ' is inside the break' : ''}` : ''}</Computed>
+  </Section>;
   if (!sq.live) return <div className="hs-screen">
     <Head kicker={`Restart review · ${sq.name}`} title="Restart review" sub={`${sq.loc} · foreman ${sq.foreman} · ${sq.status}`} />
-    {overview}
-    <p className="hs-ok">No restart review for the {sq.name.toLowerCase()}: it has no stop-work. {sq.status}.</p>
+    <div className="hs-grid" data-cols="2">
+      {today}
+      <Section title="Your checks"><p className="hs-ok">No restart review for the {sq.name.toLowerCase()}: it has no stop-work. {sq.status}.</p></Section>
+    </div>
+    {status}
   </div>;
   /* The squad leader's checks first, then everyone else's, each row naming the person. */
   const evidence = checks as Record<string, { status: string; actor_id: string | null; observed_at: string | null }> | null;
@@ -227,7 +228,18 @@ export function RestartReviewScreen({ session }: ScreenProps) {
   </tr>;
   return <div className="hs-screen">
     <Head kicker="Restart review · Heavy exposed civil work" title="Restart review" sub="Recording the review does not authorise resuming work. The site decision stays with the superintendent." />
-    {overview}
+    <div className="hs-grid" data-cols="2">
+      {today}
+      <Section title="Your checks">
+        <ActionButton session={session} action="permit" label="Confirm permit check" />
+        {/* The hold stamp sits with the review button: recording the review does not lift it. */}
+        <p className="hs-review-hold"><Hold>{stopped ? 'Heavy exposed civil work stays stopped' : heat.heavyHeld ? 'Heavy exposed civil work held' : 'Cessation not confirmed'}</Hold><span>Recording the review does not release the hold. Resuming work requires a separate site decision.</span></p>
+        {restart.blockers.length > 0 && <Note tone="red">Restart review is blocked: {restart.blockers.map(reasonLabel).join(', ')}.</Note>}
+        <ActionButton session={session} action="review" label="Record restart review" primary confirm={rashid ? { title: 'Record your restart review', body: `This records your review as superintendent. ${stopped ? 'Heavy work remains stopped.' : 'Cessation is not confirmed.'} Resuming work requires a separate site decision.` } : undefined} />
+        {!rashid && <p className="hs-small hs-muted">Only Rashid (superintendent) records the restart review.</p>}
+      </Section>
+    </div>
+    {status}
     <Section title={`Restart checks · ${sq.name} · ${passing} of ${CHECKS.length} recorded`}>
       <p className="hs-muted">Each check is recorded by the person named.</p>
       <div className="hs-scroll"><table className="hs-table hs-table-sm hs-checks-table" aria-label={`Restart checks, ${sq.name}`}>
@@ -243,14 +255,6 @@ export function RestartReviewScreen({ session }: ScreenProps) {
       </table></div>
       <Computed />
     </Section>
-    {restart.blockers.length > 0 && <Note tone="red">Restart review is blocked: {restart.blockers.map(reasonLabel).join(', ')}.</Note>}
-    <Section title="Your checks">
-      <ActionButton session={session} action="permit" label="Confirm permit check" />
-      {/* The hold stamp sits with the review button: recording the review does not lift it. */}
-      <p className="hs-review-hold"><Hold>{stopped ? 'Heavy exposed civil work stays stopped' : heat.heavyHeld ? 'Heavy exposed civil work held' : 'Cessation not confirmed'}</Hold><span>Recording the review does not release the hold. Resuming work requires a separate site decision.</span></p>
-      <ActionButton session={session} action="review" label="Record restart review" primary confirm={rashid ? { word: 'RESTART', title: 'Record your restart review', body: `This records your review as superintendent. ${stopped ? 'Heavy work remains stopped.' : 'Cessation is not confirmed.'} Resuming work requires a separate site decision.` } : undefined} />
-    </Section>
     <ShiftHandover session={session} restartStatus={story.reviewed ? 'Review recorded' : restart.status.replaceAll('_', ' ')} />
-    {!rashid && <Note>Only Rashid (superintendent) records the restart review.</Note>}
   </div>;
 }

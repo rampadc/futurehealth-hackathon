@@ -1,11 +1,11 @@
 import { Box, Stack, Typography } from '@mui/material';
 import { ThermalWorkLimit } from '../ThermalWorkLimit';
 import { timeLabel } from '../Timeline';
-import { LaterStep, Panel, isReady } from '../shared/ui';
+import { Panel } from '../shared/ui';
 import type { WorkspaceProps } from './types';
 
-/** P03 · Maya, safety officer. Screens: heat controls and fresh reading. */
-export function SafetyOfficerWorkspace({ story, capture, caseView, actions }: WorkspaceProps) {
+/** P03 · Maya, safety officer. Screen: heat controls. Huda records the fresh local reading on site. */
+export function SafetyOfficerWorkspace({ story, capture, actions }: WorkspaceProps) {
   const reading = capture.request.snapshot.readings[0];
   return <Stack spacing={3}>
     <Panel title="Civil trench conditions">
@@ -19,6 +19,5 @@ export function SafetyOfficerWorkspace({ story, capture, caseView, actions }: Wo
         </Box>
       </Box>
     </Panel>
-    <LaterStep title="Prepare the restart evidence" ready={isReady(caseView, 'fresh') || story.fresh}><Typography color="text.secondary" sx={{ mb: 1 }}>After the crew response and first-aid handoff, record the fresh local evidence for a separate restart review.</Typography>{actions(['fresh', 'water'])}</LaterStep>
   </Stack>;
 }

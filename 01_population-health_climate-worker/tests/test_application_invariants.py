@@ -74,7 +74,7 @@ def test_review_requires_current_ready_restart_result(case):
     for action, actor, payload in [
         ('report', 'C08', {}), ('incident_record', 'C01', {}),
         ('remove', 'C01', {}), ('firstaid', 'P06', {}),
-        ('fresh', 'P03', {'reading': reading}), ('permit', 'P04', {'status': 'confirmed'}),
+        ('fresh', 'C01', {'reading': reading}), ('permit', 'P04', {'status': 'confirmed'}),
     ]:
         add_event(case, action, actor, payload)
     with pytest.raises(case_module.CaseError) as error:
@@ -130,11 +130,11 @@ def test_restart_check_can_be_repeated_after_new_reading(case):
                           ('remove', 'C01'), ('firstaid', 'P06')]:
         add_event(case, action, actor)
     reading = copy.deepcopy(case_module.SEED['snapshot']['readings'][0])
-    command(case, 'P03', 'fresh', key='reading-one', payload={'reading': reading})
+    command(case, 'C01', 'fresh', key='reading-one', payload={'reading': reading})
     command(case, 'P04', 'permit', key='permit-one', payload={'status': 'confirmed'})
     execute(case.advance_clock('2025-08-04T08:05:00+04:00'))
     reading.update(measured_at='2025-08-04T08:05:00+04:00', received_at='2025-08-04T08:05:00+04:00')
-    command(case, 'P03', 'fresh', key='reading-two', payload={'reading': reading})
+    command(case, 'C01', 'fresh', key='reading-two', payload={'reading': reading})
     command(case, 'P04', 'permit', key='permit-two', payload={'status': 'confirmed'})
 
 

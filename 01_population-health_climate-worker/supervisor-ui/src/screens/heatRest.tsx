@@ -49,12 +49,13 @@ export function HeatRestScreen({ session }: ScreenProps) {
   return <div className="hs-screen">
     <Head kicker={<>{t('hr.employer')} · Dune Civil Works</>} title={mina ? 'Heat and rest coverage review' : worker ? t('hr.title') : person.id === 'P01' ? 'Project heat and rest view' : 'Crew heat and rest coverage'} />
     {error && <p role="alert" className="hs-error">{error}</p>}
-    <Section title="Sandline–Dune Heat Rest Schedule">
-      <p>{worker ? t('hr.line') : `Employer heat and rest schedule · ${policy?.scope ?? 'Dune Civil Works crew'}`}</p>{policy?.commitment && <p><b>{policy.commitment}</b></p>}
-      <p>{policy?.payroll_verified ? t('hr.paid') : t('hr.unpaid')}</p>
-      {policy && <details><summary>{t('hr.source')}</summary><p dir="ltr" lang="en">Version 1 · policy {policy.policy_id} · source {policy.source} · case {policy.case_id ?? caseView.case_id}</p></details>}
-      <Note>{t('hr.note')}</Note>
-    </Section>
+    {mina && !review && <Section title="Employer confirmation">
+      <label className="hs-field">Coverage status<select value={status} onChange={e => setStatus(e.target.value as 'confirmed' | 'needs_verification')}><option value="confirmed">Confirmed</option><option value="needs_verification">Needs verification</option></select></label>
+      <label className="hs-field"><input type="checkbox" checked={rosterVerified} onChange={e => setRosterVerified(e.target.checked)} /> I verified the C02–C12 crew roster against the employer’s coverage record.</label>
+      <label className="hs-field">Basis or unresolved item<textarea value={note} onChange={e => setNote(e.target.value)} rows={3} /></label>
+      <button type="button" className="hs-button is-primary" disabled={task?.status !== 'ready' || status === 'confirmed' && !rosterVerified || !note.trim() || session.busy} onClick={send}>Record employer coverage review</button>
+    </Section>}
+    {review && <Section icon="calc" title={worker ? t('hr.reviewed') : 'Recorded employer review'}><p>{t(coverageKey(review.status))}{mina && review.note ? ` · ${review.note}` : ''}</p><p className="hs-small">{PERSONAS.find(persona => persona.id === review.reviewed_by)?.name ?? 'Mina Rahman'} · {time(review.reviewed_at)}</p></Section>}
     <Hero>
       <Metric label={t('hr.stop')} value={policy?.records?.stop?.confirmed_at ? t('hr.confirmed') : policy?.records?.instruction?.issued_at ? t('hr.issued') : t('hr.pending')} sub={time(policy?.records?.stop?.confirmed_at)} />
       <Metric label={worker ? t('hr.arrival') : 'Shelter arrivals'} value={worker ? arrival || policy?.records?.arrivals?.some(a => a.person_id === person.id) ? t('k.recorded') : t('k.notRecorded') : `${policy?.records?.headcount?.checked_in_count ?? caseView.headcount?.checked_in_count ?? 0} / ${policy?.records?.headcount?.expected_count ?? caseView.headcount?.expected_count ?? 11}`} />
@@ -86,13 +87,12 @@ export function HeatRestScreen({ session }: ScreenProps) {
         {commercial.unresolved_questions?.length ? <List>{commercial.unresolved_questions.map(item => <Row key={item.id} title={item.question} badge={<span className="hs-badge" data-tone="wait">Open</span>} />)}</List> : <p>No open questions in the case record.</p>}
       </Section>
     </>}
-    {mina && !review && <Section title="Employer confirmation">
-      <label className="hs-field">Coverage status<select value={status} onChange={e => setStatus(e.target.value as 'confirmed' | 'needs_verification')}><option value="confirmed">Confirmed</option><option value="needs_verification">Needs verification</option></select></label>
-      <label className="hs-field"><input type="checkbox" checked={rosterVerified} onChange={e => setRosterVerified(e.target.checked)} /> I verified the C02–C12 crew roster against the employer’s coverage record.</label>
-      <label className="hs-field">Basis or unresolved item<textarea value={note} onChange={e => setNote(e.target.value)} rows={3} /></label>
-      <button type="button" className="hs-button is-primary" disabled={task?.status !== 'ready' || status === 'confirmed' && !rosterVerified || !note.trim() || session.busy} onClick={send}>Record employer coverage review</button>
-    </Section>}
-    {review && <Section icon="calc" title={worker ? t('hr.reviewed') : 'Recorded employer review'}><p>{t(coverageKey(review.status))}{mina && review.note ? ` · ${review.note}` : ''}</p><p className="hs-small">{PERSONAS.find(persona => persona.id === review.reviewed_by)?.name ?? 'Mina Rahman'} · {time(review.reviewed_at)}</p></Section>}
+    <Section title="Sandline–Dune Heat Rest Schedule">
+      <p>{worker ? t('hr.line') : `Employer heat and rest schedule · ${policy?.scope ?? 'Dune Civil Works crew'}`}</p>{policy?.commitment && <p><b>{policy.commitment}</b></p>}
+      <p>{policy?.payroll_verified ? t('hr.paid') : t('hr.unpaid')}</p>
+      {policy && <details><summary>{t('hr.source')}</summary><p dir="ltr" lang="en">Version 1 · policy {policy.policy_id} · source {policy.source} · case {policy.case_id ?? caseView.case_id}</p></details>}
+      <Note>{t('hr.note')}</Note>
+    </Section>
     <CtaBar>{worker ? <button type="button" className="hs-button" onClick={() => navigate('/worker/my-plan')}>{t('hr.back')}</button> : person.id === 'C01' ? <button type="button" className="hs-button" onClick={() => navigate('/site/headcount')}>Back to headcount</button> : person.id === 'P01' ? <button type="button" className="hs-button" onClick={() => navigate('/web/monitoring')}>Back to project monitoring</button> : null}</CtaBar>
   </div>;
 }

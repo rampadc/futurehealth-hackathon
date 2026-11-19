@@ -197,10 +197,10 @@ def test_review_uses_exact_current_evidence_age(setup_case,monkeypatch):
     command(case,'C01','incident_record')
     command(case,'C01','remove')
     command(case,'P06','firstaid')
-    command(case,'P03','fresh',{'measured_now':True,'reading':{'sensor_id':'t1',
+    command(case,'C01','fresh',{'measured_now':True,'reading':{'sensor_id':'t1',
         'zone_id':'civil_exposed','twl':180.0,'unit':'W/m²','quality':'valid'}})
     for actor,action in [('P04','permit'),('C01','personnel'),('C01','recovery_check'),
-                         ('P03','water'),('C01','crew_readiness')]:
+                         ('C01','water'),('C01','crew_readiness')]:
         command(case,actor,action,{'status':'confirmed'})
     clock.advance(minutes=5,seconds=1)
     with pytest.raises(module.CaseError) as exc:

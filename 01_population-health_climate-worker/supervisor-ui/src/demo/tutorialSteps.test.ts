@@ -8,7 +8,7 @@ const SHOTS = Object.keys(import.meta.glob('./tutorial/*.png'));
 /** Case action owners, from the backend ACTIONS table (service.py). */
 const OWNER: Record<string, string> = {
   issue: 'P03', acknowledge: 'C01', stop: 'C01', checkin: 'C05', recover: 'C01', readiness: 'C01', activity: 'C01', assign: 'C01',
-  report: 'C08', incident_record: 'C01', remove: 'C01', firstaid: 'P06', fresh: 'P03', water: 'P03', permit: 'P04',
+  report: 'C08', incident_record: 'C01', remove: 'C01', firstaid: 'P06', fresh: 'C01', water: 'C01', permit: 'P04',
   personnel: 'C01', recovery_check: 'C01', crew_readiness: 'C01', handover: 'P02',
 };
 

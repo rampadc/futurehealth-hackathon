@@ -193,7 +193,7 @@ class OperationalDecisionTests(unittest.TestCase):
         data = responded(raw_request(twl=175.0, held=['civil_heavy']))
         data['restart'] = {'proposed_at': at(), 'task_id': 'civil_heavy'}
         for name, actor in {'permit': 'P04', 'personnel': 'C01', 'recovery': 'C01',
-                            'water': 'P03', 'crew_readiness': 'C01'}.items():
+                            'water': 'C01', 'crew_readiness': 'C01'}.items():
             data['restart'][name] = {'status': 'confirmed', 'observed_at': at(), 'actor_id': actor}
         ready = evaluate_restart(request(data))
         self.assertEqual(ready.status, 'ready_for_human_review')
@@ -217,7 +217,7 @@ class OperationalDecisionTests(unittest.TestCase):
             'C02', confirmed_at=at(8, 11, 30))
         data['restart'] = {'proposed_at': at(8, 12), 'task_id': 'civil_heavy'}
         for name, actor in {'permit': 'P04', 'personnel': 'C01', 'recovery': 'C01',
-                            'water': 'P03', 'crew_readiness': 'C01'}.items():
+                            'water': 'C01', 'crew_readiness': 'C01'}.items():
             data['restart'][name] = {'status': 'confirmed', 'observed_at': at(8, 10),
                                      'actor_id': actor}
         blocked = evaluate_restart(request(data))

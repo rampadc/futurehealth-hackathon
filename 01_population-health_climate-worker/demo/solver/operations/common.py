@@ -277,7 +277,7 @@ def validate_request(req):
             _time(interval.starts_at); _time(interval.ends_at)
     if req.restart:
         _time(req.restart.proposed_at)
-        owners = {'permit':'P04','personnel':'C01','recovery':'C01','water':'P03','crew_readiness':'C01'}
+        owners = {'permit':'P04','personnel':'C01','recovery':'C01','water':'C01','crew_readiness':'C01'}
         for field,owner in owners.items():
             fact = getattr(req.restart,field)
             if fact.observed_at is not None:
