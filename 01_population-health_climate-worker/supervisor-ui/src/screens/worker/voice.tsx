@@ -39,10 +39,10 @@ export function VoiceCheckIn({ onUnderstood }: { onUnderstood: (text: string) =>
     const r = new Ctor();
     r.lang = LOCALES[lang] ?? 'en-AE'; r.interimResults = true; r.continuous = false;
     r.onresult = event => setText(Array.from(event.results).map(result => result[0].transcript).join(' '));
-    r.onerror = event => setError(event.error === 'not-allowed' ? 'Microphone access was refused. Tap an answer instead.' : 'Voice did not work. Tap an answer instead.');
+    r.onerror = event => setError(event.error === 'not-allowed' ? t('v.denied') : t('v.failed'));
     r.onend = () => setListening(false);
     recognition.current = r;
-    try { r.start(); setListening(true); } catch { setError('Voice did not work. Tap an answer instead.'); }
+    try { r.start(); setListening(true); } catch { setError(t('v.failed')); }
   };
   const stop = () => recognition.current?.stop();
   return <div className="hs-form">
@@ -60,7 +60,7 @@ export function VoiceCheckIn({ onUnderstood }: { onUnderstood: (text: string) =>
         <button type="button" className="hs-button" onClick={() => setText('')}><T k="p4.retry" /></button>
       </div>}
     </div>}
-    {error && <p role="alert" className="hs-error"><span lang="en" dir="ltr">{error}</span></p>}
-    <p className="hs-small hs-muted"><span lang="en" dir="ltr">Your browser’s speech service transcribes what you say. The words stay on this phone; your supervisor only sees that you need rest.</span></p>
+    {error && <p role="alert" className="hs-error">{error}</p>}
+    <p className="hs-small hs-muted"><T k="v.note" /></p>
   </div>;
 }

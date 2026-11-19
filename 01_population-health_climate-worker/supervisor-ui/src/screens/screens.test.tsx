@@ -569,7 +569,9 @@ describe('assessed workshop plan', () => {
     const capture = currentCase.capture!;
     currentCase.plan_assessment = { id: 'assessment-new', assessed_at: currentCase.clock, observed_through: currentCase.clock, approval_deadline: currentCase.clock, status: 'proposed', request: capture.request, response: capture.response };
     await open('/kiosk/check-in', 'C05');
-    expect(await screen.findByText('Follow foreman')).toBeTruthy();
+    await userEvent.click(await screen.findByRole('button', { name: /^Rana/ }));
+    await userEvent.click(await screen.findByRole('button', { name: /^English/ }));
+    expect(await screen.findByText('Follow your foreman')).toBeTruthy();
     expect(screen.queryByText('Workshop')).toBeNull();
   });
 
@@ -990,9 +992,22 @@ describe('voice and badges', () => {
     currentCase = await makeCase('heat_trigger', { stopped: true }, [task('checkin', 'C05', 'ready')]);
     await open('/kiosk/check-in', 'C05');
     await userEvent.click(await screen.findByRole('button', { name: /^Rana/ }));
+    // Every visit asks for a language; the worker's saved one is offered first.
+    expect(await screen.findByRole('heading', { name: tr('lang.choose', 'ar').text })).toBeTruthy();
+    await userEvent.click(screen.getByRole('button', { pressed: true }));
     const status = await screen.findByText(new RegExp(tr('kiosk.checked', 'ar').text));
     expect(status.closest('[lang]')!.getAttribute('lang')).toBe('ar');
     expect(screen.queryByText(new RegExp(tr('kiosk.checked', 'hi').text))).toBeNull();
+  });
+
+  it('lets a worker change their language from My account', async () => {
+    currentCase = await makeCase('heat_trigger', {}, []);
+    await open('/worker/account', 'C05');
+    expect(await screen.findByRole('heading', { name: 'Language' })).toBeTruthy();
+    await userEvent.click(screen.getByRole('button', { name: /^العربية/ }));
+    expect(await screen.findByRole('heading', { name: tr('acc.lang', 'ar').text })).toBeTruthy();
+    expect(screen.getByText(tr('acc.kicker', 'ar').text).closest('[dir]')!.getAttribute('dir')).toBe('rtl');
+    expect(screen.getByRole('button', { name: tr('sh.signout', 'ar').text })).toBeTruthy();
   });
 
   it('checks a worker in from an NFC badge', async () => {

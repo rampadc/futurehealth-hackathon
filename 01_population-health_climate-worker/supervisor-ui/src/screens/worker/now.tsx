@@ -80,7 +80,7 @@ function Alert({ session }: ScreenProps) {
   const t = useT();
   const { caseView } = session;
   if (!caseView) return <NoCase session={session} />;
-  if (!caseView.story.issued) return <div className="hs-screen"><h1 id="hs-title"><T k="stopwork" /></h1><Empty><En>No stop-work notice is active.</En></Empty></div>;
+  if (!caseView.story.issued) return <div className="hs-screen"><h1 id="hs-title"><T k="stopwork" /></h1><Empty><T k="alert.none" /></Empty></div>;
   return <div className="hs-screen">
     <h1 id="hs-title" className="hs-label"><T k="stopwork" /> · {time(caseView.clock)}</h1>
     <Statement tone="red"><T k="alert.stop" /></Statement>
@@ -104,11 +104,11 @@ function Shelter({ session }: ScreenProps) {
   const done = task?.status === 'recorded' || queued;
   return <div className="hs-screen">
     <h1 id="hs-title"><T k="p6.title" /></h1>
-    {queued ? <Statement tone="black"><En>Saved on this phone · sends when the network returns</En></Statement>
+    {queued ? <Statement tone="black"><T k="p6.queued" /></Statement>
       : done ? <Statement tone="black"><T k="kiosk.checked" /> · {time(caseView.clock)}</Statement>
       : <Statement source={<T k="p6.qr" />}><T k="p6.hold" /></Statement>}
-    {!task && <Note><En>Your foreman confirms the crew’s physical headcount. Follow the shelter instruction.</En></Note>}
-    {task && !done && task.status !== 'ready' && <Note tone="amber"><En>Check-in opens once your foreman confirms the stop.</En></Note>}
+    {!task && <Note><T k="p6.foreman" /></Note>}
+    {task && !done && task.status !== 'ready' && <Note tone="amber"><T k="p6.opens" /></Note>}
     <CtaBar>
       {done ? <button type="button" className="hs-button" onClick={() => navigate('/worker/now')}><T k="p6.back" /></button>
         : <HoldButton disabled={!task || task.status !== 'ready' || session.busy} onConfirm={() => void session.act('checkin', {})} hint={t('hold')}><T k="p6.cta" /></HoldButton>}
