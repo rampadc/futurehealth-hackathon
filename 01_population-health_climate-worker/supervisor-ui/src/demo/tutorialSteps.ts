@@ -1,0 +1,260 @@
+import { apiFetch, ApiError, live, type CaseView } from '../live';
+import { atDubai, payloads, toIso } from '../commands';
+import { readingPayload } from '../scenarioPresets';
+import { isoAt, minuteOf } from './model';
+import type { Device } from '../screens/registry';
+
+/**
+ * Presenter tutorial: the core shift story as a fixed series of steps. Opening a step resets the
+ * case and records every earlier step's human actions behind the scenes, each as its own persona,
+ * so the step's screen opens in the state the presenter needs. Nothing here bypasses the case
+ * rules: every record goes through `/api/case/commands` with the same checks a person's tap gets.
+ */
+
+/** One setup operation, run in order after the reset. */
+export type SetupOp =
+  | { as: string; action: string; payload?: (view: CaseView) => Record<string, unknown> }
+  | { advance: number }
+  | { awaitProposal: true }
+  | { reading: { twl: number; kind: 'valid' | 'fault' | 'stale' } };
+
+export type TutorialStep = {
+  id: string;
+  title: string;
+  /** Persona whose window the step opens. */
+  persona: string;
+  device: Device;
+  /** Screen path inside the device, e.g. `stop-work`. */
+  screen: string;
+  /** Operations after a reset. `null` keeps the current case as it is. */
+  setup: SetupOp[] | null;
+  /** What the presenter clicks in the opened window. */
+  click: string;
+  /** What this step means for the people on site and the people using the app. */
+  onSite: string;
+  /** What the backend records and calculates when the step is done. */
+  system: string;
+};
+
+const CREW = Array.from({ length: 11 }, (_, i) => `C${String(i + 2).padStart(2, '0')}`);
+const crewOf = (view: CaseView) => (view.request?.snapshot.workers ?? view.capture?.request.snapshot.workers ?? []).map(w => w.person_id);
+const check = () => payloads.check();
+
+// Each stage is the human record that a step adds, so a later step's setup is the earlier stages in order.
+const ISSUE: SetupOp[] = [{ as: 'P03', action: 'issue' }];
+const ACK: SetupOp[] = [...ISSUE, { as: 'C01', action: 'acknowledge' }];
+const STOP: SetupOp[] = [...ACK, { as: 'C01', action: 'stop' }];
+const CHECKIN: SetupOp[] = [...STOP, { as: 'C05', action: 'checkin' }];
+const RECOVER: SetupOp[] = [...CHECKIN, { as: 'C01', action: 'recover', payload: view => ({ person_ids: crewOf(view).length ? crewOf(view) : CREW, zone_id: 'shelter_a' }) }];
+const PROPOSAL: SetupOp[] = [
+  ...RECOVER,
+  { as: 'C01', action: 'readiness', payload: view => payloads.readiness(crewOf(view).length ? crewOf(view) : CREW, 'ready', 'Foreman checked the worker in person', toIso(atDubai(new Date(Date.parse(view.clock) + 2 * 60 * 60_000).toISOString()))) },
+  { advance: 2 },
+  { as: 'C01', action: 'activity', payload: view => ({ through_now: true, observed: true, groups: [{ kind: 'recovery', zone_id: 'shelter_a', person_ids: crewOf(view).length ? crewOf(view) : CREW }] }) },
+  { awaitProposal: true },
+];
+const ASSIGN: SetupOp[] = [...PROPOSAL, { as: 'C01', action: 'assign', payload: view => payloads.assign(view) }];
+const REPORT: SetupOp[] = [...ASSIGN, { as: 'C08', action: 'report' }];
+const REMOVE: SetupOp[] = [...REPORT, { as: 'C01', action: 'incident_record' }, { as: 'C01', action: 'remove', payload: () => payloads.remove() }];
+const FIRSTAID: SetupOp[] = [...REMOVE, { as: 'P06', action: 'firstaid' }];
+const RESTART_EVIDENCE: SetupOp[] = [
+  ...FIRSTAID,
+  { as: 'P03', action: 'fresh', payload: view => payloads.fresh(view, 180) },
+  { as: 'P03', action: 'water', payload: check },
+  { as: 'P04', action: 'permit', payload: check },
+  { as: 'C01', action: 'personnel', payload: check },
+  { as: 'C01', action: 'recovery_check', payload: check },
+  { as: 'C01', action: 'crew_readiness', payload: check },
+];
+const HANDOVER: SetupOp[] = [...FIRSTAID, { as: 'P02', action: 'handover' }];
+
+export const TUTORIAL_STEPS: TutorialStep[] = [
+  {
+    id: '01-issue', title: 'Maya issues the stop-work instruction', persona: 'P03', device: 'web', screen: 'heat-controls', setup: [],
+    click: 'Select “Issue stop-work to Civil crew”.',
+    onSite: 'The T1 monitor in the civil trench reads TWL 145 W/m² at 08:00, below the 150 W/m² heavy-work limit. Maya, the safety officer, reviews the heat controls and instructs the civil crew to stop heavy trench work.',
+    system: 'The solver has already placed civil heavy work on hold from the reading. Maya’s instruction is recorded as a separate case event. Huda’s acknowledgement task opens with a two-minute deadline.',
+  },
+  {
+    id: '02-acknowledge', title: 'Huda acknowledges the instruction', persona: 'C01', device: 'site', screen: 'stop-work', setup: ISSUE,
+    click: 'Select “Acknowledge”.',
+    onSite: 'Huda, the civil foreman, receives the stop-work instruction on the site phone and acknowledges it. The crew is still in the trench at this point.',
+    system: 'The acknowledgement is recorded as its own event, separate from the instruction. The overdue-acknowledgement timer is cleared, and the “confirm heavy work stopped” task opens.',
+  },
+  {
+    id: '03-stop', title: 'Huda confirms heavy work has stopped', persona: 'C01', device: 'site', screen: 'stop-work', setup: ACK,
+    click: 'Select “Confirm heavy work stopped”.',
+    onSite: 'Huda checks that the crew has stopped work and moves them towards Shelter A, the cooled recovery area.',
+    system: 'Cessation is recorded as a third, separate event. The alert, the acknowledgement and the actual stop each have their own time. Worker check-ins and the recovery headcount open.',
+  },
+  {
+    id: '04-escalation', title: 'Overdue acknowledgement escalates to Rashid', persona: 'P02', device: 'web', screen: 'response', setup: [...ISSUE, { advance: 3 }],
+    click: 'Under “Record yours”, select “Follow up overdue acknowledgment”.',
+    onSite: 'In this branch Huda has not acknowledged within two case minutes. Rashid, the superintendent, receives the overdue item and follows it up with the crew directly.',
+    system: 'The case clock was moved three minutes past the instruction. The backend recorded the escalation automatically and assigned Rashid a follow-up task. His follow-up is recorded as a human event; the hold on heavy work is unchanged.',
+  },
+  {
+    id: '05-checkin', title: 'Rana checks in at the shelter', persona: 'C05', device: 'worker', screen: 'shelter', setup: STOP,
+    click: 'Press and hold “Check in at Shelter A”.',
+    onSite: 'Rana, a civil worker, arrives at Shelter A and confirms her own arrival on her phone. Other workers can use the shelter kiosk instead.',
+    system: 'Rana’s personal arrival is recorded under her own identity. It counts towards personal arrivals only; Huda’s physical headcount is still required.',
+  },
+  {
+    id: '06-worker-view', title: 'Rana views her own heat risk and data', persona: 'C05', device: 'worker', screen: 'now', setup: [...STOP, { as: 'C05', action: 'checkin' }],
+    click: 'Review “My heat risk”, then select the “Me” tab to show privacy and my data.',
+    onSite: 'Rana sees her own heat-risk band and the reasons for it, and what data the company holds about her. Supervisors see only bands and required actions, not her health details.',
+    system: 'The worker risk endpoint is scoped to the signed-in worker. The heat-stress rules calculate her band from the site reading, her clothing, work type and acclimatisation. Other workers’ records are not returned.',
+  },
+  {
+    id: '07-headcount', title: 'Huda accounts for the crew', persona: 'C01', device: 'site', screen: 'account-for-crew', setup: CHECKIN,
+    click: 'Tick the attestation box, then select “Confirm 11 workers accounted for”.',
+    onSite: 'Huda physically checks that all 11 affected workers are at Shelter A, whether or not they checked in on a phone.',
+    system: 'The recovery headcount is recorded with the time and location. Crew planning unlocks, and Huda’s individual readiness checks and Mina’s coverage review open.',
+  },
+  {
+    id: '08-readiness', title: 'Huda confirms individual readiness', persona: 'C01', device: 'site', screen: 'readiness', setup: RECOVER,
+    click: 'Select “Confirm next”, then confirm that worker ready for workshop preparation. Repeat for others if time allows.',
+    onSite: 'Huda speaks to each worker in the shelter and confirms who is fit for supervised workshop preparation under cover.',
+    system: 'Each confirmation is recorded per person with a basis and an expiry time. Only confirmed workers can be included in a workshop proposal.',
+  },
+  {
+    id: '09-coverage', title: 'Mina reviews heat and rest coverage', persona: 'P10', device: 'web', screen: 'heat-rest', setup: RECOVER,
+    click: 'Choose the status, add a note, then select “Record employer coverage review”.',
+    onSite: 'Mina, the employer’s contract manager, checks the C02–C12 roster against the heat and rest policy for pay and rest coverage.',
+    system: 'The review is recorded as an employer record. It does not authorise work, and protective decisions never wait for it.',
+  },
+  {
+    id: '10-proposal', title: 'Huda approves the workshop proposal', persona: 'C01', device: 'site', screen: 'proposal', setup: PROPOSAL,
+    click: 'Select “Approve assessed proposal”.',
+    onSite: 'Huda reviews the solver’s proposal for supervised workshop preparation and decides whether to approve it.',
+    system: 'Readiness and observed activity were recorded, and the solver returned a checked proposal (applied: false). Approval is a separate human record. Starting work later is another record. Heavy trench work stays on hold throughout.',
+  },
+  {
+    id: '11-symptom', title: 'Bilal reports dizziness', persona: 'C08', device: 'worker', screen: 'check-in', setup: ASSIGN,
+    click: 'Select “I feel unwell”, answer the question, then press and hold “Send to my supervisor”.',
+    onSite: 'Bilal feels dizzy and reports it from his phone. His foreman, Huda, receives the report as a task to act on.',
+    system: 'The report is recorded under Bilal’s identity and starts the first-aid route whatever the sensor reading says. Huda’s incident and removal tasks open. The current plan is invalidated for recalculation.',
+  },
+  {
+    id: '12-removal', title: 'Huda records the incident and removal', persona: 'C01', device: 'site', screen: 'action-card', setup: REPORT,
+    click: 'Select “Record the site incident”, then “Confirm Bilal removed from heat” and type REMOVED.',
+    onSite: 'Huda records the incident and takes Bilal to the welfare and first-aid area.',
+    system: 'The incident record and the removal are two separate events. Bilal is marked unavailable at Welfare, and the solver recalculates the crew plan without him.',
+  },
+  {
+    id: '13-firstaid', title: 'Salim records first-aid contact', persona: 'P06', device: 'site', screen: 'action-card', setup: REMOVE,
+    click: 'Select “Record first-aid contact”.',
+    onSite: 'Salim, the first aider, attends to Bilal at Welfare.',
+    system: 'First-aid contact is recorded. Restart evidence and the shift handover can now proceed. No health detail is shared on supervisor screens.',
+  },
+  {
+    id: '14-delivery', title: 'Noura moves the materials delivery', persona: 'P05', device: 'web', screen: 'monitoring', setup: ASSIGN,
+    click: 'Record each delivery step in turn: draft, approve, record as sent, record supplier acceptance.',
+    onSite: 'Noura, the logistics coordinator, moves the truck booking from 11:30 to 15:30 so it does not arrive during the heat hold.',
+    system: 'Draft, approval, sending and supplier acceptance are four separate records. The application sends nothing externally; Noura records what happened outside it.',
+  },
+  {
+    id: '15-fresh', title: 'Maya records a fresh local reading', persona: 'P03', device: 'site', screen: 'fresh-reading', setup: FIRSTAID,
+    click: 'Enter a TWL such as 180, select “Record fresh local reading”, then “Confirm water check”.',
+    onSite: 'Maya takes a new reading at the trench and checks water provision before any restart review.',
+    system: 'A fresh, valid T1 reading is recorded at the current case time. Restart checks must be no more than five case minutes old when Rashid records his review.',
+  },
+  {
+    id: '16-restart', title: 'Rashid records the restart review', persona: 'P02', device: 'web', screen: 'restart-review', setup: RESTART_EVIDENCE,
+    click: 'Select “Record restart review” and type RESTART. Do this within five minutes of opening the step.',
+    onSite: 'Rashid reviews the fresh reading and the personnel, recovery, water, crew readiness and permit checks.',
+    system: 'The solver reports the restart evidence as ready for human review. Rashid’s review is recorded, but it does not release heavy trench work; resuming work is a separate site decision.',
+  },
+  {
+    id: '17-handover', title: 'Rashid records the shift handover', persona: 'P02', device: 'web', screen: 'restart-review', setup: FIRSTAID,
+    click: 'Select “Record shift handover”.',
+    onSite: 'Rashid hands the shift over with the restart and delivery decisions still open.',
+    system: 'The handover is recorded with the open items carried forward, so nothing is closed by the handover itself.',
+  },
+  {
+    id: '18-cost', title: 'Amal reviews the project impact', persona: 'P01', device: 'web', screen: 'monitoring', setup: HANDOVER,
+    click: 'Select “Record cost impact review”.',
+    onSite: 'Amal, the project manager, reviews the lost time and the project chronology.',
+    system: 'The review is recorded as a case event. The project view shows the chronology, confirmed work and recovery minutes, employer coverage and delivery state. No cost estimate is created.',
+  },
+  {
+    id: '19-ask', title: 'Ask the Planning Agent', persona: 'P03', device: 'web', screen: 'ask', setup: null,
+    click: 'Select a suggested question such as “What needs attention?”, or type your own question and select Send.',
+    onSite: 'Maya asks the Planning Agent to explain the case and the current plan in plain language.',
+    system: 'The agent reads the case through persona-scoped tools and cites its sources. Model Armor and grounding results appear in Run evidence below, not on product screens. The case is kept as it is for this step.',
+  },
+  {
+    id: '20-sensor', title: 'Sensor fault: missing data stays unknown', persona: 'P03', device: 'web', screen: 'heat-controls', setup: [{ reading: { twl: 145, kind: 'fault' } }],
+    click: 'Review the civil crew card and “Task controls · Civil crew”. No action is needed.',
+    onSite: 'The civil trench monitor reports an invalid reading. Civil heavy and light work show clearance blocked until a valid reading is recorded.',
+    system: 'The invalid reading is recorded with its quality. The civil band shows Unknown; it is not filled in from nearby or historical data, and an invalid reading cannot clear work.',
+  },
+];
+
+/** Tab identities this presenter page uses to record each persona's setup actions. */
+const tabs = new Map<string, string>();
+
+async function personaRequest<T>(personaId: string, path: string, init?: RequestInit): Promise<T> {
+  let tab = tabs.get(personaId);
+  const call = async (id: string, p: string, i?: RequestInit) => {
+    const response = await apiFetch(`/api${p}`, { ...i, headers: { 'X-Heat-Tab-ID': id } });
+    if (!response.ok) {
+      let message = `Request failed (${response.status})`;
+      try { const body = await response.json(); if (typeof body.detail === 'string') message = body.detail; } catch { /* Keep the status. */ }
+      throw new ApiError(message, response.status);
+    }
+    return response.status === 204 ? null : response.json();
+  };
+  if (!tab) {
+    tab = `tutorial-${personaId}-${crypto.randomUUID().replaceAll('-', '').slice(0, 16)}`;
+    await call(tab, '/session', { method: 'POST', body: JSON.stringify({ persona_id: personaId }) });
+    tabs.set(personaId, tab);
+  }
+  return call(tab, path, init) as Promise<T>;
+}
+
+async function record(personaId: string, action: string, payload: (view: CaseView) => Record<string, unknown>) {
+  const view = await personaRequest<CaseView>(personaId, '/case');
+  return personaRequest<CaseView>(personaId, '/case/commands', {
+    method: 'POST',
+    body: JSON.stringify({ command_id: crypto.randomUUID(), case_id: view.case_id, expected_version: view.version, action, payload: payload(view) }),
+  });
+}
+
+async function awaitProposal(timeoutMs = 45_000) {
+  const until = Date.now() + timeoutMs;
+  while (Date.now() < until) {
+    const view = await live.demoState();
+    if (view?.plan_assessment?.status === 'proposed' && view.plan_assessment.id) return view;
+    await new Promise(resolve => setTimeout(resolve, 750));
+  }
+  throw new Error('The solver did not return a workshop proposal in time. Open the step again.');
+}
+
+const describe = (op: SetupOp) => 'as' in op ? `${op.as} · ${op.action}` : 'advance' in op ? `Move case time ${op.advance} min` : 'awaitProposal' in op ? 'Wait for the solver proposal' : 'Inject reading';
+
+/** Reset the case and record the earlier steps, so this step's screen opens in the right state. */
+export async function prepareStep(step: TutorialStep, onProgress: (label: string) => void = () => {}): Promise<CaseView | null> {
+  if (step.setup === null) return live.demoState();
+  onProgress('Resetting the case to 08:00');
+  let view: CaseView | null = await live.reset();
+  for (const op of step.setup) {
+    onProgress(describe(op));
+    try {
+      if ('as' in op) view = await record(op.as, op.action, op.payload ?? (() => ({})));
+      else if ('advance' in op) view = await live.jumpClock(isoAt(minuteOf(view!.clock) + op.advance));
+      else if ('awaitProposal' in op) view = await awaitProposal();
+      else view = await live.signal(view!.case_id, readingPayload(view!, op.reading.twl, op.reading.kind));
+    } catch (cause) {
+      throw new Error(`Tutorial setup stopped at “${describe(op)}”: ${cause instanceof Error ? cause.message : 'unknown error'}`);
+    }
+  }
+  return live.demoState();
+}
+
+/** The persona window URL for a step. Same window names as the persona launcher, so windows are reused. */
+export const stepUrl = (step: TutorialStep) => `/${step.device}/${step.screen}?persona=${encodeURIComponent(step.persona)}`;
+export const stepWindow = (step: TutorialStep) => ({
+  name: `heat-${step.persona}-${step.device}`,
+  features: step.device === 'site' || step.device === 'worker' ? 'popup,width=430,height=900' : step.device === 'kiosk' ? 'popup,width=1024,height=768' : 'popup,width=1440,height=920',
+});

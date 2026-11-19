@@ -5,6 +5,7 @@ import { DayTimeline } from './demo/DayTimeline';
 import { SiteMap, type Selection } from './demo/SiteMap';
 import { TwlGrid } from './demo/TwlGrid';
 import { HealthRoster, PersonaLauncher } from './demo/Panels';
+import { Tutorial } from './demo/Tutorial';
 import { applyPreset, readingPayload, SCENARIO_PRESETS, type ReadingKind } from './scenarioPresets';
 import { timeLabel } from './Timeline';
 import { LiveClock } from './LiveClock';
@@ -66,8 +67,8 @@ export function DemoControl({ caseView, onChange, onReturn }: Props) {
   const execute = async (label: string, operation: () => Promise<unknown>, announce = true) => {
     loadSequence.current++;
     setBusy(true); setError(''); setMessage('');
-    try { const next = await operation(); setPresenterCase(next as CaseView | null); await onChange(next as CaseView | null); await loadRuns(); if (announce) setMessage(`${label} complete.`); }
-    catch (cause) { setError(cause instanceof Error ? cause.message : `${label} failed`); }
+    try { const next = await operation(); setPresenterCase(next as CaseView | null); await onChange(next as CaseView | null); await loadRuns(); if (announce) setMessage(`${label} complete.`); return true; }
+    catch (cause) { setError(cause instanceof Error ? cause.message : `${label} failed`); return false; }
     finally { setBusy(false); }
   };
   const selectedRun = runs.find(run => run.id === selectedRunId) ?? runs[0];
@@ -93,7 +94,8 @@ export function DemoControl({ caseView, onChange, onReturn }: Props) {
     <Alert severity="info">These controls operate the live local case. Persona windows refresh within five seconds. <b>Reset to start of day</b> starts a new case at 08:00 and restores the default site settings.</Alert>
     {busy && <Box sx={{ position: 'sticky', top: 0, zIndex: 10 }}><LinearProgress aria-label="Updating the case" /></Box>}
     {error && <Alert severity="error" role="alert">{error}</Alert>}{message && <Alert severity="success" role="status">{message}</Alert>}
-    {section('Timeline', 'Click the bar to move case time. Persona windows show their screens for that time.', <DayTimeline caseView={presenterCase} busy={busy} hours={hours} onJump={iso => void execute(`Case time ${iso.slice(11, 16)}`, () => live.jumpClock(iso))} />)}
+    <Tutorial busy={busy} run={(label, operation) => execute(label, operation)} />
+    {section('Timeline','Click the bar to move case time. Persona windows show their screens for that time.', <DayTimeline caseView={presenterCase} busy={busy} hours={hours} onJump={iso => void execute(`Case time ${iso.slice(11, 16)}`, () => live.jumpClock(iso))} />)}
     {site && section('Site map', 'Where each person and sensor is at the current case time. Colour shows each person’s heat-risk band. Select a person to assign health conditions or open their screens; select a sensor to change its state.', <SiteMap caseView={presenterCase} site={site} risk={risk} selected={selection} onSelect={setSelection} busy={busy} onChange={saveSite} />)}
     {site && section('Thermal Work Limit by hour', 'Lower TWL means more heat stress: below 140 W/m² is caution, below 115 W/m² high risk. T1 feeds the live case: an edit records a reading now and again at the start of each hour. Unedited, the scenario’s 08:00 reading of 145 W/m² stands. Other sensors drive the squad screens.',
       <TwlGrid settings={site.settings} defaults={site.defaults} hours={hours} currentHour={site.hour} busy={busy} onChange={saveSite} />,
