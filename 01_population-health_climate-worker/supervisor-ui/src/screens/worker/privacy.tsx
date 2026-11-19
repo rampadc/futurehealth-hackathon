@@ -52,7 +52,7 @@ function Welcome({ session }: ScreenProps) {
         {l.endonym}<small lang="en" dir="ltr">{l.english}{l.status !== 'ready' && ` · ${t('lang.soon')}`}</small>
       </button></li>)}
     </ul>
-    <Note><En>Translations are drafts and need native-speaker review before real use.</En></Note>
+    <Note><T k="lang.draft" /></Note>
   </div>;
   return <div className="hs-screen">
     <Head kicker={<button type="button" className="hs-link" onClick={() => setStep('lang')}>🌐 {langOf(lang).endonym}</button>} title={<T k="p1.title" />} />
@@ -65,7 +65,7 @@ function Welcome({ session }: ScreenProps) {
     </Section>
     <Note><T k="p1.alerts" /> <T k="p1.later" /></Note>
     {error && <p role="alert" className="hs-error">{error}</p>}
-    <CtaBar note="Only you and occupational health see your answers.">
+    <CtaBar note={<T k="p1.only" />}>
       <button type="button" className="hs-button is-primary" disabled={session.busy} onClick={() => void save(draft, lang).then(ok => { if (ok) navigate('/worker/now'); })}><T k="p1.save" /></button>
     </CtaBar>
   </div>;
@@ -100,15 +100,15 @@ function MyData({ session }: ScreenProps) {
     <Head title={<T k="p8.title" />} />
     <Hero>
       <Metric label={<T k="p8.shared" />} value={<T k="p8.actions" />} tone="ok" />
-      <Metric label="Recorded actions" value={String(events.length)} sub="in this case" />
+      <Metric label={<T k="p8.recorded" />} value={String(events.length)} sub={<T k="p8.inCase" />} />
       <Metric label={<T k="p8.wear" />} value={consent.wearable ? t('on') : t('off')} sub={<T k="p8.notpaired" />} />
     </Hero>
     <Section icon="lock" title={<T k="p8.consent" />}>
       <List>
-        <Row title={<T k="c.checkins" />} detail={consent.at ? t('p8.agreed', { date: time(consent.at) }) : <En>Not chosen yet.</En>} badge={<span className="hs-badge" data-tone={consent.checkins ? 'done' : 'muted'}>{consent.checkins ? t('on') : t('off')}</span>} onClick={() => navigate('/worker/welcome')} />
+        <Row title={<T k="c.checkins" />} detail={consent.at ? t('p8.agreed', { date: time(consent.at) }) : <T k="p8.notChosen" />} badge={<span className="hs-badge" data-tone={consent.checkins ? 'done' : 'muted'}>{consent.checkins ? t('on') : t('off')}</span>} onClick={() => navigate('/worker/welcome')} />
       </List>
     </Section>
-    <Section title="What your supervisor saw">
+    <Section icon="calc" title={<T k="p8.saw" />}>
       {events.length ? <List>{events.map(e => <Row key={e.id} title={e.title} />)}</List> : <p className="hs-muted"><T k="p8.none" /></p>}
     </Section>
     <Section icon="people" title={<T k="p8.who" />}><p className="hs-muted"><T k="p8.none" /></p></Section>
@@ -118,6 +118,6 @@ function MyData({ session }: ScreenProps) {
     </CtaBar>
     {(error || failed) && <p role="alert" className="hs-error">{error || failed}</p>}
     <Note><T k="p8.deletebody" /></Note>
-    <Computed><En>Your export holds your consent, your own check-ins and reports, and your own plan. Clinical notes are never stored here.</En></Computed>
+    <Computed><T k="p8.export" /></Computed>
   </div>;
 }

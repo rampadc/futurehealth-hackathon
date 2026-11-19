@@ -14,8 +14,8 @@ import { NowScreen, AlertScreen, ShelterScreen, OfflineScreen } from './worker/n
 import { CheckInScreen, MyPlanScreen } from './worker/plan';
 import { WelcomeScreen, MyDataScreen } from './worker/privacy';
 import { KioskScreen } from './kiosk';
-import { AccountScreen } from './account';
-import { HeatRestScreen } from './heatRest';
+import { AccountScreen, WorkerAccountScreen } from './account';
+import { HeatRestScreen, WorkerHeatRestScreen } from './heatRest';
 
 export type Device = 'web' | 'site' | 'worker' | 'kiosk';
 export type Owner = 'A' | 'B' | 'C';
@@ -87,11 +87,11 @@ export const SCREENS: ScreenDef[] = [
   s('alert', { device: 'worker', parent: 'now', name: 'Alert (full screen)', clock: '08:01', slice: 1, owner: 'B', personas: ['C05', 'C08'], reads: ['story'], commands: [] , component: AlertScreen }),
   s('check-in', { device: 'worker', tab: 'check', name: 'Check in (voice and tap)', clock: '08:18', slice: 2, owner: 'B', personas: ['C05', 'C08'], reads: ['story'], commands: ['checkin', 'report'] , component: CheckInScreen }),
   s('my-plan', { device: 'worker', tab: 'plan', name: 'My plan', clock: '08:12', slice: 2, owner: 'B', personas: ['C05', 'C08'], reads: ['capture.response.crew_rest.intervals'], commands: [] , component: MyPlanScreen }),
-  s('heat-rest', { device: 'worker', tab: 'plan', parent: 'my-plan', name: 'My heat and rest coverage', clock: '08:18', slice: 4, owner: 'B', personas: ['C05', 'C08'], reads: ['GET /api/case/heat-rest'], commands: [], component: HeatRestScreen }),
+  s('heat-rest', { device: 'worker', tab: 'plan', parent: 'my-plan', name: 'My heat and rest coverage', clock: '08:18', slice: 4, owner: 'B', personas: ['C05', 'C08'], reads: ['GET /api/case/heat-rest'], commands: [], component: WorkerHeatRestScreen }),
   s('shelter', { device: 'worker', parent: 'now', tab: 'now', name: 'Shelter check-in', clock: '08:04', slice: 1, owner: 'B', personas: ['C05'], reads: ['story'], commands: ['checkin'] , component: ShelterScreen }),
   s('offline', { device: 'worker', parent: 'now', name: 'Offline state', clock: '08:04', slice: 5, owner: 'B', personas: ['C05', 'C08'], reads: [], commands: [], needs: 'Check-ins and reports queue on the phone; supervisor decisions are never queued', component: OfflineScreen }),
   s('my-data', { device: 'worker', tab: 'me', name: 'Me: privacy and my data', clock: '17:10', slice: 4, owner: 'B', personas: ['C05', 'C08'], reads: ['GET /api/worker/data'], commands: [], needs: 'GET /api/worker/data, DELETE /api/worker/consent' , component: MyDataScreen }),
-  s('account', { device: 'worker', tab: 'me', group: 'account', name: 'Me: my photo', clock: '17:12', slice: 5, owner: 'C', personas: [], reads: ['GET /api/people/photos'], commands: [], needs: 'PUT/DELETE /api/people/me/photo · own photo only', component: AccountScreen }),
+  s('account', { device: 'worker', tab: 'me', group: 'account', name: 'Me: my photo', clock: '17:12', slice: 5, owner: 'C', personas: [], reads: ['GET /api/people/photos'], commands: [], needs: 'PUT/DELETE /api/people/me/photo · own photo only', component: WorkerAccountScreen }),
   // Kiosk · owner B
   s('check-in', { device: 'kiosk', name: 'Shelter A check-in', clock: '08:04', slice: 4, owner: 'B', personas: ['C05'], reads: ['workers'], commands: ['checkin'], needs: 'NFC tap simulated with a button' , component: KioskScreen }),
 ];
