@@ -4,6 +4,9 @@ import { Band, Computed, CtaBar, Empty, Hero, HoldButton, List, Metric, NoCase, 
 import type { ScreenProps } from '../registry';
 import { OwnRiskPanel } from '../risk';
 import { En, T, useT, useWorker, WorkerFrame } from './frame';
+import { RiskText } from './riskText';
+
+const KIND_KEY: Record<string, string> = { work: 'kind.work', recovery: 'kind.recovery', unavailable: 'kind.unavailable' };
 
 /** Worker's own status: working, resting or excluded. Never shows other workers or health detail. */
 function statusOf(session: ScreenProps['session']) {
@@ -24,8 +27,10 @@ export function NowScreen(props: ScreenProps) {
 }
 function Now({ session }: ScreenProps) {
   const t = useT();
+  const { lang } = useWorker();
   const { caseView, person } = session;
   if (!caseView || !person) return <NoCase session={session} />;
+  const kind = (k: string) => KIND_KEY[k] ? t(KIND_KEY[k]) : <En>{kindLabel(k)}</En>;
   const { story, excluded, current, next, recovering } = statusOf(session);
   const heat = heatNow(caseView);
   const location = caseView.request?.snapshot.workers.find(worker => worker.person_id === person.id)?.location_id;
@@ -43,20 +48,20 @@ function Now({ session }: ScreenProps) {
     <h1 id="hs-title"><T k="p2.title" /></h1>
     {story.issued && !story.stopped && <button type="button" className="hs-button is-danger" onClick={() => navigate('/worker/alert')}><T k="stopwork" /> · {t('p2.stop.d')}</button>}
     <Hero>
-      <Metric label={<T k="p2.status" />} value={excluded ? <En>Rest now</En> : stopOrdered ? <En>Stop heavy work</En> : goToShelter ? <En>Go to shelter</En> : stopWorkshop ? <En>Stop workshop work</En> : workingNow ? <En>Workshop work</En> : planNeedsUpdate ? <En>Await updated plan</En> : actualCurrent ? <En>{kindLabel(actualCurrent.kind)}</En> : recovering ? t('p2.inrec') : heat.heavyHeld ? <En>Hold heavy work</En> : <En>Work as briefed</En>} sub={excluded ? <En>Stay with the site support team</En> : goToShelter ? <En>Go to Shelter A</En> : stopWorkshop ? <En>Follow your foreman’s recovery instruction</En> : workingNow ? <En>Cooled workshop preparation</En> : planNeedsUpdate ? <En>Follow your foreman until current times are confirmed</En> : recovering && !stopOrdered ? t('shelterA') : undefined} tone={excluded || stopOrdered || stopWorkshop ? 'red' : goToShelter || planNeedsUpdate || heat.heavyHeld && !recovering ? 'amber' : recovering && !workingNow ? 'ok' : undefined} />
-      <Metric label={<T k="p2.heat" />} value={heat.reading ? `${heat.reading.twl} W/m²` : '—'} sub={<><En><Band band={heat.band.band} label={heat.band.label} /></En>{heat.heavyHeld && <> · {t('p2.heatq')}</>}</>} />
-      <Metric label={<T k="p2.next" />} value={next ? <><En>{kindLabel(next.kind)}</En> {time(next.starts_at)}</> : '—'} sub={next ? (next.kind === 'work' ? t('workshop') : t('shelterA')) : <En>Wait for your foreman</En>} />
+      <Metric label={<T k="p2.status" />} value={excluded ? t('w.rest') : stopOrdered ? t('p2.heatq') : goToShelter ? t('w.goShelter') : stopWorkshop ? t('w.stopWorkshop') : workingNow ? t('w.workshopWork') : planNeedsUpdate ? t('w.awaitPlan') : actualCurrent ? kind(actualCurrent.kind) : recovering ? t('p2.inrec') : heat.heavyHeld ? t('w.holdHeavy') : t('w.asBriefed')} sub={excluded ? t('w.support') : goToShelter ? t('w.goShelterA') : stopWorkshop ? t('w.followRecovery') : workingNow ? t('w.cooledPrep') : planNeedsUpdate ? t('w.followUntil') : recovering && !stopOrdered ? t('shelterA') : undefined} tone={excluded || stopOrdered || stopWorkshop ? 'red' : goToShelter || planNeedsUpdate || heat.heavyHeld && !recovering ? 'amber' : recovering && !workingNow ? 'ok' : undefined} />
+      <Metric label={<T k="p2.heat" />} value={heat.reading ? `${heat.reading.twl} W/m²` : '—'} sub={<><Band band={heat.band.band} label={t(`env.${heat.band.band}`)} />{heat.heavyHeld && <> · {t('p2.heatq')}</>}</>} />
+      <Metric label={<T k="p2.next" />} value={next ? <>{kind(next.kind)} {time(next.starts_at)}</> : '—'} sub={next ? (next.kind === 'work' ? t('workshop') : t('shelterA')) : t('w.waitForeman')} />
     </Hero>
     <Section icon="message" title={<T k="p2.msgs" />}>
       <List>
         {story.issued && <Row title={<T k="stopwork" />} detail={<T k="p2.stop.d" />} badge={<span className="hs-badge" data-tone="over">■</span>} onClick={() => navigate('/worker/alert')} />}
-        {recovering && <Row title={<T k="p2.water" />} detail={<En>One cup now, then every 15 minutes.</En>} badge={<span className="hs-badge" data-tone="muted"><T k="reminder" /></span>} />}
-        {person.id === 'C05' && story.stopped && <Row title={<T k="p2.ci" />} detail={checkedIn ? <T k="p2.ci.d" /> : <En>Not checked in yet.</En>} badge={checkedIn ? <span className="hs-badge" data-tone="done" aria-hidden="true" /> : undefined} onClick={checkedIn ? undefined : () => navigate('/worker/shelter')} />}
-        {story.assigned && <Row title={<T k="p2.plan" />} detail={<En>{current ? `${kindLabel(current.kind)} until ${time(current.ends_at)}` : 'See My plan'}</En>} onClick={() => navigate('/worker/my-plan')} />}
+        {recovering && <Row title={<T k="p2.water" />} detail={<T k="w.cup" />} badge={<span className="hs-badge" data-tone="muted"><T k="reminder" /></span>} />}
+        {person.id === 'C05' && story.stopped && <Row title={<T k="p2.ci" />} detail={checkedIn ? <T k="p2.ci.d" /> : <T k="w.notCheckedIn" />} badge={checkedIn ? <span className="hs-badge" data-tone="done" aria-hidden="true" /> : undefined} onClick={checkedIn ? undefined : () => navigate('/worker/shelter')} />}
+        {story.assigned && <Row title={<T k="p2.plan" />} detail={current ? (KIND_KEY[current.kind] ? t('w.until', { kind: t(KIND_KEY[current.kind]), time: time(current.ends_at) }) : <En>{`${kindLabel(current.kind)} until ${time(current.ends_at)}`}</En>) : t('w.seePlan')} onClick={() => navigate('/worker/my-plan')} />}
       </List>
-      {!story.issued && !story.assigned && <Empty>{onRoster ? <En>You are on the Dune civil crew. Wait for your foreman’s instruction; your work and recovery plan will appear here when confirmed.</En> : <T k="p2.empty" />}</Empty>}
+      {!story.issued && !story.assigned && <Empty>{onRoster ? <T k="w.onRoster" /> : <T k="p2.empty" />}</Empty>}
     </Section>
-    <OwnRiskPanel session={session} title={<En>My heat risk</En>} wrap={s => <En>{s}</En>} />
+    <OwnRiskPanel session={session} title={t('risk.title')} wrap={s => <RiskText text={s} />} say={(k, english, vars) => lang === 'en' ? english : t(k, vars)} />
     <Computed><T k="p2.computed" /></Computed>
     <CtaBar><button type="button" className="hs-button is-primary" onClick={() => navigate('/worker/check-in')}><T k="unwell" /></button></CtaBar>
   </div>;

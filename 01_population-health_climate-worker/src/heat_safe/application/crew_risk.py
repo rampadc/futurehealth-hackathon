@@ -6,6 +6,11 @@ never record anything and never reach the solver.
 
 The crew's clothing and type of work below are synthetic, chosen so the same air gives different answers.
 Acclimatisation comes from the shared roster (demo/cross-scenario/personnel.json).
+
+The site's other squads (formwork, steel fixing, MEP) are not on the case. Their rosters, clothing and type of
+work are in demo/cross-scenario/site-squads.json, and their heat is their own squad sensor from the presenter
+site settings (demo_site): a live sensor sets the work-wear TWL; an offline or stale one leaves the weather
+forecast in use and is a lost input, so every band is one level higher.
 """
 from __future__ import annotations
 
@@ -35,9 +40,19 @@ FRESH_ON_ARRIVAL = timedelta(minutes=5)
 
 
 @cache
+def squads() -> dict[str, dict]:
+    """The site's squads that are not on the case, by squad id."""
+    return {q['id']: q for q in json.loads((ROOT / 'demo/cross-scenario/site-squads.json').read_text(encoding='utf-8'))}
+
+
+def squad_worker_ids() -> set[str]:
+    return {w['id'] for q in squads().values() for w in q['workers']}
+
+
+@cache
 def _roster() -> dict:
     people = json.loads((ROOT / 'demo/cross-scenario/personnel.json').read_text(encoding='utf-8'))
-    return {p['id']: p for p in people}
+    return {**{w['id']: w for q in squads().values() for w in q['workers']}, **{p['id']: p for p in people}}
 
 
 def acclimatisation_for(person_id: str, day: date) -> Acclimatisation:
@@ -120,21 +135,72 @@ def assess(view: dict, conditions: dict[str, list[str]] | None = None) -> tuple[
     return risks, inputs
 
 
-def _conditions(request: Request) -> dict[str, list[str]]:
+def squad_heat(weather: dict[str, float] | None, sensor_twl: float | None) -> dict[str, float] | None:
+    """A squad's TWL per clothing from its own sensor, which measures its location in work wear.
+
+    Each other ensemble keeps the weather's difference from work wear. No sensor value: the forecast stands.
+    """
+    if sensor_twl is None:
+        return dict(weather) if weather is not None else None
+    if weather is None or rules.DEFAULT_CLOTHING not in weather:
+        return {rules.DEFAULT_CLOTHING: sensor_twl}
+    base = weather[rules.DEFAULT_CLOTHING]
+    return {name: sensor_twl + (twl - base) for name, twl in weather.items()}
+
+
+def assess_squad(view: dict, squad_id: str, settings: dict) -> tuple[list[WorkerRisk], dict]:
+    """Bands for one of the site's other squads, from its roster and its own squad sensor."""
+    squad = squads()[squad_id]
+    clock = datetime.fromisoformat(view['clock'])
+    from .demo_site import hour_of
+    hour = hour_of(view['clock'])
+    sensor = squad['sensor']
+    live = settings['sensors'].get(sensor) == 'live'
+    sensor_twl = settings['twl'].get(squad_id, {}).get(sensor, {}).get(str(hour)) if live else None
+    weather = site_twl(clock.date().isoformat(), clock.hour)
+    heat = squad_heat(weather, sensor_twl)
+    conditions = settings['conditions']
+
+    def factors(w: dict) -> WorkerFactors:
+        has = set(conditions.get(w['id'], ()))
+        return WorkerFactors(
+            w['id'], work_intensity=w['work_intensity'], clothing=w['clothing'],
+            acclimatisation=(acclimatisation_status(clock.date(), new_starter_since=clock.date()) if 'not_acclimatised' in has
+                             else acclimatisation_for(w['id'], clock.date())),
+            symptoms_reported='unwell' in has, low_fluid='low_fluid' in has,
+            heat_sensitive='heat_sensitive' in has, red_flag='red_flag' in has,
+        )
+    risks = [compute_worker_risk(heat, factors(w), environment_ok=live) for w in squad['workers']]
+    inputs = {'hour': f'{clock.hour:02}:00', 'site': CASE_SITE, 'squad': squad_id, 'sensor': sensor,
+              'weather': 'ok' if heat is not None else 'unavailable',
+              'local_reading': 'used' if sensor_twl is not None else 'lost', 'rules_version': rules.RULES_VERSION}
+    return risks, inputs
+
+
+def _settings(request: Request) -> dict:
     from .demo_site import load
-    return load(request.app.state.service)[0]['conditions']
+    return load(request.app.state.service)[0]
+
+
+def _conditions(request: Request) -> dict[str, list[str]]:
+    return _settings(request)['conditions']
 
 
 @router.get('/api/case/crew-risk')
-def case_crew_risk(request: Request):
-    """Each worker's band and action for supervisors and responders. No reasons, symptoms or readings."""
+def case_crew_risk(request: Request, squad: str | None = None):
+    """Each worker's band and action for supervisors and responders. No reasons, symptoms or readings.
+
+    ``squad`` picks one of the site's other squads; without it, the case crew.
+    """
     persona = actor(request)
     if persona in WORKERS or persona == 'P10':
         raise HTTPException(403, 'Crew heat risk is for supervisors; your own is on your phone')
+    if squad is not None and squad not in squads():
+        raise HTTPException(404, f'Unknown squad {squad}')
     view = request.app.state.service.read_case(None)
     if not view:
         return None
-    risks, inputs = assess(view, _conditions(request))
+    risks, inputs = assess_squad(view, squad, _settings(request)) if squad else assess(view, _conditions(request))
     return {'inputs': inputs, 'crew': crew_risk(risks),
             'workers': [] if persona == 'P01' else [r.for_supervisor() for r in risks]}
 

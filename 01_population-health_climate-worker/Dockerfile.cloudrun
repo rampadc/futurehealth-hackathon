@@ -7,6 +7,7 @@ COPY ui_design_system/tokens.css /build/ui_design_system/tokens.css
 # Issued crew photos, bundled by supervisor-ui/src/people.ts (import.meta.glob).
 COPY ui_design_system/people/ /build/ui_design_system/people/
 COPY demo/cross-scenario/personnel.json /build/demo/cross-scenario/personnel.json
+COPY demo/cross-scenario/site-squads.json /build/demo/cross-scenario/site-squads.json
 COPY demo/solver/operational-results.json /build/demo/solver/operational-results.json
 RUN npm run build
 
