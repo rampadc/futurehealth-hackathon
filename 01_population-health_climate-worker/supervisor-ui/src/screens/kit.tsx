@@ -50,13 +50,14 @@ export function List({ children, label, cols }: { children: ReactNode; label?: s
   return <ul className="hs-list" aria-label={label} data-cols={cols}>{children}</ul>;
 }
 
-export function Row({ title, detail, badge, onClick, lead, expanded, children }: { title: ReactNode; detail?: ReactNode; badge?: ReactNode; onClick?: () => void; lead?: ReactNode; expanded?: boolean; children?: ReactNode }) {
+export function Row({ title, detail, badge, onClick, lead, expanded, select, children }: { title: ReactNode; detail?: ReactNode; badge?: ReactNode; onClick?: () => void; lead?: ReactNode; expanded?: boolean; /** A control placed before the row, outside its button, such as a selection checkbox. */ select?: ReactNode; children?: ReactNode }) {
   const body = <>
     {lead && <span className="hs-lead">{lead}</span>}
     <span className="hs-row-text"><span className="hs-row-title">{title}</span>{detail && <span className="hs-small hs-muted">{detail}</span>}</span>
     {badge && <span className="hs-row-badge">{badge}</span>}
   </>;
-  return <li className="hs-row">{onClick ? <button type="button" className="hs-row-body" aria-expanded={expanded} onClick={onClick}>{body}<span aria-hidden="true" className="hs-chev">{expanded === undefined ? '›' : expanded ? '▾' : '▸'}</span></button> : <div className="hs-row-body">{body}</div>}{children && <div className="hs-row-more">{children}</div>}</li>;
+  const main = onClick ? <button type="button" className="hs-row-body" aria-expanded={expanded} onClick={onClick}>{body}<span aria-hidden="true" className="hs-chev">{expanded === undefined ? '›' : expanded ? '▾' : '▸'}</span></button> : <div className="hs-row-body">{body}</div>;
+  return <li className="hs-row">{select ? <div className="hs-row-line"><span className="hs-row-select">{select}</span>{main}</div> : main}{children && <div className="hs-row-more">{children}</div>}</li>;
 }
 
 export type BadgeTone = 'done' | 'wait' | 'over' | 'muted' | 'plan';
@@ -108,7 +109,7 @@ export function Draft({ title = 'Proposal · not applied', children }: { title?:
 }
 
 /** Rule output, labelled so it is never mistaken for an AI answer. */
-export function Computed({ children = 'Computed by the site rules and solver · not AI', tight }: { children?: ReactNode; tight?: boolean }) {
+export function Computed({ children = 'Computed by the site rules and solver', tight }: { children?: ReactNode; tight?: boolean }) {
   return <p className="hs-computed" data-tight={tight || undefined}>⚙ {children}</p>;
 }
 
@@ -158,15 +159,13 @@ type ActionProps = {
   payload?: Record<string, unknown> | (() => Record<string, unknown>);
   primary?: boolean;
   danger?: boolean;
-  /** Typed confirmation word for safety-critical records (e.g. REMOVED). */
-  confirm?: { word: string; title: string; body: string };
-  /** Press-and-hold confirmation, used on worker screens instead of typing. */
-  hold?: string;
+  /** Confirmation modal for safety-critical records (e.g. removal from heat). */
+  confirm?: { title: string; body: string };
   disabled?: boolean;
 };
 
 /** A button that records one case action. Disabled unless the signed-in persona's task is ready. */
-export function ActionButton({ session, action, label, payload, primary, danger, confirm, hold, disabled }: ActionProps) {
+export function ActionButton({ session, action, label, payload, primary, danger, confirm, disabled }: ActionProps) {
   const [asking, setAsking] = useState(false);
   const task = taskFor(session.caseView, action);
   const state = progress(session.caseView, action);
@@ -181,47 +180,37 @@ export function ActionButton({ session, action, label, payload, primary, danger,
   if (state.status === 'recorded') return <p className="hs-statusline"><StatusIcon status="ok" /> {label} · recorded</p>;
   const off = !ready || session.busy || disabled;
   return <div className="hs-action">
-    {hold ? <HoldButton className={className} disabled={off} onConfirm={run} hint={hold}>{label}</HoldButton>
-      : <button type="button" className={className} disabled={off} onClick={() => confirm ? setAsking(true) : run()}>{session.busy && ready ? 'Recording…' : label}</button>}
+    <button type="button" className={className} disabled={off} onClick={() => confirm ? setAsking(true) : run()}>{session.busy && ready ? 'Recording…' : label}</button>
     {!ready && <p className="hs-small hs-muted">{mine ? taskLine(session, action) : state.owner ? <Person id={state.owner}>{`${nameOf(state.owner)} records this (${state.owner})`}</Person> : 'Not part of this case'}</p>}
-    {confirm && asking && <TypedConfirm word={confirm.word} title={confirm.title} body={confirm.body} onCancel={() => setAsking(false)} onConfirm={() => { setAsking(false); run(); }} />}
+    {confirm && asking && <ConfirmDialog title={confirm.title} body={confirm.body} danger={danger} onCancel={() => setAsking(false)} onConfirm={() => { setAsking(false); run(); }} />}
   </div>;
 }
 
-/** Modal that asks for a typed word before a destructive or safety-critical record. */
-export function TypedConfirm({ word, title, body, onConfirm, onCancel }: { word: string; title: string; body: string; onConfirm: () => void; onCancel: () => void }) {
-  const [value, setValue] = useState('');
-  const input = useRef<HTMLInputElement>(null);
+/** Confirmation modal: a record is made only after the person selects Confirm. Nothing is typed. */
+export function ConfirmDialog({ title, body, onConfirm, onCancel, confirmLabel = 'Confirm', cancelLabel = 'Cancel', danger }: { title: ReactNode; body?: ReactNode; onConfirm: () => void; onCancel: () => void; confirmLabel?: ReactNode; cancelLabel?: ReactNode; danger?: boolean }) {
+  const confirmButton = useRef<HTMLButtonElement>(null);
   const titleId = useId();
-  useEffect(() => { input.current?.focus(); }, []);
+  useEffect(() => { confirmButton.current?.focus(); }, []);
   return <div className="hs-overlay" role="presentation" onKeyDown={e => { if (e.key === 'Escape') onCancel(); }}>
     <div className="hs-dialog" role="dialog" aria-modal="true" aria-labelledby={titleId}>
       <h2 id={titleId}>{title}</h2>
-      <p>{body}</p>
-      <form onSubmit={e => { e.preventDefault(); if (value.trim().toUpperCase() === word) onConfirm(); }}>
-        <label className="hs-field"><span>Type <b>{word}</b> to confirm</span><input ref={input} value={value} onChange={e => setValue(e.target.value)} autoComplete="off" /></label>
-        <div className="hs-dialog-actions">
-          <button type="button" className="hs-button" onClick={onCancel}>Cancel</button>
-          <button type="submit" className="hs-button is-primary" disabled={value.trim().toUpperCase() !== word}>Confirm</button>
-        </div>
-      </form>
+      {body && <p>{body}</p>}
+      <div className="hs-dialog-actions">
+        <button type="button" className="hs-button" onClick={onCancel}>{cancelLabel}</button>
+        <button ref={confirmButton} type="button" className={`hs-button ${danger ? 'is-danger' : 'is-primary'}`} onClick={onConfirm}>{confirmLabel}</button>
+      </div>
     </div>
   </div>;
 }
 
-/** Press and hold (pointer, or Space/Enter) for `ms` to confirm. Replaces typing on worker screens. */
-export function HoldButton({ children, onConfirm, disabled, className = 'hs-button is-primary', hint, ms = 900 }: { children: ReactNode; onConfirm: () => void; disabled?: boolean; className?: string; hint?: string; ms?: number }) {
-  const timer = useRef<number | undefined>(undefined);
-  const [holding, setHolding] = useState(false);
-  const start = () => { if (disabled || timer.current) return; setHolding(true); timer.current = window.setTimeout(() => { timer.current = undefined; setHolding(false); onConfirm(); }, ms); };
-  const stop = () => { window.clearTimeout(timer.current); timer.current = undefined; setHolding(false); };
-  useEffect(() => stop, []);
-  return <button type="button" className={`${className} hs-hold-button`} data-holding={holding || undefined} disabled={disabled}
-    onPointerDown={start} onPointerUp={stop} onPointerLeave={stop} onPointerCancel={stop}
-    onKeyDown={e => { if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) { e.preventDefault(); start(); } }} onKeyUp={stop} onClick={e => e.preventDefault()}>
-    <span className="hs-hold-fill" aria-hidden="true" style={{ transitionDuration: holding ? `${ms}ms` : '0ms' }} />
-    <span className="hs-hold-text">{children}{hint && <small>{hint}</small>}</span>
-  </button>;
+/** A button that asks for confirmation in a modal before recording. */
+export function ConfirmButton({ children, onConfirm, disabled, className = 'hs-button is-primary', title, body, confirmLabel, cancelLabel }: { children: ReactNode; onConfirm: () => void; disabled?: boolean; className?: string; title?: ReactNode; body?: ReactNode; confirmLabel?: ReactNode; cancelLabel?: ReactNode }) {
+  const [asking, setAsking] = useState(false);
+  return <>
+    <button type="button" className={className} disabled={disabled} onClick={() => setAsking(true)}>{children}</button>
+    {asking && <ConfirmDialog title={title ?? children} body={body} confirmLabel={confirmLabel} cancelLabel={cancelLabel} danger={className.includes('is-danger')}
+      onCancel={() => setAsking(false)} onConfirm={() => { setAsking(false); onConfirm(); }} />}
+  </>;
 }
 
 export function Choice<T extends string>({ legend, value, options, onChange }: { legend: string; value: T; options: Array<[T, string]>; onChange: (value: T) => void }) {

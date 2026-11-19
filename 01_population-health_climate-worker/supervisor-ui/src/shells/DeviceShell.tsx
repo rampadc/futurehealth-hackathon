@@ -16,6 +16,7 @@ import './shell.css';
 import { LiveClock } from '../LiveClock';
 import heatSafeLogo from '../assets/heatsafe_logo.jpg';
 import { Icon, type IconName } from '../shared/icons';
+import { ActivityLog, NotificationBell } from './Notifications';
 
 /** Rail icon per screen id; the screen name is always written beside it. */
 const NAV_ICON: Record<string, IconName> = {
@@ -115,6 +116,7 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
         : <span className="hs-person"><Avatar id={session.person.id} /><span>{session.person.name}</span></span>}
       <button type="button" className="hs-link" disabled={session.busy} onClick={() => void session.signOut()} lang={lang}>{tr('sh.signout', lang).text}</button>
       {onLockAccess && <button type="button" className="hs-link" onClick={onLockAccess} lang={lang}>{tr('sh.lock', lang).text}</button>}
+      {session.caseView && device !== 'kiosk' && <NotificationBell view={session.caseView} personId={session.person.id} device={device} lang={lang} />}
     </header>
     {tabs && topTabs && tabBar}
     <div className="hs-body">
@@ -124,6 +126,7 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
         {session.feedback && <p role="status" className="hs-ok">{session.feedback}</p>}
         {permitted && parent && <button type="button" className="hs-link hs-back" lang={lang} dir={langOf(lang).dir} onClick={() => go(parent)}>‹ {device === 'worker' && parent.tab ? tr(`tab.${parent.tab}`, lang).text : parent.name}</button>}
         {!permitted ? <section className="hs-screen"><h1>This screen belongs to another role</h1>{device === 'site' && screen.id === 'headcount' && session.person.id === 'C05' && <p>Your own arrival is {session.caseView?.headcount?.arrivals.some(a => a.person_id === 'C05') ? 'recorded' : 'not yet recorded'}. Huda confirms the full crew headcount.</p>}<button type="button" className="hs-button" onClick={() => ownScreen ? go(ownScreen) : navigate(session.person?.id.startsWith('C') ? '/worker/now' : '/web/monitoring')}>Go to my screen</button></section> : Screen ? <Screen session={session} /> : <Placeholder screen={screen} session={session} />}
+        {side && session.caseView && <ActivityLog view={session.caseView} />}
       </main>
     </div>
     {tabs && !topTabs && tabBar}

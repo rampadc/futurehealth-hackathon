@@ -39,7 +39,7 @@ export const reasonLabel = (code: string) => reasonLabels[code] ?? code.replaceA
 export function taskReason(reason: string | undefined): string | undefined {
   const described = reason?.replace(/\bC\d{2}\b/g, id => nameOf(id));
   if (!described?.startsWith('Waiting for ')) return described;
-  const owners: Record<string, string> = { activity: 'C01', readiness: 'C01', incident_record: 'C01', personnel: 'C01', recovery_check: 'C01', crew_readiness: 'C01', water: 'P03', escalation_followup: 'P02' };
+  const owners: Record<string, string> = { activity: 'C01', readiness: 'C01', incident_record: 'C01', personnel: 'C01', recovery_check: 'C01', crew_readiness: 'C01', water: 'C01', escalation_followup: 'P02' };
   return 'Waiting for ' + described.slice('Waiting for '.length).split(', ').map(id => {
     const action = ACTIONS[id as ActionId];
     const ownerId = action?.actorId ?? owners[id];

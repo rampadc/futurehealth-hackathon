@@ -63,6 +63,10 @@ button.hs-row-body:hover { background: var(--color-base); }
 .hs-row-text { flex: 1; display: flex; flex-direction: column; min-inline-size: 0; }
 .hs-row-title { font-weight: var(--weight-medium); }
 .hs-row-badge { flex: none; }
+.hs-row-line { display: flex; align-items: stretch; }
+.hs-row-line > .hs-row-body { flex: 1; min-inline-size: 0; }
+.hs-row-select { flex: none; display: flex; align-items: center; justify-content: center; inline-size: var(--target); padding-inline-start: var(--space-1); }
+.hs-row-select input { inline-size: 1.25rem; block-size: 1.25rem; margin: 0; accent-color: var(--color-ink, currentColor); }
 .hs-chev { font-size: var(--fs-title); color: var(--color-graphite); }
 [dir='rtl'] .hs-chev { transform: scaleX(-1); }
 /* Crew photo: the one round shape (ui_design_system section 26). Name always written beside it. */
@@ -156,11 +160,6 @@ button.hs-row-body:hover { background: var(--color-base); }
 .hs-cta-bar .hs-button { min-block-size: var(--target-cta); font-size: var(--fs-title); }
 .hs-shell[data-device='worker'] .hs-cta-bar, .hs-shell[data-device='site'] .hs-cta-bar { inset-block-end: calc(var(--target-glove) + var(--edge-safe)); }
 
-.hs-hold-button { position: relative; overflow: hidden; touch-action: none; user-select: none; }
-.hs-hold-fill { position: absolute; inset: 0; inline-size: 0; background: var(--color-signal-green); opacity: 0.35; transition-property: inline-size; transition-timing-function: linear; }
-.hs-hold-button[data-holding] .hs-hold-fill { inline-size: 100%; }
-.hs-hold-text { position: relative; display: flex; flex-direction: column; align-items: center; }
-.hs-hold-text small { font-size: var(--fs-small); font-weight: var(--weight-regular); }
 
 .hs-overlay { position: fixed; inset: 0; z-index: var(--z-overlay); display: grid; place-items: center; padding: var(--gutter); background: color-mix(in srgb, var(--color-ink) 45%, transparent); }
 .hs-dialog { max-inline-size: 30rem; inline-size: 100%; background: var(--color-base); border: var(--rule-structure); padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2); }

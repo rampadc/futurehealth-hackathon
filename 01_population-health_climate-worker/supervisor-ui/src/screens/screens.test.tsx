@@ -111,6 +111,13 @@ const open = async (path: string, personaId: string) => {
   return render(<App />);
 };
 
+
+/** Select a button that asks for confirmation, then confirm in the modal. */
+async function confirmPress(button: HTMLElement | Promise<HTMLElement>) {
+  fireEvent.click(await button);
+  fireEvent.click(await screen.findByRole('button', { name: 'Confirm' }));
+}
+
 describe('every built screen', () => {
   const built = SCREENS.filter(s => s.component);
   it('covers every wireframe screen', () => {
@@ -633,8 +640,8 @@ describe('assessed workshop plan', () => {
 
 describe('assistance', () => {
   it('records a fresh reading with the backend stamped time contract', async () => {
-    currentCase = await makeCase('restart_ready', { stopped: true, removed: true, firstaid: true }, [task('fresh', 'P03', 'ready')]);
-    await open('/site/fresh-reading', 'P03');
+    currentCase = await makeCase('restart_ready', { stopped: true, removed: true, firstaid: true }, [task('fresh', 'C01', 'ready')]);
+    await open('/site/fresh-reading', 'C01');
     await userEvent.click(await screen.findByRole('button', { name: 'Record fresh local reading' }));
     await waitFor(() => expect(commands[0]).toMatchObject({ action: 'fresh', payload: { measured_now: true, reading: { twl: 175, unit: 'W/m²', quality: 'valid' } } }));
     expect(commands[0].payload.reading).not.toHaveProperty('measured_now');
@@ -653,24 +660,23 @@ describe('assistance', () => {
     expect(screen.getByText('Bilal (C08) · reported 08:14')).toBeTruthy();
   });
 
-  it('needs the typed word REMOVED before recording a removal', async () => {
+  it('asks for confirmation before recording a removal', async () => {
     currentCase = await makeCase('removal_unconfirmed', { reported: true, assigned: true }, [task('incident_record', 'C01', 'recorded'), task('remove', 'C01', 'ready')]);
     await open('/site/action-card', 'C01');
     await userEvent.click(await screen.findByRole('button', { name: 'Confirm Bilal removed from heat' }));
-    const confirm = screen.getByRole('button', { name: 'Confirm' }) as HTMLButtonElement;
-    expect(confirm.disabled).toBe(true);
-    await userEvent.type(screen.getByLabelText(/to confirm/), 'removed');
-    await userEvent.click(confirm);
+    expect(screen.queryByLabelText(/to confirm/)).toBeNull();
+    expect(commands).toEqual([]);
+    await userEvent.click(screen.getByRole('button', { name: 'Confirm' }));
     await waitFor(() => expect(commands).toEqual([{ action: 'remove', payload: { location_id: 'welfare' } }]));
   });
 
-  it('Bilal reports feeling unwell with press and hold', async () => {
+  it('Bilal reports feeling unwell after confirming', async () => {
     currentCase = await makeCase('canonical_timed', { assigned: true }, [task('report', 'C08', 'ready')]);
     await open('/worker/check-in', 'C08');
     await userEvent.click(await screen.findByRole('button', { name: 'I feel unwell' }));
     await userEvent.click(screen.getByRole('button', { name: 'No' }));
     const send = screen.getByRole('button', { name: /Send to my supervisor/ });
-    fireEvent.keyDown(send, { key: ' ' });
+    await confirmPress(send);
     await waitFor(() => expect(commands).toEqual([{ action: 'report', payload: {} }]), { timeout: 2000 });
   });
 
@@ -699,7 +705,7 @@ describe('assistance', () => {
     await open('/worker/check-in', 'C08');
     await userEvent.click(await screen.findByRole('button', { name: 'I feel unwell' }));
     await userEvent.click(screen.getByRole('button', { name: 'No' }));
-    fireEvent.keyDown(screen.getByRole('button', { name: /Send to my supervisor/ }), { key: ' ' });
+    await confirmPress(screen.getByRole('button', { name: /Send to my supervisor/ }));
     expect(await screen.findByText('Saved offline')).toBeTruthy();
     expect(commands).toEqual([]);
     online.mockRestore();
@@ -730,7 +736,7 @@ describe('restart review', () => {
     // The squad leader's group comes first, and each row names a person, the check and what it confirms.
     const groups = within(checks).getAllByRole('columnheader').filter(h => h.getAttribute('scope') === 'colgroup');
     expect(groups[0].textContent).toMatch(/Squad leader · Civil crew/);
-    expect(within(rows[0]).getByText(/Personnel check|Worker removal|Recovery check|Crew readiness check/)).toBeTruthy();
+    expect(within(rows[0]).getByText(/Fresh local reading|Water check|Personnel check|Worker removal|Recovery check|Crew readiness check/)).toBeTruthy();
     expect(within(checks).getByText('Every crew member is accounted for.')).toBeTruthy();
     const handover = screen.getByRole('table', { name: 'Decisions carried forward' });
     expect(within(handover).getAllByRole('row')).toHaveLength(6);
@@ -789,7 +795,7 @@ describe('restart review', () => {
 });
 
 describe('platform screens', () => {
-  it('only the admin publishes branding, after typing PUBLISH', async () => {
+  it('only the admin publishes branding, after confirming', async () => {
     currentCase = await makeCase('heat_trigger', {}, []);
     const view = await open('/web/settings', 'P02');
     expect(await screen.findByText(/No company palette yet/)).toBeTruthy();
@@ -800,7 +806,7 @@ describe('platform screens', () => {
     const publish = await screen.findByRole('button', { name: 'Publish branding' }) as HTMLButtonElement;
     await waitFor(() => expect(publish.disabled).toBe(false));
     await userEvent.click(publish);
-    await userEvent.type(screen.getByLabelText(/to confirm/), 'PUBLISH');
+    expect(screen.queryByLabelText(/to confirm/)).toBeNull();
     await userEvent.click(screen.getByRole('button', { name: 'Confirm' }));
     await waitFor(() => expect(brandCalls).toHaveLength(1));
     expect(brandCalls[0].confirm).toBe('PUBLISH');
@@ -831,7 +837,7 @@ describe('platform screens', () => {
     await open('/worker/my-data', 'C05');
     const withdraw = await screen.findByRole('button', { name: /Withdraw consent/ });
     await waitFor(() => expect((withdraw as HTMLButtonElement).disabled).toBe(false));
-    fireEvent.keyDown(withdraw, { key: ' ' });
+    await confirmPress(withdraw);
     await waitFor(() => expect(consent.scopes).toEqual([]), { timeout: 2000 });
     localStorage.removeItem('hs-worker-lang:C05');
   });
@@ -893,7 +899,7 @@ describe('offline worker actions', () => {
     const online = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
     currentCase = await makeCase('heat_trigger', { issued: true, acknowledged: true, stopped: true }, [task('checkin', 'C05', 'ready')]);
     await open('/worker/shelter', 'C05');
-    fireEvent.keyDown(await screen.findByRole('button', { name: /Check in at Shelter A/ }), { key: ' ' });
+    await confirmPress(await screen.findByRole('button', { name: /Check in at Shelter A/ }));
     await screen.findByText(/1 saved action waiting to send/);
     expect(readOutbox(outboxScope('C05'))[0].case_id).toBe('case-1');
     currentCase = { ...currentCase, case_id: 'case-2' };
@@ -909,7 +915,7 @@ describe('offline worker actions', () => {
     const online = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
     currentCase = await makeCase('heat_trigger', { issued: true, acknowledged: true, stopped: true }, [task('checkin', 'C05', 'ready')]);
     await open('/worker/shelter', 'C05');
-    fireEvent.keyDown(await screen.findByRole('button', { name: /Check in at Shelter A/ }), { key: ' ' });
+    await confirmPress(await screen.findByRole('button', { name: /Check in at Shelter A/ }));
     await screen.findByText(/1 saved action waiting to send/);
     const oldScope = outboxScope('C05');
     renewAccessGeneration();
@@ -925,7 +931,7 @@ describe('offline worker actions', () => {
     const online = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
     currentCase = await makeCase('heat_trigger', { issued: true, acknowledged: true, stopped: true }, [task('checkin', 'C05', 'ready')]);
     const view = await open('/worker/shelter', 'C05');
-    fireEvent.keyDown(await screen.findByRole('button', { name: /Check in at Shelter A/ }), { key: ' ' });
+    await confirmPress(await screen.findByRole('button', { name: /Check in at Shelter A/ }));
     await screen.findByText(/1 saved action waiting to send/);
     const scope = outboxScope('C05');
     view.unmount();
@@ -943,7 +949,7 @@ describe('offline worker actions', () => {
     currentCase = await makeCase('heat_trigger', { issued: true, acknowledged: true, stopped: true }, [task('checkin', 'C05', 'ready')]);
     await open('/worker/shelter', 'C05');
     const hold = await screen.findByRole('button', { name: /Check in at Shelter A/ });
-    fireEvent.keyDown(hold, { key: ' ' });
+    await confirmPress(hold);
     expect(await screen.findByText(/1 saved action waiting to send/, {}, { timeout: 2000 })).toBeTruthy();
     expect(commands).toEqual([]);
     expect(readOutbox(outboxScope('C05'))).toHaveLength(1);
@@ -979,7 +985,7 @@ describe('voice and badges', () => {
     vi.stubGlobal('webkitSpeechRecognition', FakeRecognition);
     currentCase = await makeCase('canonical_timed', { assigned: true }, [task('report', 'C08', 'ready')]);
     await open('/worker/check-in', 'C08');
-    fireEvent.keyDown(await screen.findByRole('button', { name: /Hold and speak/ }), { key: ' ' });
+    fireEvent.click(await screen.findByRole('button', { name: /Tap and speak/ }));
     expect(await screen.findByText('“I feel dizzy”')).toBeTruthy();
     await userEvent.click(screen.getAllByRole('button', { name: 'I feel unwell' }).at(-1)!);
     expect(await screen.findByText(/Are you confused/)).toBeTruthy();

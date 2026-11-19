@@ -111,7 +111,7 @@ def evaluate_heat(req: Request) -> HeatResponse:
             actions.append(action('issue_hold', 'P03', f'Issue and record a hold for {task}.',
                                   evidence_ids=evidence, policy_ids=policies))
     if problem is not None:
-        actions.append(action('gather_fresh_local_reading', 'P03',
+        actions.append(action('gather_fresh_local_reading', 'C01',
                               'Obtain a valid, fresh TWL reading from the t1 monitor at the civil heavy work location.',
                               policy_ids=['p_stale']))
     return HeatResponse(**metadata(req), controls=controls,
@@ -223,7 +223,7 @@ def evaluate_restart(req: Request, heat: HeatResponse | None = None) -> RestartR
         ) if t is not None], default=req.decision_at)
     expected_actors = {
         'permit': 'P04', 'personnel': 'C01', 'recovery': 'C01',
-        'water': 'P03', 'crew_readiness': 'C01',
+        'water': 'C01', 'crew_readiness': 'C01',
     }
     for name, actor in expected_actors.items():
         confirmation = getattr(restart, name)

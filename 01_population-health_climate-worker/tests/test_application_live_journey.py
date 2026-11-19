@@ -151,10 +151,10 @@ def test_live_elapsed_shift_journey(tmp_path, monkeypatch):
     for action in ('draftDelivery', 'approveDelivery', 'sendDelivery', 'acceptDelivery'):
         act('P05', action)
     act('P01', 'costReview')
-    act('P03', 'fresh', {'measured_now': True, 'reading': {'sensor_id': 't1',
+    act('C01', 'fresh', {'measured_now': True, 'reading': {'sensor_id': 't1',
         'zone_id': 'civil_exposed', 'twl': 180.0, 'unit': 'W/m²', 'quality': 'valid'}})
     for actor, action in [('P04', 'permit'), ('C01', 'personnel'), ('C01', 'recovery_check'),
-                          ('P03', 'water'), ('C01', 'crew_readiness')]:
+                          ('C01', 'water'), ('C01', 'crew_readiness')]:
         act(actor, action, {'status': 'confirmed'})
     assert current['capture']['response']['restart']['status'] == 'ready_for_human_review'
     act('P02', 'review')

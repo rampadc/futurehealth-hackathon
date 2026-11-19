@@ -9,7 +9,7 @@ export function FirstAiderWorkspace({ story, actions }: WorkspaceProps) {
 
 /** P04 · Tariq, permit coordinator. */
 export function PermitWorkspace({ actions }: WorkspaceProps) {
-  return <Panel title="Permit check for trench restart"><Typography sx={{ mb: 2 }}>Confirm the permit check after Maya has supplied the fresh local reading. Rashid retains the restart review.</Typography>{actions(['permit'])}</Panel>;
+  return <Panel title="Permit check for trench restart"><Typography sx={{ mb: 2 }}>Confirm the permit check after Huda has recorded the fresh local reading. Rashid retains the restart review.</Typography>{actions(['permit'])}</Panel>;
 }
 
 /** P05 · Noura, logistics coordinator. */
