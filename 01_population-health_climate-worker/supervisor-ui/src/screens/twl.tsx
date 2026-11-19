@@ -17,6 +17,7 @@ const SIGNAL = { red: 'var(--color-signal-red)', amber: 'var(--color-signal-yell
 export const twlTone = (v: number) => v < TWL_HIGH_BELOW ? 'red' : v < TWL_LOW_FROM ? 'amber' : 'green';
 const TONE_WORD = { red: 'High risk', amber: 'Caution', green: 'Low environmental risk' } as const;
 const SITE_RULE = 'Heavy-work limit: TWL ≤150 W/m²';
+export const twlBandWord = (v: number) => TONE_WORD[twlTone(v)];
 
 /**
  * Horizontal TWL bar: filled from the scale minimum up to the reading, in the reading's band colour,
@@ -64,7 +65,7 @@ export function TwlReadout({ twl, estimated, size, band, large }: { twl: number 
   </span>;
 }
 
-export type TwlPoint = { hour: string; twl: number };
+export type TwlPoint = { hour: string; twl: number; temperature_c?: number; wbgt_c?: number };
 export type TwlReadingPoint = { at: string; twl: number; sensor: string; quality: string };
 
 const minutes = (hhmm: string) => { const [h, m] = hhmm.split(':').map(Number); return h * 60 + (m || 0); };
@@ -72,12 +73,17 @@ const minutes = (hhmm: string) => { const [h, m] = hhmm.split(':').map(Number); 
 /**
  * TWL through the shift: the hourly site series (solid up to now, dashed after as predicted),
  * local sensor readings as dots, the risk bands behind and the policy level as a black line.
+ * When the hours carry air temperature and WBGT, they are drawn in red and blue on a °C axis at the
+ * right. Each line has a checkbox in the legend; `onTable` adds a link to the table view.
  */
-export function TwlChart({ hourly, now, readings = [], kindLabel }: { hourly: TwlPoint[]; now: string; readings?: TwlReadingPoint[]; kindLabel: string }) {
+export function TwlChart({ hourly, now, readings = [], kindLabel, onTable }: { hourly: TwlPoint[]; now: string; readings?: TwlReadingPoint[]; kindLabel: string; onTable?: () => void }) {
   const id = useId();
   const [hover, setHover] = useState<number | null>(null);
+  const [shown, setShown] = useState({ twl: true, temp: true, wbgt: true });
   if (!hourly.length) return <p className="hs-muted">No hourly TWL for this day.</p>;
-  const W = 720, H = 240, L = 44, R = 12, T = 12, B = 28;
+  const hasTemp = hourly.some(p => p.temperature_c != null), hasWbgt = hourly.some(p => p.wbgt_c != null);
+  const celsius = hasTemp || hasWbgt;
+  const W = 720, H = 240, L = 44, R = celsius ? 40 : 12, T = 12, B = 28;
   const t0 = minutes(hourly[0].hour), t1 = minutes(hourly[hourly.length - 1].hour);
   const values = [...hourly.map(p => p.twl), ...readings.map(r => r.twl), TWL_POLICY];
   const lo = Math.max(0, Math.floor((Math.min(...values) - 20) / 20) * 20);
@@ -98,8 +104,16 @@ export function TwlChart({ hourly, now, readings = [], kindLabel }: { hourly: Tw
   const pastPath = path([...past.map(p => [minutes(p.hour), p.twl] as [number, number]), [nowM, interp]]);
   const futurePath = path([[nowM, interp], ...future.map(p => [minutes(p.hour), p.twl] as [number, number])]);
   const ticks: number[] = []; for (let v = lo; v <= hi; v += 20) ticks.push(v);
+  // °C axis on the right, in 5-degree steps round the day's air temperature and WBGT.
+  const degrees = hourly.flatMap(p => [p.temperature_c, p.wbgt_c]).filter((v): v is number => v != null);
+  const cLo = degrees.length ? Math.floor((Math.min(...degrees) - 2) / 5) * 5 : 0;
+  const cHi = degrees.length ? Math.ceil((Math.max(...degrees) + 2) / 5) * 5 : 1;
+  const yc = (v: number) => T + (H - T - B) * (1 - (v - cLo) / Math.max(1, cHi - cLo));
+  const cTicks: number[] = []; if (celsius) for (let v = cLo; v <= cHi; v += 5) cTicks.push(v);
+  const cPath = (key: 'temperature_c' | 'wbgt_c') => hourly.filter(p => p[key] != null).map((p, i) => `${i ? 'L' : 'M'}${x(minutes(p.hour)).toFixed(1)} ${yc(p[key]!).toFixed(1)}`).join('');
+  const toggle = (key: keyof typeof shown) => setShown(v => ({ ...v, [key]: !v[key] }));
   const band = (from: number, to: number) => { const a = Math.max(lo, from), b = Math.min(hi, to); return b > a ? { y: y(b), h: y(a) - y(b) } : null; };
-  const red = band(lo, TWL_HIGH_BELOW), amber = band(TWL_HIGH_BELOW, TWL_LOW_FROM);
+  const red = band(lo, TWL_HIGH_BELOW), amber = band(TWL_HIGH_BELOW, TWL_LOW_FROM), green = band(TWL_LOW_FROM, hi);
   const hp = hover == null ? null : hourly[hover];
   const onMove = (e: PointerEvent<SVGSVGElement>) => {
     const box = e.currentTarget.getBoundingClientRect();
@@ -108,9 +122,11 @@ export function TwlChart({ hourly, now, readings = [], kindLabel }: { hourly: Tw
     setHover(best);
   };
   return <figure className="hs-chart" aria-labelledby={`${id}-cap`}>
-    <div className="hs-chart-legend" aria-hidden="true">
-      <span><i className="hs-key-line" />{kindLabel} · up to now</span>
-      <span><i className="hs-key-line" data-dashed />Predicted</span>
+    <div className="hs-chart-legend">
+      <label><input type="checkbox" checked={shown.twl} onChange={() => toggle('twl')} /><i className="hs-key-line" data-tone="twl" aria-hidden="true" />TWL · {kindLabel} up to now</label>
+      <span aria-hidden="true"><i className="hs-key-line" data-tone="twl" data-dashed />Predicted</span>
+      {hasTemp && <label><input type="checkbox" checked={shown.temp} onChange={() => toggle('temp')} /><i className="hs-key-line" data-tone="temp" aria-hidden="true" />Air temperature °C</label>}
+      {hasWbgt && <label><input type="checkbox" checked={shown.wbgt} onChange={() => toggle('wbgt')} /><i className="hs-key-line" data-tone="wbgt" aria-hidden="true" />WBGT °C</label>}
       {readings.length > 0 && <span><i className="hs-key-dot" />Local sensor</span>}
       <span><i className="hs-key-policy" />Site {SITE_RULE}</span>
     </div>
@@ -119,25 +135,30 @@ export function TwlChart({ hourly, now, readings = [], kindLabel }: { hourly: Tw
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`TWL by hour, ${hourly[0].hour} to ${hourly[hourly.length - 1].hour}. Lowest ${Math.min(...hourly.map(p => p.twl))} W/m².`} onPointerMove={onMove} onPointerLeave={() => setHover(null)}>
         {red && <rect x={L} width={W - L - R} y={red.y} height={red.h} fill="var(--color-signal-red)" opacity=".12" />}
         {amber && <rect x={L} width={W - L - R} y={amber.y} height={amber.h} fill="var(--color-signal-yellow)" opacity=".16" />}
+        {green && <rect x={L} width={W - L - R} y={green.y} height={green.h} fill="var(--color-signal-green)" opacity=".1" />}
         {ticks.map(v => <g key={v}><line x1={L} x2={W - R} y1={y(v)} y2={y(v)} stroke="var(--color-section-frame, #ddd)" strokeWidth="1" /><text x={L - 6} y={y(v) + 4} textAnchor="end" className="hs-chart-tick">{v}</text></g>)}
+        {cTicks.map(v => <text key={`c${v}`} x={W - R + 6} y={yc(v) + 4} className="hs-chart-tick">{v}°</text>)}
         {hourly.filter((_, i) => i % 2 === 0).map(p => <text key={p.hour} x={x(minutes(p.hour))} y={H - 8} textAnchor="middle" className="hs-chart-tick">{p.hour}</text>)}
-        <line x1={L} x2={W - R} y1={y(TWL_POLICY)} y2={y(TWL_POLICY)} stroke="#000" strokeWidth="2" />
+        <line x1={L} x2={W - R} y1={y(TWL_POLICY)} y2={y(TWL_POLICY)} stroke="var(--color-graphite)" strokeWidth="3" strokeDasharray="0 7" strokeLinecap="round" vectorEffect="non-scaling-stroke" data-series="policy" />
         <line x1={x(nowM)} x2={x(nowM)} y1={T} y2={H - B} stroke="var(--color-graphite)" strokeWidth="1" strokeDasharray="2 3" />
         <text x={x(nowM) + 4} y={T + 10} className="hs-chart-tick">now {now}</text>
-        <path d={pastPath} fill="none" stroke="var(--color-ink)" strokeWidth="2" strokeLinejoin="round" />
-        <path d={futurePath} fill="none" stroke="var(--color-ink)" strokeWidth="2" strokeDasharray="6 5" strokeLinejoin="round" />
+        {hasTemp && shown.temp && <path d={cPath('temperature_c')} fill="none" stroke="var(--chart-temp)" strokeWidth="3" strokeLinejoin="round" vectorEffect="non-scaling-stroke" data-series="temperature" />}
+        {hasWbgt && shown.wbgt && <path d={cPath('wbgt_c')} fill="none" stroke="var(--chart-wbgt)" strokeWidth="3" strokeLinejoin="round" vectorEffect="non-scaling-stroke" data-series="wbgt" />}
+        {shown.twl && <path d={pastPath} fill="none" stroke="var(--chart-twl)" strokeWidth="3" strokeLinejoin="round" vectorEffect="non-scaling-stroke" data-series="twl" />}
+        {shown.twl && <path d={futurePath} fill="none" stroke="var(--chart-twl)" strokeWidth="3" strokeDasharray="8 6" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />}
         {readings.map(r => { const m = minutes(r.at); return m >= t0 && m <= t1 ? <circle key={`${r.sensor}${r.at}`} cx={x(m)} cy={y(r.twl)} r="5" fill="var(--color-sheet)" stroke="var(--color-ink)" strokeWidth="2" strokeDasharray={r.quality === 'valid' ? undefined : '3 2'}><title>{`${r.at} · ${r.sensor} · TWL ${r.twl} W/m² · ${r.quality === 'valid' ? TONE_WORD[twlTone(r.twl)] : 'Unknown'} · quality: ${r.quality}`}</title></circle> : null; })}
-        {hp && <g pointerEvents="none"><line x1={x(minutes(hp.hour))} x2={x(minutes(hp.hour))} y1={T} y2={H - B} stroke="var(--color-ink)" strokeWidth="1" /><circle cx={x(minutes(hp.hour))} cy={y(hp.twl)} r="5" fill="var(--color-ink)" stroke="var(--color-sheet)" strokeWidth="2" /></g>}
+        {hp && <g pointerEvents="none"><line x1={x(minutes(hp.hour))} x2={x(minutes(hp.hour))} y1={T} y2={H - B} stroke="var(--color-ink)" strokeWidth="1" /><circle cx={x(minutes(hp.hour))} cy={y(hp.twl)} r="5" fill="var(--chart-twl)" stroke="var(--color-sheet)" strokeWidth="2" /></g>}
       </svg>
       {hp && <div className="hs-chart-tip" style={{ insetInlineStart: `${(x(minutes(hp.hour)) / W) * 100}%` }} role="status">
-        <b>{hp.hour}</b> · TWL {hp.twl} W/m² · {TONE_WORD[twlTone(hp.twl)]} · check site holds<br /><small>{minutes(hp.hour) > nowM ? 'Predicted' : kindLabel}</small>
+        <b>{hp.hour}</b> · TWL {hp.twl} W/m² · {TONE_WORD[twlTone(hp.twl)]} · check site holds{hp.temperature_c != null && <> · {hp.temperature_c} °C</>}{hp.wbgt_c != null && <> · WBGT {hp.wbgt_c} °C</>}<br /><small>{minutes(hp.hour) > nowM ? 'Predicted' : kindLabel}</small>
       </div>}
     </div>
-    <figcaption id={`${id}-cap`} className="hs-visually-hidden">TWL in sun by hour. Environmental band does not clear site holds. Site {SITE_RULE}.</figcaption>
+    <figcaption id={`${id}-cap`} className="hs-visually-hidden">TWL in sun by hour{celsius ? ', with air temperature and WBGT in °C on the right axis' : ''}. Environmental band does not clear site holds. Site {SITE_RULE}.</figcaption>
+    {onTable ? <p><button type="button" className="hs-link" onClick={onTable}>Open the hourly table</button></p> : 
     <details className="hs-chart-table"><summary>Show as table</summary>
       <table className="hs-table hs-table-sm"><thead><tr><th>Hour</th><th>TWL W/m²</th><th>Environmental band</th><th>Site heavy work</th><th>Source</th><th>Quality</th></tr></thead>
         <tbody>{hourly.map(p => <tr key={p.hour}><td>{p.hour}</td><td>{p.twl}</td><td>{TONE_WORD[twlTone(p.twl)]}</td><td>{SITE_RULE}</td><td>{minutes(p.hour) > nowM ? 'Predicted' : kindLabel}</td><td>—</td></tr>)}
           {readings.map(r => <tr key={`r${r.sensor}${r.at}`}><td>{r.at}</td><td>{r.twl}</td><td>{r.quality === 'valid' ? TONE_WORD[twlTone(r.twl)] : 'Unknown'}</td><td>{SITE_RULE}</td><td>Sensor {r.sensor} · quality {r.quality}</td><td>{r.quality}</td></tr>)}</tbody></table>
-    </details>
+    </details>}
   </figure>;
 }

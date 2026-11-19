@@ -267,9 +267,31 @@ describe('stop-work', () => {
   it('shows replayed site conditions on heat controls without using them for clearance', async () => {
     currentCase = await makeCase('heat_trigger', {}, [task('issue', 'P03', 'ready')]);
     await open('/web/heat-controls', 'P03');
-    expect(await screen.findByRole('heading', { name: 'Site conditions · Historical ERA5' })).toBeTruthy();
-    expect(screen.getByText(/08:00 · TWL 127 W\/m² in sun · 167 in shade/)).toBeTruthy();
-    expect(screen.getByRole('img', { name: /^TWL by hour/ })).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: 'Site conditions' })).toBeTruthy();
+    const table = screen.getByRole('table', { name: 'Site conditions this hour and the worst of the day' });
+    expect(within(table).getByRole('row', { name: /TWL in sun 127 W\/m² · Medium zone/ })).toBeTruthy();
+    expect(within(table).getByRole('row', { name: /TWL in shade 167 W\/m²/ })).toBeTruthy();
+    const chart = screen.getByRole('img', { name: /^TWL by hour/ });
+    expect(chart.querySelector('[data-series="temperature"]')).toBeTruthy();
+    await userEvent.click(screen.getByRole('checkbox', { name: 'WBGT °C' }));
+    expect(chart.querySelector('[data-series="wbgt"]')).toBeNull();
+    expect(screen.queryByText(/For planning only/)).toBeNull();
+    await userEvent.click(screen.getByRole('button', { name: 'Open the hourly table' }));
+    expect(await screen.findByRole('heading', { level: 1, name: 'Site conditions table' })).toBeTruthy();
+    expect(screen.getByRole('table', { name: 'Site conditions by hour' })).toBeTruthy();
+    expect(screen.getByText(/Historical weather data · Mussafah · For planning only/)).toBeTruthy();
+  });
+
+  it('shows heat controls for the squad chosen on the page', async () => {
+    currentCase = await makeCase('heat_trigger', {}, []);
+    await open('/web/heat-controls', 'P03');
+    await userEvent.click(await screen.findByRole('radio', { name: /Steel fixing crew/ }));
+    expect(screen.getByRole('heading', { name: 'Task controls · Steel fixing crew' })).toBeTruthy();
+    expect(screen.getByRole('radio', { name: /Steel fixing crew.*Sensor T3 · offline · forecast in use/ })).toBeTruthy();
+    expect(screen.queryByRole('heading', { name: /Reading source/ })).toBeNull();
+    expect(screen.getByText(/has no heavy-work hold to clear/)).toBeTruthy();
+    // The squad choice is shared across screens in this tab; put it back for later tests.
+    await userEvent.click(screen.getByRole('radio', { name: /Civil crew/ }));
   });
 
   it('says conditions are unavailable and to rely on local readings', async () => {

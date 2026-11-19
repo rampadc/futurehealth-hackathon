@@ -5,14 +5,15 @@ import { crew, heatNow, progress, time } from '../data';
 import { ActionButton, Avatar, Band, Computed, Draft, Empty, Head, Hero, Hold, List, Metric, NoCase, Note, Row, Section, Statement, taskBadge, taskLine, Person } from '../kit';
 import type { ScreenProps } from '../registry';
 import { ConditionsPanel } from '../conditions';
+import { StatusIcon } from '../../shared/icons';
 import { bandOf, OtherSquadScreen, SquadItems, SquadPicker, squadsFor, useSquad } from '../squads';
 
-const FRESH_MS = 5 * 60_000;
 const CONTROL_LABEL: Record<string, string> = { hold_required: 'Hold required', held: 'Held', stopped: 'Stopped', clearance_blocked: 'Clearance blocked', no_new_hold: 'No hold' };
 const controlLabel = (state: string) => CONTROL_LABEL[state] ?? state.replaceAll('_', ' ').replace(/^./, c => c.toUpperCase());
 
-/** Heat controls: what must stop, why, and what evidence will clear it. */
+/** Heat controls: what must stop, why, and what evidence will clear it, for the chosen squad. */
 export function HeatControlsScreen({ session }: ScreenProps) {
+  const [squadId] = useSquad();
   const { caseView } = session;
   if (!caseView) return <NoCase session={session} />;
   const heat = heatNow(caseView);
@@ -23,53 +24,64 @@ export function HeatControlsScreen({ session }: ScreenProps) {
   const siteLimit = heavy?.reason_codes.includes('twl_heavy_limit');
   const story = caseView.story;
   const issuedAt = story.events.find(e => e.id === 'issue')?.occurred_at;
-  const held = squadsFor(caseView).filter(q => q.hold);
+  const squads = squadsFor(caseView);
+  const sq = squads.find(q => q.id === squadId) ?? squads[0];
+  const held = squads.filter(q => q.hold);
   const nextStep: { tone: 'red' | 'amber' | undefined; text: string } = held.length && !story.issued
     ? { tone: 'red', text: `Heavy-work limit reached for the ${held.map(q => q.name.toLowerCase()).join(', ')}. Issue the stop-work instruction below.` }
     : story.issued && !story.acknowledged ? { tone: 'amber', text: 'Stop-work instruction issued. Huda acknowledges it next; Rashid follows up if it is overdue.' }
       : story.issued ? { tone: undefined, text: 'Stop-work instruction acknowledged. Keep heavy work held until the restart review clears it.' }
         : { tone: undefined, text: 'No squad needs a stop-work instruction. Continue to monitor readings.' };
+  // The squad's own sensor: for the case crew the recorded reading, for the others the site sensor setting.
+  const FRESHNESS: Record<string, string> = { current: 'fresh', stale: 'stale', missing: 'no reading', failed: 'failed', future: 'time in the future', invalid: 'invalid' };
+  const sensorLine = (q: typeof sq) => {
+    if (q.live) {
+      const ok = heat.freshness === 'current';
+      return <>{!ok && <StatusIcon status="error" />} Sensor {(r?.sensor_id ?? q.sensor).toUpperCase()} · {r ? `measured ${time(r.measured_at)} · received ${time(r.received_at)} · quality ${r.quality} · ` : ''}<b>{FRESHNESS[heat.freshness] ?? heat.freshness}</b></>;
+    }
+    const state = q.reading.fresh ? `reading ${q.reading.at} · ` : '';
+    const word = q.reading.fresh ? 'fresh' : q.reading.at === 'forecast' ? 'offline · forecast in use' : 'stale · forecast in use';
+    return <>{!q.reading.fresh && <StatusIcon status="error" />} Sensor {q.sensor.toUpperCase()} · {state}<b>{word}</b></>;
+  };
+  // Each squad card carries its stop-work status: hold, foreman, sensor and, once issued, the instruction.
+  const stopLine = (q: typeof sq) => q.live && story.issued
+    ? `Stop-work issued${issuedAt ? ` at ${time(issuedAt)}` : ''} · ${story.acknowledged ? 'acknowledged by Huda' : 'awaiting Huda’s acknowledgement'}`
+    : q.hold ? 'Heavy-work hold · stop-work needed' : 'No hold · no stop-work needed';
+  const lines = (q: typeof sq) => [bandOf(q), <>{q.hold && <Hold />} {stopLine(q)}</>, `${q.loc} · foreman ${q.foreman}`, sensorLine(q)];
+  const civil = squads.find(q => q.live);
+  // A fixture squad's band is already raised one level when its sensor is offline or stale.
+  const BAND_LABEL: Record<string, string> = { red: 'High risk', amber: 'Caution', green: 'Low environmental risk' };
+  const band = sq.live ? heat.band.label : `${BAND_LABEL[sq.band] ?? 'Unknown'}${sq.estimated ? ' · raised one level, sensor not fresh' : ''}`;
+  const limitReached = sq.live ? siteLimit : sq.hold;
+  const HOLD_TEXT = 'Heavy-work limit reached: TWL ≤ 150 stops heavy exposed work.';
+  const EVIDENCE = 'A fresh same-zone reading, the permit check and a separate restart review by the superintendent.';
   return <div className="hs-screen">
-    <Head kicker={`Heat controls · Civil trench · ${time(caseView.clock)} GST`} title="Heat controls" sub="The environmental band and the site’s heavy-work hold are separate decisions." />
-    <Statement tone={nextStep.tone}>{nextStep.text}</Statement>
-    <Section title="Stop-work by squad" icon="stop">
-      <List>{squadsFor(caseView).map(q => {
-        const issuedHere = q.live && story.issued;
-        return <Row key={q.id} lead={<Avatar id={q.foremanId} size="md" />} title={q.name} detail={`${q.loc} · foreman ${q.foreman} · TWL ${q.twl ?? '—'} W/m²${q.estimated ? ' (forecast)' : ''}`}
-          badge={q.hold ? <Hold /> : <span className="hs-badge" data-tone="muted">No hold</span>}>
-          {q.live && q.hold && !issuedHere && <ActionButton session={session} action="issue" label={`Issue stop-work to ${q.name}`} primary />}
-          {issuedHere && <p className="hs-statusline">Stop-work instruction issued{issuedAt ? ` at ${time(issuedAt)}` : ''} · {story.acknowledged ? 'acknowledged by Huda' : 'awaiting Huda’s acknowledgement'}</p>}
-        </Row>;
-      })}</List>
-      <Computed>Holds are computed by the site rules · not AI. Only a squad with a heavy-work hold needs a stop-work instruction.</Computed>
+    <Head kicker={`Heat controls · ${sq.name} · ${time(caseView.clock)} GST`} title="Heat controls" sub="The environmental band and the site’s heavy-work hold are separate decisions." />
+    <SquadPicker squads={squads} lines={lines} />
+    <Computed>Holds are computed by the site rules · not AI. Only a squad with a heavy-work hold needs a stop-work instruction.</Computed>
+    <Statement tone={nextStep.tone} compact>{nextStep.text}</Statement>
+    {civil?.hold && !story.issued && <ActionButton session={session} action="issue" label={`Issue stop-work to ${civil.name}`} primary />}
+    <Section title={`Task controls · ${sq.name}`}>
+      {!sq.live ? <List cols={3}><Row title={`${sq.name} heavy work`} detail={sq.hold ? HOLD_TEXT : sq.reading.fresh ? 'No restriction' : 'Local reading is not fresh · forecast in use'} badge={sq.hold ? <Hold /> : <span className="hs-badge" data-tone="muted">No hold</span>} /></List>
+        : controls.length ? <List cols={3}>{controls.map(c => <Row key={c.task_id} title={nameOf(c.task_id)} detail={c.reason_codes.map(reasonLabel).join(' · ') || 'No restriction'} badge={c.state === 'held' || c.state === 'stopped' || c.state === 'hold_required' ? <Hold>{controlLabel(c.state)}</Hold> : <span className="hs-badge" data-tone="muted">{controlLabel(c.state)}</span>} />)}</List>
+        : <Empty>The solver has not assessed this case yet.</Empty>}
     </Section>
-    <div className="hs-grid">
-      <Section title="Task controls">
-        {controls.length ? <List>{controls.map(c => <Row key={c.task_id} title={nameOf(c.task_id)} detail={c.reason_codes.map(reasonLabel).join(' · ') || 'No restriction'} badge={c.state === 'held' || c.state === 'stopped' || c.state === 'hold_required' ? <Hold>{controlLabel(c.state)}</Hold> : <span className="hs-badge" data-tone="muted">{controlLabel(c.state)}</span>} />)}</List>
-          : <Empty>The solver has not assessed this case yet.</Empty>}
-        <Computed />
-      </Section>
-      <Section title="Reading source">
-        <List>
-          <Row title={`Sensor ${r?.sensor_id ?? '—'} · ${r ? nameOf(r.zone_id) : 'no zone'}`} detail={r ? `Measured ${time(r.measured_at)} · received ${time(r.received_at)} · quality ${r.quality}` : 'No reading'} badge={<span className="hs-badge" data-tone={heat.freshness === 'current' ? 'done' : 'over'}>{heat.freshness === 'current' ? 'Fresh' : heat.freshness}</span>} />
-          <Row title="Freshness limit" detail={`A reading older than ${FRESH_MS / 60_000} minutes cannot clear a hold.`} />
-          <Row title="Forecast and replay" detail="Shown below as planning context · never used to clear a hold." badge={<span className="hs-badge" data-tone="muted">Not for clearance</span>} />
-        </List>
-      </Section>
+    <ConditionsPanel session={session} />
+    <div className="hs-grid" data-cols="2">
       <Section title="Policy stack">
-        <p className="hs-policy-row"><span><b>Site rule</b> TWL ≤ 150 · stop heavy work · Sandline heat plan</span><span><b>Legal zone</b> {heat.band.label} · ADOSH display bands</span></p>
+        <p className="hs-policy-row"><span><b>Site rule</b> TWL ≤ 150 · stop heavy work · Sandline heat plan</span><span><b>Legal zone</b> {band} · ADOSH display bands</span></p>
         <List>
           <Row title="Legal: ADOSH heat stress bands" detail="Display bands for environmental risk." />
-          <Row title="Site: Sandline heat plan" detail={siteLimit ? 'Heavy-work limit reached: TWL ≤ 150 stops heavy exposed work.' : 'Heavy-work limit not reached at this reading.'} badge={siteLimit ? <Hold /> : undefined} />
+          <Row title="Site: Sandline heat plan" detail={limitReached ? HOLD_TEXT : 'Heavy-work limit not reached at this reading.'} badge={limitReached ? <Hold /> : undefined} />
           {response?.policy_versions.map(v => <Row key={v} title={v} detail="Policy version used by the solver" />)}
         </List>
       </Section>
       <Section title="Evidence needed before clearance">
-        {response?.heat.clearance_blockers.length ? <List>{response.heat.clearance_blockers.map(b => <Row key={b} title={reasonLabel(b)} badge={<span className="hs-badge" data-tone="wait">Missing</span>} />)}</List>
-          : <Note>A fresh same-zone reading, the permit check and a separate restart review by the superintendent.</Note>}
+        {sq.live && response?.heat.clearance_blockers.length ? <List>{response.heat.clearance_blockers.map(b => <Row key={b} title={reasonLabel(b)} badge={<span className="hs-badge" data-tone="wait">Missing</span>} />)}</List>
+          : sq.live || sq.hold ? <Note>{EVIDENCE}</Note>
+          : <p className="hs-statusline">The {sq.name.toLowerCase()} has no heavy-work hold to clear.</p>}
       </Section>
     </div>
-    <ConditionsPanel session={session} />
   </div>;
 }
 
