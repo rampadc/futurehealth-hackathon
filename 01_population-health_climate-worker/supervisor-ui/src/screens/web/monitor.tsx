@@ -8,7 +8,6 @@ import { nextHandoff } from '../../story';
 import { ActionButton, Badge, Band, Computed, Empty, Head, Hero, Hold, List, Metric, NoCase, Note, Row, Section, taskBadge, Avatar, Avatars, Person } from '../kit';
 import type { ScreenProps } from '../registry';
 import { CrewRiskPanel } from '../risk';
-import { TwlReadout } from '../twl';
 import { bandOf, OtherSquadScreen, SquadItems, SquadPicker, squadsFor, useSquad, sensorsNow } from '../squads';
 
 /** Squad Monitoring: within five seconds, does anyone need action now? */
@@ -50,7 +49,6 @@ export function SquadMonitoringScreen({ session }: ScreenProps) {
   return <div className="hs-screen">
     <Head kicker={`Squad Monitoring · Civil crew · ${time(caseView.clock)} GST`} title="Squad Monitoring" />
     <SquadPicker squads={squads} lines={lines} />
-    <p className="hs-statusline"><TwlReadout twl={heat.reading?.twl ?? null} band={heat.band.band} /> {heat.reading ? `· sensor ${heat.reading.sensor_id} · ${time(heat.reading.measured_at)}` : ''} {heat.heavyHeld && <Hold />}</p>
     <div className="hs-grid">
       <Section title="Your actions">
         {actions.length ? <List>{actions.filter(t => SCREEN_FOR_ACTION[t.action]?.web).map(t => <Row key={t.action} lead={<Avatar id={t.actor_id} size="md" />} title={t.label} detail={`${nameOf(t.actor_id)}${t.due_at ? ` · due ${time(t.due_at)}` : ''}`} badge={taskBadge(session, t.action)} onClick={() => navigate(`/web/${SCREEN_FOR_ACTION[t.action].web}`)} />)}</List>

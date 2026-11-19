@@ -11,6 +11,8 @@ import { bandOf, OtherSquadScreen, SquadItems, SquadPicker, squadsFor, useSquad 
 const CONTROL_LABEL: Record<string, string> = { hold_required: 'Hold required', held: 'Held', stopped: 'Stopped', clearance_blocked: 'Clearance blocked', no_new_hold: 'No hold' };
 const controlLabel = (state: string) => CONTROL_LABEL[state] ?? state.replaceAll('_', ' ').replace(/^./, c => c.toUpperCase());
 
+const ITEMS_ID = 'squad-items';
+
 /** Heat controls: what must stop, why, and what evidence will clear it, for the chosen squad. */
 export function HeatControlsScreen({ session }: ScreenProps) {
   const [squadId] = useSquad();
@@ -57,15 +59,18 @@ export function HeatControlsScreen({ session }: ScreenProps) {
   const EVIDENCE = 'A fresh same-zone reading, the permit check and a separate restart review by the superintendent.';
   return <div className="hs-screen">
     <Head kicker={`Heat controls · ${sq.name} · ${time(caseView.clock)} GST`} title="Heat controls" sub="The environmental band and the site’s heavy-work hold are separate decisions." />
-    <SquadPicker squads={squads} lines={lines} />
-    <Computed>Holds are computed by the site rules · not AI. Only a squad with a heavy-work hold needs a stop-work instruction.</Computed>
-    <Statement tone={nextStep.tone} compact>{nextStep.text}</Statement>
-    {civil?.hold && !story.issued && <ActionButton session={session} action="issue" label={`Issue stop-work to ${civil.name}`} primary />}
+    <div className="hs-squad-head">
+      <SquadPicker squads={squads} lines={lines} onItems={() => document.getElementById(ITEMS_ID)?.scrollIntoView({ behavior: 'smooth', block: 'start' })} />
+      <Statement tone={nextStep.tone} compact>{nextStep.text}</Statement>
+      {civil?.hold && !story.issued && <ActionButton session={session} action="issue" label={`Issue stop-work to ${civil.name}`} primary />}
+    </div>
     <Section title={`Task controls · ${sq.name}`}>
       {!sq.live ? <List cols={3}><Row title={`${sq.name} heavy work`} detail={sq.hold ? HOLD_TEXT : sq.reading.fresh ? 'No restriction' : 'Local reading is not fresh · forecast in use'} badge={sq.hold ? <Hold /> : <span className="hs-badge" data-tone="muted">No hold</span>} /></List>
         : controls.length ? <List cols={3}>{controls.map(c => <Row key={c.task_id} title={nameOf(c.task_id)} detail={c.reason_codes.map(reasonLabel).join(' · ') || 'No restriction'} badge={c.state === 'held' || c.state === 'stopped' || c.state === 'hold_required' ? <Hold>{controlLabel(c.state)}</Hold> : <span className="hs-badge" data-tone="muted">{controlLabel(c.state)}</span>} />)}</List>
         : <Empty>The solver has not assessed this case yet.</Empty>}
+      <Computed tight>Holds are computed by the site rules · not AI. Only a squad with a heavy-work hold needs a stop-work instruction.</Computed>
     </Section>
+    <Section title={`Alerts and warnings · ${sq.name}`} id={ITEMS_ID}><SquadItems squad={sq} /></Section>
     <ConditionsPanel session={session} />
     <div className="hs-grid" data-cols="2">
       <Section title="Policy stack">

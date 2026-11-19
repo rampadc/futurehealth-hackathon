@@ -72,6 +72,14 @@ def _weather(site: str, day: str) -> pd.DataFrame:
 date_parse = date.fromisoformat  # the tools' `date` parameter shadows datetime.date inside them
 
 
+def _rounded(value, digits: int) -> float | int | None:
+    """A weather value for JSON: rounded, or None when the source has no value for that hour."""
+    v = float(value)
+    if v != v:  # NaN
+        return None
+    return int(round(v)) if digits == 0 else round(v, digits)
+
+
 def _date_or_none(s: str | None) -> date | None:
     return date.fromisoformat(s) if s else None
 
@@ -151,6 +159,8 @@ def compute_heat_stress(site: str, date: str) -> dict:
         hour=t.strftime("%H:%M"),
         temperature_c=round(float(r["temperature_c"]), 1),
         wbgt_c=round(float(r["wbgt_c"]), 1),
+        relative_humidity_pct=_rounded(r["relative_humidity_pct"], 0),
+        wet_bulb_c=_rounded(r["wet_bulb_c"], 1),
         twl_sun_wm2=rules.display_twl(float(r["twl_wm2"])),
         twl_zone_sun=r["twl_zone"],
         twl_shade_wm2=rules.display_twl(float(r["twl_shade_wm2"])),

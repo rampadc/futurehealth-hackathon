@@ -45,15 +45,33 @@ export function ConditionsPanel({ session, readings }: { session: CaseSession; r
 type OkConditions = Extract<SiteConditions, { status: 'ok' }>;
 const sourceLabel = (c: OkConditions) => c.kind === 'replay' ? 'Historical ERA5' : 'Forecast';
 const shiftHours = (c: OkConditions) => c.hourly.filter(h => SHIFT(h.hour));
+type Measure = 'twl_sun_wm2' | 'temperature_c' | 'wbgt_c' | 'wet_bulb_c' | 'relative_humidity_pct';
+/**
+ * The day's worst value of a measure and its hour: lowest TWL, highest of the others (higher wet bulb
+ * or humidity means less sweat evaporates). An hour after the case clock is marked predicted.
+ */
+const worst = (c: OkConditions, field: Measure, unit: string, word: string) => {
+  const hours = c.hourly.filter(h => h[field] != null);
+  if (!hours.length) return '—';
+  const low = field === 'twl_sun_wm2';
+  const at = hours.reduce((best, h) => (low ? h[field]! < best[field]! : h[field]! > best[field]!) ? h : best);
+  return `${at[field]}${unit} ${word} at ${at.hour}${at.hour > c.clock_hour ? ' · predicted' : ''}`;
+};
 
 function ConditionsBody({ conditions: c, readings, now: clock }: { conditions: OkConditions; readings?: TwlReadingPoint[]; now?: string }) {
   const now = c.current;
   const s = c.summary;
+  const high = c.hourly.filter(h => h.twl_zone_sun === 'high');
+  const ahead = high.filter(h => h.hour > c.clock_hour).length;
+  const highHours = `${high.length} h${!ahead ? '' : ahead === high.length ? ', all predicted' : ` · ${ahead} h predicted`}`;
   const rows: Array<[string, string, string]> = [
-    ['TWL in sun', now ? `${now.twl_sun_wm2} W/m² · ${zone(now.twl_zone_sun)}` : '—', `${s.min_twl_sun_wm2} W/m² lowest · ${s.hours_high_zone_sun} h in the High zone`],
+    ['TWL in sun', now ? `${now.twl_sun_wm2} W/m² · ${zone(now.twl_zone_sun)}` : '—', worst(c, 'twl_sun_wm2', ' W/m²', 'lowest')],
+    ['Hours in the High zone', now ? (now.twl_zone_sun === 'high' ? 'This hour' : 'Not this hour') : '—', highHours],
     ['TWL in shade', now ? `${now.twl_shade_wm2} W/m² · ${zone(now.twl_zone_shade)}` : '—', '—'],
-    ['Air temperature', now ? `${now.temperature_c} °C` : '—', `${s.max_temperature_c} °C peak`],
-    ['WBGT', now ? `${now.wbgt_c} °C` : '—', `${s.max_wbgt_c} °C peak`],
+    ['Air temperature', now ? `${now.temperature_c} °C` : '—', worst(c, 'temperature_c', ' °C', 'peak')],
+    ['WBGT', now ? `${now.wbgt_c} °C` : '—', worst(c, 'wbgt_c', ' °C', 'peak')],
+    ['Wet bulb', now?.wet_bulb_c != null ? `${now.wet_bulb_c} °C` : '—', worst(c, 'wet_bulb_c', ' °C', 'peak')],
+    ['Humidity', now?.relative_humidity_pct != null ? `${now.relative_humidity_pct}%` : '—', worst(c, 'relative_humidity_pct', '%', 'peak')],
     ['Midday break', now ? (now.midday_break_minutes ? `${now.midday_break_minutes} min in this hour` : 'Not in this hour') : '—', s.midday_break],
   ];
   const table = <div className="hs-scroll"><table className="hs-table hs-table-sm hs-conditions-table" aria-label="Site conditions this hour and the worst of the day">
@@ -62,7 +80,7 @@ function ConditionsBody({ conditions: c, readings, now: clock }: { conditions: O
     </table></div>;
   return <>
     <TwlChart kindLabel={sourceLabel(c)} now={clock ?? c.clock_hour} readings={readings} onTable={() => navigate('/web/site-conditions')}
-      hourly={shiftHours(c).map(h => ({ hour: h.hour, twl: h.twl_sun_wm2, temperature_c: h.temperature_c, wbgt_c: h.wbgt_c }))} />
+      hourly={shiftHours(c).map(h => ({ hour: h.hour, twl: h.twl_sun_wm2, temperature_c: h.temperature_c, wbgt_c: h.wbgt_c, wet_bulb_c: h.wet_bulb_c, relative_humidity_pct: h.relative_humidity_pct }))} />
     {table}
     {s.heat_programme_required && <p className="hs-statusline"><Badge tone="wait">Heat programme</Badge> A heat stress programme is required for this day.</p>}
   </>;
@@ -80,8 +98,8 @@ export function SiteConditionsTableScreen({ session }: ScreenProps) {
       : c.status !== 'ok' ? <Note tone="red">Conditions unavailable: {c.message}. Treat site heat as unknown and rely on local readings.</Note>
       : <Section title={`Site conditions · ${sourceLabel(c)}`} icon="sensor">
         <div className="hs-scroll"><table className="hs-table hs-table-sm" aria-label="Site conditions by hour">
-          <thead><tr><th>Hour</th><th>TWL sun W/m²</th><th>TWL shade W/m²</th><th>Environmental band</th><th>Air °C</th><th>WBGT °C</th><th>Midday break</th><th>Source</th></tr></thead>
-          <tbody>{shiftHours(c).map(h => <tr key={h.hour}><td>{h.hour}</td><td>{h.twl_sun_wm2}</td><td>{h.twl_shade_wm2}</td><td>{twlBandWord(h.twl_sun_wm2)}</td><td>{h.temperature_c}</td><td>{h.wbgt_c}</td><td>{h.midday_break_minutes ? `${h.midday_break_minutes} min` : '—'}</td><td>{h.hour > nowM ? 'Predicted' : sourceLabel(c)}{h.data_issue ? ` · ${h.data_issue}` : ''}</td></tr>)}</tbody>
+          <thead><tr><th>Hour</th><th>TWL sun W/m²</th><th>TWL shade W/m²</th><th>Environmental band</th><th>Air °C</th><th>WBGT °C</th><th>Wet bulb °C</th><th>Humidity %</th><th>Midday break</th><th>Source</th></tr></thead>
+          <tbody>{shiftHours(c).map(h => <tr key={h.hour}><td>{h.hour}</td><td>{h.twl_sun_wm2}</td><td>{h.twl_shade_wm2}</td><td>{twlBandWord(h.twl_sun_wm2)}</td><td>{h.temperature_c}</td><td>{h.wbgt_c}</td><td>{h.wet_bulb_c ?? '—'}</td><td>{h.relative_humidity_pct ?? '—'}</td><td>{h.midday_break_minutes ? `${h.midday_break_minutes} min` : '—'}</td><td>{h.hour > nowM ? 'Predicted' : sourceLabel(c)}{h.data_issue ? ` · ${h.data_issue}` : ''}</td></tr>)}</tbody>
         </table></div>
         <p className="hs-muted">{c.kind === 'replay' ? 'Historical weather data' : 'Weather forecast'} · {c.site === 'mussafah' ? 'Mussafah' : c.site} · For planning only</p>
         {c.citation.length > 0 && <p className="hs-muted">Zones: {c.citation.map((x, i) => <span key={x.cite}>{i ? '; ' : ''}{x.url ? <a href={x.url} target="_blank" rel="noreferrer">{x.cite}</a> : x.cite}</span>)}</p>}
