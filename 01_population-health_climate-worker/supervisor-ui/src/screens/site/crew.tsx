@@ -20,14 +20,15 @@ const readinessBadge = (p: CrewMember) => p.excluded ? <span className="hs-badge
     : p.readiness === 'not_ready' ? <span className="hs-badge" data-tone="muted">Not ready</span>
       : <span className="hs-badge" data-tone="wait">Unconfirmed</span>;
 
-/** Readiness confirmation: one worker, one task, face to face. */
+/** Readiness confirmation: face to face, for one worker or for several selected workers with the same basis. */
 export function ReadinessScreen({ session }: ScreenProps) {
   const { caseView, person } = session;
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string[] | null>(null);
+  const [picked, setPicked] = useState<string[]>([]);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [basis, setBasis] = useState<Basis>(BASES[0][0]);
   const [hours, setHours] = useState('2');
-  useEffect(() => { setSelected(null); setExpanded(null); setBasis(BASES[0][0]); setHours('2'); }, [caseView?.case_id]);
+  useEffect(() => { setSelected(null); setPicked([]); setExpanded(null); setBasis(BASES[0][0]); setHours('2'); }, [caseView?.case_id]);
   if (!caseView || !person) return <NoCase session={session} />;
   const all = crew(caseView);
   const list = [...all].sort((a, b) => Number(b.qualifications.includes('civil_worker')) - Number(a.qualifications.includes('civil_worker')));
@@ -38,18 +39,25 @@ export function ReadinessScreen({ session }: ScreenProps) {
   const canConfirm = readinessTask?.status === 'ready' && readinessTask.actor_id === person.id;
   const workshop = caseView.capture?.request.locations.find(l => l.id === caseView.capture?.request.task_locations.workshop_prep);
   const fixed = caseView.capture?.request.snapshot.zone_windows.find(w => w.zone_id === workshop?.id)?.fixed_occupant_ids ?? [];
-  if (selected) {
-    const p = all.find(x => x.id === selected)!;
+  const confirmableIds = new Set(canConfirm ? list.filter(p => !p.excluded && p.readiness !== 'ready').map(p => p.id) : []);
+  const chosen = picked.filter(id => confirmableIds.has(id));
+  const toggle = (id: string) => setPicked(current => current.includes(id) ? current.filter(x => x !== id) : [...current, id]);
+  const people = (selected ?? []).map(id => all.find(x => x.id === id)).filter((p): p is CrewMember => !!p);
+  if (selected && people.length) {
+    const p = people[0];
+    const many = people.length > 1;
     const validUntil = toIso(atDubai(new Date(Date.parse(caseView.clock) + Number(hours) * 3_600_000).toISOString()));
+    const submit = () => session.act('readiness', payloads.readiness(people.map(x => x.id), 'ready', basis, validUntil)).then(() => { setSelected(null); setPicked([]); });
     return <div className="hs-screen">
-      <Head kicker="Confirm readiness · Workshop preparation" title={<Person id={p.id} size="lg">{who(p.id)}</Person>} sub={p.qualifications.length ? `Qualified: ${p.qualifications.map(reasonLabel).join(', ')}` : 'Qualification not on record'} />
-      <Note>Time in shelter is not readiness. Confirm only after speaking with the worker.</Note>
-      <form className="hs-form" onSubmit={e => { e.preventDefault(); void session.act('readiness', payloads.readiness([p.id], 'ready', basis, validUntil)).then(() => setSelected(null)); }}>
+      <Head kicker="Confirm readiness · Workshop preparation" title={many ? `${people.length} selected workers` : <Person id={p.id} size="lg">{who(p.id)}</Person>} sub={many ? undefined : p.qualifications.length ? `Qualified: ${p.qualifications.map(reasonLabel).join(', ')}` : 'Qualification not on record'} />
+      {many && <List>{people.map(x => <Row key={x.id} lead={<Avatar id={x.id} size="sm" />} title={who(x.id)} detail={x.qualifications.map(reasonLabel).join(', ') || 'Qualification not on record'} />)}</List>}
+      <Note>{many ? 'Time in shelter is not readiness. Confirm only after speaking with each selected worker. The same basis and validity apply to all of them.' : 'Time in shelter is not readiness. Confirm only after speaking with the worker.'}</Note>
+      <form className="hs-form" onSubmit={e => { e.preventDefault(); void submit(); }}>
         <Choice legend="Assessment basis" value={basis} options={BASES.map(([id, label]) => [id, label])} onChange={setBasis} />
         <label className="hs-field">Valid for<select value={hours} onChange={e => setHours(e.target.value)}><option value="1">1 hour</option><option value="2">2 hours</option><option value="4">4 hours</option></select></label>
         <p className="hs-computed">Confirmer recorded automatically: {who(person.id)} · valid until {time(validUntil)}</p>
         <CtaBar>
-          <button type="submit" className="hs-button is-primary" disabled={!canConfirm || session.busy}>Confirm {p.name.split(' ')[0]} ready for workshop preparation</button>
+          <button type="submit" className="hs-button is-primary" disabled={!canConfirm || session.busy}>{many ? `Confirm ${people.length} selected workers ready for workshop preparation` : `Confirm ${p.name.split(' ')[0]} ready for workshop preparation`}</button>
           <button type="button" className="hs-button" onClick={() => setSelected(null)}>Back to the list</button>
         </CtaBar>
       </form>
@@ -65,13 +73,15 @@ export function ReadinessScreen({ session }: ScreenProps) {
       <Metric label="Workshop places" value={workshop ? `${workshop.capacity - fixed.length} of ${workshop.capacity}` : '—'} sub={fixed.length ? `${fixed.length} fixed occupants` : undefined} />
     </Hero>
     <Section title="Affected workers">
+      {confirmableIds.size > 0 && <p className="hs-small"><button type="button" className="hs-link" onClick={() => setPicked(chosen.length === confirmableIds.size ? [] : [...confirmableIds])}>{chosen.length === confirmableIds.size ? 'Clear selection' : `Select all unconfirmed (${confirmableIds.size})`}</button></p>}
       <List>{list.map(p => {
         const isOpen = expanded === p.id;
-        const confirmable = canConfirm && !p.excluded && p.readiness !== 'ready';
-        return <Row key={p.id} lead={<Avatar id={p.id} size="sm" excluded={p.excluded} />} title={who(p.id)} badge={readinessBadge(p)} expanded={isOpen} onClick={() => setExpanded(isOpen ? null : p.id)}>
+        const confirmable = confirmableIds.has(p.id);
+        const select = confirmableIds.size > 0 ? <input type="checkbox" aria-label={`Select ${who(p.id)}`} checked={chosen.includes(p.id)} disabled={!confirmable} onChange={() => toggle(p.id)} /> : undefined;
+        return <Row key={p.id} select={select} lead={<Avatar id={p.id} size="sm" excluded={p.excluded} />} title={who(p.id)} detail={readinessBadge(p)} expanded={isOpen} onClick={() => setExpanded(isOpen ? null : p.id)}>
           {isOpen && <>
             <span className="hs-small hs-muted">{`${p.qualifications.map(reasonLabel).join(', ') || 'No qualification on record'} · ${p.readiness === 'ready' ? `ready${p.readinessUntil ? ` until ${time(p.readinessUntil)}` : ''}` : p.reason ?? 'no readiness confirmation yet'}`}</span>
-            {confirmable && <button type="button" className="hs-button" onClick={() => setSelected(p.id)}>Confirm {p.name.split(' ')[0]}’s readiness</button>}
+            {confirmable && <button type="button" className="hs-button" onClick={() => setSelected([p.id])}>Confirm {p.name.split(' ')[0]}’s readiness</button>}
           </>}
         </Row>;
       })}</List>
@@ -83,7 +93,8 @@ export function ReadinessScreen({ session }: ScreenProps) {
     {activityDue && <Section title="Observed activity">
       <div className="hs-mui"><EvidenceAction action="activity" caseView={caseView} person={person} onAction={session.act} busy={session.busy} /></div>
     </Section>}
-    {canConfirm && next && <CtaBar><button type="button" className="hs-button is-primary" onClick={() => setSelected(next.id)}>Confirm next: {next.name.split(' ')[0]}</button></CtaBar>}
+    {canConfirm && chosen.length > 0 && <CtaBar><button type="button" className="hs-button is-primary" onClick={() => setSelected(chosen)}>Confirm selected ({chosen.length})</button></CtaBar>}
+    {canConfirm && !chosen.length && next && <CtaBar><button type="button" className="hs-button is-primary" onClick={() => setSelected([next.id])}>Confirm next: {next.name.split(' ')[0]}</button></CtaBar>}
     {!canConfirm && !activityDue && <CtaBar><button type="button" className="hs-button" onClick={() => navigate('/site/proposal')}>Review proposal</button></CtaBar>}
   </div>;
 }
@@ -165,7 +176,7 @@ export function ActionCardScreen({ session }: ScreenProps) {
   const reportedAt = story.events.find(event => event.id === 'report')?.occurred_at;
   return <div className="hs-screen">
     <Head kicker={reportedAt ? `Bilal (C08) · reported ${time(reportedAt)}` : 'Bilal (C08) · report recorded'} title="Worker action card" />
-    <Statement tone="red" source="⚙ Escalation rule · not AI">Bilal needs rest now. Keep him off work and with someone.</Statement>
+    <Statement tone="red" source="⚙ Escalation rule">Bilal needs rest now. Keep him off work and with someone.</Statement>
     <Note tone="amber">If he is confused, has vomited or stopped sweating: treat it as an emergency, start cooling, keep someone with him and call 998.</Note>
     <Section title="Steps">
       <List>{steps.map(([action, label, owner], i) => <Row key={action} title={`${i + 1}. ${label}`} detail={`Owner: ${owner}`} badge={taskBadge(session, action)} />)}</List>
@@ -173,7 +184,7 @@ export function ActionCardScreen({ session }: ScreenProps) {
     <Note>No health detail here. Details stay in Bilal’s own health record.</Note>
     <CtaBar>
       {salim ? <ActionButton session={session} action="firstaid" label="Record first-aid contact" primary />
-        : !story.removed ? <><ActionButton session={session} action="incident_record" label="Record the site incident" /><ActionButton session={session} action="remove" label="Confirm Bilal removed from heat" danger confirm={{ word: 'REMOVED', title: 'Confirm Bilal is out of the heat', body: 'This records your confirmation for the protective response. Bilal goes to welfare and first aid.' }} /></>
+        : !story.removed ? <><ActionButton session={session} action="incident_record" label="Record the site incident" /><ActionButton session={session} action="remove" label="Confirm Bilal removed from heat" danger confirm={{ title: 'Confirm Bilal is out of the heat', body: 'This records your confirmation for the protective response. Bilal goes to welfare and first aid.' }} /></>
           : <ActionButton session={session} action="recovery_check" label="Confirm the recovery check" primary />}
     </CtaBar>
   </div>;

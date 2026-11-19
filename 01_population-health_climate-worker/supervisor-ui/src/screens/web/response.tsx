@@ -68,7 +68,7 @@ export function HeatControlsScreen({ session }: ScreenProps) {
       {!sq.live ? <List cols={3}><Row title={`${sq.name} heavy work`} detail={sq.hold ? HOLD_TEXT : sq.reading.fresh ? 'No restriction' : 'Local reading is not fresh · forecast in use'} badge={sq.hold ? <Hold /> : <span className="hs-badge" data-tone="muted">No hold</span>} /></List>
         : controls.length ? <List cols={3}>{controls.map(c => <Row key={c.task_id} title={nameOf(c.task_id)} detail={c.reason_codes.map(reasonLabel).join(' · ') || 'No restriction'} badge={c.state === 'held' || c.state === 'stopped' || c.state === 'hold_required' ? <Hold>{controlLabel(c.state)}</Hold> : <span className="hs-badge" data-tone="muted">{controlLabel(c.state)}</span>} />)}</List>
         : <Empty>The solver has not assessed this case yet.</Empty>}
-      <Computed tight>Holds are computed by the site rules · not AI. Only a squad with a heavy-work hold needs a stop-work instruction.</Computed>
+      <Computed tight>Holds are computed by the site rules. Only a squad with a heavy-work hold needs a stop-work instruction.</Computed>
     </Section>
     <Section title={`Alerts and warnings · ${sq.name}`} id={ITEMS_ID}><SquadItems squad={sq} /></Section>
     <ConditionsPanel session={session} />
@@ -131,7 +131,7 @@ export function ProtectiveResponseScreen({ session }: ScreenProps) {
     </Section>
     {mine.length > 0 && <Section title="Record yours">
       {mine.map(t => t.action === 'recover' ? <button key={t.action} type="button" className="hs-button is-primary" onClick={() => navigate('/site/account-for-crew')}>Open physical headcount</button> : <ActionButton key={t.action} session={session} action={t.action} label={t.label} primary
-        confirm={t.action === 'remove' ? { word: 'REMOVED', title: 'Confirm the worker is out of the heat', body: 'This records your human confirmation for the protective response. Software cannot record it for you.' } : undefined} />)}
+        confirm={t.action === 'remove' ? { title: 'Confirm the worker is out of the heat', body: 'This records your human confirmation for the protective response. Software cannot record it for you.' } : undefined} />)}
     </Section>}
     {protective && protective.actions.length > 0 && <Section title="Solver’s protective actions">
       <Draft><ul className="hs-plain">{protective.actions.map(a => <li key={a.code + a.owner_id}>{reasonLabel(a.code)} · <Person id={a.owner_id}>{nameOf(a.owner_id)}</Person> · {a.status}{a.due_at ? ` · due ${time(a.due_at)}` : ''}{a.message ? ` — ${a.message}` : ''}</li>)}</ul></Draft>

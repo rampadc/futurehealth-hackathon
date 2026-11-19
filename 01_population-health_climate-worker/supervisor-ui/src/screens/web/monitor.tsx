@@ -21,8 +21,10 @@ export function SquadMonitoringScreen({ session }: ScreenProps) {
       <Metric label="Heavy work" value={caseView.story.stopped ? 'Stopped' : caseView.story.issued ? 'Stop instructed' : 'Awaiting instruction'} tone={caseView.story.issued ? 'red' : undefined} />
       <Metric label="Foreman headcount" value={`${caseView.headcount?.confirmed_count ?? 0} / ${caseView.headcount?.expected_count ?? 11}`} />
     </Hero>
-    <Section title="Project evidence"><p>Review the case chronology, confirmed work and recovery duration, employer coverage and delivery state.</p><button type="button" className="hs-button is-primary" onClick={() => navigate('/web/heat-rest')}>Open project heat and rest view</button></Section>
-    <Section title="Cost impact review"><ActionButton session={session} action="costReview" label="Record cost impact review" /></Section>
+    <div className="hs-grid" data-cols="2">
+      <Section title="Project evidence"><p>Review the case chronology, confirmed work and recovery duration, employer coverage and delivery state.</p><button type="button" className="hs-button is-primary" onClick={() => navigate('/web/heat-rest')}>Open project heat and rest view</button></Section>
+      <Section title="Cost impact review"><ActionButton session={session} action="costReview" label="Record cost impact review" /></Section>
+    </div>
   </div>;
   const story = caseView.story;
   const heat = heatNow(caseView);
@@ -93,7 +95,7 @@ export function SystemTrustScreen({ session }: ScreenProps) {
       <ul className="hs-syslist">
         <li><h3>Inputs</h3><ul>{sensorsNow().filter(x => !x.id.startsWith('k')).map(x => <li key={x.id}><span><b>{x.id.toUpperCase()} · {x.type}</b><small>{x.loc} · {x.relay}</small></span><Badge tone={x.off || x.stale ? 'over' : 'done'}>{x.off ? 'Offline' : x.stale ? 'Stale' : 'Live'}</Badge></li>)}
           <li><span><b>Weather forecast</b><small>Hourly, Mussafah · planning context only</small></span><Badge tone="muted">Context</Badge></li></ul></li>
-        <li><h3>Rules (no AI)</h3><ul>
+        <li><h3>Rules</h3><ul>
           <li><span><b>Risk monitor and heat rules</b><small>Bands, holds and escalations · deterministic</small></span><Badge tone={ready === false ? 'over' : 'done'}>{ready === null ? 'Checking' : ready ? 'Ready' : 'Degraded'}</Badge></li>
           <li><span><b>Operational solver</b><small>{counts('solver_run')} runs this case · every result applied: false</small></span><Badge tone={appliedOnSite ? 'over' : 'done'}>{appliedOnSite ? 'Applied' : 'Proposals only'}</Badge></li>
           <li><span><b>Case database</b><small>Commands, events and evidence</small></span><Badge tone={ready === false ? 'over' : 'done'}>{ready === false ? 'Degraded' : 'Ready'}</Badge></li></ul></li>

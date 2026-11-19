@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { BrandCheck, BrandPalette, BrandSettings } from '../../contract';
 import { live } from '../../live';
 import { time } from '../data';
-import { Badge, Computed, CtaBar, Draft, Empty, Hero, List, Metric, Note, Row, Section, TypedConfirm } from '../kit';
+import { Badge, Computed, CtaBar, Draft, Empty, Hero, List, Metric, Note, Row, Section, ConfirmDialog } from '../kit';
 import type { ScreenProps } from '../registry';
 
 const EXAMPLE: BrandPalette = { name: 'Sandline', primary: '#1F3A5F', on_primary: '#FFFFFF', logo_text: 'SANDLINE', rail_tint: false };
@@ -89,11 +89,11 @@ export function BrandingSettings({ session }: ScreenProps) {
           <Row title="Stop-work and emergency screens" detail="The stop-work instruction and the worker alert drop the brand entirely." badge={<Badge tone="muted">Never</Badge>} />
         </List>
       </Section>
-      {admin ? <CtaBar note="Publishing changes every signed-in surface. Type PUBLISH to confirm.">
+      {admin ? <CtaBar note="Publishing changes every signed-in surface.">
         <button type="button" className="hs-button is-primary" disabled={!passing} onClick={() => setConfirming(true)}>Publish branding</button>
       </CtaBar> : <Note>Only the organisation admin can publish branding.</Note>}
     </>}
-    {confirming && <TypedConfirm word="PUBLISH" title="Publish this branding?" body="Every supervisor, site and worker screen picks it up straight away. Safety colours do not change." onCancel={() => setConfirming(false)} onConfirm={() => void publish()} />}
+    {confirming && <ConfirmDialog title="Publish this branding?" body="Every supervisor, site and worker screen picks it up straight away. Safety colours do not change." onCancel={() => setConfirming(false)} onConfirm={() => void publish()} />}
     <Computed>Guardrails run on the server before anything is saved.</Computed>
   </div>;
 }

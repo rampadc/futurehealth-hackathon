@@ -18,7 +18,7 @@ export const readyTasks = (caseView: CaseView | null, personId: string | undefin
 /** Owners of case actions the story module does not list (backend-only evidence actions). */
 const EXTRA_OWNERS: Record<string, string> = {
   escalation_followup: 'P02', activity: 'C01', readiness: 'C01', incident_record: 'C01',
-  personnel: 'C01', recovery_check: 'C01', crew_readiness: 'C01', water: 'P03',
+  personnel: 'C01', recovery_check: 'C01', crew_readiness: 'C01', water: 'C01',
 };
 const RESTART_KEYS: Record<string, string> = { permit: 'permit', personnel: 'personnel', recovery_check: 'recovery', water: 'water', crew_readiness: 'crew_readiness' };
 export const ownerOf = (action: string) => ACTIONS[action as ActionId]?.actorId ?? EXTRA_OWNERS[action] ?? '';

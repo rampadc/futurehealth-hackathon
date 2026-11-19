@@ -1,6 +1,6 @@
 import { navigate } from '../../router';
 import { assessmentCapture, heatNow, intervalsOf, kindLabel, nowAndNext, taskFor, time } from '../data';
-import { Band, Computed, CtaBar, Empty, Hero, HoldButton, List, Metric, NoCase, Note, Row, Section, Statement } from '../kit';
+import { Band, Computed, CtaBar, Empty, Hero, ConfirmButton, List, Metric, NoCase, Note, Row, Section, Statement } from '../kit';
 import type { ScreenProps } from '../registry';
 import { OwnRiskPanel } from '../risk';
 import { En, T, useT, useWorker, WorkerFrame } from './frame';
@@ -111,7 +111,7 @@ function Shelter({ session }: ScreenProps) {
     {task && !done && task.status !== 'ready' && <Note tone="amber"><T k="p6.opens" /></Note>}
     <CtaBar>
       {done ? <button type="button" className="hs-button" onClick={() => navigate('/worker/now')}><T k="p6.back" /></button>
-        : <HoldButton disabled={!task || task.status !== 'ready' || session.busy} onConfirm={() => void session.act('checkin', {})} hint={t('hold')}><T k="p6.cta" /></HoldButton>}
+        : <ConfirmButton disabled={!task || task.status !== 'ready' || session.busy} onConfirm={() => void session.act('checkin', {})} body={t('confirm.body')} confirmLabel={t('confirm')} cancelLabel={t('cancel')}><T k="p6.cta" /></ConfirmButton>}
     </CtaBar>
   </div>;
 }

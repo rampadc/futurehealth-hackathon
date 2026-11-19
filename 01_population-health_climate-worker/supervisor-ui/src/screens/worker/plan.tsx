@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { navigate } from '../../router';
 import { assessmentCapture, intervalsOf, kindLabel, minutes, nowAndNext, time } from '../data';
-import { Computed, CtaBar, Empty, Hero, HoldButton, List, Metric, NoCase, Note, Row, Section, Statement } from '../kit';
+import { Computed, CtaBar, Empty, Hero, ConfirmButton, List, Metric, NoCase, Note, Row, Section, Statement } from '../kit';
 import type { ScreenProps } from '../registry';
 import { En, T, useT, useWorker, WorkerFrame } from './frame';
 import { VoiceCheckIn } from './voice';
@@ -54,7 +54,7 @@ function CheckIn({ session }: ScreenProps) {
     {!online && <Note tone="amber"><T k="p4.offline" /></Note>}
     {!report && (step === 'unwell' || step === 'emergency') && <Note tone="amber"><T k="p4.tellForeman" /></Note>}
     {report && (step === 'unwell' || step === 'emergency') && <CtaBar>
-      <HoldButton disabled={!canSend} onConfirm={() => void session.act('report', {})} hint={t('hold')}><T k="p4.send" /></HoldButton>
+      <ConfirmButton disabled={!canSend} onConfirm={() => void session.act('report', {})} body={t('confirm.body')} confirmLabel={t('confirm')} cancelLabel={t('cancel')}><T k="p4.send" /></ConfirmButton>
     </CtaBar>}
     <Computed><T k="p4.rule" /></Computed>
   </div>;

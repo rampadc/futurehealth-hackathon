@@ -18,7 +18,8 @@ export function ForemanWorkspace({ story, capture, caseView, actions }: Workspac
       <Typography sx={{ mb: 1 }}>Keep Bilal off work and confirm his location. Salim records first-aid contact in his own workspace.</Typography>
       {actions(['incident_record', 'remove'])}
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>First-aid contact: {story.firstaid ? 'Recorded by Salim' : 'Waiting for Salim'}. A contact record does not clear Bilal to return.</Typography>
-      {actions(['leila', 'personnel', 'recovery_check', 'crew_readiness'])}
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>After first-aid contact, record a fresh local reading at the trench and the water check for the separate restart review.</Typography>
+      {actions(['fresh', 'water', 'leila', 'personnel', 'recovery_check', 'crew_readiness'])}
       {!story.removed || !story.firstaid ? <Alert severity="info" sx={{ mt: 1 }}>Replanning is waiting for removal and first-aid contact.</Alert> : <Box sx={{ mt: 2 }}><Schedule capture={capture} /></Box>}
     </Panel>}
   </Stack>;

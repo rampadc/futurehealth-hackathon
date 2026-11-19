@@ -45,7 +45,7 @@ export type WorkerDataExport = {
   note: string;
 };
 
-/** Branding · GET /api/brand (all), POST /api/brand/check, PUT /api/brand (admin only, typed PUBLISH). */
+/** Branding · GET /api/brand (all), POST /api/brand/check, PUT /api/brand (admin only, confirm value PUBLISH sent after the confirmation modal). */
 export type BrandSettings = {
   version: number;
   published_at: string | null;
