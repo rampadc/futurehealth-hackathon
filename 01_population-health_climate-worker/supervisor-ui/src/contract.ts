@@ -57,7 +57,7 @@ export type BrandCheck = { id: 'format' | 'contrast' | 'signal'; ok: boolean; la
 export type BrandPalette = { name: string; primary: string; on_primary: string; logo_text: string; rail_tint: boolean };
 
 /** Site heat conditions · GET /api/case/conditions. Risk-core replay or forecast; never a local measurement. */
-export type ConditionsHour = { hour: string; temperature_c: number; wbgt_c: number; twl_sun_wm2: number; twl_zone_sun: string; twl_shade_wm2: number; twl_zone_shade: string; band_sun: string; midday_break_minutes: number; withdrawal_limit: string; data_issue: string };
+export type ConditionsHour = { hour: string; temperature_c: number; wbgt_c: number; relative_humidity_pct?: number | null; wet_bulb_c?: number | null; twl_sun_wm2: number; twl_zone_sun: string; twl_shade_wm2: number; twl_zone_shade: string; band_sun: string; midday_break_minutes: number; withdrawal_limit: string; data_issue: string };
 export type SiteConditions =
   | { status: 'ok'; site: string; date: string; source: string; kind: 'replay' | 'forecast'; clock_hour: string; current: ConditionsHour | null;
       summary: { max_temperature_c: number; max_wbgt_c: number; min_twl_sun_wm2: number; worst_band: string; hours_high_zone_sun: number; midday_break: string; heat_programme_required: boolean; data_issues: number };

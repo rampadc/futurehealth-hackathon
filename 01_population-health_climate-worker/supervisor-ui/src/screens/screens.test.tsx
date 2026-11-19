@@ -20,7 +20,7 @@ let commands: Array<{ action: string; payload: Record<string, unknown> }>;
 let commandIds: string[];
 let brand: { version: number; published_at: string | null; published_by: string | null; platform: unknown; mobile: unknown };
 let brandCalls: Array<Record<string, unknown>>;
-const hourOf = (hour: string, twl: number, zone: string) => ({ hour, temperature_c: 34.4, wbgt_c: 32.2, twl_sun_wm2: twl, twl_zone_sun: zone, twl_shade_wm2: twl + 40, twl_zone_shade: 'low', band_sun: zone === 'high' ? 'red' : 'amber', midday_break_minutes: 0, withdrawal_limit: '', data_issue: '' });
+const hourOf = (hour: string, twl: number, zone: string) => ({ hour, temperature_c: 34.4, wbgt_c: 32.2, wet_bulb_c: 29, relative_humidity_pct: 68, twl_sun_wm2: twl, twl_zone_sun: zone, twl_shade_wm2: twl + 40, twl_zone_shade: 'low', band_sun: zone === 'high' ? 'red' : 'amber', midday_break_minutes: 0, withdrawal_limit: '', data_issue: '' });
 let conditions: unknown;
 let crewRisk: CrewRisk;
 let chatHistory: unknown[];
@@ -267,9 +267,56 @@ describe('stop-work', () => {
   it('shows replayed site conditions on heat controls without using them for clearance', async () => {
     currentCase = await makeCase('heat_trigger', {}, [task('issue', 'P03', 'ready')]);
     await open('/web/heat-controls', 'P03');
-    expect(await screen.findByRole('heading', { name: 'Site conditions · Historical ERA5' })).toBeTruthy();
-    expect(screen.getByText(/08:00 · TWL 127 W\/m² in sun · 167 in shade/)).toBeTruthy();
-    expect(screen.getByRole('img', { name: /^TWL by hour/ })).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: 'Site conditions' })).toBeTruthy();
+    const table = screen.getByRole('table', { name: 'Site conditions this hour and the worst of the day' });
+    expect(within(table).getByRole('row', { name: /TWL in sun 127 W\/m² · Medium zone/ })).toBeTruthy();
+    expect(within(table).getByRole('row', { name: /TWL in shade 167 W\/m²/ })).toBeTruthy();
+    const chart = screen.getByRole('img', { name: /^TWL by hour/ });
+    // By default only the TWL line is drawn, with no right axis.
+    expect([...chart.querySelectorAll('[data-series]')].map(e => e.getAttribute('data-series'))).toEqual(['policy', 'twl']);
+    expect(chart.querySelectorAll('[data-axis="right"]')).toHaveLength(0);
+    await userEvent.click(screen.getByRole('checkbox', { name: 'Air temperature °C' }));
+    // After the case clock every line is drawn as predicted (dashed).
+    expect(chart.querySelector('[data-series="twl"] [data-part="predicted"]')).toBeTruthy();
+    expect(chart.querySelector('[data-series="temp"] [data-part="predicted"]')).toBeTruthy();
+    await userEvent.click(screen.getByRole('checkbox', { name: 'WBGT °C' }));
+    expect(chart.querySelector('[data-series="wbgt"]')).toBeTruthy();
+    // Humidity and °C never share the right axis: choosing one clears the other.
+    await userEvent.click(screen.getByRole('checkbox', { name: 'Humidity %' }));
+    expect((screen.getByRole('checkbox', { name: 'Air temperature °C' }) as HTMLInputElement).checked).toBe(false);
+    expect(chart.querySelector('[data-series="temp"]')).toBeNull();
+    expect([...chart.querySelectorAll('[data-axis="right"]')].every(t => t.textContent!.endsWith('%'))).toBe(true);
+    await userEvent.click(screen.getByRole('checkbox', { name: 'Wet bulb °C' }));
+    expect((screen.getByRole('checkbox', { name: 'Humidity %' }) as HTMLInputElement).checked).toBe(false);
+    expect([...chart.querySelectorAll('[data-axis="right"]')].every(t => t.textContent!.endsWith('°'))).toBe(true);
+    expect(within(table).getByRole('row', { name: /Humidity 68%/ })).toBeTruthy();
+    expect(screen.queryByText(/For planning only/)).toBeNull();
+    await userEvent.click(screen.getByRole('button', { name: 'Open the hourly table' }));
+    expect(await screen.findByRole('heading', { level: 1, name: 'Site conditions table' })).toBeTruthy();
+    expect(screen.getByRole('table', { name: 'Site conditions by hour' })).toBeTruthy();
+    expect(screen.getByText(/Historical weather data · Mussafah · For planning only/)).toBeTruthy();
+  });
+
+  it('shows heat controls for the squad chosen on the page', async () => {
+    currentCase = await makeCase('heat_trigger', {}, []);
+    await open('/web/heat-controls', 'P03');
+    await userEvent.click(await screen.findByRole('radio', { name: /Steel fixing crew/ }));
+    expect(screen.getByRole('heading', { name: 'Task controls · Steel fixing crew' })).toBeTruthy();
+    const card = screen.getByRole('radio', { name: /Steel fixing crew/ }).closest('.hs-sq') as HTMLElement;
+    expect(card.textContent).toMatch(/Sensor T3 · offline · forecast in use/);
+    // On the selected card, the counts open the squad's alerts and warnings.
+    window.HTMLElement.prototype.scrollIntoView = vi.fn();
+    await userEvent.click(within(card).getByRole('button', { name: /steel fixing crew’s 1 alert and 1 warning/ }));
+    expect(window.HTMLElement.prototype.scrollIntoView).toHaveBeenCalled();
+    const items = screen.getByRole('heading', { name: 'Alerts and warnings · Steel fixing crew' }).closest('section')!;
+    expect(within(items).getByText(/offline · band raised one level/)).toBeTruthy();
+    // An unselected card has no such button: the first click selects it.
+    const mep = screen.getByRole('radio', { name: /MEP crew/ }).closest('.hs-sq') as HTMLElement;
+    expect(within(mep).queryByRole('button', { name: /alert/ })).toBeNull();
+    expect(screen.queryByRole('heading', { name: /Reading source/ })).toBeNull();
+    expect(screen.getByText(/has no heavy-work hold to clear/)).toBeTruthy();
+    // The squad choice is shared across screens in this tab; put it back for later tests.
+    await userEvent.click(screen.getByRole('radio', { name: /Civil crew/ }));
   });
 
   it('says conditions are unavailable and to rely on local readings', async () => {
@@ -325,8 +372,29 @@ describe('stop-work', () => {
     currentCase = await makeCase('heat_trigger', {}, []);
     currentCase.request!.snapshot.readings[0] = { ...currentCase.request!.snapshot.readings[0], twl: 145, quality: 'invalid' };
     await open('/web/monitoring', 'P03');
-    expect((await screen.findAllByText(/TWL 145 W\/m² · Unknown/)).length).toBeGreaterThan(0);
-    expect(screen.queryByText(/TWL 145 W\/m² · Low environmental risk/)).toBeNull();
+    const card = (await screen.findByRole('radio', { name: /Civil crew/ })).closest('.hs-sq') as HTMLElement;
+    expect(card.textContent).toMatch(/TWL 145 W\/m²\s*Unknown/);
+    expect(card.textContent).not.toMatch(/Low environmental risk/);
+  });
+
+  it('filters the crews shown in the squad selector and keeps at least one', async () => {
+    currentCase = await makeCase('heat_trigger', {}, []);
+    await open('/web/monitoring', 'P03');
+    await userEvent.click(await screen.findByText('Filter'));
+    await userEvent.click(screen.getByRole('checkbox', { name: /Formwork crew/ }));
+    await userEvent.click(screen.getByRole('checkbox', { name: /MEP crew/ }));
+    expect(screen.queryByRole('radio', { name: /Formwork crew/ })).toBeNull();
+    expect(screen.queryByRole('radio', { name: /MEP crew/ })).toBeNull();
+    expect(screen.getByText('Crews · 2 of 4')).toBeTruthy();
+    // Hiding the chosen crew moves the choice to the first crew still shown.
+    await userEvent.click(screen.getByRole('checkbox', { name: /Civil crew/ }));
+    expect(screen.getByRole('radio', { name: /Steel fixing crew/ }).getAttribute('aria-checked')).toBe('true');
+    // The last crew shown cannot be hidden.
+    expect((screen.getByRole('checkbox', { name: /Steel fixing crew/ }) as HTMLInputElement).disabled).toBe(true);
+    for (const name of [/Civil crew/, /Formwork crew/, /MEP crew/]) await userEvent.click(screen.getByRole('checkbox', { name }));
+    expect(screen.getByText('Crews · 4 of 4')).toBeTruthy();
+    // The squad choice is shared across screens in this tab; put it back for later tests.
+    await userEvent.click(screen.getByRole('radio', { name: /Civil crew/ }));
   });
 
   it('warns that every band is raised while the local reading is lost', async () => {

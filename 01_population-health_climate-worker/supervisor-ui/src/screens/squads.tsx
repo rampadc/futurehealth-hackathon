@@ -1,10 +1,11 @@
-import { useEffect, useSyncExternalStore, type ReactNode } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { live, type CaseView, type SensorState, type SiteSensors } from '../live';
 import { thermalStatus } from '../thermal';
 import { crew, heatNow, time } from './data';
 import { Avatar, Badge, Band, List, Row } from './kit';
 import { StatusIcon } from '../shared/icons';
 import { TwlReadout } from './twl';
+import { nameOf } from '../replay';
 import siteSquads from '../../../demo/cross-scenario/site-squads.json';
 
 /** Roster of each squad that is not on the case (shared with the backend's per-worker heat risk). */
@@ -104,6 +105,13 @@ export function squadsFor(caseView: CaseView | null): Squad[] {
   const open = caseView.tasks.filter(t => t.status === 'ready');
   const overdue = open.filter(t => t.due_at && Date.parse(t.due_at) <= Date.parse(caseView.clock));
   const recorded = caseView.tasks.filter(t => t.status === 'recorded').length;
+  // The civil crew's alerts and warnings, itemised: excluded workers and overdue actions are alerts; other open actions are warnings.
+  const isOverdue = (t: (typeof open)[number]) => overdue.includes(t);
+  const items: Squad['items'] = [
+    ...people.filter(p => p.excluded).map(p => ({ title: `${p.name} excluded from heat work`, detail: 'Protective response · stays out of heat work', tone: 'error' as const })),
+    ...overdue.map(t => ({ title: t.label, detail: `${nameOf(t.actor_id)} · overdue since ${time(t.due_at!)}`, tone: 'error' as const })),
+    ...open.filter(t => !isOverdue(t)).map(t => ({ title: t.label, detail: `${nameOf(t.actor_id)}${t.due_at ? ` · due ${time(t.due_at)}` : ' · open'}`, tone: 'warn' as const })),
+  ];
   const civil: Squad = {
     id: 'civil', name: 'Civil crew', foreman: 'Huda', foremanId: 'C01', loc: 'Civil trench', shelter: 'Shelter A', size: people.length,
     twl: heat.reading?.twl ?? null, band: heat.band.band, hold: heat.heavyHeld,
@@ -112,7 +120,7 @@ export function squadsFor(caseView: CaseView | null): Squad[] {
     alerts: people.filter(p => p.excluded).length + overdue.length, warnings: open.length - overdue.length,
     actions: { open: open.length, done: recorded }, responses: { done: recorded, total: recorded + open.length },
     headcount: `${caseView.headcount?.confirmed_count ?? 0} / ${caseView.headcount?.expected_count ?? people.length}`,
-    breakStart: '12:30', breakEnd: '15:00', checks: { done: 0, total: 8 }, members: people.map(p => p.id), items: [], live: true,
+    breakStart: '12:30', breakEnd: '15:00', checks: { done: 0, total: 8 }, members: people.map(p => p.id), items, live: true,
   };
   return [civil, ...fixture];
 }
@@ -125,18 +133,99 @@ export function useSquad(): [string, (id: string) => void] {
   return [id, next => { selected = next; listeners.forEach(l => l()); }];
 }
 
-/** Squad selector: a card per squad with its foreman, alerts and warnings, plus per-screen facts. */
-export function SquadPicker({ squads, lines }: { squads: Squad[]; lines?: (q: Squad) => ReactNode[] }) {
+/* Crews hidden from the selector by the Filter, kept for this viewer on this device. */
+const FILTER_KEY = 'hs-squad-filter';
+const readHidden = (): string[] => { try { return JSON.parse(localStorage.getItem(FILTER_KEY) ?? '[]'); } catch { return []; } };
+let hiddenSquads: string[] = readHidden();
+const filterListeners = new Set<() => void>();
+function setHidden(next: string[]) {
+  hiddenSquads = next;
+  try { localStorage.setItem(FILTER_KEY, JSON.stringify(next)); } catch { /* Private mode: keep it for this tab. */ }
+  filterListeners.forEach(l => l());
+}
+function useHiddenSquads() {
+  return useSyncExternalStore(l => { filterListeners.add(l); return () => { filterListeners.delete(l); }; }, () => hiddenSquads, () => hiddenSquads);
+}
+
+/** Filter: a dropdown of checkboxes choosing which crews the selector shows. At least one stays shown. */
+function SquadFilter({ squads, hidden, onChange }: { squads: Squad[]; hidden: string[]; onChange: (id: string, show: boolean) => void }) {
+  const ref = useRef<HTMLDetailsElement>(null);
+  // Close when the user clicks elsewhere or presses Escape.
+  useEffect(() => {
+    const close = (e: Event) => { if (ref.current?.open && !ref.current.contains(e.target as Node)) ref.current.open = false; };
+    const key = (e: KeyboardEvent) => { if (e.key === 'Escape' && ref.current?.open) { ref.current.open = false; ref.current.querySelector('summary')?.focus(); } };
+    document.addEventListener('pointerdown', close);
+    document.addEventListener('keydown', key);
+    return () => { document.removeEventListener('pointerdown', close); document.removeEventListener('keydown', key); };
+  }, []);
+  const shown = squads.filter(q => !hidden.includes(q.id)).length;
+  return <details className="hs-filter" ref={ref}>
+    <summary className="hs-button">Filter{shown < squads.length ? ` · ${shown} of ${squads.length}` : ''}</summary>
+    <fieldset className="hs-filter-menu"><legend>Crews to show</legend>
+      {squads.map(q => { const on = !hidden.includes(q.id); return <label key={q.id}>
+        <input type="checkbox" checked={on} disabled={on && shown === 1} onChange={e => onChange(q.id, e.target.checked)} />{q.name} <small>{q.foreman}</small>
+      </label>; })}
+    </fieldset>
+  </details>;
+}
+
+/**
+ * Squad selector: a card per squad with its foreman, alerts and warnings, plus per-screen facts.
+ * Clicking anywhere on a card selects the squad. With `onItems`, the selected card's alert and
+ * warning counts become a button that opens that squad's list. The cards scroll sideways as a
+ * carousel, and Filter chooses which crews appear.
+ */
+export function SquadPicker({ squads: all, lines, onItems }: { squads: Squad[]; lines?: (q: Squad) => ReactNode[]; onItems?: (q: Squad) => void }) {
   const [current, choose] = useSquad();
-  return <div className="hs-squads" role="radiogroup" aria-label="Squad">{squads.map(q =>
-    <button key={q.id} type="button" role="radio" aria-checked={q.id === current} className="hs-sq" onClick={() => choose(q.id)}>
-      <span className="hs-sq-h"><Avatar id={q.foremanId} size="md" /><span><b>{q.name}</b><small>{q.foreman}</small></span></span>
-      <span className="hs-sq-n">
-        <span data-zero={!q.alerts || undefined}>{q.alerts > 0 && <StatusIcon status="error" />}<b>{q.alerts}</b> alert{q.alerts === 1 ? '' : 's'}</span>
-        <span data-zero={!q.warnings || undefined}>{q.warnings > 0 && <StatusIcon status="warn" />}<b>{q.warnings}</b> warning{q.warnings === 1 ? '' : 's'}</span>
-      </span>
+  const hidden = useHiddenSquads();
+  const squads = all.filter(q => !hidden.includes(q.id));
+  const track = useRef<HTMLDivElement>(null);
+  const [ends, setEnds] = useState({ start: true, end: true });
+  const measure = () => {
+    const t = track.current;
+    if (t) setEnds({ start: t.scrollLeft <= 1, end: t.scrollLeft + t.clientWidth >= t.scrollWidth - 1 });
+  };
+  useEffect(() => {
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [squads.length]);
+  // Keep the chosen crew in view when it changes.
+  useEffect(() => { track.current?.querySelector('[aria-checked="true"]')?.closest('.hs-sq')?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' }); }, [current]);
+  const page = (dir: 1 | -1) => track.current?.scrollBy({ left: dir * track.current.clientWidth * 0.9, behavior: 'smooth' });
+  const filter = (id: string, show: boolean) => {
+    const next = show ? hidden.filter(h => h !== id) : [...hidden, id];
+    setHidden(next);
+    // Hiding the chosen crew moves the choice to the first crew still shown.
+    if (!show && id === current) { const first = all.find(q => !next.includes(q.id)); if (first) choose(first.id); }
+  };
+  return <div className="hs-squad-picker">
+    <div className="hs-squad-bar">
+      <span className="hs-label">Crews · {squads.length} of {all.length}</span>
+      <span className="hs-grow" />
+      {!(ends.start && ends.end) && <>
+        <button type="button" className="hs-button hs-carousel-btn" aria-label="Previous crews" disabled={ends.start} onClick={() => page(-1)}>‹</button>
+        <button type="button" className="hs-button hs-carousel-btn" aria-label="Next crews" disabled={ends.end} onClick={() => page(1)}>›</button>
+      </>}
+      <SquadFilter squads={all} hidden={hidden} onChange={filter} />
+    </div>
+    <div className="hs-squads" role="radiogroup" aria-label="Squad" ref={track} onScroll={measure}>{squads.map(q => {
+    const selected = q.id === current;
+    const counts = <>
+      <span data-zero={!q.alerts || undefined}>{q.alerts > 0 && <StatusIcon status="error" />}<b>{q.alerts}</b> alert{q.alerts === 1 ? '' : 's'}</span>
+      <span data-zero={!q.warnings || undefined}>{q.warnings > 0 && <StatusIcon status="warn" />}<b>{q.warnings}</b> warning{q.warnings === 1 ? '' : 's'}</span>
+    </>;
+    const opens = onItems && selected && q.alerts + q.warnings > 0;
+    return <div key={q.id} className="hs-sq" data-checked={selected || undefined}>
+      <button type="button" role="radio" aria-checked={selected} className="hs-sq-pick" onClick={() => choose(q.id)}>
+        <span className="hs-sq-h"><Avatar id={q.foremanId} size="md" /><span><b>{q.name}</b><small>{q.foreman}</small></span></span>
+      </button>
+      {opens ? <button type="button" className="hs-sq-n hs-sq-open" onClick={() => onItems(q)} aria-label={`Show the ${q.name.toLowerCase()}’s ${q.alerts} alert${q.alerts === 1 ? '' : 's'} and ${q.warnings} warning${q.warnings === 1 ? '' : 's'}`}>{counts}</button>
+        : <span className="hs-sq-n">{counts}</span>}
       {(lines ? lines(q) : [`${q.loc} · ${q.size} workers`]).map((l, i) => <span key={i} className="hs-sq-l">{l}</span>)}
-    </button>)}</div>;
+    </div>;
+  })}</div>
+  </div>;
 }
 
 export const bandOf = (q: Squad) => <TwlReadout twl={q.twl} estimated={q.estimated} band={q.band} size={56} large />;
