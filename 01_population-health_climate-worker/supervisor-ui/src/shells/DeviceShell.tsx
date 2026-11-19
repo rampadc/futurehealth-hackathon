@@ -23,6 +23,9 @@ const NAV_ICON: Record<string, IconName> = {
   'work-rest': 'calendar', 'restart-review': 'play', ask: 'message', trust: 'lock', 'site-setup': 'pin', settings: 'settings',
 };
 
+/** Tab icon per phone section; the tab name is always written beside it. */
+const TAB_ICON: Record<string, IconName> = { now: 'clock', check: 'message', plan: 'calendar', me: 'person', today: 'gauge', crew: 'people', ask: 'message' };
+
 type Props = { device: Device; screen?: string; onLockAccess?: () => void };
 
 /**
@@ -87,7 +90,7 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
   const tabBar = tabs && <nav className="hs-tabs" data-place={topTabs ? 'top' : undefined} aria-label="Sections" lang={lang} dir={langOf(lang).dir}>
     {tabs.map(([id, label]) => {
       const first = allowed.find(s => s.tab === id);
-      return <button key={id} type="button" disabled={!first} aria-current={screen.tab === id ? 'page' : undefined} onClick={() => first && go(first)}>{device === 'worker' ? tr(`tab.${id}`, lang).text : label}</button>;
+      return <button key={id} type="button" disabled={!first} aria-current={screen.tab === id ? 'page' : undefined} onClick={() => first && go(first)}>{TAB_ICON[id] && <Icon name={TAB_ICON[id]} />}<span>{device === 'worker' ? tr(`tab.${id}`, lang).text : label}</span></button>;
     })}
   </nav>;
   return <div className="hs-shell" data-theme={info.theme} data-device={device} data-layout={side ? 'side' : undefined}>
@@ -110,8 +113,8 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
       {account
         ? <button type="button" className="hs-me" aria-current={screen.id === 'account' ? 'page' : undefined} aria-label={`My account: ${session.person.name}`} onClick={() => go(account)}><Avatar id={session.person.id} size={phone ? 'md' : undefined} /><span>{session.person.name}</span></button>
         : <span className="hs-person"><Avatar id={session.person.id} /><span>{session.person.name}</span></span>}
-      <button type="button" className="hs-link" disabled={session.busy} onClick={() => void session.signOut()}>Sign out</button>
-      {onLockAccess && <button type="button" className="hs-link" onClick={onLockAccess}>Lock access</button>}
+      <button type="button" className="hs-link" disabled={session.busy} onClick={() => void session.signOut()} lang={lang}>{tr('sh.signout', lang).text}</button>
+      {onLockAccess && <button type="button" className="hs-link" onClick={onLockAccess} lang={lang}>{tr('sh.lock', lang).text}</button>}
     </header>
     {tabs && topTabs && tabBar}
     <div className="hs-body">

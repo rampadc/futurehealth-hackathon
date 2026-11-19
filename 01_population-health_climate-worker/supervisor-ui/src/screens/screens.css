@@ -457,3 +457,27 @@ button.hs-row-body:hover { background: var(--color-base); }
 .hs-row-more { padding: 0 var(--space-2) var(--space-2); display: flex; flex-direction: column; gap: var(--space-1); }
 .hs-stop-twl { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
 .hs-shell .hs-cta-bar[data-inline] { position: static; }
+
+/* Readouts mix numbers, units and words. Each takes its direction from its own first letter,
+   so "145 W/m²" keeps its order on Arabic and Urdu screens instead of flipping to "W/m² 145". */
+.hs-shell .hs-readout { unicode-bidi: plaintext; }
+
+/* Stacked readouts (kiosk): the block shrinks to its content instead of spanning the page;
+   readouts sit at heading size and line up in one column. */
+.hs-hero[data-layout='rows'] { align-self: flex-start; max-inline-size: 100%; grid-template-columns: minmax(0, auto) auto; }
+.hs-hero[data-layout='rows'] > .hs-metric { grid-column: 1 / -1; grid-template-columns: subgrid; }
+.hs-hero[data-layout='rows'] > .hs-metric > .hs-readout { font-size: var(--fs-heading); }
+.hs-hero[data-numbered] { grid-template-columns: auto minmax(0, auto) auto; counter-reset: hs-row; }
+.hs-hero[data-numbered] > .hs-metric { counter-increment: hs-row; }
+.hs-hero[data-numbered] > .hs-metric::before {
+  content: counter(hs-row); grid-column: 1; grid-row: 1 / span 2; align-self: center;
+  display: grid; place-items: center; inline-size: 2rem; block-size: 2rem; border: 2px solid var(--color-ink); border-radius: 50%;
+  font-weight: var(--weight-bold); font-variant-numeric: tabular-nums;
+}
+.hs-hero[data-numbered] > .hs-metric > :is(.hs-label, .hs-small) { grid-column: 2; }
+.hs-hero[data-numbered] > .hs-metric > .hs-readout { grid-column: 3; }
+
+/* Kiosk badge screen: "Tap your badge" in every worker language under the heading. */
+.hs-kiosk-langs { display: flex; flex-wrap: wrap; gap: var(--space-half) var(--space-2); list-style: none; padding: 0; margin: 0; color: var(--color-graphite); font-weight: var(--weight-medium); }
+.hs-kiosk-done { align-self: flex-start; min-inline-size: 10rem; }
+.hs-langs[data-compact] button { font-size: var(--fs-body); min-block-size: var(--target-touch); }

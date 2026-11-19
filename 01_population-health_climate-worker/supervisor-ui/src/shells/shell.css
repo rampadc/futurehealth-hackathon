@@ -122,3 +122,14 @@
 .hs-shell:is([data-device='site'], [data-device='worker']) .hs-body { grid-template-rows: 1fr; }
 .hs-shell:is([data-device='site'], [data-device='worker']) .hs-cta-bar { inset-block-end: 0; }
 .hs-back { display: inline-flex; align-items: center; margin-block-end: var(--space-2); font-weight: var(--weight-medium); }
+
+/* Phone tabs: a line icon before each tab name. */
+.hs-tabs > button { display: flex; align-items: center; justify-content: center; gap: var(--space-half); padding-inline: var(--space-half); }
+.hs-tabs > button .hs-icon { inline-size: 1.25em; block-size: 1.25em; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: square; stroke-linejoin: miter; }
+/* Glare drops section tints, but the tabs keep a colour line each so sections stay apart.
+   Darker tones than day so each line holds at least 4.5:1 on white in sun. */
+.hs-shell[data-theme='glare'] .hs-tabs > button:nth-of-type(5n+1) { --color-section-rule: #7A5C25; }
+.hs-shell[data-theme='glare'] .hs-tabs > button:nth-of-type(5n+2) { --color-section-rule: #3F6630; }
+.hs-shell[data-theme='glare'] .hs-tabs > button:nth-of-type(5n+3) { --color-section-rule: #9A4520; }
+.hs-shell[data-theme='glare'] .hs-tabs > button:nth-of-type(5n+4) { --color-section-rule: #5E5246; }
+.hs-shell[data-theme='glare'] .hs-tabs > button:nth-of-type(5n+5) { --color-section-rule: #6B4428; }

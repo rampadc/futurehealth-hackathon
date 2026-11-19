@@ -23,8 +23,9 @@ export function Head({ kicker, title, sub }: { kicker?: ReactNode; title: ReactN
   </header>;
 }
 
-export function Hero({ children, rows }: { children: ReactNode; rows?: boolean }) {
-  return <div className="hs-hero" role="group" aria-label="Summary" data-layout={rows ? 'rows' : undefined}>{children}</div>;
+/** Summary readouts. `rows` stacks them and shrinks to their content; `numbered` adds 1, 2, 3 before each row. */
+export function Hero({ children, rows, numbered }: { children: ReactNode; rows?: boolean; numbered?: boolean }) {
+  return <div className="hs-hero" role="group" aria-label="Summary" data-layout={rows ? 'rows' : undefined} data-numbered={numbered || undefined}>{children}</div>;
 }
 
 export function Metric({ label, value, sub, tone }: { label: ReactNode; value: ReactNode; sub?: ReactNode; tone?: Tone }) {
