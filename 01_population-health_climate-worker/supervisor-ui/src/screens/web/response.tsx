@@ -4,6 +4,7 @@ import { navigate } from '../../router';
 import { crew, heatNow, progress, time } from '../data';
 import { ActionButton, Avatar, Band, Computed, Draft, Empty, Head, Hero, Hold, List, Metric, NoCase, Note, Row, Section, Statement, taskBadge, taskLine, Person } from '../kit';
 import type { ScreenProps } from '../registry';
+import { ReportUnwell } from '../site/reportUnwell';
 import { ConditionsPanel } from '../conditions';
 import { StatusIcon } from '../../shared/icons';
 import { bandOf, OtherSquadScreen, SquadItems, SquadPicker, squadsFor, useSquad } from '../squads';
@@ -133,6 +134,7 @@ export function ProtectiveResponseScreen({ session }: ScreenProps) {
       {mine.map(t => t.action === 'recover' ? <button key={t.action} type="button" className="hs-button is-primary" onClick={() => navigate('/site/account-for-crew')}>Open physical headcount</button> : <ActionButton key={t.action} session={session} action={t.action} label={t.label} primary
         confirm={t.action === 'remove' ? { title: 'Confirm the worker is out of the heat', body: 'This records your human confirmation for the protective response. Software cannot record it for you.' } : undefined} />)}
     </Section>}
+    {(person?.id === 'C01' || !!story.reports?.length) && <ReportUnwell session={session} compact />}
     {protective && protective.actions.length > 0 && <Section title="Solver’s protective actions">
       <Draft><ul className="hs-plain">{protective.actions.map(a => <li key={a.code + a.owner_id}>{reasonLabel(a.code)} · <Person id={a.owner_id}>{nameOf(a.owner_id)}</Person> · {a.status}{a.due_at ? ` · due ${time(a.due_at)}` : ''}{a.message ? ` — ${a.message}` : ''}</li>)}</ul></Draft>
     </Section>}

@@ -27,6 +27,27 @@ PERSONAS = [
     ('P10','Mina Rahman','Employer contract manager','Dune Civil Works'),
 ]
 PEOPLE = {id: {'id':id,'name':name,'role':role,'organisation':org,'description':''} for id,name,role,org in PERSONAS}
+CREW = {f'C{i:02}' for i in range(2,13)}
+WORKER_PERSONAS = {'C05','C08'}
+# A crew member reports feeling unwell on their own phone or at a shelter kiosk; the foreman reports for
+# anyone without a phone or too unwell to use one. The first report opens the case's incident steps.
+REPORTERS = {'C01',*WORKER_PERSONAS}
+REPORT_VIA = {'C01':{'foreman'},'C05':{'phone','kiosk'},'C08':{'phone','kiosk'}}
+try:
+    from heat_safe.paths import ROOT as _ROOT
+    CREW_NAMES = {p['id']:p['name'] for p in json.loads((_ROOT / 'demo/cross-scenario/personnel.json').read_text(encoding='utf-8'))}
+except (OSError, ValueError, KeyError):
+    CREW_NAMES = {}
+
+
+def first_name(person_id: str) -> str:
+    name = CREW_NAMES.get(person_id) or PEOPLE.get(person_id,{}).get('name') or person_id
+    return name.split(' ')[0]
+
+
+def reported_person(event: dict) -> str:
+    """The crew member a report is about. Reports recorded before `person_id` existed were the worker's own."""
+    return event['payload'].get('person_id') or event['actor_id']
 # (owner, title, prerequisites); these names are stable UI action IDs.
 ACTIONS = {
     'sensor_reading':('sensor','New local monitor reading received',()),
@@ -70,7 +91,7 @@ TASK_LABELS = {
     'readiness':'Confirm individual workshop readiness', 'assign':'Confirm supervised workshop assignment',
     'start_work':'Confirm actual workshop work start', 'coverage_review':'Review heat-rest roster coverage',
     'start_recovery':'Confirm return to cooled recovery',
-    'report':'Report dizziness', 'incident_record':'Record worker symptom report',
+    'report':'Report feeling unwell', 'incident_record':'Record worker symptom report',
     'remove':'Confirm removal to first aid', 'firstaid':'Record first aid contact',
     'leila':'Confirm Leila’s workshop readiness', 'draftDelivery':'Draft later delivery request',
     'approveDelivery':'Approve delivery request', 'sendDelivery':'Record delivery request sent',
@@ -207,6 +228,7 @@ class CaseService:
         q['decision_at'] = case['clock']
         snap = q['snapshot']
         present = {}
+        incident_person = next((reported_person(e) for e in events if e['action']=='report'), 'C08')
         for e in events:
             a, p, t, eid = e['action'], e['payload'], e['occurred_at'], f"case-e{e['id']}"
             present[a] = e
@@ -247,13 +269,13 @@ class CaseService:
                     worker = next(w for w in snap['workers'] if w['person_id']==rd['person_id'])
                     worker['readiness'] = {'status':rd['status'],'task_id':'workshop_prep','confirmed_by':'C01','confirmed_at':t,'valid_until':rd['valid_until'],'evidence_id':f'{eid}-{i}','basis':rd['basis'],'source':'human_confirmation'}
             elif a == 'report':
-                next(w for w in snap['workers'] if w['person_id']=='C08')['availability']='unavailable'
+                next(w for w in snap['workers'] if w['person_id']==reported_person(e))['availability']='unavailable'
             elif a == 'incident_record':
-                snap['incidents'].append({'evidence_id':eid,'person_id':'C08','reported_at':t,'reported_by':'C01','removed_at':None,'first_aid_contacted_at':None,'location_id':None,'responder_id':'P06'})
+                snap['incidents'].append({'evidence_id':eid,'person_id':incident_person,'reported_at':t,'reported_by':'C01','removed_at':None,'first_aid_contacted_at':None,'location_id':None,'responder_id':'P06'})
             elif a == 'remove':
                 incident = snap['incidents'][-1]
                 incident.update(removed_at=t,location_id=p.get('location_id','welfare'))
-                worker = next(w for w in snap['workers'] if w['person_id']=='C08')
+                worker = next(w for w in snap['workers'] if w['person_id']==incident_person)
                 worker.update(availability='unavailable',location_id=incident['location_id'])
             elif a == 'firstaid': snap['incidents'][-1]['first_aid_contacted_at'] = t
             elif a in {'fresh','sensor_reading'}:
@@ -344,9 +366,10 @@ class CaseService:
         action, command_id = body.get('action'), body.get('command_id')
         if action not in ACTIONS: raise CaseError(422,'Unknown action')
         if not isinstance(command_id,str) or not command_id.strip() or len(command_id)>200: raise CaseError(422,'command_id required')
-        if ACTIONS[action][0] != actor: raise CaseError(403,'Action belongs to another role')
+        if (actor not in REPORTERS) if action=='report' else ACTIONS[action][0] != actor: raise CaseError(403,'Action belongs to another role')
         p = body.get('payload') or {}
         if not isinstance(p,dict): raise CaseError(422,'payload must be an object')
+        if action=='report': p=self._report_payload(actor,p)
         self._validate_payload(action,p)
         with self._conn() as c:
             active=self._active(c)
@@ -407,8 +430,11 @@ class CaseService:
         if action=='activity': self._validate_activity_continuity(case,self._events(c,case['id']),p['intervals'])
         done = {r['action'] for r in c.execute('SELECT action FROM events WHERE case_id=?',(case['id'],))}
         if action=='recover' and 'report' in done and 'remove' not in done:
-            raise CaseError(409,"Confirm Bilal's welfare location with removal before the complete headcount")
-        if action in done and action not in {'activity','readiness','fresh','coverage_review','assign','start_work','start_recovery',*RESTART_ACTIONS}: raise CaseError(409,'Action already recorded')
+            first=next(reported_person(e) for e in self._events(c,case['id']) if e['action']=='report')
+            raise CaseError(409,f"Confirm {first_name(first)}'s welfare location with removal before the complete headcount")
+        if action=='report' and p['person_id'] in {reported_person(e) for e in self._events(c,case['id']) if e['action']=='report'}:
+            raise CaseError(409,'This worker is already reported unwell')
+        if action in done and action not in {'activity','readiness','fresh','coverage_review','assign','start_work','start_recovery','report',*RESTART_ACTIONS}: raise CaseError(409,'Action already recorded')
         if not all(prereq in done for prereq in ACTIONS[action][2]): raise CaseError(409,'Prerequisite evidence missing')
         if action == 'review':
             latest=self._latest(c,case['id'],case['version'])
@@ -467,6 +493,28 @@ class CaseService:
             p={**p,'work_intervals':intervals}
         c.execute('INSERT INTO events(case_id,command_id,actor_id,action,occurred_at,payload,command_payload) VALUES (?,?,?,?,?,?,?)',(case['id'],command_id,actor,action,case['clock'],encoded(p),raw))
         c.execute('UPDATE cases SET clock=?,version=? WHERE id=?',(case['clock'],case['version']+1,case['id']))
+
+    @staticmethod
+    def _report_payload(actor, p):
+        """Who the report is about and how it arrived. Workers report only themselves. Any other field,
+        such as a typed note, is dropped: symptom detail never enters the shared record."""
+        person=p.get('person_id', actor if actor in WORKER_PERSONAS else None)
+        if person not in CREW: raise CaseError(422,'Choose a worker on the affected crew')
+        if actor in WORKER_PERSONAS and person!=actor: raise CaseError(403,'Workers report only for themselves')
+        via=p.get('via','foreman' if actor=='C01' else 'phone')
+        if via not in REPORT_VIA[actor]: raise CaseError(422,'Unsupported report channel')
+        return {'person_id':person,'via':via}
+
+    def _title(self, e, incident_person):
+        """Timeline title. Report steps name the worker they are about."""
+        a=e['action']
+        if a=='report':
+            name=first_name(reported_person(e))
+            if e['actor_id']=='C01': return f'Huda reported that {name} is unwell'
+            return f'{name} requested assistance at the Shelter A kiosk' if e['payload'].get('via')=='kiosk' else f'{name} requested assistance'
+        if a=='incident_record': return f'Huda recorded {first_name(incident_person)}’s report in the incident record'
+        if a=='remove': return f'Huda confirmed {first_name(incident_person)}’s removal from work'
+        return ACTIONS[a][1]
 
     def _validate_payload(self, action, p):
         if action == 'recover':
@@ -766,17 +814,33 @@ class CaseService:
                          if next(w for w in current_snapshot['workers'] if w['person_id']==pid)['availability']=='available'
                          and (not items or max(at(item['ends_at']) for item in items)!=at(case['clock']))]
         flags={flag: action in done for action,flag in FLAG.items()}
-        if persona_id=='C05':
-            flags.update(reported=False,removed=False,firstaid=False,leila=False)
+        report_events=[e for e in events if e['action']=='report']
+        incident_person=reported_person(report_events[0]) if report_events else None
+        reports=[{'person_id':reported_person(e),'via':e['payload'].get('via','phone'),'reported_by':e['actor_id'],'occurred_at':e['occurred_at']} for e in report_events]
+        if persona_id in WORKER_PERSONAS:
+            # A worker sees only reports about themselves, and the incident steps only when the incident is theirs.
+            reports=[r for r in reports if r['person_id']==persona_id]
+            own_incident=incident_person==persona_id
+            flags.update(reported=bool(reports),removed=flags['removed'] and own_incident,firstaid=flags['firstaid'] and own_incident,leila=False)
+            if not own_incident: incident_person=None
         timeline=[]
         for e in events:
-            if persona_id in {'C05','C08'} and e['actor_id'] in {f'C{i:02}' for i in range(2,13)} and e['actor_id']!=persona_id: continue
-            if persona_id in {'C05','C08'} and e['action'] in {'readiness','activity','leila'}: continue
-            if persona_id == 'C05' and e['action'] in {'report','incident_record','remove','firstaid'}: continue
-            timeline.append({'id':e['action'],'actorId':e['actor_id'],'title':ACTIONS[e['action']][1],'occurred_at':e['occurred_at'],'evidence_ids':[f"case-e{e['id']}"]})
+            if persona_id in WORKER_PERSONAS and e['actor_id'] in CREW and e['actor_id']!=persona_id: continue
+            if persona_id in WORKER_PERSONAS and e['action'] in {'readiness','activity','leila'}: continue
+            if persona_id in WORKER_PERSONAS and e['action']=='report' and reported_person(e)!=persona_id: continue
+            if persona_id in WORKER_PERSONAS and e['action'] in {'incident_record','remove','firstaid'} and incident_person!=persona_id: continue
+            timeline.append({'id':e['action'],'actorId':e['actor_id'],'title':self._title(e,incident_person or 'C08'),'occurred_at':e['occurred_at'],'evidence_ids':[f"case-e{e['id']}"]})
         tasks=[]
+        reported_ids={reported_person(e) for e in report_events}
+        for reporter in sorted(REPORTERS):
+            if persona_id and reporter!=persona_id: continue
+            if reporter=='C01':
+                status,label='ready' if CREW-reported_ids else 'recorded','Report an unwell worker'
+            else:
+                status,label='recorded' if reporter in reported_ids else 'ready',TASK_LABELS['report']
+            tasks.append({'action':'report','actor_id':reporter,'label':label,'status':status,'reason':None,'due_at':None})
         for action,(owner,title,pre) in ACTIONS.items():
-            if owner in {'sensor','system'}: continue
+            if owner in {'sensor','system'} or action=='report': continue
             status='recorded' if action in done else 'ready' if all(p in done for p in pre) else 'waiting'
             reason=None if status!='waiting' else 'Waiting for '+', '.join(p for p in pre if p not in done)
             if action=='activity' and status in {'ready','recorded'} and missing_history:
@@ -854,7 +918,8 @@ class CaseService:
             assessment={**assessment,'started_worker_ids':[pid for pid in assessment['started_worker_ids'] if pid==persona_id],
                         'request':scoped['request'] if scoped else None,
                         'response':scoped['response'] if scoped else None,'check':None}
-        result={'case_id':case['id'],'version':case['version'],'clock':case['clock'],'story':{**flags,'events':timeline},
+        result={'case_id':case['id'],'version':case['version'],'clock':case['clock'],
+                'story':{**flags,'events':timeline,'reports':reports,'incident_person_id':incident_person},
                 'request':projected_request,'capture':capture,'tasks':tasks,'runs':runs,'workers':workers,
                 'retry_available':retry_available,'viewer_id':persona_id,
                 'time':{'mode':'elapsed' if started else 'legacy','server_now':self.now().astimezone(timezone.utc).isoformat(),

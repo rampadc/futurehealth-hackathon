@@ -13,7 +13,8 @@ function statusOf(session: ScreenProps['session']) {
   const { caseView, person } = session;
   const story = caseView!.story;
   const id = person!.id;
-  const excluded = id === 'C08' && story.reported;
+  // The worker's own view lists only reports about them.
+  const excluded = !!story.reported;
   const approved = caseView!.plan_assessment ? caseView!.plan_assessment.status === 'approved' : story.assigned;
   const mine = story.assigned && approved && !(story.reported && (!story.removed || !story.firstaid)) ? intervalsOf(assessmentCapture(caseView!), id) : [];
   const { current, next } = nowAndNext(mine, caseView!.clock);

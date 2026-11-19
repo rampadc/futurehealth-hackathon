@@ -1,6 +1,7 @@
 import { lazy, Suspense, useRef, useState } from 'react';
 import { Alert, AppBar, Box, Button, Chip, CircularProgress, Divider, List, ListItemButton, ListItemText, Paper, Stack, Toolbar, Typography } from '@mui/material';
 import { nameOf } from './replay';
+import { isStanding } from './story';
 import { copy } from './copy';
 import { CaseSummary } from './CaseSummary';
 import { AssistantChat } from './AssistantChat';
@@ -51,7 +52,7 @@ function DesktopApp({ onLockAccess, demoControl }: Props & { demoControl: boolea
   const planningIssue = planningStatus === 'unknown' || planningStatus === 'model_invalid' || planningStatus === 'infeasible';
   const planningMessage = planningStatus === 'unknown' ? 'A reliable crew plan could not be calculated.' : planningStatus === 'model_invalid' ? 'The current crew plan did not pass validation.' : 'No crew plan meets the current recorded constraints.';
   const retryButton = <Button color="inherit" disabled={busy} onClick={() => void retryCalculation()}>{busy ? 'Retrying…' : 'Retry calculation'}</Button>;
-  const remaining = caseView?.tasks.filter(task => task.actor_id === person.id && task.status === 'ready').length ?? 0;
+  const remaining = caseView?.tasks.filter(task => task.actor_id === person.id && task.status === 'ready' && !isStanding(task.action)).length ?? 0;
   const next = nextTask(caseView?.tasks ?? []);
   return <Box sx={{ minWidth: 0, minHeight: '100vh', bgcolor: 'background.default', display: 'flex', flexDirection: 'column' }}>
     <a href="#main" className="skip-link">Skip to workspace</a>
@@ -80,7 +81,7 @@ function DesktopApp({ onLockAccess, demoControl }: Props & { demoControl: boolea
             {story && <Paper variant="outlined" sx={{ px: 2.5, py: 2, borderLeft: '4px solid', borderLeftColor: story.issued ? 'error.main' : 'warning.main' }}><Typography variant="subtitle2">{story.stopped ? copy.stoppedTitle : story.issued ? copy.instructionTitle : copy.pendingTitle}</Typography><Typography variant="body2" color="text.secondary">{story.stopped ? copy.stoppedDetail : story.issued ? copy.instructionDetail : copy.pendingDetail}</Typography></Paper>}
             <Alert severity={caseView.runs?.[0]?.status === 'processing' ? 'info' : 'error'} action={retryAvailable ? retryButton : undefined}>{caseView.runs?.[0]?.status === 'processing' ? 'The live solver is calculating this case.' : `The current solver response is unavailable. ${caseView.runs?.[0]?.error ?? 'Record the missing current evidence or check the service.'}`}</Alert>
             {view === 'activity' && story && <Activity story={story} />}
-            {view === 'workspace' && <Panel title="Record current evidence"><Typography variant="body2" color="text.secondary">The case remains available for your authorised confirmations. Current observed activity may be needed after a clock change.</Typography>{caseView.tasks.filter(task => task.status === 'ready').map(task => <EvidenceAction key={task.action} action={task.action} caseView={caseView} person={person} onAction={act} busy={busy} />)}</Panel>}
+            {view === 'workspace' && <Panel title="Record current evidence"><Typography variant="body2" color="text.secondary">The case remains available for your authorised confirmations. Current observed activity may be needed after a clock change.</Typography>{caseView.tasks.filter(task => task.status === 'ready' && !isStanding(task.action)).map(task => <EvidenceAction key={task.action} action={task.action} caseView={caseView} person={person} onAction={act} busy={busy} />)}</Panel>}
           </> : <>
             <Paper variant="outlined" sx={{ px: 2.5, py: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, borderLeft: '4px solid', borderLeftColor: story.issued ? 'error.main' : 'warning.main' }}>
               <Box><Typography variant="subtitle2">{story.stopped ? copy.stoppedTitle : story.issued ? copy.instructionTitle : copy.pendingTitle}</Typography><Typography variant="body2" color="text.secondary">{story.stopped ? copy.stoppedDetail : story.issued ? copy.instructionDetail : copy.pendingDetail}</Typography></Box><Chip label={story.stopped ? copy.stoppedStatus : story.issued ? 'Stop-work active' : person.id === 'P03' ? 'Safety review due' : 'Awaiting safety review'} color={story.issued ? 'error' : 'warning'} size="small" />

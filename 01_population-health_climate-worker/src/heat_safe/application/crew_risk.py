@@ -114,7 +114,7 @@ def assess(view: dict, conditions: dict[str, list[str]] | None = None) -> tuple[
     local, local_status = _local_reading(snapshot, clock)
     if heat is not None:
         heat = with_local_reading(heat, local)
-    reported = {e['actorId'] for e in view['story']['events'] if e['id'] == 'report'}
+    reported = {r['person_id'] for r in view['story'].get('reports', [])}
     def factors(pid: str) -> WorkerFactors:
         has = set(conditions.get(pid, ()))
         return WorkerFactors(
