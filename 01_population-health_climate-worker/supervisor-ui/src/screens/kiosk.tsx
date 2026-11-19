@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { LANGS, langOf, preferredLanguage, tr, useWorkerLanguage } from '../i18n';
 import { live } from '../live';
 import { assessmentCapture, assignedIds, crew, time } from './data';
-import { Computed, Head, Hero, Metric, NoCase, Note, Avatar } from './kit';
+import { Computed, ConfirmButton, CtaBar, Head, Hero, Metric, NoCase, Note, Avatar, Statement } from './kit';
 import type { ScreenProps } from './registry';
 import { StatusIcon } from '../shared/icons';
 
@@ -13,11 +13,12 @@ const READY = LANGS.filter(l => l.status === 'ready');
 /**
  * Shelter A kiosk. Every visit starts the same way: the worker taps their badge (Web NFC where the
  * browser has it; name tiles always work), then picks a language. The summary is shown in that
- * language only. The tap records the worker's own shelter arrival when that task is ready.
+ * language only. The tap records the worker's own shelter arrival when that task is ready. A worker
+ * without a phone, or too unwell to use one, reports feeling unwell here after the same fixed question.
  */
 export function KioskScreen({ session }: ScreenProps) {
   const { caseView, person } = session;
-  const [visit, setVisit] = useState<{ id: string; step: 'lang' | 'summary'; lang: string } | null>(null);
+  const [visit, setVisit] = useState<{ id: string; step: 'lang' | 'summary' | 'unwell' | 'emergency'; lang: string } | null>(null);
   const [unknown, setUnknown] = useState<string | null>(null);
   const tapRef = useRef<(id: string) => void>(() => {});
   const nfc = useNfcBadges(id => tapRef.current(id));
@@ -58,9 +59,32 @@ export function KioskScreen({ session }: ScreenProps) {
     const l = visit.lang;
     const t = (k: string) => tr(k, l).text;
     const here = arrived.has(who.id);
+    const report = caseView.tasks.find(x => x.action === 'report' && x.actor_id === who.id);
+    const reported = report?.status === 'recorded';
+    const queued = session.outbox.some(e => e.action === 'report');
+    const head = <Head kicker={<>{t('shelterA')} · {time(caseView.clock)} · <button type="button" className="hs-link" onClick={() => setVisit({ ...visit, step: 'lang' })}>🌐 {langOf(l).endonym}</button></>} title={who.name.split(' ')[0]} />;
+    if (visit.step === 'unwell' || visit.step === 'emergency') return <div className="hs-screen" lang={l} dir={langOf(l).dir}>
+      {head}
+      {reported || queued ? <>
+        <Statement tone="black">{t(reported ? 'p4.submitted' : 'p4.saved')}</Statement>
+        <Note>{t('p4.stay')}</Note>
+      </> : <>
+        <Statement>{t('p4.q')}</Statement>
+        <div className="hs-form-row">
+          <button type="button" className="hs-button" aria-pressed={visit.step === 'unwell'} onClick={() => setVisit({ ...visit, step: 'unwell' })}>{t('no')}</button>
+          <button type="button" className="hs-button is-danger" aria-pressed={visit.step === 'emergency'} onClick={() => setVisit({ ...visit, step: 'emergency' })}>{t('p4.yes')}</button>
+        </div>
+        {visit.step === 'emergency' && <Statement tone="red">{t('p4.getHelp')}</Statement>}
+        {report ? <Note>{t('p1.sees')}</Note> : <Note tone="amber">{t('p4.tellForeman')}</Note>}
+      </>}
+      <CtaBar>
+        {report && !reported && !queued && <ConfirmButton disabled={report.status !== 'ready' || session.busy} onConfirm={() => void session.act('report', { via: 'kiosk' })} body={t('confirm.body')} confirmLabel={t('confirm')} cancelLabel={t('cancel')}>{t('p4.send')}</ConfirmButton>}
+        <button type="button" className="hs-button" onClick={() => setVisit(null)}>{t('k.done')}</button>
+      </CtaBar>
+    </div>;
     return <div className="hs-screen" lang={l} dir={langOf(l).dir}>
-      <Head kicker={<>{t('shelterA')} · {time(caseView.clock)} · <button type="button" className="hs-link" onClick={() => setVisit({ ...visit, step: 'lang' })}>🌐 {langOf(l).endonym}</button></>} title={who.name.split(' ')[0]} />
-      {here ? <p className="hs-statusline" role="status"><StatusIcon status="ok" /> {t('kiosk.checked')}</p>
+      {head}
+      {reported ? <p className="hs-statusline" role="status">{t('p4.submitted')} · {t('p4.stay')}</p> : here ? <p className="hs-statusline" role="status"><StatusIcon status="ok" /> {t('kiosk.checked')}</p>
         : !session.busy && <p className="hs-statusline" role="status">{t('k.seeHuda')}</p>}
       <Hero rows numbered>
         <Metric label={t('hr.arrival')} value={here ? t('k.recorded') : t('k.notRecorded')} tone={here ? 'ok' : undefined} />
@@ -69,6 +93,7 @@ export function KioskScreen({ session }: ScreenProps) {
       </Hero>
       <Note>{t('k.huda')}</Note>
       <button type="button" className="hs-button is-primary hs-kiosk-done" onClick={() => setVisit(null)}>{t('k.done')}</button>
+      {!reported && <button type="button" className="hs-button is-danger" onClick={() => setVisit({ ...visit, step: 'unwell' })}>{t('unwell')}</button>}
       <Computed>{t('k.feeds')}</Computed>
     </div>;
   }

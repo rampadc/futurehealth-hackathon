@@ -4,6 +4,7 @@ import { crew, heatNow, SCREEN_FOR_ACTION, tasksOf, time, who } from '../data';
 import { Band, Computed, CtaBar, Empty, Head, Hero, Hold, List, Metric, NoCase, Row, Section, Statement, taskBadge, taskLine, ActionButton, Note, Avatar } from '../kit';
 import { TwlReadout } from '../twl';
 import type { ScreenProps } from '../registry';
+import { isStanding } from '../../story';
 import { smsInfo, tr, preferredLanguage, langOf, isReady as langReady } from '../../i18n';
 
 const order = { ready: 0, waiting: 1, recorded: 2 } as const;
@@ -29,6 +30,7 @@ export function TodayScreen({ session }: ScreenProps) {
     </Hero>
     <List label="Open">
       <Row title="Your actions" detail={mine.length ? `${ready} ready · ${waiting} waiting` : 'No actions for you in this case'} badge={ready ? <span className="hs-badge" data-tone="plan">{ready} ready</span> : undefined} onClick={() => navigate('/site/actions')} />
+      {person?.id === 'C01' && <Row title="Report an unwell worker" detail={reportLine(caseView)} badge={story.reports?.length ? <span className="hs-badge" data-tone="over">{story.reports.length} reported</span> : undefined} onClick={() => navigate('/site/report-unwell')} />}
       {story.issued && <Row title="Stop-work instruction" detail={story.stopped ? 'Heavy work stop confirmed' : story.acknowledged ? 'Acknowledged' : 'Issued · awaiting acknowledgement'} onClick={() => navigate('/site/stop-work')} />}
     </List>
     {first && SCREEN_FOR_ACTION[first.action]?.site && <CtaBar><button type="button" className="hs-button is-primary" onClick={() => openAction(first.action)}>{first.label}</button></CtaBar>}
@@ -36,7 +38,11 @@ export function TodayScreen({ session }: ScreenProps) {
 }
 
 type View = NonNullable<ScreenProps['session']['caseView']>;
-const sortedTasks = (caseView: View, personId?: string) => tasksOf(caseView, personId).sort((a, b) => order[a.status] - order[b.status]);
+const reportLine = (caseView: View) => {
+  const reports = caseView.story.reports ?? [];
+  return reports.length ? `${reports.map(r => who(r.person_id)).join(', ')} · needs rest now` : 'For a worker without a phone';
+};
+const sortedTasks = (caseView: View, personId?: string) => tasksOf(caseView, personId).filter(t => !isStanding(t.action)).sort((a, b) => order[a.status] - order[b.status]);
 const openAction = (action: string) => { const target = SCREEN_FOR_ACTION[action]?.site; if (target) navigate(`/site/${target}`); };
 
 /** Your actions: every action for the signed-in responder, most urgent first. */
@@ -150,6 +156,7 @@ export function HeadcountScreen({ session }: ScreenProps) {
       <Row title="Affected workers" detail={`${people.length} workers · ${arrivals.size} personal arrival${arrivals.size === 1 ? '' : 's'}`} onClick={() => navigate('/site/affected-workers')} />
       <Row title="Account for the crew" detail={taskLine(session, 'recover')} badge={taskBadge(session, 'recover')} onClick={() => navigate('/site/account-for-crew')} />
       <Row title="Readiness confirmation" detail={taskLine(session, 'readiness')} badge={taskBadge(session, 'readiness')} onClick={() => navigate('/site/readiness')} />
+      <Row title="Report an unwell worker" detail={reportLine(caseView)} badge={caseView.story.reports?.length ? <span className="hs-badge" data-tone="over">{caseView.story.reports.length} reported</span> : undefined} onClick={() => navigate('/site/report-unwell')} />
     </List>
   </div>;
 }

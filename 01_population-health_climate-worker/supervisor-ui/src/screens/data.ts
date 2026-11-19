@@ -1,6 +1,6 @@
 import personnel from '../../../demo/cross-scenario/personnel.json';
 import type { CaseView, Task } from '../live';
-import { ACTIONS, type ActionId } from '../story';
+import { ACTIONS, incidentPersonId, type ActionId } from '../story';
 import { nameOf, type Interval, type ReplayCapture } from '../replay';
 import { assessThermalReading, thermalStatus } from '../thermal';
 import { timeLabel } from '../Timeline';
@@ -41,6 +41,17 @@ export function progress(caseView: CaseView | null, action: string): Progress {
   return { status: recorded ? 'recorded' : 'open', owner };
 }
 
+/** Crew members reported unwell in this case. Older cases recorded only Bilal's own report. */
+export function reportedIds(caseView: CaseView | null): Set<string> {
+  const story = caseView?.story;
+  if (!story) return new Set();
+  if (story.reports) return new Set(story.reports.map(r => r.person_id));
+  return new Set(story.reported ? ['C08'] : []);
+}
+
+/** The worker whose removal and first-aid steps the case records: the first one reported. */
+export const incidentPerson = (caseView: CaseView | null): string | null => caseView ? incidentPersonId(caseView.story) : null;
+
 export type CrewMember = {
   id: string;
   name: string;
@@ -62,6 +73,7 @@ export function crew(caseView: CaseView | null): CrewMember[] {
   const ids = caseView.workers?.length ? caseView.workers.map(w => w.person_id) : snapshot?.workers.map(w => w.person_id) ?? [];
   const recovered = new Set(snapshot?.recovery?.person_ids ?? []);
   const excluded = new Set(caseView.capture?.response.protective_response.excluded_worker_ids ?? []);
+  const reported = reportedIds(caseView);
   return ids.map(id => {
     const live = caseView.workers?.find(w => w.person_id === id);
     const snap = snapshot?.workers.find(w => w.person_id === id);
@@ -76,7 +88,7 @@ export function crew(caseView: CaseView | null): CrewMember[] {
       reason: live?.reason ?? null,
       qualifications: person?.qualifications ?? [],
       inRecovery: recovered.has(id),
-      excluded: excluded.has(id) || (id === 'C08' && !!caseView.story.reported),
+      excluded: excluded.has(id) || reported.has(id),
     };
   });
 }
@@ -124,7 +136,7 @@ export const SCREEN_FOR_ACTION: Record<string, { site?: string; web?: string }> 
   issue: { site: 'stop-work', web: 'heat-controls' }, acknowledge: { site: 'stop-work', web: 'response' }, stop: { site: 'stop-work', web: 'response' },
   recover: { site: 'account-for-crew', web: 'response' }, personnel: { site: 'account-for-crew', web: 'restart-review' }, escalation_followup: { web: 'response' },
   readiness: { site: 'readiness', web: 'crew' }, activity: { site: 'readiness', web: 'crew' }, crew_readiness: { site: 'readiness', web: 'restart-review' }, leila: { site: 'readiness', web: 'crew' },
-  assign: { site: 'proposal', web: 'crew' }, incident_record: { site: 'action-card', web: 'response' }, remove: { site: 'action-card', web: 'response' }, firstaid: { site: 'action-card', web: 'response' },
+  assign: { site: 'proposal', web: 'crew' }, report: { site: 'report-unwell', web: 'response' }, incident_record: { site: 'action-card', web: 'response' }, remove: { site: 'action-card', web: 'response' }, firstaid: { site: 'action-card', web: 'response' },
   start_work: { site: 'proposal', web: 'crew' }, start_recovery: { site: 'proposal', web: 'crew' },
   recovery_check: { site: 'action-card', web: 'restart-review' }, fresh: { site: 'fresh-reading', web: 'restart-review' }, water: { site: 'fresh-reading', web: 'restart-review' },
   permit: { web: 'restart-review' }, review: { web: 'restart-review' }, handover: { web: 'restart-review' },

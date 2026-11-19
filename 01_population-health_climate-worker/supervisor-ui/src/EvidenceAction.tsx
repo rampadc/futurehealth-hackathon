@@ -7,7 +7,7 @@ import type { CaseView, Task } from './live';
 import { atDubai, caseWorkers, payloads, simplePayload, toIso } from './commands';
 
 const extraLabels: Record<string, string> = {
-  incident_record: 'Record Bilal’s site incident', readiness: 'Confirm individual workshop readiness',
+  incident_record: 'Record the worker’s site incident', readiness: 'Confirm individual workshop readiness',
   activity: 'Record observed crew activity', water: 'Confirm water check',
   personnel: 'Confirm personnel check', recovery_check: 'Confirm recovery check',
   crew_readiness: 'Confirm crew readiness check',
@@ -22,7 +22,8 @@ export function EvidenceAction({ action, caseView, person, onAction, busy }: {
   const label = ACTIONS[action as ActionId]?.label ?? extraLabels[action] ?? task?.label ?? action.replaceAll('_', ' ');
   const known = caseWorkers(caseView);
   const workers = known.length ? known : Array.from({ length: 11 }, (_, index) => ({ person_id: `C${String(index + 2).padStart(2, '0')}` }));
-  const activeWorkers = workers.filter(w => !(w.person_id === 'C08' && caseView.story.reported));
+  const reported = new Set(caseView.story.reports?.map(r => r.person_id) ?? (caseView.story.reported ? ['C08'] : []));
+  const activeWorkers = workers.filter(w => !reported.has(w.person_id));
   const rosterKey = activeWorkers.map(worker => worker.person_id).join(',');
   const [twl, setTwl] = useState('145');
   const [basis, setBasis] = useState('Foreman checked the worker in person');

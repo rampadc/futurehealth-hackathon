@@ -4,7 +4,7 @@ import { EvidenceAction } from '../../EvidenceAction';
 import { ApprovalCountdown } from '../../LiveClock';
 import { reasonLabel } from '../../copy';
 import { navigate } from '../../router';
-import { assessmentCapture, assignedIds, crew, intervalsOf, kindLabel, time, who, type CrewMember } from '../data';
+import { assessmentCapture, assignedIds, crew, firstNameOf, incidentPerson, intervalsOf, kindLabel, reportedIds, time, who, type CrewMember } from '../data';
 import { ActionButton, Choice, Computed, CtaBar, Draft, Empty, Head, Hero, List, Metric, NoCase, Note, Row, Section, Statement, taskBadge, Avatar, Person } from '../kit';
 import type { ScreenProps } from '../registry';
 
@@ -114,7 +114,7 @@ export function ProposalScreen({ session }: ScreenProps) {
   const ids = assignedIds(capture);
   const people = crew(caseView);
   const assessment = caseView.plan_assessment;
-  const working = (caseView.request?.snapshot.workers ?? caseView.capture?.request.snapshot.workers ?? []).filter(w => w.location_id === 'workshop' && !(w.person_id === 'C08' && caseView.story.reported)).map(w => w.person_id);
+  const working = (caseView.request?.snapshot.workers ?? caseView.capture?.request.snapshot.workers ?? []).filter(w => w.location_id === 'workshop' && !reportedIds(caseView).has(w.person_id)).map(w => w.person_id);
   const canReturn = caseView.tasks.some(t => t.action === 'start_recovery' && t.status === 'ready');
   const returnControl = canReturn && <Section title="Stop workshop work and return to recovery">
     <p>Choose workers you saw stop work and return to cooled shelter. This records actual work through now.</p>
@@ -165,26 +165,29 @@ export function ActionCardScreen({ session }: ScreenProps) {
   const { caseView, person } = session;
   if (!caseView || !person) return <NoCase session={session} />;
   const story = caseView.story;
-  if (!story.reported) return <div className="hs-screen"><Head title="Worker action card" /><Empty>No worker has asked for help in this case.</Empty></div>;
+  const id = incidentPerson(caseView);
+  if (!id) return <div className="hs-screen"><Head title="Worker action card" /><Empty>No worker is reported unwell in this case.</Empty></div>;
+  const name = firstNameOf(id);
   const steps: Array<[string, string, string]> = [
     ['incident_record', 'Record the site incident', 'Huda'],
-    ['remove', 'Remove Bilal from the heat and confirm where he is', 'Huda'],
+    ['remove', `Remove ${name} from the heat and confirm where they are`, 'Huda'],
     ['firstaid', 'Record first-aid contact', 'Salim'],
     ['recovery_check', 'Confirm the recovery check', 'Huda'],
   ];
   const salim = person.id === 'P06';
-  const reportedAt = story.events.find(event => event.id === 'report')?.occurred_at;
+  const report = story.reports?.find(r => r.person_id === id);
+  const reportedAt = report?.occurred_at ?? story.events.find(event => event.id === 'report')?.occurred_at;
   return <div className="hs-screen">
-    <Head kicker={reportedAt ? `Bilal (C08) · reported ${time(reportedAt)}` : 'Bilal (C08) · report recorded'} title="Worker action card" />
-    <Statement tone="red" source="⚙ Escalation rule">Bilal needs rest now. Keep him off work and with someone.</Statement>
-    <Note tone="amber">If he is confused, has vomited or stopped sweating: treat it as an emergency, start cooling, keep someone with him and call 998.</Note>
+    <Head kicker={reportedAt ? `${who(id)} · reported ${time(reportedAt)}${report?.via === 'foreman' ? ' by Huda' : report?.via === 'kiosk' ? ' at the kiosk' : ''}` : `${who(id)} · report recorded`} title="Worker action card" />
+    <Statement tone="red" source="⚙ Escalation rule">{name} needs rest now. Keep {name} off work and with someone.</Statement>
+    <Note tone="amber">If {name} is confused, has vomited or stopped sweating: treat it as an emergency, start cooling, keep someone with them and call 998.</Note>
     <Section title="Steps">
       <List>{steps.map(([action, label, owner], i) => <Row key={action} title={`${i + 1}. ${label}`} detail={`Owner: ${owner}`} badge={taskBadge(session, action)} />)}</List>
     </Section>
-    <Note>No health detail here. Details stay in Bilal’s own health record.</Note>
+    <Note>No health detail here. Details stay in {name}’s own health record.</Note>
     <CtaBar>
       {salim ? <ActionButton session={session} action="firstaid" label="Record first-aid contact" primary />
-        : !story.removed ? <><ActionButton session={session} action="incident_record" label="Record the site incident" /><ActionButton session={session} action="remove" label="Confirm Bilal removed from heat" danger confirm={{ title: 'Confirm Bilal is out of the heat', body: 'This records your confirmation for the protective response. Bilal goes to welfare and first aid.' }} /></>
+        : !story.removed ? <><ActionButton session={session} action="incident_record" label="Record the site incident" /><ActionButton session={session} action="remove" label={`Confirm ${name} removed from heat`} danger confirm={{ title: `Confirm ${name} is out of the heat`, body: `This records your confirmation for the protective response. ${name} goes to welfare and first aid.` }} /></>
           : <ActionButton session={session} action="recovery_check" label="Confirm the recovery check" primary />}
     </CtaBar>
   </div>;

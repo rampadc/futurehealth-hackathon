@@ -1,10 +1,12 @@
 import { Box, Stack, Typography } from '@mui/material';
 import { Panel } from '../shared/ui';
+import { nameOf } from '../replay';
+import { incidentPersonId } from '../story';
 import type { WorkspaceProps } from './types';
 
 /** P06 · Salim, first aider. */
 export function FirstAiderWorkspace({ story, actions }: WorkspaceProps) {
-  return <Panel title="First-aid contact"><Typography sx={{ mb: 2 }}>{story.reported ? 'Bilal needs assistance. Huda confirms removal and location; record your contact separately.' : 'No assistance request is open in this case yet.'}</Typography>{actions(['firstaid'])}<Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>Clinical notes stay outside the shared operations record.</Typography></Panel>;
+  return <Panel title="First-aid contact"><Typography sx={{ mb: 2 }}>{story.reported ? `${nameOf(incidentPersonId(story) ?? 'C08').split(' ')[0]} needs assistance. Huda confirms removal and location; record your contact separately.` : 'No assistance request is open in this case yet.'}</Typography>{actions(['firstaid'])}<Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>Clinical notes stay outside the shared operations record.</Typography></Panel>;
 }
 
 /** P04 · Tariq, permit coordinator. */

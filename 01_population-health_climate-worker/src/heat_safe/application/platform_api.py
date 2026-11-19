@@ -128,7 +128,7 @@ def worker_data(request: Request):
     return {
         'person_id': person_id, 'generated_at': now(), 'consent': consent,
         'check_ins': [{'at': e['occurred_at'], 'location_id': 'shelter_a'} for e in own if e['action'] == 'checkin'],
-        'reports': [{'at': e['occurred_at'], 'kind': 'needs_rest'} for e in own if e['action'] == 'report'],
+        'reports': [{'at': r['occurred_at'], 'kind': 'needs_rest'} for r in (view['story'].get('reports', []) if view else [])],
         'plan_intervals': intervals,
         'note': 'Clinical notes are never stored in the shared operations record.',
     }

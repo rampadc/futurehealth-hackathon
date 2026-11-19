@@ -8,6 +8,7 @@ import { AdminSettingsScreen } from './web/settings';
 import { SiteSetupScreen } from './web/setup';
 import { TodayScreen, ActionsScreen, StopWorkScreen, CrewMessageScreen, HeadcountScreen, AffectedWorkersScreen, AccountForCrewScreen } from './site/today';
 import { ReadinessScreen, ProposalScreen, ActionCardScreen } from './site/crew';
+import { ReportUnwellScreen } from './site/reportUnwell';
 import { FreshReadingScreen, RestartReviewScreen } from './restart';
 import { SiteAskScreen, WebAskScreen } from './ask';
 import { NowScreen, AlertScreen, ShelterScreen, OfflineScreen } from './worker/now';
@@ -58,7 +59,7 @@ export const SCREENS: ScreenDef[] = [
   s('heat-rest', { device: 'web', name: 'Heat and rest coverage', clock: '08:18', slice: 4, owner: 'A', personas: ['P10', 'P01', 'C01'], reads: ['GET /api/case/heat-rest', 'headcount', 'plan_assessment'], commands: ['coverage_review'], component: HeatRestScreen }),
   s('heat-controls', { device: 'web', name: 'Heat controls', clock: '08:00', slice: 1, owner: 'A', personas: ['P03'], reads: ['capture.request.snapshot.readings', 'capture.response.heat.controls', 'capture.response.decision_at'], commands: ['issue'] , component: HeatControlsScreen }),
   s('site-conditions', { device: 'web', parent: 'heat-controls', name: 'Site conditions table', clock: '08:00', slice: 1, owner: 'A', personas: ['P03'], reads: ['GET /api/case/conditions'], commands: [], component: SiteConditionsTableScreen }),
-  s('response', { device: 'web', name: 'Protective response', clock: '08:04', slice: 1, owner: 'A', personas: ['C01', 'P02', 'P06'], reads: ['story', 'tasks', 'capture.response.protective_response'], commands: ['acknowledge', 'stop', 'recover', 'escalation_followup'] , component: ProtectiveResponseScreen }),
+  s('response', { device: 'web', name: 'Protective response', clock: '08:04', slice: 1, owner: 'A', personas: ['C01', 'P02', 'P06'], reads: ['story', 'tasks', 'capture.response.protective_response'], commands: ['acknowledge', 'stop', 'recover', 'escalation_followup', 'report'] , component: ProtectiveResponseScreen }),
   s('crew', { device: 'web', name: 'Crew & workshop', clock: '08:10', slice: 2, owner: 'A', personas: ['C01'], reads: ['capture.request.snapshot', 'capture.request.locations', 'capture.response.crew_rest'], commands: ['readiness', 'activity', 'assign', 'leila'] , component: CrewWorkshopScreen }),
   s('work-rest', { device: 'web', name: 'Work/rest plan', clock: '08:11', slice: 2, owner: 'A', personas: ['C01', 'P02'], reads: ['capture.response.crew_rest', 'capture.request.planning'], commands: [] , component: WorkRestPlanScreen }),
   s('restart-review', { device: 'web', name: 'Restart review', clock: '15:08', slice: 3, owner: 'A', personas: ['P02', 'P04'], reads: ['story', 'capture.request.restart', 'capture.response.restart'], commands: ['review', 'handover'] , component: RestartReviewScreen }),
@@ -75,6 +76,7 @@ export const SCREENS: ScreenDef[] = [
   s('headcount', { device: 'site', tab: 'crew', name: 'Headcount', clock: '08:04', slice: 1, owner: 'B', personas: ['C01'], reads: ['workers', 'capture.request.snapshot.workers'], commands: [] , component: HeadcountScreen }),
   s('affected-workers', { device: 'site', tab: 'crew', parent: 'headcount', name: 'Affected workers', clock: '08:04', slice: 1, owner: 'B', personas: ['C01'], reads: ['workers', 'headcount'], commands: [], component: AffectedWorkersScreen }),
   s('account-for-crew', { device: 'site', tab: 'crew', parent: 'headcount', name: 'Account for the crew', clock: '08:04', slice: 1, owner: 'B', personas: ['C01'], reads: ['workers', 'headcount'], commands: ['recover', 'personnel'], component: AccountForCrewScreen }),
+  s('report-unwell', { device: 'site', tab: 'crew', parent: 'headcount', name: 'Report an unwell worker', clock: '08:18', slice: 2, owner: 'B', personas: ['C01'], reads: ['story.reports', 'workers'], commands: ['report'], component: ReportUnwellScreen }),
   s('readiness', { device: 'site', tab: 'crew', parent: 'headcount', name: 'Readiness confirmation', clock: '08:10', slice: 2, owner: 'B', personas: ['C01'], reads: ['workers'], commands: ['readiness', 'activity', 'crew_readiness'] , component: ReadinessScreen }),
   s('proposal', { device: 'site', tab: 'plan', name: 'Proposal review', clock: '08:11', slice: 2, owner: 'B', personas: ['C01'], reads: ['plan_assessment', 'workers'], commands: ['assign', 'start_work', 'start_recovery'] , component: ProposalScreen }),
   s('action-card', { device: 'site', tab: 'today', parent: 'actions', name: 'Worker action card', clock: '08:18', slice: 2, owner: 'B', personas: ['C01', 'P06'], reads: ['story', 'tasks'], commands: ['incident_record', 'remove', 'firstaid'] , component: ActionCardScreen }),
@@ -93,7 +95,7 @@ export const SCREENS: ScreenDef[] = [
   s('my-data', { device: 'worker', tab: 'me', name: 'Me: privacy and my data', clock: '17:10', slice: 4, owner: 'B', personas: ['C05', 'C08'], reads: ['GET /api/worker/data'], commands: [], needs: 'GET /api/worker/data, DELETE /api/worker/consent' , component: MyDataScreen }),
   s('account', { device: 'worker', tab: 'me', group: 'account', name: 'Me: my photo', clock: '17:12', slice: 5, owner: 'C', personas: [], reads: ['GET /api/people/photos'], commands: [], needs: 'PUT/DELETE /api/people/me/photo · own photo only', component: WorkerAccountScreen }),
   // Kiosk · owner B
-  s('check-in', { device: 'kiosk', name: 'Shelter A check-in', clock: '08:04', slice: 4, owner: 'B', personas: ['C05'], reads: ['workers'], commands: ['checkin'], needs: 'NFC tap simulated with a button' , component: KioskScreen }),
+  s('check-in', { device: 'kiosk', name: 'Shelter A check-in', clock: '08:04', slice: 4, owner: 'B', personas: ['C05', 'C08'], reads: ['workers', 'story.reports'], commands: ['checkin', 'report'], needs: 'NFC tap simulated with a button' , component: KioskScreen }),
 ];
 
 export const DEVICE_INFO: Record<Device, { name: string; sub: string; theme: 'day' | 'glare'; tabs?: Array<[string, string]> }> = {

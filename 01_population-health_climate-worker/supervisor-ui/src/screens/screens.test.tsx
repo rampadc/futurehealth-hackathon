@@ -1028,6 +1028,64 @@ describe('voice and badges', () => {
     await waitFor(() => expect(commands).toEqual([{ action: 'checkin', payload: {} }]));
     vi.unstubAllGlobals();
   });
+  it('records a kiosk report for a worker without a phone', async () => {
+    consent = { person_id: 'C05', language: 'en', scopes: ['heat_alerts'], consented_at: '2025-08-04T07:30:00+04:00' };
+    currentCase = await makeCase('heat_trigger', { stopped: true }, [task('checkin', 'C05', 'recorded'), task('report', 'C05', 'ready')]);
+    await open('/kiosk/check-in', 'C05');
+    await userEvent.click(await screen.findByRole('button', { name: /^Rana/ }));
+    await userEvent.click(await screen.findByRole('button', { name: /^English/ }));
+    await userEvent.click(await screen.findByRole('button', { name: 'I feel unwell' }));
+    expect(screen.getByText(/Are you confused/)).toBeTruthy();
+    await userEvent.click(screen.getByRole('button', { name: 'Yes, one of these' }));
+    expect(screen.getByText(/call 998/)).toBeTruthy();
+    await confirmPress(screen.getByRole('button', { name: 'Send to my supervisor' }));
+    await waitFor(() => expect(commands).toEqual([{ action: 'report', payload: { via: 'kiosk' } }]));
+  });
+
+  it('tells a kiosk worker without a report task to see the foreman', async () => {
+    consent = { person_id: 'C05', language: 'en', scopes: ['heat_alerts'], consented_at: '2025-08-04T07:30:00+04:00' };
+    currentCase = await makeCase('heat_trigger', { stopped: true }, [task('checkin', 'C05', 'recorded')]);
+    await open('/kiosk/check-in', 'C05');
+    await userEvent.click(await screen.findByRole('button', { name: /^Rana/ }));
+    await userEvent.click(await screen.findByRole('button', { name: /^English/ }));
+    await userEvent.click(await screen.findByRole('button', { name: 'I feel unwell' }));
+    expect(screen.queryByRole('button', { name: 'Send to my supervisor' })).toBeNull();
+    expect(screen.getByText(/Tell your foreman in person/)).toBeTruthy();
+  });
+
+  it('shows a recorded kiosk report as submitted', async () => {
+    consent = { person_id: 'C05', language: 'en', scopes: ['heat_alerts'], consented_at: '2025-08-04T07:30:00+04:00' };
+    currentCase = await makeCase('heat_trigger', { stopped: true, reported: true }, [task('checkin', 'C05', 'recorded'), task('report', 'C05', 'recorded')]);
+    await open('/kiosk/check-in', 'C05');
+    await userEvent.click(await screen.findByRole('button', { name: /^Rana/ }));
+    await userEvent.click(await screen.findByRole('button', { name: /^English/ }));
+    expect(await screen.findByText(/Report submitted/)).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'I feel unwell' })).toBeNull();
+  });
+});
+
+describe('foreman reports an unwell worker', () => {
+  it('records a report for a crew member after the fixed question', async () => {
+    currentCase = await makeCase('canonical_timed', { recovered: true }, [task('report', 'C01', 'ready')]);
+    await open('/site/report-unwell', 'C01');
+    await userEvent.click(await screen.findByText('Sara (C03)'));
+    expect(screen.getByText(/Is Sara confused/)).toBeTruthy();
+    const report = screen.getByRole('button', { name: 'Report Sara unwell' }) as HTMLButtonElement;
+    expect(report.disabled).toBe(true);
+    await userEvent.click(screen.getByRole('button', { name: 'No' }));
+    fireEvent.click(report);
+    fireEvent.click(await screen.findByRole('button', { name: 'Record report' }));
+    await waitFor(() => expect(commands).toEqual([{ action: 'report', payload: { person_id: 'C03' } }]));
+  });
+
+  it('opens the action card for the worker the foreman reported', async () => {
+    const reports = [{ person_id: 'C03', via: 'foreman' as const, reported_by: 'C01', occurred_at: '2025-08-04T08:14:00+04:00' }];
+    currentCase = await makeCase('canonical_timed', { reported: true, reports, incident_person_id: 'C03' }, [task('incident_record', 'C01', 'ready')]);
+    await open('/site/action-card', 'C01');
+    expect(await screen.findByText('Sara (C03) · reported 08:14 by Huda')).toBeTruthy();
+    expect(screen.getByText(/Sara needs rest now/)).toBeTruthy();
+    expect(screen.queryByText(/Bilal/)).toBeNull();
+  });
 });
 
 describe('crew photos and the account page', () => {

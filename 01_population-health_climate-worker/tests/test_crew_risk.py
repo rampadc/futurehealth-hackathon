@@ -91,7 +91,7 @@ def test_a_hotter_local_reading_lowers_every_limit(app, medium):
 
 def test_a_report_of_feeling_unwell_shows_as_needs_rest_without_detail(app, medium):
     view = app.state.service.read_case(None)
-    view['story']['events'].append({'id': 'report', 'actorId': 'C08'})
+    view['story']['reports'].append({'person_id': 'C08', 'via': 'phone', 'reported_by': 'C08', 'occurred_at': view['clock']})
     risks = {r.person_id: r for r in crew_risk.assess(view)[0]}
     bilal = risks['C08']
     assert bilal.for_supervisor()['needs_rest'] and bilal.for_supervisor()['action'].startswith('Needs rest now')

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Accordion, AccordionDetails, AccordionSummary, Avatar, Box, Paper, Stack, Typography } from '@mui/material';
-import type { Persona } from '../story';
+import { isStanding, type Persona } from '../story';
 import { photoUrl, usePhotos } from '../people';
 import { nameOf } from '../replay';
 import type { CaseView, Task } from '../live';
@@ -15,7 +15,7 @@ export function PersonAvatar({ id, size = 4 }: { id: string; size?: number }) {
   return <Avatar src={photoUrl(id) ?? undefined} alt="" aria-hidden="true"
     sx={{ width: theme => theme.spacing(size), height: theme => theme.spacing(size), bgcolor: 'action.selected', color: 'text.primary', typography: size > 4 ? 'body2' : 'caption', border: '1px solid', borderColor: 'text.primary' }}>{initials(nameOf(id))}</Avatar>;
 }
-export const nextTask = (tasks: Task[]) => tasks.find(task => task.status === 'ready');
+export const nextTask = (tasks: Task[]) => tasks.find(task => task.status === 'ready' && !isStanding(task.action));
 export const isReady = (caseView: CaseView, id: string) => caseView.tasks.some(task => task.action === id && task.status === 'ready');
 
 export function Panel({ title, children, action }: { title: string; children: ReactNode; action?: ReactNode }) {

@@ -30,9 +30,9 @@ Screens are addressed by name. The clickable prototype in `ui_wireframes/` keeps
 | Device | Screens (path `/<device>/<id>`) |
 |---|---|
 | Supervisor web | `monitoring` Squad Monitoring · `heat-controls` · `response` Protective response · `crew` Crew & workshop · `work-rest` Work/rest plan · `restart-review` · `ask` Ask the Planning Agent · `trust` System & trust · `site-setup` Site setup · `settings` Admin settings (Branding, People and roles tabs; `/web/branding` still opens it) |
-| Site app | `today` · `stop-work` · `headcount` · `readiness` · `proposal` · `action-card` · `fresh-reading` · `ask` |
+| Site app | `today` · `stop-work` · `headcount` · `report-unwell` Report an unwell worker · `readiness` · `proposal` · `action-card` · `fresh-reading` · `ask` |
 | Worker app | `welcome` · `now` · `alert` · `check-in` · `my-plan` · `shelter` · `offline` · `my-data` |
-| Kiosk | `check-in` Shelter A check-in |
+| Kiosk | `check-in` Shelter A check-in and "I feel unwell" |
 
 ## Building a screen
 
@@ -53,6 +53,7 @@ What is real and what is simulated:
 | Area | State |
 |---|---|
 | Case actions (stop-work, headcount, readiness, assignment, removal, first aid, fresh reading, checks, review, handover) | Real: `/api/case/commands`, same rules and owners as the desktop app |
+| Unwell reports | Real: `report` carries `person_id` and `via`. A worker reports themself on the worker app or the Shelter A kiosk (`via: phone/kiosk`); Huda reports any crew member who has no phone or is too unwell to use one (`via: foreman`, web Protective response, site `report-unwell`, desktop workspace). One report per worker. The first report opens the removal and first-aid steps; later reports remove that worker from planned work. No symptom detail is stored |
 | Planning Agent (web and site Ask) | Real: `/api/chat` (ADK + Gemini on the backend). Each answer lists the tools it used. Supervisors and responders also get `what_if_crew_plan`, which asks the solver about a hypothetical change and records nothing; its answers are marked "Hypothetical · not recorded". Workers do not get it |
 | Solver proposals, work/rest plan | Real solver output, shown as drafts with `applied: false` |
 | Site conditions (Squad Monitoring, Heat controls) | Real: `/api/case/conditions`, hourly TWL from the risk core (ERA5 replay for 4 Aug 2025, Mussafah). Planning context only; never clears a hold |
