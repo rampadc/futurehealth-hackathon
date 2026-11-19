@@ -110,3 +110,12 @@ def test_shade_sensor_does_not_change_a_sun_plan():
 def test_sensor_misuse_comes_back_as_an_error_dict(call):
     assert call()["status"] == "error"
 
+
+
+def test_heat_stress_hours_carry_humidity_and_wet_bulb():
+    """The conditions screens explain TWL with humidity and wet bulb, so every hour carries both."""
+    r = agent_tools.compute_heat_stress("mussafah", "2025-08-04")
+    assert r["status"] == "ok"
+    nine = next(h for h in r["hourly"] if h["hour"] == "09:00")
+    assert isinstance(nine["relative_humidity_pct"], int) and 0 <= nine["relative_humidity_pct"] <= 100
+    assert 0 < nine["wet_bulb_c"] < nine["temperature_c"]

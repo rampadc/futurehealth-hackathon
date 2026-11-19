@@ -45,8 +45,8 @@ export function Section({ title, children, id, icon, tone }: { title: ReactNode;
   </section>;
 }
 
-export function List({ children, label }: { children: ReactNode; label?: string }) {
-  return <ul className="hs-list" aria-label={label}>{children}</ul>;
+export function List({ children, label, cols }: { children: ReactNode; label?: string; cols?: number }) {
+  return <ul className="hs-list" aria-label={label} data-cols={cols}>{children}</ul>;
 }
 
 export function Row({ title, detail, badge, onClick, lead, expanded, children }: { title: ReactNode; detail?: ReactNode; badge?: ReactNode; onClick?: () => void; lead?: ReactNode; expanded?: boolean; children?: ReactNode }) {
@@ -93,8 +93,8 @@ export function Avatars({ ids, size = 'sm', max = 4 }: { ids: string[]; size?: A
   </span>;
 }
 
-export function Statement({ tone, children, source }: { tone?: Tone; children: ReactNode; source?: ReactNode }) {
-  return <div className="hs-statement" data-tone={tone}><p className="hs-big">{children}</p>{source && <p className="hs-small">{source}</p>}</div>;
+export function Statement({ tone, children, source, compact }: { tone?: Tone; children: ReactNode; source?: ReactNode; compact?: boolean }) {
+  return <div className="hs-statement" data-tone={tone} data-size={compact ? 'compact' : undefined}><p className="hs-big">{children}</p>{source && <p className="hs-small">{source}</p>}</div>;
 }
 
 export function Note({ children, tone }: { children: ReactNode; tone?: Tone }) {
@@ -107,8 +107,8 @@ export function Draft({ title = 'Proposal · not applied', children }: { title?:
 }
 
 /** Rule output, labelled so it is never mistaken for an AI answer. */
-export function Computed({ children = 'Computed by the site rules and solver · not AI' }: { children?: ReactNode }) {
-  return <p className="hs-computed">⚙ {children}</p>;
+export function Computed({ children = 'Computed by the site rules and solver · not AI', tight }: { children?: ReactNode; tight?: boolean }) {
+  return <p className="hs-computed" data-tight={tight || undefined}>⚙ {children}</p>;
 }
 
 const BAND_TONE: Record<string, string> = { green: 'low', amber: 'caution', red: 'high', emergency: 'high', unknown: 'unknown' };
