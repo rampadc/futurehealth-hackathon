@@ -100,7 +100,7 @@ def _restart(req, now):
     snap['readings'][0].update(evidence_id='fresh-restart-reading',twl=175.0,
                              measured_at=at(now),received_at=at(now))
     req['restart'] = {'proposed_at':at(now),'task_id':'civil_heavy'}
-    for field,actor in [('permit','P04'),('personnel','C01'),('recovery','C01'),('water','P03'),('crew_readiness','C01')]:
+    for field,actor in [('permit','P04'),('personnel','C01'),('recovery','C01'),('water','C01'),('crew_readiness','C01')]:
         req['restart'][field] = {'status':'confirmed','observed_at':at(now),'actor_id':actor}
 
 

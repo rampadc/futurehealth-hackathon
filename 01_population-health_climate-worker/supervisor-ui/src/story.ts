@@ -44,7 +44,7 @@ export const ACTIONS: Record<ActionId, StoryAction> = {
   approveDelivery: { label: 'Approve delivery request', actorId: 'P05', prerequisites: ['deliveryDrafted'], title: 'Noura approved the delivery request', flag: 'deliveryApproved' },
   sendDelivery: { label: 'Record delivery request sent', actorId: 'P05', prerequisites: ['deliveryApproved'], title: 'Noura recorded the delivery request as sent', flag: 'deliverySent' },
   acceptDelivery: { label: 'Record supplier acceptance', actorId: 'P05', prerequisites: ['deliverySent'], title: 'Noura recorded supplier acceptance', flag: 'deliveryAccepted' },
-  fresh: { label: 'Record fresh local reading', actorId: 'P03', prerequisites: ['firstaid'], title: 'Maya recorded a fresh local reading', flag: 'fresh' },
+  fresh: { label: 'Record fresh local reading', actorId: 'C01', prerequisites: ['firstaid'], title: 'Huda recorded a fresh local reading', flag: 'fresh' },
   permit: { label: 'Confirm permit check', actorId: 'P04', prerequisites: ['fresh'], title: 'Tariq confirmed the permit check', flag: 'permit' },
   review: { label: 'Record restart review', actorId: 'P02', prerequisites: ['permit', 'fresh', 'removed', 'firstaid'], title: 'Rashid recorded the restart review; work remains stopped', flag: 'reviewed' },
   handover: { label: 'Record shift handover', actorId: 'P02', prerequisites: ['assigned', 'firstaid'], title: 'Rashid recorded the shift handover with restart decisions carried forward', flag: 'handover' },

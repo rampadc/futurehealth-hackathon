@@ -58,7 +58,7 @@ export function Tutorial({ busy, run }: Props) {
 
   return <Paper variant="outlined" sx={{ p: { xs: 2, md: 3 } }}><Stack spacing={2}>
     <Stack direction="row" spacing={2} useFlexGap sx={{ alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap' }}>
-      <Box><Typography variant="h6" component="h2">Tutorial</Typography><Typography variant="body2" color="text.secondary">Step {current + 1} of {TUTORIAL_STEPS.length}. Opening a step resets the case and records the earlier steps for you.</Typography></Box>
+      <Box><Typography variant="h6" component="h2">Tutorial</Typography><Typography variant="body2" color="text.secondary">Step {current + 1} of {TUTORIAL_STEPS.length}. Opening a step continues the current case and records any earlier steps that are missing.</Typography></Box>
       <Button variant="outlined" onClick={() => go(null)}>End tutorial</Button>
     </Stack>
     <Box component="ol" aria-label="Tutorial steps" sx={{ listStyle: 'none', m: 0, p: 0, display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -90,7 +90,7 @@ function StepDetail({ step, busy, progress, opened, onOpen, onNext, onBack, last
     <Stack spacing={1.5} sx={{ minWidth: 0 }}>
       <Box>
         <Typography variant="overline" color="text.secondary">1 · Prepare and open</Typography>
-        <Typography variant="body2" sx={{ mb: 0.5 }}>{step.setup === null ? 'Keeps the current case as it is.' : step.setup.length ? 'Resets the case to 08:00, then records the earlier steps behind the scenes.' : 'Resets the case to 08:00.'}</Typography>
+        <Typography variant="body2" sx={{ mb: 0.5 }}>{step.setup === null ? 'Keeps the current case as it is.' : step.reset ? 'Resets the case to 08:00.' : 'Continues the current case and records any missing earlier steps behind the scenes. The case is reset only if this step was already recorded.'}</Typography>
         <Link component="button" type="button" variant="body1" disabled={busy} onClick={onOpen} sx={{ fontWeight: 600, textAlign: 'left', '&[disabled]': { color: 'text.disabled', cursor: 'default', textDecoration: 'none' } }}>{linkText} → {stepUrl(step).split('?')[0]}</Link>
         {progress && <Typography variant="caption" component="p" role="status" color="text.secondary">{progress}…</Typography>}
         {opened && <Typography variant="caption" component="p" role="status" color="success.main">Case ready. The window is open.</Typography>}

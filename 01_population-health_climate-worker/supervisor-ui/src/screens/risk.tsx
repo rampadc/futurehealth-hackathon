@@ -48,7 +48,7 @@ export function CrewRiskPanel({ session, squad }: { session: CaseSession; squad?
         </List>
         <InputNotes inputs={risk.inputs} />
         {ORDER.filter(b => risk.workers.some(w => w.band === b)).map(b => <BandTable key={b} band={b} workers={risk.workers.filter(w => w.band === b)} />)}
-        <Computed>Computed by the heat-stress rules ({risk.inputs.rules_version}) for {risk.inputs.hour} · each worker’s clothing, work type and acclimatisation · not AI · never clears a hold</Computed>
+        <Computed>Computed by the heat-stress rules ({risk.inputs.rules_version}) for {risk.inputs.hour} · each worker’s clothing, work type and acclimatisation · never clears a hold</Computed>
       </>}
   </Section>;
 }

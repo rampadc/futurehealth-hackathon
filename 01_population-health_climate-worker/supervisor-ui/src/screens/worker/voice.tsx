@@ -19,7 +19,7 @@ export function speechRecognition(): RecognitionCtor | null {
 }
 
 /**
- * Voice check-in: hold to speak, see what was understood, then confirm. The transcript stays on
+ * Voice check-in: tap to speak, tap again to finish, see what was understood, then confirm. The transcript stays on
  * this phone and is never sent to Heat-Safe or the supervisor; only the worker's confirmed action is.
  * The browser's own speech service does the transcription, which the note says plainly.
  */
@@ -46,10 +46,8 @@ export function VoiceCheckIn({ onUnderstood }: { onUnderstood: (text: string) =>
   };
   const stop = () => recognition.current?.stop();
   return <div className="hs-form">
-    <button type="button" className="hs-button is-primary hs-hold-button" data-holding={listening || undefined}
-      onPointerDown={start} onPointerUp={stop} onPointerLeave={stop}
-      onKeyDown={e => { if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) { e.preventDefault(); start(); } }} onKeyUp={stop}>
-      <span className="hs-hold-text">🎙 {listening ? t('p4.listen') : t('p4.hold')}</span>
+    <button type="button" className="hs-button is-primary" aria-pressed={listening} onClick={() => listening ? stop() : start()}>
+      🎙 {listening ? t('p4.listen') : t('p4.hold')}
     </button>
     {text && <div className="hs-draft" aria-live="polite">
       <p className="hs-label"><T k="p4.understood" /></p>
