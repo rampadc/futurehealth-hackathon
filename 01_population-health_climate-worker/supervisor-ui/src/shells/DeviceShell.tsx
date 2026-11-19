@@ -69,7 +69,7 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
   const allowed = screens.filter(s => !s.personas.length || s.personas.includes(session.person!.id));
   const ownScreen = allowed.find(s => !s.group) ?? allowed[0];
   const permitted = allowed.includes(screen);
-  const railButton = (s: ScreenDef) => <button key={s.id} type="button" aria-current={s.id === screen.id ? 'page' : undefined} onClick={() => go(s)}>{NAV_ICON[s.id] && <Icon name={NAV_ICON[s.id]} />}<span>{s.name}{!s.component && <small> · planned</small>}</span></button>;
+  const railButton = (s: ScreenDef) => <button key={s.id} type="button" aria-current={s.id === screen.id || side && s.id === screen.parent ? 'page' : undefined} onClick={() => go(s)}>{NAV_ICON[s.id] && <Icon name={NAV_ICON[s.id]} />}<span>{s.name}{!s.component && <small> · planned</small>}</span></button>;
   const Screen = permitted ? screen.component : undefined;
   const tabs = info.tabs;
   // Supervisor web: the side panel runs to the top-left corner and carries the product and company.
@@ -79,7 +79,7 @@ export function DeviceShell({ device, screen: screenId, onLockAccess }: Props) {
   const parent = screen.parent ? allowed.find(s => s.id === screen.parent) : undefined;
   const railTint = showBrand && brand.rail_tint ? { borderInlineStart: `4px solid ${brand.primary}` } : undefined;
   const rail = <nav className="hs-rail" aria-label={`${info.name} screens`} style={side ? undefined : railTint}>
-    {allowed.filter(s => !s.group).map(railButton)}
+    {allowed.filter(s => !s.group && !(side && s.parent)).map(railButton)}
     {allowed.some(s => s.group === 'admin') && <p className="hs-rail-group">Admin</p>}
     {allowed.filter(s => s.group === 'admin').map(railButton)}
     <DeviceSwitch current={device} personId={session.person.id} />

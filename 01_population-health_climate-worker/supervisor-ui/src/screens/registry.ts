@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react';
 import type { CaseSession } from '../session';
 import { HeatControlsScreen, ProtectiveResponseScreen } from './web/response';
+import { SiteConditionsTableScreen } from './conditions';
 import { CrewWorkshopScreen, WorkRestPlanScreen } from './web/plan';
 import { SquadMonitoringScreen, SystemTrustScreen } from './web/monitor';
 import { AdminSettingsScreen } from './web/settings';
@@ -29,7 +30,7 @@ export type ScreenDef = {
   name: string;
   /** Section tab on phone shells. */
   tab?: string;
-  /** Phone sub-screen: opened from this screen, which its back link returns to. */
+  /** Sub-screen: opened from this screen, which its back link returns to. Not listed in the web rail. */
   parent?: string;
   /** `admin` screens sit in their own group at the end of the rail; `account` is reached from your photo in the title bar. */
   group?: 'admin' | 'account';
@@ -56,6 +57,7 @@ export const SCREENS: ScreenDef[] = [
   s('monitoring', { device: 'web', name: 'Squad Monitoring', clock: '08:18', slice: 4, owner: 'A', personas: ['C01', 'P03', 'P02', 'P04', 'P05', 'P06', 'P01'], reads: ['workers', 'capture.response.heat', 'capture.response.crew_rest', 'tasks'], commands: ['draftDelivery', 'approveDelivery', 'sendDelivery', 'acceptDelivery', 'costReview'], needs: 'Optional GET /api/case/monitor summary if CaseView is too heavy' , component: SquadMonitoringScreen }),
   s('heat-rest', { device: 'web', name: 'Heat and rest coverage', clock: '08:18', slice: 4, owner: 'A', personas: ['P10', 'P01', 'C01'], reads: ['GET /api/case/heat-rest', 'headcount', 'plan_assessment'], commands: ['coverage_review'], component: HeatRestScreen }),
   s('heat-controls', { device: 'web', name: 'Heat controls', clock: '08:00', slice: 1, owner: 'A', personas: ['P03'], reads: ['capture.request.snapshot.readings', 'capture.response.heat.controls', 'capture.response.decision_at'], commands: ['issue'] , component: HeatControlsScreen }),
+  s('site-conditions', { device: 'web', parent: 'heat-controls', name: 'Site conditions table', clock: '08:00', slice: 1, owner: 'A', personas: ['P03'], reads: ['GET /api/case/conditions'], commands: [], component: SiteConditionsTableScreen }),
   s('response', { device: 'web', name: 'Protective response', clock: '08:04', slice: 1, owner: 'A', personas: ['C01', 'P02', 'P06'], reads: ['story', 'tasks', 'capture.response.protective_response'], commands: ['acknowledge', 'stop', 'recover', 'escalation_followup'] , component: ProtectiveResponseScreen }),
   s('crew', { device: 'web', name: 'Crew & workshop', clock: '08:10', slice: 2, owner: 'A', personas: ['C01'], reads: ['capture.request.snapshot', 'capture.request.locations', 'capture.response.crew_rest'], commands: ['readiness', 'activity', 'assign', 'leila'] , component: CrewWorkshopScreen }),
   s('work-rest', { device: 'web', name: 'Work/rest plan', clock: '08:11', slice: 2, owner: 'A', personas: ['C01', 'P02'], reads: ['capture.response.crew_rest', 'capture.request.planning'], commands: [] , component: WorkRestPlanScreen }),
