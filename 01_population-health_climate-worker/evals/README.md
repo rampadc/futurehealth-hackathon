@@ -74,7 +74,7 @@ categories: injection, jailbreak, harmful, personal_data, link and control.
 SELECT category,
        JSON_VALUE(armor_json, '$.input') AS input_verdict,
        COUNT(*) AS runs, COUNTIF(passed) AS scenario_passed
-FROM `heat-safe-example.telemetry.eval_results`
+FROM `YOUR_PROJECT_ID.telemetry.eval_results`
 WHERE suite = 'redteam'
 GROUP BY 1, 2 ORDER BY 1, 2;
 ```

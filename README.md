@@ -1,32 +1,61 @@
-# Future Health — business and hackathon plans
+# Heat-Safe Crew
 
-**Research refreshed: 3 November 2026.** A consolidated plan replaces the earlier separate business briefs, pitch notes, and battlecards. It combines research with distribution and channels, customer acquisition, sales and delivery, financial scenarios, and a practical prototype, evidence and pitch plan for the hackathon.
+Heat-Safe Crew helps construction supervisors coordinate heat controls, worker check-ins, task reassignment and handover evidence for outdoor crews in Abu Dhabi. This is the working prototype for the Future Health Digital Innovation Challenge.
 
-| Focus area | Read the complete plan | Central commercial question |
-|---|---|---|
-| Population Health — climate-resilient worker health | [Heat-Safe Crew](01_population-health_climate-worker/business/OPPORTUNITY_PLAN.md) | Will a contractor pay for better heat-control execution and evidence on its sites? |
+The application combines a deterministic heat-risk and scheduling core with a Gemini/ADK assistant grounded in safety guidance. Worker, supervisor, site and kiosk views share a case event ledger. Human confirmations record operational actions; an assistant answer or solver proposal does not authorize work.
 
-For the recommended competition choice, commercial comparison and execution calendar, read the [business and hackathon strategy](00_cross-cutting/FHDIC_Ideation_Assessment_Business_Plans.md).
+## For judges
 
-These are researched opportunity hypotheses, not validated customer demand. Public announcements, vendor claims, and procurement notices are labelled according to what they establish. Proposed prices and revenue scenarios are assumptions to test, not market forecasts. No buyer interviews or partner commitments are implied.
+- [Application walkthrough](01_population-health_climate-worker/supervisor-ui/README.md): screens, roles and the elapsed case.
+- [Scenario dossier](01_population-health_climate-worker/demo/README.md): ten scenarios, expected decisions and evidence.
+- [Architecture and implementation](01_population-health_climate-worker/doc/heat-safe-crew-agent-plan.md): risk model, agent, data and system design.
+- [Evaluation guide](01_population-health_climate-worker/evals/README.md): golden scenarios and adversarial checks.
+- [Business and opportunity plan](01_population-health_climate-worker/business/OPPORTUNITY_PLAN.md): researched hypotheses, proposed economics and validation plan.
 
-## Run Heat-Safe locally
+Hosted access details are supplied separately by the presenters. Repository access does not provide cloud credentials or application access codes.
 
-Use Python 3.13 with `uv`, Node.js 22.12+ and npm. Configure the private local `.env` with your Google project and Application Default Credentials, following the [application guide](01_population-health_climate-worker/README.md). From the repository root:
+## Run locally
+
+Install Python 3.13, [uv](https://docs.astral.sh/uv/), Node.js 22.12+ and npm. From the repository root:
 
 ```sh
 cd 01_population-health_climate-worker
+cp .env.example .env
+# Configure your own Google Cloud project and ADC path in .env.
 uv run --env-file .env python tools/dev_local.py --setup
 ```
 
-For subsequent runs, omit `--setup`. The launcher starts the app on **http://127.0.0.1:5174/** (supervisor web, with site, worker and kiosk screens at `/site`, `/worker` and `/kiosk`; the original desktop app is at `/classic`), the application/ADK backend on port 8001 and the operational solver on port 8765. Open **http://127.0.0.1:5174/demo-control** directly to start a case and inspect executions. Named workspaces contain operational actions; presenter controls stay on their separate route.
+See the [application setup guide](01_population-health_climate-worker/README.md#credentials) for credentials and cloud prerequisites. Live Gemini, guidance search and telemetry require configured Google Cloud services and permissions; cloning this repository does not provision them.
 
-Cases, human evidence, calculations and assistant conversations persist in ignored worktree-local SQLite files. Solver proposals are freshly calculated from the case event ledger. Live Gemini uses server-side credentials. Named persona selection is for local development; it is not production authentication.
+Open **http://127.0.0.1:5174/**. Site, worker and kiosk views are at `/site`, `/worker` and `/kiosk`. Open `/demo-control` to start a case and inspect executions. The backend runs on port 8001 and the operational solver on 8765. Later runs can omit `--setup`; Ctrl+C stops the launcher.
 
-See the [desktop guide](01_population-health_climate-worker/supervisor-ui/README.md), [verification record](01_population-health_climate-worker/supervisor-ui/LIVE_VERIFICATION.md) and [scenario dossier](01_population-health_climate-worker/demo/README.md). Christine’s standalone `adk web` planning agent remains available independently.
+Local cases and assistant conversations persist in ignored SQLite files under `.local/`. Named persona selection is for local development and provides no production authentication. The demonstration uses fictional crew personas and synthetic case events alongside public environmental data. It sends no SMS and provides no clinical or field safety approval.
 
-## Supporting material
+## Verify
 
-The `ideation/` folders preserve the original concepts. The `research/` and `rfqs/` folders retain the earlier source archive; refreshed citations are in the plans themselves. The former business briefs and pitch files remain available with superseded notices for traceability. They are not additional required reading.
+From `01_population-health_climate-worker/`:
 
-[Future Health Digital Innovation Challenge](https://hack2skill.com/event/futurehealthchallenge/): the official page currently lists registration closing **10 November 2026** and working prototypes due **20 November 2026**. These dates are challenge milestones, not evidence of buyer urgency.
+```sh
+uv sync --locked
+uv run --locked pytest -q
+cd supervisor-ui
+npm ci
+npm test
+npm run build
+```
+
+Unit tests run without cloud credentials. Integration tests with additional service requirements are described in the component guides and CI workflow.
+
+## Repository map
+
+| Path | Contents |
+|---|---|
+| `01_population-health_climate-worker/src/`, `agents/` | Risk core, application API and assistant |
+| `01_population-health_climate-worker/supervisor-ui/` | React application |
+| `01_population-health_climate-worker/demo/solver/` | Operational solver and its tests |
+| `01_population-health_climate-worker/data/` | Public source provenance, replay data and synthetic fixtures |
+| `01_population-health_climate-worker/cloud/` | Current Cloud Run deployment template and CI trust checks |
+| `01_population-health_climate-worker/infra/` | Earlier standalone agent deployment |
+| `00_cross-cutting/`, application `business/`, `research/`, `pitches/` | Supporting research and planning archive |
+
+Public data and reference documents retain their source terms; see the [data provenance and attribution notes](01_population-health_climate-worker/data/README.md#source-and-licensing-references). Archived plans are research hypotheses, not validated customer demand or partner commitments.

@@ -16,7 +16,7 @@ Plan and architecture: `doc/heat-safe-crew-agent-plan.md`.
 
 ## Local end-to-end demo
 
-From this directory, with Python 3.12+, `uv`, Node.js 22.12+ and npm installed:
+From this directory, with Python 3.13, `uv`, Node.js 22.12+ and npm installed:
 
 ```bash
 uv run --env-file .env python tools/dev_local.py --setup  # first run only
@@ -31,8 +31,8 @@ process; startup logs are in `.local/logs/`. The app stores local case and assis
 state under `.local/heat-safe/` by default, which is ignored by Git. Set
 `HEAT_SAFE_LOCAL_DIR` to use another private local directory.
 
-The `.env` file supplies the personal `heat-safe-example` project and the
-separate ADC path described below. Keep its credentials out of source control.
+Copy `.env.example` to `.env` and configure your own Google Cloud project and
+Application Default Credentials as described below. Keep credentials out of source control.
 The named roles are fictional demo personas, not authenticated users. A fresh
 case starts at 08:00 GST on 4 August 2025 and advances with real elapsed time to
 10:30. Presenter controls show a timeline of the case day (click to move case
@@ -65,37 +65,34 @@ uv run pytest                                  # unit tests, no cloud access nee
 
 ## Credentials
 
-This repo runs on the personal GCP project `heat-safe-example`. The machine's default gcloud
-credentials belong to a different (work) account, so **every command that calls GCP must load
-`.env`**:
+Create local configuration from the committed template:
 
 ```bash
-uv run --env-file .env python tools/ask_supervisor.py "Plan tomorrow for a roofing crew at site A"
-uv run --env-file .env python evals/run_evals.py
-uv run --env-file .env adk web agents
+cp .env.example .env
 ```
 
-`.env` (gitignored) sets `GOOGLE_APPLICATION_CREDENTIALS` to a separate ADC file,
-`~/.config/gcloud-heat-safe/application_default_credentials.json`, plus project, region and the
-gcloud configuration. Without it, Google libraries fall back to the default ADC and every call
-returns 403. `heat_safe.gcp.check_credentials` catches this at startup and says so in one line.
-
-To avoid typing `--env-file`, either run `export UV_ENV_FILE=.env` once per terminal, or install
-direnv (`brew install direnv`) and add an `.envrc` containing `dotenv`, so it loads whenever you
-`cd` into the repo.
-
-If the separate ADC expires, renew it without touching the work one:
+Set `GOOGLE_CLOUD_PROJECT` to your own project ID and
+`GOOGLE_APPLICATION_CREDENTIALS` to an ADC file outside the repository. Authenticate
+with an account authorized for that project. A separate gcloud configuration keeps
+this prototype's credentials separate from other projects:
 
 ```bash
-CLOUDSDK_CONFIG=$HOME/.config/gcloud-heat-safe gcloud auth application-default login
+CLOUDSDK_CONFIG="$HOME/.config/gcloud-heat-safe" gcloud auth application-default login
+CLOUDSDK_CONFIG="$HOME/.config/gcloud-heat-safe" gcloud auth application-default set-quota-project YOUR_PROJECT_ID
 ```
+
+Use `uv run --env-file .env` for commands that call Google Cloud. Live agent,
+guidance search and telemetry need the APIs, datasets and permissions described
+in the architecture and deployment guides. The deterministic solver and unit
+tests do not need live cloud access. Named local personas are fictional and
+provide no production authentication.
 
 ## Heat-Safe API
 
 `server.py` serves the agent over HTTP for any frontend. It's one FastAPI app with three layers:
 
 ```bash
-uv run --env-file ../.env uvicorn server:app --reload --port 8010
+uv run --env-file .env uvicorn server:app --reload --port 8010
 # http://localhost:8010/docs    every endpoint, its inputs and outputs, with "Try it out"
 # http://localhost:8010/dev-ui  the adk web chat page, as before
 ```

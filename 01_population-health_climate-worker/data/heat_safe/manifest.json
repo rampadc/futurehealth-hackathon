@@ -267,7 +267,7 @@
   },
   {
     "path": "processed/onet_work_context_plan_roles.csv",
-    "source": "/local/Documents/my_projects/future_health_hackathon/data/raw/onet/Work_Context.txt",
+    "source": "raw/onet/Work_Context.txt",
     "status": "cached",
     "note": "",
     "retrieved_utc": "2026-10-30T00:55:29+00:00"

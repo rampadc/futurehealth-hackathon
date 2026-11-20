@@ -14,6 +14,10 @@ Thumbs.db
 !.env.*.example
 *.pem
 *.key
+*.p12
+*.pfx
+application_default_credentials.json
+service-account*.json
 # Temporary Google auth action credentials
 gha-creds-*.json
 
@@ -45,6 +49,21 @@ test-results/
 
 # Terraform plan files can contain secrets
 tfplan
+*.tfplan
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+crash.log
+
+# Local case records, conversations and database backups
+.local/
+*.sqlite
+*.sqlite3
+*.sqlite-*
+*.sqlite3-*
+*.db
+*.db-*
+*.dump
 
 # Eval run results: also written to BigQuery telemetry.eval_results
 01_population-health_climate-worker/evals/results/

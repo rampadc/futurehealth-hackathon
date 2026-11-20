@@ -117,9 +117,11 @@ class EventGuardTests(unittest.TestCase):
         data["pull_request"]["head"]["repo"] = repo(42)
         self.assertEqual(verify.validate_closed(data, lambda _: pr(state="closed", head_repo=repo(42)))["ready"], "false")
 
-    def test_comment_contains_retrieval_instruction_but_no_code(self):
+    def test_comment_requests_private_access_without_infrastructure_details(self):
         content = comment.body("5", "deployed", SHA, "https://example.run.app")
-        self.assertIn("heat-safe-pr-5-codes", content)
+        self.assertIn("request them privately from an authorized maintainer", content)
+        self.assertNotIn("gcloud secrets", content)
+        self.assertNotIn("--project=", content)
         self.assertIn(SHA, content)
         self.assertNotIn("access_code\"", content)
         self.assertNotIn("presenter_code\"", content)

@@ -35,8 +35,8 @@ How to read the decisions:
 ## Build the dashboard (about 30 minutes)
 
 1. Go to **lookerstudio.google.com** and choose **Create → Report**. Sign in with the account that has BigQuery access
-   to `heat-safe-example`.
-2. **Add data → BigQuery → My projects → heat-safe-example → telemetry → `v_turns` → Add.** Then add the other
+   to `YOUR_PROJECT_ID`.
+2. **Add data → BigQuery → My projects → YOUR_PROJECT_ID → telemetry → `v_turns` → Add.** Then add the other
    three views the same way (**Resource → Manage added data sources → Add**). Each view is a separate data source.
 3. **Theme:** use **Theme and layout** for a simple one. Add a title text box: "Heat-Safe agent: observability".
 4. **Controls** (top of the page; **Insert → Control**):

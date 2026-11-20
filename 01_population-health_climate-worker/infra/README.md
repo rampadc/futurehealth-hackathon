@@ -5,33 +5,23 @@ endpoints, the agent chat, and the ADK dev UI at `/dev-ui`, so teammates can cal
 Gemini budget, so **destroy it when the demo is over**.
 
 ```bash
-# From 01_population-health_climate-worker/. --env-file ../.env (it lives at the repo root): Terraform
+# From 01_population-health_climate-worker/. --env-file .env (it lives in this directory): Terraform
 # and gcloud must use the project's credentials (README "Credentials")
-uv run --env-file ../.env terraform -chdir=infra init        # once: downloads the google provider
-uv run --env-file ../.env terraform -chdir=infra plan        # what would change (read it every time)
-uv run --env-file ../.env terraform -chdir=infra apply       # build the image if code changed, deploy
-uv run --env-file ../.env terraform -chdir=infra output url  # the link to share
-uv run --env-file ../.env terraform -chdir=infra destroy     # remove it all; `apply` brings it back
+uv run --env-file .env terraform -chdir=infra init        # once: downloads the google provider
+uv run --env-file .env terraform -chdir=infra plan -var='project=YOUR_PROJECT_ID'        # what would change (read it every time)
+uv run --env-file .env terraform -chdir=infra apply -var='project=YOUR_PROJECT_ID'       # build the image if code changed, deploy
+uv run --env-file .env terraform -chdir=infra output url  # the link to share
+uv run --env-file .env terraform -chdir=infra destroy -var='project=YOUR_PROJECT_ID'     # remove it all; `apply` brings it back
 
 # Live date instead of the replay day:
-uv run --env-file ../.env terraform -chdir=infra apply -var demo_today=""
+uv run --env-file .env terraform -chdir=infra apply -var='project=YOUR_PROJECT_ID' -var demo_today=""
 # Service logs:
 gcloud run services logs read supervisor-demo --region me-central1 --limit 50
 ```
 
-Deployed 7 Nov 2026 (`adk web`), redeployed 17 Nov with the API and Model Armor:
-`https://heat-safe.example.invalid`. Start at `/docs`; the ADK chat page is at `/dev-ui`.
-It runs with `HEAT_SAFE_TODAY=2025-07-31`, so "tomorrow" is the hot 1 Aug 2025 replay day.
-
-Verified on 17 Nov:
-- `/docs` and `/dev-ui` return 200.
-- `/sites/mussafah/conditions` returns 24 hours.
-- `/monitor/replay` streams `plan`, 24 `reading`, 2 `alert`, `replan`, `done`.
-- `/agent/chat`:
-  - a normal plan in 18.5 s (armor passed, grounding passed)
-  - a phone and passport number replaced before Gemini (`input: redacted`)
-  - an injection blocked in 2.1 s
-- No raw personal data in that session's `telemetry.agent_events` rows.
+Obtain the URL from `terraform output url`. This is the earlier standalone
+agent deployment; use [`cloud/`](../cloud/README.md) for the current application.
+Do not publish a development UI or deployment access codes in repository content.
 
 | File | Role |
 |---|---|
@@ -53,7 +43,7 @@ Verified on 17 Nov:
 | ~~`adk web` dev UI~~ | Done 15 Nov: `server.py` (FastAPI) serves the API; the dev UI stays at `/dev-ui` for the demo |
 | In-memory sessions, 1 instance | `--session_service_uri` (Cloud SQL / Vertex AI sessions); scale out freely |
 | Image built by `local-exec` in `apply` | CI (Cloud Build trigger or GitHub Actions) builds on merge; Terraform gets the tag |
-| Local `terraform.tfstate` | GCS backend (`heat-safe-example-tfstate`, versioned) so the team shares state with locking |
+| Local `terraform.tfstate` | GCS backend (`YOUR_PROJECT_ID-tfstate`, versioned) so the team shares state with locking |
 | One environment | `dev` and `prod` workspaces or folders, same modules, different variables |
 | Model Armor in `asia-south1` | A UAE region once Model Armor offers one; `PERSON_NAME` with a custom dictionary of site and role words to exclude |
 | Demo and eval traffic mixed in `telemetry.agent_events` | A source label per environment |

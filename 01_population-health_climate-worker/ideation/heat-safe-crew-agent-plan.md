@@ -257,7 +257,7 @@ Agent events, tool calls, guardrail decisions and eval results stream to BigQuer
 
 Weather, air quality, standards, guidance and occupation data are real and public. Anything about specific workers, sites, wearables or incidents is synthetic and labelled that way in the demo.
 
-`uv run python tools/download_data.py` fetches every automatic source (idempotent; `--force` refreshes) and records each file's URL, retrieval time and status in `data/manifest.json`. Last run: 48 files, 0 failures. `uv run python tools/load_bigquery.py` loads the tabular data into BigQuery `raw` in `heat-safe-example` (me-central1), replacing each table on every run. `data/raw/` and `data/processed/` are gitignored, so a fresh clone runs the script first. Hourly times are local (Asia/Dubai); sites are in `src/heat_safe/sites.py`. Inventory details: `data/README.md`.
+`uv run python tools/download_data.py` fetches every automatic source (idempotent; `--force` refreshes) and records each file's URL, retrieval time and status in `data/manifest.json`. Last run: 48 files, 0 failures. `uv run python tools/load_bigquery.py` loads the tabular data into BigQuery `raw` in `YOUR_PROJECT_ID` (me-central1), replacing each table on every run. `data/raw/` and `data/processed/` are gitignored, so a fresh clone runs the script first. Hourly times are local (Asia/Dubai); sites are in `src/heat_safe/sites.py`. Inventory details: `data/README.md`.
 
 #### Real data: downloaded
 

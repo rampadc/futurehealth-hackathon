@@ -30,7 +30,7 @@ def body(pr, status, sha, url):
     if status == "deployed":
         require(url.startswith("https://") and "\n" not in url and ")" not in url, "invalid preview URL")
         location = f"Preview: {url}\n"
-        access = f"Access codes: an authorized maintainer can run `gcloud secrets versions access latest --secret=heat-safe-pr-{pr}-codes --project=heat-safe-example`. The codes are never posted here.\n"
+        access = "Access codes: request them privately from an authorized maintainer. The codes are never posted here.\n"
     else:
         location = "Preview: removed\n"
         access = "Access code: removed with the preview.\n"

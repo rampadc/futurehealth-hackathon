@@ -273,7 +273,7 @@ Agent events, tool calls, guardrail decisions and eval results stream to BigQuer
 
 Weather, air quality, standards, guidance and occupation data are real and public. Anything about specific workers, sites, wearables or incidents is synthetic and labelled that way in the demo.
 
-`uv run python tools/download_data.py` fetches every automatic source (idempotent; `--force` refreshes) and records each file's URL, retrieval time and status in `data/manifest.json`. Last run: 48 files, 0 failures. `uv run python tools/load_bigquery.py` loads the tabular data into BigQuery `raw` in `heat-safe-example` (me-central1), replacing each table on every run. `data/raw/` and `data/processed/` are gitignored, so a fresh clone runs the script first. Hourly times are local (Asia/Dubai); sites are in `src/heat_safe/sites.py`. Inventory details: `data/README.md`.
+`uv run python tools/download_data.py` fetches every automatic source (idempotent; `--force` refreshes) and records each file's URL, retrieval time and status in `data/manifest.json`. Last run: 48 files, 0 failures. `uv run python tools/load_bigquery.py` loads the tabular data into BigQuery `raw` in `YOUR_PROJECT_ID` (me-central1), replacing each table on every run. `data/raw/` and `data/processed/` are gitignored, so a fresh clone runs the script first. Hourly times are local (Asia/Dubai); sites are in `src/heat_safe/sites.py`. Inventory details: `data/README.md`.
 
 #### Real data: downloaded
 
@@ -388,7 +388,7 @@ With a team of four or five, split it as: agent and tools; risk model, data and 
 ### Week 1 · 25 Oct – 1 Nov · Foundations and core risk loop
 
 - [ ] Register the team (closes 10 Nov)
-- [x] GCP project `heat-safe-example` in me-central1, with credentials kept separate from other accounts
+- [x] GCP project `YOUR_PROJECT_ID` in me-central1, with credentials kept separate from other accounts
 - [x] Billing alert; enable Cloud Run, Secret Manager, Pub/Sub (budget alert set by the team; APIs enabled)
 - [x] Download and inventory all public data (`tools/download_data.py`, `data/manifest.json`); first hand-collected documents and the TWL table in `data/raw/regulatory/manual/`
 - [x] BigQuery datasets `raw`, `analytics`, `vectors`, `telemetry`, `metrics` in me-central1; raw data loaded (`tools/load_bigquery.py`)
